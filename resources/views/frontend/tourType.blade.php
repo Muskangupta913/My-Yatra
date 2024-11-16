@@ -637,7 +637,7 @@ function fetchPackages(selectedPrice, selectedDuration, selectedType) {
                                             ₹${Number(item.ragular_price).toLocaleString('en-IN')}
                                         </small>
                                     </div>
-                                    <button class="btn btn-danger mx-2 btn-lg rounded-0 booknow" data-id="${item.id}">Book Now</button>
+                                    <button class="btn btn-danger mx-2 btn-lg rounded-0 booknow" data-id="${item.id}  id="booknow" data-bs-toggle="modal" data-bs-target="#bookingModal">Bookk Now</button>
                                 </div>
                             </div>
                         </div>

@@ -46,7 +46,7 @@
            @endsession
 
             <div class="card mt-5 shadow-lg rounded-0">
-                <div class="card-header bg-warning "><h4>Login</h4></div>
+                <div class="card-header bg-warning "><h4>Loginnn</h4></div>
                 <div class="card-body">
                 <form action="{{ route('login')}}" method="post">
                     @csrf

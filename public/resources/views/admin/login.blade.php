@@ -29,7 +29,7 @@
                 <div class="col-md-4 m-auto">
                     <div class="card rounded-0">
                         <div class="card-header bg-primary">
-                            <h5 class="card-title">Login</h5>
+                            <h5 class="card-title">Loginn</h5>
                         </div>
                         <div class="card-body rounded-0">
 

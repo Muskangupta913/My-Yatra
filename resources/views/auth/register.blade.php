@@ -46,7 +46,7 @@
            @endsession
 
             <div class="card rounded-0 shadow-lg">
-                <div class="card-header rounded-0 bg-warning"><h5 class="mt-2">Create an account</h5></div>
+                <div class="card-header rounded-0 bg-warning"><h5 class="mt-2">Create an accounttt</h5></div>
                 <div class="card-body">
                 <form action="{{ route('register')}}" method="post">
                     @csrf
