@@ -66,65 +66,53 @@
   </div>
   {{-- end top header --}}
   <nav class="navbar navbar-expand-lg navbar-light primary-header shadow bg-light">
-    <div class="container">
-      <a class="navbar-brand" href="{{ route('home')}}"><img
-          src="{{ asset('assets/img/make-my-bharat-yatra-logo.png')}}" width="200" alt="make-my-bharat-yatra-logo"></a>
-      <button class="navbar-toggler d-lg-none" type="button" data-bs-toggle="collapse"
-        data-bs-target="#collapsibleNavId" aria-controls="collapsibleNavId" aria-expanded="false"
-        aria-label="Toggle navigation">
-        <span class="navbar-toggler-icon"></span>
-      </button>
-      <div class="collapse navbar-collapse" id="collapsibleNavId">
-        <ul class="navbar-nav ms-auto mt-2 mt-lg-0">
-          <li class="nav-item">
-            <a class="nav-link text-danger active" href="{{ route('home')}}" aria-current="page">Home
-              <span class="visually-hidden">(current)</span></a>
-          </li>
-
-          <li class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle" href="#" id="dropdownId1" data-bs-toggle="dropdown" aria-haspopup="true"
-              aria-expanded="false">Travel Packages</a>
-            <div class="dropdown-menu mega-dropdown " aria-labelledby="dropdownId1">
-          
-              <a class="dropdown-item" href="http://127.0.0.1:8000//holidays/goa-tour-package">Goa</a>
-              <a class="dropdown-item" href="http://127.0.0.1:8000/holidays/uttar-pradesh-tour-packages">Uttar Pradesh</a>
-             
-  
-              
-            </div>
-          </li>
-
-          {{-- <li class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle" href="#" id="dropdownId" data-bs-toggle="dropdown" aria-haspopup="true"
-              aria-expanded="false">Top Destination</a>
-            <div class="dropdown-menu" aria-labelledby="dropdownId">
-              <a class="dropdown-item" href="#">Action 1</a>
-              <a class="dropdown-item" href="#">Action 2</a>
-            </div>
-          </li> --}}
-
-          <li class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle" href="#" id="dropdownId" data-bs-toggle="dropdown" aria-haspopup="true"
-              aria-expanded="false">Travel Attraction</a>
-            <div class="dropdown-menu" aria-labelledby="dropdownId">
-              <a class="dropdown-item" href="http://127.0.0.1:8000/tour-category/adevanture">Adventure Tour</a>
-              {{-- <a class="dropdown-item" href="http://127.0.0.1:8000/tour-category/city-tours">City Tour</a> --}}
-              <a class="dropdown-item" href="http://127.0.0.1:8000/tour-category/honeymoon">Honeymoon</a>
-            </div>
-          </li>
-
-          <li class="nav-item">
-            <a href="" class="nav-link">Blog</a>
-          </li>
-
-          <li class="nav-item">
-            <a href="{{ route('contactUs') }}" class="nav-link">Contact Us</a>
-          </li>
-        </ul>
-
-      </div>
+  <div class="container">
+    <a class="navbar-brand" href="{{ route('home') }}">
+      <img src="{{ asset('assets/img/make-my-bharat-yatra-logo.png') }}" width="200" alt="make-my-bharat-yatra-logo">
+    </a>
+    <button class="navbar-toggler d-lg-none" type="button" data-bs-toggle="collapse"
+      data-bs-target="#collapsibleNavId" aria-controls="collapsibleNavId" aria-expanded="false"
+      aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="collapsibleNavId">
+      <ul class="navbar-nav ms-auto mt-2 mt-lg-0">
+        <li class="nav-item">
+          <a class="nav-link text-danger active" href="{{ route('home') }}" aria-current="page">Homeee
+            <span class="visually-hidden">(current)</span>
+          </a>
+        </li>
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" href="#" id="dropdownId1" data-bs-toggle="dropdown" aria-haspopup="true"
+            aria-expanded="false">Travel Packages</a>
+          <div class="dropdown-menu mega-dropdown" aria-labelledby="dropdownId1">
+            <a class="dropdown-item" href="http://127.0.0.1:8000//holidays/goa-tour-package">Goa</a>
+            <a class="dropdown-item" href="http://127.0.0.1:8000/holidays/uttar-pradesh-tour-packages">Uttar Pradesh</a>
+          </div>
+        </li>
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" href="#" id="dropdownId" data-bs-toggle="dropdown" aria-haspopup="true"
+            aria-expanded="false">Travel Attraction</a>
+          <div class="dropdown-menu" aria-labelledby="dropdownId">
+            <a class="dropdown-item" href="http://127.0.0.1:8000/tour-category/adevanture">Adventure Tour</a>
+            <a class="dropdown-item" href="http://127.0.0.1:8000/tour-category/honeymoon">Honeymoon</a>
+          </div>
+        </li>
+        <li class="nav-item">
+          <a href="{{ route('blog') }}" class="nav-link">Blog</a>
+        </li>
+        <li class="nav-item">
+          <a href="{{ route('contactUs') }}" class="nav-link">Contact Us</a>
+        </li>
+        <!-- Add to Cart Icon -->
+        <a href="{{ route('checkout') }}" class="nav-link">
+    <i class="fa fa-shopping-cart"></i>
+  </a>
+      </ul>
     </div>
-  </nav>
+  </div>
+</nav>
+
 
 
   @yield('content')

@@ -2,6 +2,7 @@
 @section('title', 'Login')
 @section('meta_description', '')
 @section('content')
+
 <section class="login-section">
 <div class="container">
     <div class="row">
@@ -23,7 +24,6 @@
                 {{ session('success') }}
             </strong>
            </div>
-                      
            @endsession
 
            @session('error')
@@ -42,11 +42,10 @@
                 {{ session('error') }}
             </strong>
            </div>
-                   
            @endsession
 
             <div class="card mt-5 shadow-lg rounded-0">
-                <div class="card-header bg-warning "><h4>Login</h4></div>
+                <div class="card-header bg-warning"><h4>Login</h4></div>
                 <div class="card-body">
                 <form action="{{ route('login')}}" method="post">
                     @csrf
@@ -57,9 +56,14 @@
                         <small class="text-danger">{{ $message }}</small>
                         @enderror
                     </div>
-                    <div class="mb-3">
+                    <div class="mb-3 position-relative">
                         <label for="password" class="form-label">Password</label>
-                        <input type="password" class="form-control"  id="password" name="password" placeholder="**********" required>
+                        <div class="input-group">
+                            <input type="password" class="form-control" id="password" name="password" placeholder="**********" required>
+                            <span class="input-group-text bg-light" id="togglePassword" style="cursor: pointer;">
+                                <i class="fa fa-eye" id="togglePasswordIcon"></i>
+                            </span>
+                        </div>
                         @error('password')
                         <small class="text-danger">{{ $message }}</small>
                         @enderror
@@ -78,14 +82,33 @@
                 <div class="mb-3">
                     <a href="{{ route('registerView')}}" class="text-center d-block">If you are new User Create Account!</a>
                 </div>
-                
                 </div>
             </div>
-
-
         </div>
     </div>
 </div>
 </section>
-    
+
+<!-- Password Toggle Script -->
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const passwordField = document.getElementById('password');
+        const togglePassword = document.getElementById('togglePassword');
+        const togglePasswordIcon = document.getElementById('togglePasswordIcon');
+
+        togglePassword.addEventListener('click', function () {
+            // Toggle the type attribute
+            const type = passwordField.getAttribute('type') === 'password' ? 'text' : 'password';
+            passwordField.setAttribute('type', type);
+
+            // Toggle the icon
+            togglePasswordIcon.classList.toggle('fa-eye');
+            togglePasswordIcon.classList.toggle('fa-eye-slash');
+        });
+    });
+</script>
+
+<!-- Font Awesome -->
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+
 @endsection

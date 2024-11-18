@@ -540,4 +540,19 @@ public function contactApplied(Request $request){
 
 }
 
+public function addtocard()
+{
+    // Add any logic needed for the checkout page
+    return view('frontend.checkout'); // Ensure you have a 'checkout.blade.php' view
 }
+
+public function  payment()
+{
+    return view('frontend.payment');
+}
+public function ourblog(){
+    return view('frontend.our-blog');
+}
+
+}
+
