@@ -206,31 +206,35 @@
             selectedDestinations.forEach((destination, index) => {
                 // Add destination to the list
                 const div = document.createElement('div');
-                div.classList.add('destination-item');
-                div.innerHTML = `
-                    <div>
-                        <h4 class="text-lg font-semibold text-gray-700">${destination.name}</h4>
-                        <div class="destination-details">
-                            <p><strong>Budget:</strong> ₹${destination.budget}</p>
-                            <p><strong>Duration:</strong> ${destination.duration}</p>
-                            <p><strong>Theme:</strong> ${destination.theme}</p>
-                            <p><strong>Adults:</strong></p>
-                        </div>
-                        <div class="quantity-control">
-                            <button onclick="decreaseQuantity(${index}, 'adults')">-</button>
-                            <input type="text" id="adults-${index}" class="details-value" value="${destination.adults}" readonly>
-                            <button onclick="increaseQuantity(${index}, 'adults')">+</button>
-                        </div>
-                        <p><strong>Children:</strong></p>
-                        <div class="quantity-control">
-                            <button onclick="decreaseQuantity(${index}, 'children')">-</button>
-                            <input type="text" id="children-${index}" class="details-value" value="${destination.children}" readonly>
-                            <button onclick="increaseQuantity(${index}, 'children')">+</button>
-                        </div>
-                    </div>
-                    <i class="fas fa-trash" onclick="removeDestination(${index})"></i>
-                `;
-                destinationList.appendChild(div);
+div.classList.add('destination-item');
+div.innerHTML = `
+    <div style="width: 150%;">
+        <h4 class="text-lg font-semibold text-gray-700">${destination.name}</h4>
+        <div class="destination-details">
+            <p><strong>Budget:</strong> ₹${destination.budget}</p>
+            <p><strong>Duration:</strong> ${destination.duration}</p>
+            <p><strong>Theme:</strong> ${destination.theme}</p>
+        </div>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 1rem;">
+            <p class="font-semibold">Adults:</p>
+            <div class="quantity-control" style="margin-left: auto;">
+                <button onclick="decreaseQuantity(${index}, 'adults')">-</button>
+                <input type="text" id="adults-${index}" class="details-value" value="${destination.adults}" readonly>
+                <button onclick="increaseQuantity(${index}, 'adults')">+</button>
+            </div>
+        </div>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 1rem;">
+            <p class="font-semibold">Children:</p>
+            <div class="quantity-control" style="margin-left: auto;">
+                <button onclick="decreaseQuantity(${index}, 'children')">-</button>
+                <input type="text" id="children-${index}" class="details-value" value="${destination.children}" readonly>
+                <button onclick="increaseQuantity(${index}, 'children')">+</button>
+            </div>
+        </div>
+    </div>
+    <i class="fas fa-trash" onclick="removeDestination(${index})"></i>
+`;
+destinationList.appendChild(div);
 
                 // Add destination price to the price summary
                 const priceDiv = document.createElement('div');

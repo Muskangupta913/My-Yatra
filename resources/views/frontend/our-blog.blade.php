@@ -1,12 +1,304 @@
 
  
 
-@extends('frontend.layouts.master') <!-- Assuming there's a main layout -->
+@extends('frontend.layouts.master')
 
 @section('content')
+<!-- External Resources -->
 <link href="https://cdn.jsdelivr.net/npm/tailwindcss@3.3.2/dist/tailwind.min.css" rel="stylesheet">
 <link rel="stylesheet" href="https://unpkg.com/swiper/swiper-bundle.min.css">
 <script src="https://unpkg.com/swiper/swiper-bundle.min.js"></script>
+
+<style>
+/* Your custom CSS code here */
+.myimagesslider {
+    width: 100%;
+    height: 100%;
+}
+.img-content {
+    text-align: center;
+    font-size: 18px;
+    background: #fff;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.img-content img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+.myimagesslider{
+    width: 100%;
+    height: 300px;
+    margin: 20px auto;
+}
+.featured-posts {
+    margin: 40px 0;
+}
+.post-card {
+    margin-bottom: 30px;
+}
+.newsletter {
+    background-color: #f8f9fa;
+    padding: 30px 0;
+    text-align: center;
+}
+.festivals-section {
+    padding: 10px 0;
+}
+.festival-card {
+    transition: transform 0.2s;
+}
+.festival-card:hover {
+    transform: scale(1.05);
+}
+.festival-img {
+    height: 200px;
+    object-fit: cover;
+}
+.travel-tips-section {
+    padding: 30px 0;
+}
+.icon-box i {
+    font-size: 60px;
+    color: #3c8fe8;
+}
+.card-body h5 {
+    font-size: 1.25rem;
+}
+.culinary-section {
+    padding: 50px 0;
+}
+.dish-card {
+    transition: transform 0.2s;
+}
+.dish-card:hover {
+    transform: scale(1.05);
+}
+.dish-img {
+    object-fit: cover;
+}
+.adventure-section {
+    padding: 50px 0;
+}
+.activity-card {
+    transition: transform 0.2s;
+}
+.activity-card:hover {
+    transform: scale(1.05);
+}
+.activity-img {
+    object-fit: cover;
+}
+.icon-box {
+    font-size: 48px;
+    color: #007bff;
+}
+.adventure-container h2{
+    font-size: 30px;
+}
+.swiper {
+    width: 100%;
+    height: 100%;
+}
+.swiper-slide img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+.swiper-slide {
+    text-align: center;
+    font-size: 18px;
+    background: #fff;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.swiper-slide img {
+    display: block;
+    width: 100%;
+    height: 300px !important;
+    object-fit: cover;
+}
+.tip-icon {
+    font-size: 40px;
+    color: #007bff;
+}
+.tip-title {
+    font-weight: bold;
+    color: #007bff;
+}
+.travelt-icon i {
+    font-size: 50px;
+    color: red;
+}
+.myimagesslider p{
+    padding: 0px 10px;
+}
+.cta-section {
+    background-color: rgba(89, 89, 252, 0.522);
+    padding: 100px 0;
+    color: white;
+}
+.cta-overlay {
+    background-color: rgba(0, 0, 0, 0.6);
+    padding: 27px;
+}
+.cta-title {
+    font-size: 2.5rem;
+    font-weight: bold;
+}
+.cta-btn {
+    background-color: #ff5722;
+    color: white;
+    font-weight: bold;
+    padding: 15px 30px;
+    border-radius: 50px;
+}
+.cta-btn:hover {
+    background-color: #e64a19;
+    color: #fff;
+}
+.overlay-text{
+    line-height: 40px;
+}
+.overlay-text h2{
+    font-size: 40px;
+    font-weight: 700;
+}
+.overlay-text p{
+    font-size: 20px;
+}
+.call-to-action{
+    margin: 40px 0px;
+}
+.swiper-caption h5{
+    font-size: 20px;
+    font-weight: 700;
+}
+.swiper-caption p{
+    padding: 0px 30px;
+}
+.main-top-container h1{
+    font-size: 60px;
+    font-weight: 800;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 80px;
+}
+@media only screen and (max-width: 600px) {
+    .main-top-container h2{
+        font-size: 30px;
+    }
+    .main-top-container p{
+        text-align: center;
+        padding: 0px 10px;
+    }
+    .blog-destination{
+        height: 300px;
+    }
+    .second-container {
+        padding: 0px 20px;
+    }
+    .swi-img{
+        width: 100%;
+        height: 200px;
+    }
+    .display-6{
+        font-size: 20px;
+    }
+    .second-container  h3{
+        font-size: 20px;
+    }
+    .second-container  p{
+        font-size: 12px;
+    }
+    .second-container img{
+        height: 200px;
+    }
+    .offbeat-destination{
+        height: 200px;
+        text-align: center;
+        align-items: center;
+    }
+    .offbeat-destination h1{
+        font-size: 25px;
+    }
+    .offbeat-destination p{
+        margin: 30px 0px;
+        font-size: 15px;
+    }
+    .mtext{
+        font-size: 15px;
+    }
+    .bcontent h2{
+        font-size: 20px;
+    }
+    .goap{
+        font-size: 14px;
+    }
+    .cta-section{
+        background-image: url('./images/cta-banner.jpeg'); 
+        height: 300px !important; 
+        background-position: center;
+        background-repeat: no-repeat; 
+        background-size: cover;  
+    }
+    .overlay-text{
+        line-height: 20px;
+    }
+    .overlay-text h2{
+        font-size: 16px;
+    }
+    .overlay-text p{
+        font-size: 12px;
+    }
+    .cta-title{
+        font-size: 15px;
+    }
+    .call-p{
+        font-size: 10px;
+    }
+    .cta-btn{
+        font-size: 9px;
+    }
+    .call-to-action {
+        margin-bottom: 50px;
+    }
+    .cta-section {
+        padding: 10px 0;
+        color: white;
+    }
+    .overlay-text{
+        padding: 60px;
+    }
+    .swiper-hpc p{
+        font-size: 12px;
+        padding: 0px 20px;
+    }
+    .swiper-hpc{
+        height: 160px;
+    }
+    .swiper-slide img {
+        display: block;
+        width: 100%;
+        height: 200px !important;
+        object-fit: cover;
+    }
+    .main-top-container h1{
+        margin: 20px;
+        font-size: 50px;
+    }
+    .blog-p-c h5{
+        font-size: 13px;
+        padding: 0px 10px;
+    }
+}
+</style>
 
 <!-- Blog banner start -->
 <div class="container-fluid main-top-container" style="text-align: center;">
@@ -20,13 +312,12 @@
                 the famous cities of London and Paris never really lose their crowds.
             </p>  
         </div>
-
         <div class="col-md-7">
             <img src="{{ asset('images/travelblog-images.jpg') }}" width="100%" height="100%" alt="">
         </div>
     </div>
 </div>
-@endsection
+
 
 
 
