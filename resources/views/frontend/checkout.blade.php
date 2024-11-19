@@ -8,7 +8,9 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
     <style>
         body {
-            background-color: #f1f3f6;
+            background-image: linear-gradient(to right, #6dd5fa, #2980b9);
+            min-height: 100vh;
+            font-family: 'Arial', sans-serif;
         }
         .checkout-container {
             display: flex;
@@ -19,148 +21,114 @@
             background-color: #ffffff;
             border: 1px solid #e0e0e0;
             padding: 1.5rem;
-            border-radius: 0.5rem;
+            border-radius: 1rem;
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
         }
         .summary-card {
             max-width: 450px;
         }
         .checkout-button {
-            background-color: #fb641b;
+            background-color: #f39c12;
             transition: background-color 0.3s ease, transform 0.3s ease;
             font-size: 1.125rem;
             font-weight: bold;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
         }
         .checkout-button:hover {
-            background-color: #d23f07;
+            background-color: #d35400;
             transform: scale(1.05);
         }
-        .details-label {
-            font-weight: 600;
-            color: #212121;
-        }
-        .details-value {
-            color: #757575;
-            font-weight: 500;
-        }
-        .quantity-control {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            justify-content: flex-end;
-        }
+        .destination-item {
+    position: relative;
+    border: 1px solid #e0e0e0;
+    padding: 1rem;
+    border-radius: 0.75rem;
+    background-color: #f8f9fa;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    margin-bottom: 1rem;
+}
+.destination-item i {
+    position: absolute;
+    top: 0.5rem;
+    right: 0.5rem;
+    cursor: pointer;
+    color: #e74c3c;
+    font-size: 1.25rem;
+    transition: color 0.3s ease;
+}
+.destination-item i:hover {
+    color: #c0392b;
+}
         .quantity-control button {
-            background-color: #e0e0e0;
-            color: #333;
+            background-color: #3498db;
+            color: #fff;
             font-weight: bold;
+            border: none;
             width: 2rem;
             height: 2rem;
-            border-radius: 0.25rem;
-            border: none;
+            border-radius: 0.5rem;
             cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+        .quantity-control button:hover {
+            background-color: #2980b9;
         }
         .quantity-control input {
             width: 3rem;
             text-align: center;
-            border: none;
+            border: 1px solid #ddd;
+            border-radius: 0.25rem;
             font-weight: bold;
+            margin: 0 0.5rem;
         }
-        .destination-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            padding: 1rem;
-            border-bottom: 1px solid #e0e0e0;
-        }
-        .destination-item i {
-            cursor: pointer;
-            color: #ff4d4d;
-        }
-        .destination-details {
-            font-size: 0.875rem;
-            color: #757575;
+        .total-price {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #2c3e50;
         }
         .summary-label {
             font-size: 0.875rem;
+            color: #7f8c8d;
         }
-        .quantity-wrapper {
-            display: flex;
-            justify-content: flex-end;
-        }
-        .summary-card hr {
+        .details-card hr, .summary-card hr {
             margin: 1rem 0;
-            border-color: #e0e0e0;
-        }
-        .total-price {
-            font-size: 1.25rem;
-            font-weight: bold;
-            color: #333;
-        }
-        .details-card hr {
-            border-color: #e0e0e0;
-            margin: 1rem 0;
+            border-color: #ddd;
         }
     </style>
 </head>
 <body>
-    <div class="max-w-6xl mx-auto checkout-container">
+    <div class="max-w-7xl mx-auto checkout-container">
         <!-- Left Section (Vacation Details) -->
         <div class="details-card flex-1">
             <h2 class="text-2xl font-bold text-gray-800 mb-4">Vacation Details</h2>
-
-            <!-- Destinations Selection -->
-            <div id="destination-list">
-                <!-- Destination items will be dynamically added here -->
-            </div>
-
+            <div id="destination-list"></div>
             <hr>
-
-            <div class="quantity-wrapper">
-                <!-- Example for Adults/Children controls, will be repeated dynamically -->
-            </div>
         </div>
 
         <!-- Right Section (Price Summary) -->
         <div class="summary-card">
             <h3 class="text-xl font-semibold text-gray-800 mb-4">Price Summary</h3>
-
-            <!-- Price Breakdown for each destination -->
-            <div id="price-summary">
-                <!-- Price items will be dynamically added here -->
-            </div>
-            
+            <div id="price-summary"></div>
             <hr>
-
-            <!-- Subtotal -->
             <div class="flex justify-between items-center mt-4">
                 <p class="summary-label">Subtotal:</p>
                 <p id="subtotal" class="details-value">₹0</p>
             </div>
-            
-            <!-- Tax -->
             <div class="flex justify-between items-center mt-2">
                 <p class="summary-label">Tax (10%):</p>
                 <p id="tax" class="details-value">₹0</p>
             </div>
-
-            <!-- Travel Charge -->
             <div class="flex justify-between items-center mt-2">
                 <p class="summary-label">Travel Charge:</p>
                 <p id="travel-charge" class="details-value">₹500</p>
             </div>
-
-            <!-- Total Price -->
             <div class="flex justify-between items-center mt-4 border-t-2 border-gray-200 pt-2">
                 <p class="total-price">Total Price:</p>
                 <p id="total-price" class="total-price">₹0</p>
             </div>
-
-            <!-- Payment Button -->
-            <a href="{{ route('payment') }}" class="nav-link">
-            <button type="submit" class="checkout-button w-full py-4 text-white rounded-lg mt-4">
+            <button type="submit" class="checkout-button w-full py-3 text-white rounded-lg mt-4">
                 <i class="fas fa-check-circle mr-2"></i> Proceed to Pay
             </button>
-    </a>
         </div>
     </div>
 
@@ -174,21 +142,20 @@
         let selectedDestinations = [];
 
         function addDestination(index) {
-            const destination = destinations[index];
-            selectedDestinations.push(destination);
-            updatePriceSummary();
+            selectedDestinations.push(destinations[index]);
             renderDestinationList();
+            updatePriceSummary();
         }
 
         function removeDestination(index) {
             selectedDestinations.splice(index, 1);
-            updatePriceSummary();
             renderDestinationList();
+            updatePriceSummary();
         }
 
         function updatePriceSummary() {
-            let subtotal = selectedDestinations.reduce((sum, dest) => sum + (dest.price * dest.adults) + (dest.price * dest.children), 0);
-            let tax = subtotal * 0.1; // 10% tax
+            let subtotal = selectedDestinations.reduce((sum, dest) => sum + (dest.price * dest.adults + dest.price * dest.children), 0);
+            let tax = subtotal * 0.1;
             let travelCharge = 500;
             let totalPrice = subtotal + tax + travelCharge;
 
@@ -198,74 +165,65 @@
         }
 
         function renderDestinationList() {
-            const destinationList = document.getElementById('destination-list');
-            const priceSummary = document.getElementById('price-summary');
-            destinationList.innerHTML = '';
-            priceSummary.innerHTML = '';
+    const destinationList = document.getElementById('destination-list');
+    destinationList.innerHTML = '';
 
-            selectedDestinations.forEach((destination, index) => {
-                // Add destination to the list
-                const div = document.createElement('div');
-div.classList.add('destination-item');
-div.innerHTML = `
-    <div style="width: 150%;">
-        <h4 class="text-lg font-semibold text-gray-700">${destination.name}</h4>
-        <div class="destination-details">
-            <p><strong>Budget:</strong> ₹${destination.budget}</p>
-            <p><strong>Duration:</strong> ${destination.duration}</p>
-            <p><strong>Theme:</strong> ${destination.theme}</p>
-        </div>
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 1rem;">
-            <p class="font-semibold">Adults:</p>
-            <div class="quantity-control" style="margin-left: auto;">
-                <button onclick="decreaseQuantity(${index}, 'adults')">-</button>
-                <input type="text" id="adults-${index}" class="details-value" value="${destination.adults}" readonly>
-                <button onclick="increaseQuantity(${index}, 'adults')">+</button>
+    selectedDestinations.forEach((destination, index) => {
+        // Calculate the total price for the current destination
+        const destinationTotal = (destination.price * destination.adults) + (destination.price * destination.children);
+
+        const div = document.createElement('div');
+        div.classList.add('destination-item');
+        div.innerHTML = `
+            <div>
+                <h4 class="text-lg font-semibold">${destination.name}</h4>
+                <p class="text-sm text-gray-600">Budget: ₹${destination.budget} | Duration: ${destination.duration} | Theme: ${destination.theme}</p>
+                <div class="flex items-center mt-2">
+                    <p>Adults: </p>
+                    <div class="quantity-control ml-auto">
+                        <button onclick="updateQuantity(${index}, 'adults', -1)">-</button>
+                        <input type="text" value="${destination.adults}" readonly>
+                        <button onclick="updateQuantity(${index}, 'adults', 1)">+</button>
+                    </div>
+                </div>
+                <div class="flex items-center mt-2">
+                    <p>Children: </p>
+                    <div class="quantity-control ml-auto">
+                        <button onclick="updateQuantity(${index}, 'children', -1)">-</button>
+                        <input type="text" value="${destination.children}" readonly>
+                        <button onclick="updateQuantity(${index}, 'children', 1)">+</button>
+                    </div>
+                </div>
+                <div class="mt-4">
+                    <p class="font-semibold text-gray-800">Total Price: ₹<span id="destination-total-${index}">${destinationTotal}</span></p>
+                </div>
             </div>
-        </div>
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 1rem;">
-            <p class="font-semibold">Children:</p>
-            <div class="quantity-control" style="margin-left: auto;">
-                <button onclick="decreaseQuantity(${index}, 'children')">-</button>
-                <input type="text" id="children-${index}" class="details-value" value="${destination.children}" readonly>
-                <button onclick="increaseQuantity(${index}, 'children')">+</button>
-            </div>
-        </div>
-    </div>
-    <i class="fas fa-trash" onclick="removeDestination(${index})"></i>
-`;
-destinationList.appendChild(div);
+            <i class="fas fa-trash" onclick="removeDestination(${index})"></i>
+        `;
+        destinationList.appendChild(div);
+    });
+}
 
-                // Add destination price to the price summary
-                const priceDiv = document.createElement('div');
-                priceDiv.classList.add('flex', 'justify-between', 'items-center', 'mb-2');
-                priceDiv.innerHTML = `
-                    <p class="summary-label">${destination.name}:</p>
-                    <p class="details-value">₹${destination.price * destination.adults + destination.price * destination.children}</p>
-                `;
-                priceSummary.appendChild(priceDiv);
-            });
-        }
 
-        function increaseQuantity(index, type) {
-            const input = document.getElementById(`${type}-${index}`);
-            input.value = parseInt(input.value) + 1;
-            selectedDestinations[index][type] += 1; // Update the destination data
-            updatePriceSummary();
-        }
 
-        function decreaseQuantity(index, type) {
-            const input = document.getElementById(`${type}-${index}`);
-            if (parseInt(input.value) > 0) {
-                input.value = parseInt(input.value) - 1;
-                selectedDestinations[index][type] -= 1; // Update the destination data
-                updatePriceSummary();
-            }
-        }
+function updateQuantity(index, type, change) {
+    selectedDestinations[index][type] += change;
+    if (selectedDestinations[index][type] < 0) selectedDestinations[index][type] = 0;
 
-        // Example of adding destinations to the list initially
-        addDestination(0); // Add Maldives
-        addDestination(1); // Add Hawaii
+    // Recalculate the destination total and update the DOM
+    const destinationTotal = (selectedDestinations[index].price * selectedDestinations[index].adults) + 
+                             (selectedDestinations[index].price * selectedDestinations[index].children);
+    document.getElementById(`destination-total-${index}`).textContent = destinationTotal;
+     // Update the input field for the quantity
+     renderDestinationList();
+
+// Update the overall price summary
+    updatePriceSummary();
+}
+
+        // Initialize
+        addDestination(0);
+        addDestination(1);
     </script>
 </body>
 </html>
