@@ -8,37 +8,52 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
     <style>
         body {
-            background-image: linear-gradient(to right, #6dd5fa, #2980b9);
-            min-height: 100vh;
-            font-family: 'Arial', sans-serif;
-        }
-        .checkout-container {
-            display: flex;
-            gap: 1.5rem;
-            margin-top: 2rem;
-        }
-        .details-card, .summary-card {
-            background-color: #ffffff;
-            border: 1px solid #e0e0e0;
-            padding: 1.5rem;
-            border-radius: 1rem;
-            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
-        }
-        .summary-card {
-            max-width: 450px;
-        }
-        .checkout-button {
-            background-color: #f39c12;
-            transition: background-color 0.3s ease, transform 0.3s ease;
-            font-size: 1.125rem;
-            font-weight: bold;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-        }
-        .checkout-button:hover {
-            background-color: #d35400;
-            transform: scale(1.05);
-        }
-        .destination-item {
+    background-image: linear-gradient(to right, #6dd5fa, #2980b9);
+    min-height: 100vh;
+    font-family: 'Arial', sans-serif;
+    padding: 0;
+    margin: 0;
+}
+
+.checkout-container {
+    display: flex;
+    flex-wrap: wrap; /* Allows stacking on smaller screens */
+    gap: 1.5rem;
+    margin-top: 2rem;
+    justify-content: space-between;
+    padding: 0 1rem; /* Padding for smaller screens */
+}
+
+.details-card, .summary-card {
+    background-color: #ffffff;
+    border: 1px solid #e0e0e0;
+    padding: 1.5rem;
+    border-radius: 1rem;
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+    flex: 1;
+    min-width: 300px; /* Minimum width for smaller screens */
+    max-width: 100%; /* Ensures full width on smaller screens */
+}
+
+.summary-card {
+    max-width: 450px;
+    width: 100%;
+}
+
+.checkout-button {
+    background-color: #f39c12;
+    transition: background-color 0.3s ease, transform 0.3s ease;
+    font-size: 1.125rem;
+    font-weight: bold;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+.checkout-button:hover {
+    background-color: #d35400;
+    transform: scale(1.05);
+}
+
+.destination-item {
     position: relative;
     border: 1px solid #e0e0e0;
     padding: 1rem;
@@ -47,6 +62,7 @@
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
     margin-bottom: 1rem;
 }
+
 .destination-item i {
     position: absolute;
     top: 0.5rem;
@@ -56,45 +72,102 @@
     font-size: 1.25rem;
     transition: color 0.3s ease;
 }
+
 .destination-item i:hover {
     color: #c0392b;
 }
-        .quantity-control button {
-            background-color: #3498db;
-            color: #fff;
-            font-weight: bold;
-            border: none;
-            width: 2rem;
-            height: 2rem;
-            border-radius: 0.5rem;
-            cursor: pointer;
-            transition: background-color 0.2s ease;
-        }
-        .quantity-control button:hover {
-            background-color: #2980b9;
-        }
-        .quantity-control input {
-            width: 3rem;
-            text-align: center;
-            border: 1px solid #ddd;
-            border-radius: 0.25rem;
-            font-weight: bold;
-            margin: 0 0.5rem;
-        }
-        .total-price {
-            font-size: 1.5rem;
-            font-weight: bold;
-            color: #2c3e50;
-        }
-        .summary-label {
-            font-size: 0.875rem;
-            color: #7f8c8d;
-        }
-        .details-card hr, .summary-card hr {
-            margin: 1rem 0;
-            border-color: #ddd;
-        }
-    </style>
+
+.quantity-control button {
+    background-color: #3498db;
+    color: #fff;
+    font-weight: bold;
+    border: none;
+    width: 2rem;
+    height: 2rem;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.quantity-control button:hover {
+    background-color: #2980b9;
+}
+
+.quantity-control input {
+    width: 3rem;
+    text-align: center;
+    border: 1px solid #ddd;
+    border-radius: 0.25rem;
+    font-weight: bold;
+    margin: 0 0.5rem;
+}
+
+.total-price {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #2c3e50;
+}
+
+.summary-label {
+    font-size: 0.875rem;
+    color: #7f8c8d;
+}
+
+.details-card hr, .summary-card hr {
+    margin: 1rem 0;
+    border-color: #ddd;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .checkout-container {
+        flex-direction: column; /* Stack vertically on smaller screens */
+        padding: 0 1rem;
+    }
+
+    .details-card, .summary-card {
+        max-width: 100%;
+        flex: 1;
+        margin-bottom: 2rem; /* Add margin between the cards */
+    }
+
+    .checkout-button {
+        font-size: 1rem; /* Adjust button size on small screens */
+    }
+
+    .destination-item {
+        padding: 1rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .checkout-container {
+        padding: 0 0.5rem; /* Smaller padding on extra small screens */
+    }
+
+    .details-card, .summary-card {
+        padding: 1rem; /* Reduce padding on small screens */
+    }
+
+    .checkout-button {
+        font-size: 0.9rem;
+        padding: 0.75rem; /* Adjust button size for small screens */
+    }
+
+    .destination-item {
+        padding: 0.75rem; /* Adjust destination item padding */
+    }
+
+    .quantity-control button {
+        width: 1.5rem;
+        height: 1.5rem; /* Make buttons smaller */
+    }
+
+    .quantity-control input {
+        width: 2.5rem; /* Adjust input field width */
+    }
+}
+</style>
 </head>
 <body>
     <div class="max-w-7xl mx-auto checkout-container">
@@ -103,6 +176,10 @@
             <h2 class="text-2xl font-bold text-gray-800 mb-4">Vacation Details</h2>
             <div id="destination-list"></div>
             <hr>
+            <div class="flex justify-between items-center mt-2">
+    <p class="summary-label" ><b>Total Price for All Destinations:</p>
+    <p id="all-destinations-total" class="details-value">₹0</p>
+</div>
         </div>
 
         <!-- Right Section (Price Summary) -->
@@ -154,15 +231,22 @@
         }
 
         function updatePriceSummary() {
-            let subtotal = selectedDestinations.reduce((sum, dest) => sum + (dest.price * dest.adults + dest.price * dest.children), 0);
-            let tax = subtotal * 0.1;
-            let travelCharge = 500;
-            let totalPrice = subtotal + tax + travelCharge;
+    let subtotal = selectedDestinations.reduce((sum, dest) => sum + (dest.price * dest.adults + dest.price * dest.children), 0);
+    let tax = subtotal * 0.1;
+    let travelCharge = 500;
+    let totalPrice = subtotal + tax + travelCharge;
 
-            document.getElementById('subtotal').textContent = `₹${subtotal}`;
-            document.getElementById('tax').textContent = `₹${tax}`;
-            document.getElementById('total-price').textContent = `₹${totalPrice}`;
-        }
+    // Calculate the total price for all selected destinations
+    let allDestinationsTotal = selectedDestinations.reduce((sum, dest) => sum + (dest.price * dest.adults + dest.price * dest.children), 0);
+
+    // Update the individual price summary
+    document.getElementById('subtotal').textContent = `₹${subtotal}`;
+    document.getElementById('tax').textContent = `₹${tax}`;
+    document.getElementById('total-price').textContent = `₹${totalPrice}`;
+
+    // Update the total price for all selected destinations
+    document.getElementById('all-destinations-total').textContent = `₹${allDestinationsTotal}`;
+}
 
         function renderDestinationList() {
     const destinationList = document.getElementById('destination-list');
@@ -199,6 +283,7 @@
                 </div>
             </div>
             <i class="fas fa-trash" onclick="removeDestination(${index})"></i>
+            
         `;
         destinationList.appendChild(div);
     });
