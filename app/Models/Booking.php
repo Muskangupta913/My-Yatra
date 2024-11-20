@@ -32,3 +32,4 @@ class Booking extends Model
     }
 }
 
+?>

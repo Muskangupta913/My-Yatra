@@ -211,7 +211,7 @@
                     <div class="form-check">
                       <input class="form-check-input filter-type" type="checkbox" value="7" id="adevanture">
                       <label class="form-check-label" for="adevanture">
-                        Adventure
+                        Adevanture
                       </label>
                     </div>
                     <div class="form-check">
@@ -361,7 +361,7 @@
               <div class="form-check">
                 <input class="form-check-input filter-type" type="checkbox" value="7" id="adevanture">
                 <label class="form-check-label" for="adevanture">
-                  Adventure
+                  Adevanture
                 </label>
               </div>
               <div class="form-check">

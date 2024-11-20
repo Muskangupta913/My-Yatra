@@ -211,7 +211,7 @@
                     <div class="form-check">
                       <input class="form-check-input filter-type" type="checkbox" value="7" id="adevanture">
                       <label class="form-check-label" for="adevanture">
-                        Adventure
+                        Adevanture
                       </label>
                     </div>
                     <div class="form-check">
@@ -361,7 +361,7 @@
               <div class="form-check">
                 <input class="form-check-input filter-type" type="checkbox" value="7" id="adevanture">
                 <label class="form-check-label" for="adevanture">
-                  Adventure
+                  Adevanture
                 </label>
               </div>
               <div class="form-check">
@@ -634,9 +634,7 @@ function fetchPackages(selectedPrice, selectedDuration, selectedType) {
                                 </p>
                                 <small class="text-muted d-block" style="text-decoration: line-through; margin-top:-10px; font-size:14px; font-weight:600;">₹${Number(item.ragular_price).toLocaleString('en-IN')}</small>
                             </div>
-                              <a href="/holidays/${response.destinations.slug}/${item.slug}" class="text-decoration-none text-dark">
                             <button class="btn btn-danger mx-2 btn-lg rounded-0 booknow" data-id="${item.id}">Book Now</button>
-                            </a>
                         </div>
                     </div>
                 </div>
