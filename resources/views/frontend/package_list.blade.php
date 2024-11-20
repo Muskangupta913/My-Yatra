@@ -244,7 +244,8 @@
                         
                         </div>
 
-                        <button class="btn btn-danger mx-2 btn-lg rounded-0 booknow"  data-id="{{$item->id}}">Book Now</button>
+                        <button class="btn btn-danger mx-2 btn-lg rounded-0 booknow"  data-id="{{$item->id}}">Bookk
+                           Now</button>
                        </div>
 
                      </div>
