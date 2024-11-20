@@ -51,11 +51,6 @@ Route::get('tour-category/{newSlug}/{itemSlug}', [HomeController::class, 'showTo
 
 // holiday-packages
 Route::get('/holiday-packages/{slug}', [HomeController::class,  'packageDetails'])->name('packageDetails');
- 
-
-//add to card controllerr
-
-
 
 // Route::get('/test',  function(){
 //   return view('frontend.test');
@@ -91,6 +86,7 @@ Route::get('/career-apply', [HomeController::class, 'careerApply'])->name('caree
 Route::get('/terms-and-conditions', [HomeController::class, 'termsCondition'])->name('termsCondition');
 
 Route::post('/job-apply', [HomeController::class, 'jobApply'])->name('jobApply');
+<<<<<<< HEAD
 // Add this to web.php
 Route::get('/cart', [CartContoller::class, 'cartbutton'])->name('cart');
 Route::post('/add-to-cart', [CartContoller::class, 'addTocart'])->name('addtocart');
@@ -100,6 +96,8 @@ Route::post('/add-to-cart', [CartContoller::class, 'addTocart'])->name('addtocar
 Route::get('/checkout', [CartContoller::class, 'cart'])->name('checkout');
 Route::get('/payment',[HomeController::class, 'payment'])->name('payment');
 Route::get('/blog',[HomeController::class, 'ourblog'])->name('blog');
+=======
+>>>>>>> 93c139d9eac24e538af697553dcedfb238a3e829
 
 Route::fallback(function () {
   return response()->view('errors.404', [], 404);  // Match the path of your error view
