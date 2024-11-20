@@ -80,7 +80,7 @@
 .dish-img {
     object-fit: cover;
 }
-.adventure-section {
+.adevanture-section {
     padding: 50px 0;
 }
 .activity-card {

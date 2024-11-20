@@ -182,8 +182,8 @@
                       </label>
                     </div>
                     <div class="form-check">
-                      <input class="form-check-input" type="checkbox" value="" id="Adventure">
-                      <label class="form-check-label" for="Adventure">
+                      <input class="form-check-input" type="checkbox" value="" id="Adevanture">
+                      <label class="form-check-label" for="Adevnture">
                         Adventure
                       </label>
                     </div>

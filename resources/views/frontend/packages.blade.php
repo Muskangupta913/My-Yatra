@@ -182,8 +182,8 @@
                   <form action="">
                     
                     <div class="form-check">
-                      <input class="form-check-input filter-type" type="checkbox" value="1" id="Adventure">
-                      <label class="form-check-label" for="Adventure">
+                      <input class="form-check-input filter-type" type="checkbox" value="1" id="Adevanture">
+                      <label class="form-check-label" for="Adevanture">
                         Adventure Tour
                       </label>
                     </div>
@@ -332,8 +332,8 @@
             <form action="">
               
               <div class="form-check">
-                <input class="form-check-input filter-type" type="checkbox" value="1" id="Adventure">
-                <label class="form-check-label" for="Adventure">
+                <input class="form-check-input filter-type" type="checkbox" value="1" id="Adevanture">
+                <label class="form-check-label" for="Adevanture">
                   Adventure Tour
                 </label>
               </div>
@@ -359,9 +359,9 @@
               </div>
 
               <div class="form-check">
-                <input class="form-check-input filter-type" type="checkbox" value="7" id="adevanture">
-                <label class="form-check-label" for="adevanture">
-                  Adevanture
+                <input class="form-check-input filter-type" type="checkbox" value="7" id="adventure">
+                <label class="form-check-label" for="adventure">
+                  Adventure
                 </label>
               </div>
               <div class="form-check">

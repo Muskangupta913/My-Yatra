@@ -323,8 +323,8 @@
                 <form action="">
                   
                   <div class="form-check">
-                    <input class="form-check-input filter-type" type="checkbox" value="1" id="Adventure">
-                    <label class="form-check-label" for="Adventure">
+                    <input class="form-check-input filter-type" type="checkbox" value="1" id="Adevanture">
+                    <label class="form-check-label" for="Adevanture">
                       Adventure Tour
                     </label>
                   </div>
@@ -366,8 +366,9 @@
               </div>
             </div>
           </div>
-        </div>
-                   
+        </div> 
+         <!-- Apply Button -->
+         <button type="submit" class="btn btn-danger w-100 mt-3">Apply</button>    
          </div>
 
          <div class="col-md-9">
@@ -375,8 +376,6 @@
             <!-- Filtered packages will be injected here -->
         </div>
          </div>
-
-        
     </div>
 </div>
 </section>

@@ -209,9 +209,9 @@
                     </div>
 
                     <div class="form-check">
-                      <input class="form-check-input filter-type" type="checkbox" value="7" id="adevanture">
-                      <label class="form-check-label" for="adevanture">
-                        Adevanture
+                      <input class="form-check-input filter-type" type="checkbox" value="7" id="adventure">
+                      <label class="form-check-label" for="adventure">
+                        Adventure
                       </label>
                     </div>
                     <div class="form-check">
@@ -359,9 +359,9 @@
               </div>
 
               <div class="form-check">
-                <input class="form-check-input filter-type" type="checkbox" value="7" id="adevanture">
-                <label class="form-check-label" for="adevanture">
-                  Adevanture
+                <input class="form-check-input filter-type" type="checkbox" value="7" id="adventure">
+                <label class="form-check-label" for="adventure">
+                  Adventure
                 </label>
               </div>
               <div class="form-check">

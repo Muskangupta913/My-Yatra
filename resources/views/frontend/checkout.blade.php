@@ -8,7 +8,12 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
     <style>
    body {
-    background-image: linear-gradient(to right, #6dd5fa, #2980b9);
+    background-image: 
+        url('{{ asset("assets/images/backg.webp") }}');/* Replace with your image URL */
+        /* linear-gradient(to right, #6dd5fa, #2980b9); */
+    background-size: cover; /* Ensures the image covers the entire body */
+    background-blend-mode: overlay; /* Combines the image and gradient */
+    /* filter: blur(5px); /Adjust the blur intensity as needed */
     min-height: 100vh;
     font-family: 'Arial', sans-serif;
 }
@@ -105,7 +110,7 @@
 
 .summary-label {
     font-size: 0.875rem;
-    color: ##000000;
+    color: ##000000;;
 }
 
 .details-card hr, .summary-card hr {
