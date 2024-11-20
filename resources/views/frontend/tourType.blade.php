@@ -489,12 +489,15 @@ $(document).ready(function() {
     });
 
     // Book Now Button Click Handler
-    $(document).on('click', '.booknow', function(event) {
-        event.preventDefault();
-        var id = $(this).data("id");
-        $('#bookingModal').modal('show');
-        $('#package_id').val(id);
-    });
+    $(document).on('click', '.booknow', function (event) {
+    event.preventDefault(); // Prevent default behavior if necessary
+    var slug = $(this).data("slug");     // Package slug
+    var newSlug = $(this).data("newslug"); // Category slug
+    var routeUrl = `/tour-category/${newSlug}/${slug}`; // Construct the route
+
+    // Redirect to the constructed route
+    window.location.href = routeUrl;
+});
 
     // Add to Cart Button Click Handler
     $(document).on('click', '.add-to-cart', function(event) {
@@ -609,43 +612,45 @@ $(document).ready(function() {
 
     // Create Package HTML Helper Function
     function createPackageHtml(item, slug, discount) {
-        return `
-            <div class="col-md-6 mb-3">
-                <div class="card shadow card-body p-0">
-                    <a href="/tour-category/${slug}/${item.slug}" class="text-decoration-none text-dark">
-                        <img src="/uploads/packages/${item.photo}" width="100%" style="height:250px; object-fit:cover;" alt="${item.package_name}">
-                    </a>
-                    <div class="package-desc py-3 px-2">
-                        <h5>${item.package_name.length > 38 ? item.package_name.substring(0, 38) + '...' : item.package_name}</h5>
-                        <div class="d-flex justify-content-between">
-                            <p class="btn btn-outline-danger fw-semibold btn-sm">${item.duration} days</p>
-                            <ul class="d-flex list-unstyled">
-                                <li><i class="fa-solid fa-hotel text-warning px-2"></i></li>
-                                <li><i class="fa-solid fa-car text-danger px-2"></i></li>
-                                <li><i class="fa-solid fa-utensils text-success px-2"></i></li>
-                            </ul>
-                        </div>
-                        <div class="price-offer d-flex justify-content-between align-items-center">
-                            <div>
-                                <p>Starting Price Per Adult</p>
-                                <p style="font-size: 20px; margin-top:-10px; font-weight:bold;">
-                                    ₹${Number(item.offer_price).toLocaleString('en-IN')}
-                                    <small style="font-size:14px; font-weight:600; color:green;">${discount.toFixed(2)}% Off</small>
-                                </p>
-                                <small class="text-muted d-block" style="text-decoration: line-through; margin-top:-10px; font-size:14px; font-weight:600;">
-                                    ₹${Number(item.ragular_price).toLocaleString('en-IN')}
-                                </small>
-                            </div>
-                            <div class="d-flex flex-column">
-                                <button class="btn btn-danger mb-2 rounded-0 booknow" data-id="${item.id}">Book Now</button>
-                                <button class="btn btn-outline-danger rounded-0 add-to-cart" data-id="${item.id}">Add To Cart</button>
-                            </div>
-                        </div>
+      return `
+    <div class="col-md-6 mb-3">
+        <div class="card shadow card-body p-0">
+            <a href="/tour-category/${slug}/${item.slug}" class="text-decoration-none text-dark">
+                <img src="/uploads/packages/${item.photo}" width="100%" style="height:250px; object-fit:cover;" alt="${item.package_name}">
+            </a>
+            <div class="package-desc py-3 px-2">
+                <h5>${item.package_name.length > 38 ? item.package_name.substring(0, 38) + '...' : item.package_name}</h5>
+                <div class="d-flex justify-content-between">
+                    <p class="btn btn-outline-danger fw-semibold btn-sm">${item.duration} days</p>
+                    <ul class="d-flex list-unstyled">
+                        <li><i class="fa-solid fa-hotel text-warning px-2"></i></li>
+                        <li><i class="fa-solid fa-car text-danger px-2"></i></li>
+                        <li><i class="fa-solid fa-utensils text-success px-2"></i></li>
+                    </ul>
+                </div>
+                <div class="price-offer d-flex justify-content-between align-items-center">
+                    <div>
+                        <p>Starting Price Per Adult</p>
+                        <p style="font-size: 20px; margin-top:-10px; font-weight:bold;">
+                            ₹${Number(item.offer_price).toLocaleString('en-IN')}
+                            <small style="font-size:14px; font-weight:600; color:green;">${discount.toFixed(2)}% Off</small>
+                        </p>
+                        <small class="text-muted d-block" style="text-decoration: line-through; margin-top:-10px; font-size:14px; font-weight:600;">
+                            ₹${Number(item.ragular_price).toLocaleString('en-IN')}
+                        </small>
+                    </div>
+                    <div class="d-flex flex-column">
+                        <button class="btn btn-danger mb-2 rounded-0 booknow" data-slug="${item.slug}" data-newslug="${slug}">Book Now</button>
+                        <button class="btn btn-outline-danger rounded-0 add-to-cart" data-id="${item.id}">Add To Cart</button>
                     </div>
                 </div>
             </div>
-        `;
-    }
+        </div>
+    </div>
+`;
+
+}
+
 
     // Initial load of packages
     fetchPackages();

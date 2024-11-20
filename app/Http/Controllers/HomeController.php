@@ -546,8 +546,25 @@ public function  payment()
 {
     return view('frontend.payment');
 }
-public function ourblog(){
-    return view('frontend.our-blog');
+public function ourblog()
+{
+    // Vacation spots (mocked data for demonstration)
+    $vacationSpots = [
+        (object) ['name' => 'Andaman & Nicobar', 'description' => 'Explore serene beaches.', 'image' => 'andaman.jpg'],
+        (object) ['name' => 'Ladakh', 'description' => 'Mesmerizing landscapes.', 'image' => 'ladakh.jpg'],
+        (object) ['name' => 'Rann of Kutch', 'description' => 'Witness the white desert.', 'image' => 'kutch.jpg']
+    ];
+
+    // Festival regions (mocked data for demonstration)
+    $festivalRegions = [
+        (object) ['name' => 'Rajasthan', 'description' => 'Cultural festivals.', 'image' => 'rajasthan.jpg'],
+        (object) ['name' => 'Goa', 'description' => 'Carnival celebrations.', 'image' => 'goa.jpg']
+    ];
+
+    // Passing data to the Blade view
+    return view('frontend.ourblog', compact('vacationSpots', 'festivalRegions'));
 }
+
+
 
 }

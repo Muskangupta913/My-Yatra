@@ -60,6 +60,10 @@
               class="fa-solid fa-envelope px-1"></i></a>
           <a href="{{ route('loginView')}}" class="btn btn-warning btn-sm rounded-0 fw-bold mx-3 px-3"><i
               class="fa-regular fa-user"></i> LOGIN</a>
+              <!-- Add to Cart Icon placed near Login -->
+    <a href="{{ route('checkout') }}" class="nav-link d-inline-block">
+        <i class="fa fa-shopping-cart" style="font-size: 20px;"></i>
+    </a>
         </div>
       </div>
     </div>
@@ -114,7 +118,8 @@
           </li>
 
           <li class="nav-item">
-            <a href="" class="nav-link">Blog</a>
+          <a href="{{ route('blog') }}" class="nav-link">Blog</a>
+
           </li>
 
           <li class="nav-item">
