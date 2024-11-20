@@ -7,21 +7,18 @@
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
     <style>
-        body {
+   body {
     background-image: linear-gradient(to right, #6dd5fa, #2980b9);
     min-height: 100vh;
     font-family: 'Arial', sans-serif;
-    padding: 0;
-    margin: 0;
 }
 
 .checkout-container {
     display: flex;
-    flex-wrap: wrap; /* Allows stacking on smaller screens */
+    flex-wrap: wrap; /* Allow wrapping for smaller screens */
     gap: 1.5rem;
     margin-top: 2rem;
-    justify-content: space-between;
-    padding: 0 1rem; /* Padding for smaller screens */
+    padding: 1rem;
 }
 
 .details-card, .summary-card {
@@ -30,14 +27,12 @@
     padding: 1.5rem;
     border-radius: 1rem;
     box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
-    flex: 1;
-    min-width: 300px; /* Minimum width for smaller screens */
-    max-width: 100%; /* Ensures full width on smaller screens */
+    width: 100%; /* Default width for smaller screens */
 }
 
 .summary-card {
     max-width: 450px;
-    width: 100%;
+    margin: 0 auto; /* Center align summary card on small screens */
 }
 
 .checkout-button {
@@ -119,55 +114,31 @@
 }
 
 /* Responsive Design */
-@media (max-width: 768px) {
+@media (min-width: 640px) {
+    /* Small screens (e.g., phones in landscape mode) */
     .checkout-container {
-        flex-direction: column; /* Stack vertically on smaller screens */
-        padding: 0 1rem;
+        flex-wrap: nowrap; /* Single row layout for small screens */
     }
-
     .details-card, .summary-card {
-        max-width: 100%;
-        flex: 1;
-        margin-bottom: 2rem; /* Add margin between the cards */
-    }
-
-    .checkout-button {
-        font-size: 1rem; /* Adjust button size on small screens */
-    }
-
-    .destination-item {
-        padding: 1rem;
+        width: calc(50% - 0.75rem); /* Equal width for details and summary */
     }
 }
 
-@media (max-width: 480px) {
+@media (min-width: 1024px) {
+    /* Large screens (e.g., laptops) */
     .checkout-container {
-        padding: 0 0.5rem; /* Smaller padding on extra small screens */
+        max-width: 1200px;
+        margin: 2rem auto;
     }
-
-    .details-card, .summary-card {
-        padding: 1rem; /* Reduce padding on small screens */
+    .details-card {
+        flex: 2; /* Larger space for details card */
     }
-
-    .checkout-button {
-        font-size: 0.9rem;
-        padding: 0.75rem; /* Adjust button size for small screens */
-    }
-
-    .destination-item {
-        padding: 0.75rem; /* Adjust destination item padding */
-    }
-
-    .quantity-control button {
-        width: 1.5rem;
-        height: 1.5rem; /* Make buttons smaller */
-    }
-
-    .quantity-control input {
-        width: 2.5rem; /* Adjust input field width */
+    .summary-card {
+        flex: 1; /* Smaller space for summary card */
     }
 }
 </style>
+
 </head>
 <body>
     <div class="max-w-7xl mx-auto checkout-container">
@@ -177,7 +148,7 @@
             <div id="destination-list"></div>
             <hr>
             <div class="flex justify-between items-center mt-2">
-    <p class="summary-label" ><b>Total Price for All Destinations:</p>
+    <p class="summary-label">Total Price for All Destinations:</p>
     <p id="all-destinations-total" class="details-value">₹0</p>
 </div>
         </div>
@@ -231,22 +202,26 @@
         }
 
         function updatePriceSummary() {
-    let subtotal = selectedDestinations.reduce((sum, dest) => sum + (dest.price * dest.adults + dest.price * dest.children), 0);
+    let subtotal = selectedDestinations.reduce(
+        (sum, dest) => sum + dest.price * (dest.adults + dest.children),
+        0
+    );
     let tax = subtotal * 0.1;
     let travelCharge = 500;
     let totalPrice = subtotal + tax + travelCharge;
 
-    // Calculate the total price for all selected destinations
-    let allDestinationsTotal = selectedDestinations.reduce((sum, dest) => sum + (dest.price * dest.adults + dest.price * dest.children), 0);
-
-    // Update the individual price summary
     document.getElementById('subtotal').textContent = `₹${subtotal}`;
     document.getElementById('tax').textContent = `₹${tax}`;
     document.getElementById('total-price').textContent = `₹${totalPrice}`;
 
-    // Update the total price for all selected destinations
-    document.getElementById('all-destinations-total').textContent = `₹${allDestinationsTotal}`;
+    // Calculate the total price of all destinations
+    const totalAllDestinations = selectedDestinations.reduce(
+        (sum, dest) => sum + dest.price * (dest.adults + dest.children),
+        0
+    );
+    document.getElementById('all-destinations-total').textContent = `₹${totalAllDestinations}`;
 }
+
 
         function renderDestinationList() {
     const destinationList = document.getElementById('destination-list');
