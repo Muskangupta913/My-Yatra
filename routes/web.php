@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\admin\AdminController;
 use App\Http\Controllers\admin\AuthController;
+use App\Http\Controllers\CartContoller;
 use App\Http\Controllers\HomeController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
@@ -33,6 +34,8 @@ Route::get('/', [HomeController::class, 'index'])->name('home');
 // Route::get('/home', function(){
 //   return view('frontend.home');
 // });
+
+
 
 Route::get('/holidays/{slug}', [HomeController::class, 'packages'])->name('packages');
 
@@ -88,7 +91,13 @@ Route::get('/career-apply', [HomeController::class, 'careerApply'])->name('caree
 Route::get('/terms-and-conditions', [HomeController::class, 'termsCondition'])->name('termsCondition');
 
 Route::post('/job-apply', [HomeController::class, 'jobApply'])->name('jobApply');
-Route::get('/checkout', [HomeController::class, 'addtocard'])->name('checkout');
+// Add this to web.php
+Route::get('/cart', [CartContoller::class, 'cartbutton'])->name('cart');
+Route::post('/add-to-cart', [CartContoller::class, 'addTocart'])->name('addtocart');
+
+
+
+Route::get('/checkout', [CartContoller::class, 'cart'])->name('checkout');
 Route::get('/payment',[HomeController::class, 'payment'])->name('payment');
 Route::get('/blog',[HomeController::class, 'ourblog'])->name('blog');
 
