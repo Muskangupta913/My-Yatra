@@ -376,7 +376,10 @@
         </div>
       </div>
     </div>
-        
+         <!-- Apply Button -->
+         <button type="submit" class="btn btn-danger w-100 mt-3">Apply</button> 
+
+
          </div>
         <div class="col-md-9 mb-3">
           <div class="row" id="package-list">
@@ -442,7 +445,6 @@
                   <div class="invalid-feedback">Please select a valid travel date.</div>
               </div>
           </div>
-      
           <!-- Terms & Conditions -->
           <div class="form-check mb-3">
               <input type="checkbox" class="form-check-input" id="terms" name="terms" required>

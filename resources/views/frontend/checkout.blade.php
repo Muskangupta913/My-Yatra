@@ -187,9 +187,9 @@
 
     <script>
         let destinations = [
-            { name: 'Maldives', price: 2000, adults: 2, children: 2, budget: 2500, duration: '7 Days', theme: 'Beach & Relaxation' },
-            { name: 'Hawaii', price: 3000, adults: 2, children: 2, budget: 3000, duration: '10 Days', theme: 'Adventure & Nature' },
-            { name: 'Bali', price: 1500, adults: 2, children: 2, budget: 1500, duration: '5 Days', theme: 'Cultural & Heritage' },
+            { name: 'Maldives', price: 2000, adults: 0, children: 0, budget: 2500, duration: '7 Days', theme: 'Beach & Relaxation' },
+            { name: 'Hawaii', price: 3000, adults: 0, children: 0, budget: 3000, duration: '10 Days', theme: 'Adventure & Nature' },
+            { name: 'Bali', price: 1500, adults: 0, children: 0, budget: 1500, duration: '5 Days', theme: 'Cultural & Heritage' },
         ];
 
         let selectedDestinations = [];
