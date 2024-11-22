@@ -546,6 +546,11 @@ public function  payment()
 {
     return view('frontend.payment');
 }
+
+public function checkout(){
+    return view('frontend.checkout');
+}
+
 public function ourblog()
 {
     // Vacation spots (mocked data for demonstration)
