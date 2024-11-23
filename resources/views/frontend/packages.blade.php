@@ -182,8 +182,8 @@
                   <form action="">
                     
                     <div class="form-check">
-                      <input class="form-check-input filter-type" type="checkbox" value="1" id="Adevanture">
-                      <label class="form-check-label" for="Adevanture">
+                      <input class="form-check-input filter-type" type="checkbox" value="1" id="Adventure">
+                      <label class="form-check-label" for="Adventure">
                         Adventure Tour
                       </label>
                     </div>
@@ -209,9 +209,9 @@
                     </div>
 
                     <div class="form-check">
-                      <input class="form-check-input filter-type" type="checkbox" value="7" id="adevanture">
-                      <label class="form-check-label" for="adevanture">
-                        Adevanture
+                      <input class="form-check-input filter-type" type="checkbox" value="7" id="adventure">
+                      <label class="form-check-label" for="adventure">
+                        Adventure
                       </label>
                     </div>
                     <div class="form-check">
@@ -332,8 +332,8 @@
             <form action="">
               
               <div class="form-check">
-                <input class="form-check-input filter-type" type="checkbox" value="1" id="Adevanture">
-                <label class="form-check-label" for="Adevanture">
+                <input class="form-check-input filter-type" type="checkbox" value="1" id="Adventure">
+                <label class="form-check-label" for="Adventure">
                   Adventure Tour
                 </label>
               </div>
@@ -376,7 +376,10 @@
         </div>
       </div>
     </div>
-        
+         <!-- Apply Button -->
+         <button type="submit" class="btn btn-danger w-100 mt-3">Apply</button> 
+
+
          </div>
         <div class="col-md-9 mb-3">
           <div class="row" id="package-list">
@@ -442,7 +445,6 @@
                   <div class="invalid-feedback">Please select a valid travel date.</div>
               </div>
           </div>
-      
           <!-- Terms & Conditions -->
           <div class="form-check mb-3">
               <input type="checkbox" class="form-check-input" id="terms" name="terms" required>

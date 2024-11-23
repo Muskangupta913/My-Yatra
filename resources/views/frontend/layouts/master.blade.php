@@ -111,7 +111,7 @@
             <a class="nav-link dropdown-toggle" href="#" id="dropdownId" data-bs-toggle="dropdown" aria-haspopup="true"
               aria-expanded="false">Travel Attraction</a>
             <div class="dropdown-menu" aria-labelledby="dropdownId">
-              <a class="dropdown-item" href="http://127.0.0.1:8000/tour-category/adevanture">Adventure Tour</a>
+              <a class="dropdown-item" href="http://127.0.0.1:8000/tour-category/adventure">Adventure Tour</a>
               {{-- <a class="dropdown-item" href="http://127.0.0.1:8000/tour-category/city-tours">City Tour</a> --}}
               <a class="dropdown-item" href="http://127.0.0.1:8000/tour-category/honeymoon">Honeymoon</a>
             </div>
@@ -119,7 +119,6 @@
 
           <li class="nav-item">
           <a href="{{ route('blog') }}" class="nav-link">Blog</a>
-
           </li>
 
           <li class="nav-item">

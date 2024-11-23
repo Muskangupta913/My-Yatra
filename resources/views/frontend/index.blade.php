@@ -1,6 +1,5 @@
 @extends('frontend.layouts.master')
 @section('content')
-
 <section class="hero">
 
   <div class="container">
@@ -8,7 +7,7 @@
       <div class="card search-engine-card py-5 px-4" style="position: relative">
         <ul class="nav nav-tabs border-0" style="position: absolute; top:0; left:1%; transform:translateY(-50%);"
           id="myTab" role="tablist">
-          <!-- <li class="nav-item" role="presentation">
+          <li class="nav-item" role="presentation">
             <button class="nav-link px-4 shadow border-0" id="home-tab" data-bs-toggle="tab" data-bs-target="#home"
               type="button" role="tab" aria-controls="home" aria-selected="true">
               <i class="fa-solid fa-plane-departure d-block"></i>
@@ -21,7 +20,7 @@
               <i class="fa-solid fa-building d-block"></i>
               <small>Hotel</small>
             </button>
-          </li> -->
+          </li>
           <li class="nav-item" role="presentation">
             <button class="nav-link active px-4 border-0 shadow" id="contact-tab" data-bs-toggle="tab"
               data-bs-target="#contact" type="button" role="tab" aria-controls="contact" aria-selected="false">
@@ -112,7 +111,7 @@
 
               <select class="form-select" id="inputGroupSelect04" aria-label="Example select with button addon">
                 <option selected>No. Of Nights</option>
-                <option value="1">2 Days 1 Night</option>
+                <option value="1">2 Days 1 Nights</option>
                 <option value="2">3 Days 2 Nights</option>
                 <option value="3">4 Days 3 Nights</option>
               </select>
@@ -124,7 +123,6 @@
           <div class="tab-pane fade" id="pills-profile" role="tabpanel" aria-labelledby="pills-profile-tab"
             tabindex="0">
             <div class="input-group  mobile_tabs mb-3">
-
               <input type="text" class="form-control py-3 rounded-start-pill" aria-describedby="button-addon2"
                 placeholder="Example : Delhi, Agra, Jaipur etc">
 
@@ -146,8 +144,7 @@
   <div class="container">
     <h2 class="border-start border-4 mb-5 border-warning px-2" style="font-weight: 400;">Best <span
         style="font-size: 30px; font-weight:bold;">Tourist Places</span> to Visit in the <span
-        style="font-size: 30px; font-weight:bold;">India</span></h2>
-    
+        style="font-size: 30px; font-weight:bold;">India</span></h2>   
     <div class="row">
       <div class="swiper mySwiper best-places px-2">
         <div class="swiper-wrapper">
@@ -175,7 +172,7 @@
 
 <section class="tour-places tour-category mt-5 mb-5">
   <div class="container">
-    <h2 class="border-start border-4 mb-5 border-warning px-2" style="font-weight: 400;">Wornderful Place For You<span
+    <h2 class="border-start border-4 mb-5 border-warning px-2" style="font-weight: 400;">Wonderful Place For You<span
         style="font-size: 30px; font-weight:bold;"> Tour Categories</span> </h2>
     
     <div class="row">
@@ -204,7 +201,6 @@
       </div>
     </div>
   </div>
-
   </div>
 </section>
 
