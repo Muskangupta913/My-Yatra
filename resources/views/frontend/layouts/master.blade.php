@@ -1,3 +1,5 @@
+
+
 <!doctype html>
 <html lang="en">
 
@@ -34,6 +36,8 @@
 
   gtag('config', 'G-6VR342NV7T');
 </script>
+
+
 </head>
 
 <body>
@@ -60,10 +64,15 @@
               class="fa-solid fa-envelope px-1"></i></a>
           <a href="{{ route('loginView')}}" class="btn btn-warning btn-sm rounded-0 fw-bold mx-3 px-3"><i
               class="fa-regular fa-user"></i> LOGIN</a>
-              <!-- Add to Cart Icon placed near Login -->
-    <a href="{{ route('checkout') }}" class="nav-link d-inline-block">
-        <i class="fa fa-shopping-cart" style="font-size: 20px;"></i>
-    </a>
+
+
+              <<a href="{{ route('checkout') }}" class="nav-link d-inline-block position-relative" style="margin-top: 5px;">
+    <i class="fa fa-shopping-cart" style="font-size: 18px;"></i>
+    <span id="cart-count" class="badge bg-danger rounded-pill position-absolute" 
+          style="top: -10px; right: -10px; font-size: 11px;">
+        {{ $cartCount }}
+    </span>
+</a>
         </div>
       </div>
     </div>
@@ -349,7 +358,40 @@
         }
       }
     });
-  </script>
+</script>
+<script>
+$(document).ready(function() {
+    // Function to update cart count
+    function updateCartCount(count) {
+        $('#cart-count').text(count);
+    }
+
+    // Add to cart AJAX call
+    $('.add-to-cart-btn').click(function(e) {
+        e.preventDefault();
+        let packageId = $(this).data('package-id');
+        
+        $.ajax({
+            url: '/cart/add/' + packageId,
+            method: 'POST',
+            headers: {
+                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+            },
+            success: function(response) {
+                if (response.success) {
+                    updateCartCount(response.cartCount);
+                    // Optional: Show success message
+                    alert('Package added to cart successfully!');
+                }
+            },
+            error: function(xhr) {
+                console.error('Error adding to cart:', xhr);
+                alert('Failed to add package to cart');
+            }
+        });
+    });
+});
+</script>
 </body>
 
 </html>

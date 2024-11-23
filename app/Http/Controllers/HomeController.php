@@ -10,11 +10,12 @@ use App\Models\City;
 use App\Models\TourType;
 use App\Models\JobApplication;
 use App\Models\Contact;
-use App\Model\User;
-use App\Model\Cart;
+use App\Models\User;
+use App\Models\Cart;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 
 
 
@@ -36,13 +37,20 @@ class HomeController extends Controller
 
        // dd($tourTypes);
 
+       
+
         // Get Packages  Data
 
        $tourpackages = Package::with('destination')->orderBy('id', 'desc')->limit(12)->get();
 
+       //add to cart   $cartCount = 0;
+    if (Auth::check()) {
+        $cartCount = Cart::where('user_id', Auth::id())->count();
+    }
+
        // dd($tourpackages);
         //dd($destinations);
-        return view('frontend.index', compact('destinations', 'tourTypes', 'tourpackages'));
+        return view('frontend.index', compact('destinations', 'tourTypes', 'tourpackages','cartCount'));
     }
 
     public function packages(Request $request, $slug){
@@ -576,45 +584,42 @@ public function ourblog()
 
 
 
-public function addtocart($id)
+  public function addtocart($id)
+  {
+      try {
+          // Check if the package exists
+          $package = Package::find($id);
+          if (!$package) {
+              return response()->json(['success' => false, 'message' => 'Package not found'], 404);
+          }
+  
+          // Since we're using auth middleware, we know the user is authenticated
+          $cart = Cart::create([
+              'user_id' => Auth::id(),
+              'package_id' => $id
+          ]);
+  
+          // Get the updated cart count for this user
+          $cartCount = Cart::where('user_id', Auth::id())->count();
+  
+          return response()->json([
+              'success' => true,
+              'message' => 'Item added to cart successfully',
+              'cartCount' => $cartCount
+          ]);
+  
+      } catch (\Exception $e) {
+          \Log::error('Cart Error: ' . $e->getMessage());
+          return response()->json([
+              'success' => false,
+              'message' => 'Failed to add item to cart'
+          ], 500);
+      }
+    }
+      public function getCartCount()
 {
-    // Check if the package exists
-    $package = Package::find($id);
-    if (!$package) {
-        return response()->json(['success' => false, 'message' => 'Package not found'], 404);
-    }
-
-    // Handle cart for authenticated users
-    if (Auth::check()) {
-        $user = Auth::user();
-        
-        try {
-            $cart = new Cart();
-            $cart->user_id = $user->id;
-            $cart->package_id = $id;
-            $cart->save();
-            
-            // Get total cart count for the user
-            $cartCount = Cart::where('user_id', $user->id)->count();
-            
-            return response()->json([
-                'success' => true, 
-                'message' => 'Item added to cart',
-                'cartCount' => $cartCount
-            ]);
-        } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Failed to add item to cart'
-            ], 500);
-        }
-    }
-
-    // If user is not authenticated, return unauthorized status
-    return response()->json([
-        'success' => false,
-        'message' => 'Please login to add items to cart'
-    ], 401);
+    $cartCount = Cart::where('user_id', Auth::id())->count();
+    return response()->json(['count' => $cartCount]);
 }
-
 }
+  
