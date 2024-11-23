@@ -579,6 +579,7 @@ $(document).ready(function() {
 });
 
     // Add to Cart Button Click Handler
+
     $(document).on('click', '.add-to-cart', function(event) {
         event.preventDefault();
         const itemId = $(this).data('id');
@@ -587,29 +588,35 @@ $(document).ready(function() {
 
     // Add to Cart Function
     function addToCart(id) {
-        $.ajax({
-            url: '{{ route("addtocart")}}',
-            method: 'POST',
-            data: {
-                id: id
-            },
-            headers: {
-                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-            },
-            success: function(response) {
-                if (response.success) {
-                    alert('Item added to cart successfully!');
-                    updateCartCount(response.cartCount); // Update cart count if implemented
-                } else {
-                    alert(response.message || 'Failed to add item to cart');
+    $.ajax({
+        url: `/addtocart/${id}`,
+        method: 'GET',
+        headers: {
+            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+        },
+        success: function(response) {
+            if (response.success) {
+                alert('Item added to cart successfully!');
+                if (response.cartCount) {
+                    updateCartCount(response.cartCount);
                 }
-            },
-            error: function(xhr, status, error) {
-                console.error('Error adding to cart:', error);
+            } else {
+                alert(response.message || 'Failed to add item to cart');
+            }
+        },
+        error: function(xhr, status, error) {
+            if (xhr.status === 401) {
+                // Redirect to login page if unauthorized
+                window.location.href = '/login';
+            } else {
                 alert('Error adding item to cart');
             }
-        });
-    }
+            console.error('Error adding to cart:', error);
+        }
+    });
+}
+    
+        
 
     // Booking Form Submission
     $('#bookingForm').on('submit', function(e) {
@@ -721,6 +728,7 @@ $(document).ready(function() {
                     <div class="d-flex flex-column">
                         <button class="btn btn-danger mb-2 rounded-0 booknow" data-slug="${item.slug}" data-newslug="${slug}">Book Now</button>
                         <button class="btn btn-outline-danger rounded-0 add-to-cart" data-id="${item.id}">Add To Cart</button>
+
                     </div>
                 </div>
             </div>

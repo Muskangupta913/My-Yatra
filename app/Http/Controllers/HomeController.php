@@ -10,8 +10,11 @@ use App\Models\City;
 use App\Models\TourType;
 use App\Models\JobApplication;
 use App\Models\Contact;
+use App\Model\User;
+use App\Model\Cart;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Auth;
 
 
 
@@ -537,6 +540,11 @@ public function  payment()
 {
     return view('frontend.payment');
 }
+
+public function checkout(){
+    return view('frontend.checkout');
+}
+
 public function ourblog()
 {
     // Vacation spots (mocked data for demonstration)
@@ -554,6 +562,48 @@ public function ourblog()
 
     // Passing data to the Blade view
     return view('frontend.ourblog', compact('vacationSpots', 'festivalRegions'));
+}
+
+
+public function addtocart($id)
+{
+    // Check if the package exists
+    $package = Package::find($id);
+    if (!$package) {
+        return response()->json(['success' => false, 'message' => 'Package not found'], 404);
+    }
+
+    // Handle cart for authenticated users
+    if (Auth::check()) {
+        $user = Auth::user();
+        
+        try {
+            $cart = new Cart();
+            $cart->user_id = $user->id;
+            $cart->package_id = $id;
+            $cart->save();
+            
+            // Get total cart count for the user
+            $cartCount = Cart::where('user_id', $user->id)->count();
+            
+            return response()->json([
+                'success' => true, 
+                'message' => 'Item added to cart',
+                'cartCount' => $cartCount
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to add item to cart'
+            ], 500);
+        }
+    }
+
+    // If user is not authenticated, return unauthorized status
+    return response()->json([
+        'success' => false,
+        'message' => 'Please login to add items to cart'
+    ], 401);
 }
 
 }
