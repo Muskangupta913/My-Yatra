@@ -64,6 +64,9 @@
 
 </section>
 
+<!-- <section>
+<h1>adventure</h1>
+</section> -->
 <section style="background-color: #fff;">
 <div class="container py-5">
     <div class="row">
@@ -173,8 +176,8 @@
                       <form action="">
                         
                         <div class="form-check">
-                          <input class="form-check-input filter-type" type="checkbox" value="1" id="Adventure">
-                          <label class="form-check-label" for="Adventure">
+                          <input class="form-check-input filter-type" type="checkbox" value="1" id="Adevanture">
+                          <label class="form-check-label" for="Adevanture">
                             Adventure Tour
                           </label>
                         </div>

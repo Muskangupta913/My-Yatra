@@ -7,6 +7,10 @@ use App\Http\Controllers\HomeController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Artisan;
+use App\Http\Controllers\CityController;
+
+
+
 
 /*
 |--------------------------------------------------------------------------
@@ -41,6 +45,25 @@ Route::get('/holidays/{slug}', [HomeController::class, 'packages'])->name('packa
 
 Route::get('/holidays/{destinationSlug}/{packageSlug}', action: [HomeController::class, 'packagesDetails'])->name('packagesDetails');
 Route::post('/book-package', action: [HomeController::class, 'store'])->name('book.package');
+
+// Register route
+Route::post('/register', [AuthController::class, 'register'])->name('register');
+
+// Login route
+Route::get('/login', [AuthController::class, 'loginView'])->name('login');
+Route::post('/login', [AuthController::class, 'login']);
+
+// Forgot password routes
+Route::get('/forgot-password', [AuthController::class, 'forgotView'])->name('forgot.password');
+Route::post('/forgot-password', [AuthController::class, 'forgot']);
+
+// Reset password routes
+Route::get('/reset-password/{token}', [AuthController::class, 'resetPasswordView'])->name('reset.password');
+Route::post('/reset-password', [AuthController::class, 'resetPassword']);
+
+// Password updated confirmation
+Route::get('/password-updated', [AuthController::class, 'passwordUpdated'])->name('passwordUpdated');
+
 
 // filter holiday packages
 Route::post('holidays/{slug}', [HomeController::class, 'filterPackages'])->name('filter.packages');
@@ -149,8 +172,6 @@ Route::prefix('admin')->middleware(['onlyAuthenticated', 'onlyAdmin'])->group(fu
       Route::post('/update', [AdminController::class, 'updateCity'])->name('updateCity');
     });
 
-
-
        Route::prefix('destination')->group(function(){
        Route::get('/', [AdminController::class, 'destination'])->name('destination');
        Route::get('/create', [AdminController::class, 'create_destination'])->name('create_destination');
@@ -194,6 +215,30 @@ Route::prefix('admin')->middleware(['onlyAuthenticated', 'onlyAdmin'])->group(fu
         Route::get('/manage-contact-data', [AdminController::class, 'contactData'])->name('contactData');
        
         });
+
+        Route::get('/festivals', function () {
+          $festivalRegions = [
+              [
+                  'name' => 'North India',
+                  'image' => 'north-india.jpg',
+                  'festivals' => ['Diwali', 'Holi', 'Lohri'],
+                  'significance' => 'Cultural hub',
+                  'best_places' => ['Delhi', 'Jaipur', 'Amritsar']
+              ],
+              // More regions...
+          ];
+      
+          return view('festivals', compact('festivalRegions'));
+      });
+      
+
+// top destination 
+Route::get('/delhi', [CityController::class, 'delhi'])->name('delhi');
+Route::get('/goa-tour', [CityController::class, 'goaTour'])->name('goaTour');
+Route::get('/manali', [CityController::class, 'manali'])->name('manali');
+Route::post('/kerala', [CityController::class, 'kerala'])->name('kerala'); 
+Route::get('/coimbatore', [CityController::class, 'coimbatore'])->name('coimbatore');
+Route::get('/mussoorie', [CityController::class, 'mussoorie'])->name('mussoorie');
 
 });
 

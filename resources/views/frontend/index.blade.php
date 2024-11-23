@@ -8,7 +8,7 @@
       <div class="card search-engine-card py-5 px-4" style="position: relative">
         <ul class="nav nav-tabs border-0" style="position: absolute; top:0; left:1%; transform:translateY(-50%);"
           id="myTab" role="tablist">
-          <!-- <li class="nav-item" role="presentation">
+          <li class="nav-item" role="presentation">
             <button class="nav-link px-4 shadow border-0" id="home-tab" data-bs-toggle="tab" data-bs-target="#home"
               type="button" role="tab" aria-controls="home" aria-selected="true">
               <i class="fa-solid fa-plane-departure d-block"></i>
@@ -21,7 +21,7 @@
               <i class="fa-solid fa-building d-block"></i>
               <small>Hotel</small>
             </button>
-          </li> -->
+          </li>
           <li class="nav-item" role="presentation">
             <button class="nav-link active px-4 border-0 shadow" id="contact-tab" data-bs-toggle="tab"
               data-bs-target="#contact" type="button" role="tab" aria-controls="contact" aria-selected="false">
@@ -98,7 +98,7 @@
           <li class="nav-item" role="presentation">
             <button class="nav-link bg-danger text-white rounded-end-pill" id="pills-profile-tab" data-bs-toggle="pill"
               data-bs-target="#pills-profile" type="button" role="tab" aria-controls="pills-profile"
-              aria-selected="false">TOP DESTINATIONS</button>
+              aria-selected="true">TOP DESTINATIONS</button>
           </li>
         </ul>
 
