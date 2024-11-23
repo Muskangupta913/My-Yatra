@@ -584,45 +584,37 @@ public function addtocart($id)
         return response()->json(['success' => false, 'message' => 'Package not found'], 404);
     }
 
-   // Handle cart for authenticated users
+    // Handle cart for authenticated users
     if (Auth::check()) {
         $user = Auth::user();
-
-        // Save to the cart table
-        $cart = new Cart();
-        $cart->user_id = $user->id;
-        $cart->package_id = $id;
-        $cart->save();
-
-        return response()->json(['success' => true, 'message' => 'Item added to cart']);
-    }
-     else {
-        // Handle unauthenticated users using session-based cart
-        $cart = session()->get('cart', []);
-
-        // Check if the package is already in the session cart
-        if (!isset($cart[$id])) {
-            $cart[$id] = [
-                'id' => $id,
-                'name' => $package->package_name, // Assuming package has a name column
-                // 'price' => $package->price, // Assuming package has a price column
-                'quantity' => 1,
-            ];
-        } else {
-            // Increment quantity if already in the cart
-            $cart[$id]['quantity'] += 1;
-        }
-
-        // Store the updated cart in the session
-        session()->put('cart', $cart);
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Item added to cart',
-            'cart' => session()->get('cart'),
-        ]);
         
+        try {
+            $cart = new Cart();
+            $cart->user_id = $user->id;
+            $cart->package_id = $id;
+            $cart->save();
+            
+            // Get total cart count for the user
+            $cartCount = Cart::where('user_id', $user->id)->count();
+            
+            return response()->json([
+                'success' => true, 
+                'message' => 'Item added to cart',
+                'cartCount' => $cartCount
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to add item to cart'
+            ], 500);
+        }
     }
+
+    // If user is not authenticated, return unauthorized status
+    return response()->json([
+        'success' => false,
+        'message' => 'Please login to add items to cart'
+    ], 401);
 }
 
 }

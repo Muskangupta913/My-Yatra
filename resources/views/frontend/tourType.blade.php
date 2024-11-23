@@ -584,27 +584,33 @@ $(document).ready(function() {
 
     // Add to Cart Function
     function addToCart(id) {
-        $.ajax({
-        url: `/addtocart/${id}`, // Pass the id as part of the URL
-        method: 'GET', // Use GET since the route expects GET
+    $.ajax({
+        url: `/addtocart/${id}`,
+        method: 'GET',
         headers: {
             'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
         },
-            success: function(response) {
-                if (response.success) {
-                    alert('Item added to cart successfully!');
-                    updateCartCount(response.cartCount); // Update cart count if implemented
-                } else {
-                    alert(response.message || 'Failed to add item to cart');
-                    
+        success: function(response) {
+            if (response.success) {
+                alert('Item added to cart successfully!');
+                if (response.cartCount) {
+                    updateCartCount(response.cartCount);
                 }
-            },
-            error: function(xhr, status, error) {
-                console.error('Error adding to cart:', error);
+            } else {
+                alert(response.message || 'Failed to add item to cart');
+            }
+        },
+        error: function(xhr, status, error) {
+            if (xhr.status === 401) {
+                // Redirect to login page if unauthorized
+                window.location.href = '/login';
+            } else {
                 alert('Error adding item to cart');
             }
-        });
-    }
+            console.error('Error adding to cart:', error);
+        }
+    });
+}
     
         
 
