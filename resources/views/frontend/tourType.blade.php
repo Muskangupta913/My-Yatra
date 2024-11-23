@@ -56,15 +56,90 @@
     display: block;
   }
 }
+/* Transparent navigation bar */
+.topnav {
+  background-color: transparent; /* Transparent background */
+  overflow: hidden;
+  text-align: center; /* Center-align the buttons */
+  padding: 10px 0;
+}
+
+/* Style the links to look like buttons */
+.topnav a {
+  display: inline-block;
+  margin: 0 10px; /* Spacing between buttons */
+  color: #333; /* Neutral text color */
+  text-align: center;
+  padding: 10px 20px; /* Padding for a button-like appearance */
+  text-decoration: none;
+  font-size: 16px;
+  border: 1px solid #e63946; /* red border for outline style */
+  border-radius: 20px; /* Rounded corners */
+  background-color: white; /* White background */
+  transition: all 0.3s ease; /* Smooth hover effect */
+}
+
+/* Hover effect for buttons */
+.topnav a:hover {
+  background-color: #e63946; /* red background on hover */
+  color: white; /* White text on hover */
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Subtle shadow for hover effect */
+}
+
+/* Active/current button styling */
+.topnav a.active {
+  background-color: #e63946; /* red background for active link */
+  color: white; /* White text for active link */
+  font-weight: bold; /* Bold font for active link */
+}
+
+/* Responsive adjustments for smaller screens */
+@media screen and (max-width: 600px) {
+  .topnav a {
+    display: block; /* Stack buttons vertically on smaller screens */
+    margin: 5px 0; /* Add spacing between stacked buttons */
+    text-align: center;
+  }
+}
+
+/* Background image section adjustments */
+.packages-bg-images {
+  background-position: center center;
+  background-size: cover;
+  height: 300px;
+}
+
+/* Responsive height for the background image */
+@media screen and (max-width: 600px) {
+  .packages-bg-images {
+    height: 200px;
+  }
+  h1 {
+    font-size: 24px; /* Smaller font size for smaller screens */
+  }
+}
+
 </style>
 
 <section class="packages-bg-images d-flex justify-content-center align-items-center" style="background:linear-gradient(rgba(0, 0, 0, 0.554), rgba(0, 0, 0, 0.667)),  url('{{ asset("uploads/packages/" . $packages[0]->photo) }}'); height:300px; background-position:center center; background-size:cover;">
 <h1 class=" text-white ">{{$tourTypes->name}}</h1>
-
 </section>
-<!-- <section>
-<h1>adventure</h1>
-</section> -->
+<section class="tour-places tour-category mt-0 mb-1">
+<div class="container">
+    <h2 class="border-start border-4 mb-5 border-warning px-2" style="font-weight: 400;">
+      <span style="font-size: 30px; font-weight:bold;">Tour Categories</span>
+    </h2>
+    <div class="topnav">
+      <b><a class="active" href="http://127.0.0.1:8000/tour-category/honeymoon">Honeymoon</a>
+      <a href="http://127.0.0.1:8000/tour-category/adventure">Adventure</a>
+      <a href="http://127.0.0.1:8000/tour-category/religious-places">Religious Places</a>
+      <a href="http://127.0.0.1:8000/tour-category/beach">Beaches</a>
+      <a href="http://127.0.0.1:8000/tour-category/beach">Trekking</a>
+      <a href="http://127.0.0.1:8000/tour-category/beach">Trekking</a>
+      <a href="http://127.0.0.1:8000/tour-category/beach">Beaches</a></b>
+    </div>
+  </div>
+</section>
 <section style="background-color: #fff;">
 <div class="container py-5">
     <div class="row">
@@ -174,8 +249,8 @@
                       <form action="">
                         
                         <div class="form-check">
-                          <input class="form-check-input filter-type" type="checkbox" value="1" id="Adevanture">
-                          <label class="form-check-label" for="Adevanture">
+                          <input class="form-check-input filter-type" type="checkbox" value="1" id="Adventure">
+                          <label class="form-check-label" for="Adventure">
                             Adventure Tour
                           </label>
                         </div>
@@ -201,9 +276,9 @@
                         </div>
     
                         <div class="form-check">
-                          <input class="form-check-input filter-type" type="checkbox" value="7" id="adevanture">
-                          <label class="form-check-label" for="adevanture">
-                            Adevanture
+                          <input class="form-check-input filter-type" type="checkbox" value="7" id="Adventure">
+                          <label class="form-check-label" for="Adventure">
+                          Adventure
                           </label>
                         </div>
                         <div class="form-check">
@@ -324,8 +399,8 @@
                 <form action="">
                   
                   <div class="form-check">
-                    <input class="form-check-input filter-type" type="checkbox" value="1" id="Adevanture">
-                    <label class="form-check-label" for="Adevanture">
+                    <input class="form-check-input filter-type" type="checkbox" value="1" id="Adventure">
+                    <label class="form-check-label" for="Adventure">
                       Adventure Tour
                     </label>
                   </div>
@@ -351,9 +426,9 @@
                   </div>
     
                   <div class="form-check">
-                    <input class="form-check-input filter-type" type="checkbox" value="7" id="adevanture">
-                    <label class="form-check-label" for="adevanture">
-                      Adevanture
+                    <input class="form-check-input filter-type" type="checkbox" value="7" id="adventure">
+                    <label class="form-check-label" for="adventure">
+                      Adventure
                     </label>
                   </div>
                   <div class="form-check">
