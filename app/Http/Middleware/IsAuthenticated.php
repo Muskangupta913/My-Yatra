@@ -17,8 +17,8 @@ class IsAuthenticated
     {
         if(auth()->check() && auth()->user()->is_admin == 1){
             return redirect()->route('admin.dashboard');
-        }else if(auth()->check() && auth()->user()->is_admin == 0){
-            return redirect()->route('user.dashboard');
+        }else if(auth()->check()){
+            return redirect()->route('home');
         }
         return $next($request);
     }

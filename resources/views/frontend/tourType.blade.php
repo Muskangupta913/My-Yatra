@@ -499,6 +499,36 @@ $(document).ready(function() {
 });
 
     // Add to Cart Button Click Handler
+
+    $(document).on('click', '.add-to-cart', function(event) {
+        event.preventDefault();
+        const itemId = $(this).data('id');
+        addToCart(itemId);
+    });
+
+    // Add to Cart Function
+    function addToCart(id) {
+        $.ajax({
+        url: `/addtocart/${id}`, // Pass the id as part of the URL
+        method: 'GET', // Use GET since the route expects GET
+        headers: {
+            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+        },
+            success: function(response) {
+                if (response.success) {
+                    alert('Item added to cart successfully!');
+                    updateCartCount(response.cartCount); // Update cart count if implemented
+                } else {
+                    alert(response.message || 'Failed to add item to cart');
+                    
+                }
+            },
+            error: function(xhr, status, error) {
+                console.error('Error adding to cart:', error);
+                alert('Error adding item to cart');
+            }
+        });
+    }
     
         
 
@@ -611,10 +641,7 @@ $(document).ready(function() {
                     </div>
                     <div class="d-flex flex-column">
                         <button class="btn btn-danger mb-2 rounded-0 booknow" data-slug="${item.slug}" data-newslug="${slug}">Book Now</button>
-                        
-                        <a class="btn btn-outline-danger rounded-0" href="{{ url('addtocart', item.id) }}">
-                               Add To Cart
-                                         </a>
+                        <button class="btn btn-outline-danger rounded-0 add-to-cart" data-id="${item.id}">Add To Cart</button>
 
                     </div>
                 </div>

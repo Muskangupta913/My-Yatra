@@ -101,8 +101,8 @@ Route::fallback(function () {
 Route::group(['middleware' => ['isAuthenticated']], function(){
 Route::get('/register', [AuthController::class, "registerView"])->name('registerView');
 Route::post('/register', [AuthController::class, "register"])->name('register');
-Route::get('/login', [AuthController::class, "loginView"])->name('loginView');
-Route::post('/login', [AuthController::class, "login"])->name('login');
+Route::get('/login', [AuthController::class, "loginView"])->name('loginView');//to got to the login
+Route::post('/login', [AuthController::class, "login"])->name('login');//this is login api
 Route::get('/forgot-password', [AuthController::class, 'forgotView'])->name('forgotView');
 Route::post('/forgot-password', [AuthController::class, 'forgot'])->name('forgot.password');
 
@@ -110,7 +110,16 @@ Route::get('/reset-password/{token}', [AuthController::class, 'resetPasswordView
 Route::post('/reset-password', [AuthController::class, 'resetPassword'])->name('resetPassword');
 Route::get('/password-update', [AuthController::class, 'passwordUpdated'])->name('passwordUpdated');
 Route::get('/verify/{token}', [AuthController::class, 'verify'])->name('verify');
+
+
 });
+
+
+ // use authenticate middle 
+ Route::get('/addtocart/{id}', [HomeController::class, 'addtocart'])
+    ->name('addtocart')
+    ->middleware('onlyauthenticated');
+
 
 // User Dashboard Route
 Route::group(["middleware" => ['onlyAuthenticated']], function(){

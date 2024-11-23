@@ -10,8 +10,11 @@ use App\Models\City;
 use App\Models\TourType;
 use App\Models\JobApplication;
 use App\Models\Contact;
+use App\Model\User;
+use App\Model\Cart;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Auth;
 
 
 
@@ -571,5 +574,55 @@ public function ourblog()
 }
 
 
+
+
+public function addtocart($id)
+{
+    // Check if the package exists
+    $package = Package::find($id);
+    if (!$package) {
+        return response()->json(['success' => false, 'message' => 'Package not found'], 404);
+    }
+
+   // Handle cart for authenticated users
+    if (Auth::check()) {
+        $user = Auth::user();
+
+        // Save to the cart table
+        $cart = new Cart();
+        $cart->user_id = $user->id;
+        $cart->package_id = $id;
+        $cart->save();
+
+        return response()->json(['success' => true, 'message' => 'Item added to cart']);
+    }
+     else {
+        // Handle unauthenticated users using session-based cart
+        $cart = session()->get('cart', []);
+
+        // Check if the package is already in the session cart
+        if (!isset($cart[$id])) {
+            $cart[$id] = [
+                'id' => $id,
+                'name' => $package->package_name, // Assuming package has a name column
+                // 'price' => $package->price, // Assuming package has a price column
+                'quantity' => 1,
+            ];
+        } else {
+            // Increment quantity if already in the cart
+            $cart[$id]['quantity'] += 1;
+        }
+
+        // Store the updated cart in the session
+        session()->put('cart', $cart);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Item added to cart',
+            'cart' => session()->get('cart'),
+        ]);
+        
+    }
+}
 
 }
