@@ -1,5 +1,4 @@
 @extends('frontend.layouts.master')
-
 @section('title', $tourTypes->name . ' ' . 'Tour Packages')
 @section('meta_description', $tourTypes->name)
 @section('content')
