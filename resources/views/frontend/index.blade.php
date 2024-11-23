@@ -1,6 +1,5 @@
 @extends('frontend.layouts.master')
 @section('content')
-
 <section class="hero">
 
   <div class="container">
@@ -112,7 +111,7 @@
 
               <select class="form-select" id="inputGroupSelect04" aria-label="Example select with button addon">
                 <option selected>No. Of Nights</option>
-                <option value="1">2 Days 1 Night</option>
+                <option value="1">2 Days 1 Nights</option>
                 <option value="2">3 Days 2 Nights</option>
                 <option value="3">4 Days 3 Nights</option>
               </select>
@@ -124,7 +123,6 @@
           <div class="tab-pane fade" id="pills-profile" role="tabpanel" aria-labelledby="pills-profile-tab"
             tabindex="0">
             <div class="input-group  mobile_tabs mb-3">
-
               <input type="text" class="form-control py-3 rounded-start-pill" aria-describedby="button-addon2"
                 placeholder="Example : Delhi, Agra, Jaipur etc">
 
@@ -146,8 +144,7 @@
   <div class="container">
     <h2 class="border-start border-4 mb-5 border-warning px-2" style="font-weight: 400;">Best <span
         style="font-size: 30px; font-weight:bold;">Tourist Places</span> to Visit in the <span
-        style="font-size: 30px; font-weight:bold;">India</span></h2>
-    
+        style="font-size: 30px; font-weight:bold;">India</span></h2>   
     <div class="row">
       <div class="swiper mySwiper best-places px-2">
         <div class="swiper-wrapper">
@@ -175,7 +172,7 @@
 
 <section class="tour-places tour-category mt-5 mb-5">
   <div class="container">
-    <h2 class="border-start border-4 mb-5 border-warning px-2" style="font-weight: 400;">Wornderful Place For You<span
+    <h2 class="border-start border-4 mb-5 border-warning px-2" style="font-weight: 400;">Wonderful Place For You<span
         style="font-size: 30px; font-weight:bold;"> Tour Categories</span> </h2>
     
     <div class="row">
@@ -204,7 +201,6 @@
       </div>
     </div>
   </div>
-
   </div>
 </section>
 

@@ -152,7 +152,7 @@
                                         <div class="icon"><i class="fa-regular fa-person-hiking"></i></div>
                                         <div class="search-input"><label>Type</label> <select class="nice-select"
                                                 name="type" id="type">
-                                                <option value="Adevanture" selected="selected" disabled="disabled">
+                                                <option value="Adventure" selected="selected" disabled="disabled">
                                                     Adventure</option>
                                                 <option value="Beach">Beach</option>
                                                 <option value="Group Tour">Group Tour</option>
