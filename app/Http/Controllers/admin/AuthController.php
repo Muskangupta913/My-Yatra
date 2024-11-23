@@ -10,7 +10,6 @@ use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
-
 use App\Models\PasswordReset;
 
 class AuthController extends Controller
@@ -105,26 +104,30 @@ public function loginView(){
     return view('auth.login');
 }
 
-public function login(Request $request){
-   
-    try{
-         // Trim inputs
-         $request->merge([
-            'email' => trim($request->email),
-            'password' => trim($request->password),
-        ]);
-        $request->validate([
-            'email' => 'required|email',
-            'password' => 'required',
-        ]);
+    // Login Method
+    public function login(Request $request)
+    {
+        try {
+            // Trim inputs
+            $request->merge([
+                'email' => trim($request->email),
+                'password' => trim($request->password),
+            ]);
 
-        $credentials = $request->only(['email', 'password']);
-        if (Auth::attempt($credentials)) {
-            
-            if(Auth::user()->is_verified == 0){
-                Auth::logout();
-                return back()->with('error', 'Please Verify your email');   
-            }
+            // Validate login inputs
+            $request->validate([
+                'email' => 'required|email',
+                'password' => 'required',
+            ]);
+
+            // Attempt login
+            $credentials = $request->only(['email', 'password']);
+            if (Auth::attempt($credentials)) {
+                // Check if the user is verified
+                if (Auth::user()->is_verified == 0) {
+                    Auth::logout();
+                    return back()->with('error', 'Please verify your email.');
+                }
 
             if(Auth::user()->is_admin == 1){
                 return redirect()->route('dashboard');
@@ -140,94 +143,80 @@ public function login(Request $request){
     }
 }
 
-
-// forgot password
-
-public function forgotView(){
-    return view('auth.forgot-password');
-}
-
-
-public function forgot(Request $request){
-    $request->validate([
-        'email' => 'required|email',
-    ]);
-
-
-    $user = User::where('email', $request->email)->first();
-
-    if(!$user){
-
-        return back()->with('error', 'Email is not exists!');
+    // Forgot Password View Method
+    public function forgotView()
+    {
+        return view('auth.forgot-password');
     }
 
-  $token = Str::random(50);
-  $url = url('/reset-password/'.$token);
+    // Forgot Password Method
+    public function forgot(Request $request)
+    {
+        $request->validate([
+            'email' => 'required|email',
+        ]);
 
-  PasswordReset::updateOrInsert(
-    [
-        'email' => $user->email,
-    ],
-    [
-        'email' => $user->email,
-        'token' => $token,
-        'created_at' => Carbon::now()
-    ]
-  );
+        $user = User::where('email', $request->email)->first();
+        if (!$user) {
+            return back()->with('error', 'Email does not exist!');
+        }
 
-  Mail::send('mail.forgot-password',['url' => $url], function($message) use($user){
-    $message->to($user->email);
-    $message->subject('Reset Password');
-  });
-    
-  return back()->with('success', 'Please check your email to reset your password');
+        $token = Str::random(50);
+        $url = url('/reset-password/' . $token);
 
+        PasswordReset::updateOrInsert(
+            [
+                'email' => $user->email,
+            ],
+            [
+                'email' => $user->email,
+                'token' => $token,
+                'created_at' => Carbon::now()
+            ]
+        );
 
-}
+        Mail::send('mail.forgot-password', ['url' => $url], function($message) use ($user) {
+            $message->to($user->email);
+            $message->subject('Reset Password');
+        });
 
-
-// Reset Password View
-
-public function resetPasswordView($token){
-    
-    $resetData =  PasswordReset::where('token', $token)->first();
-
-    if(!$resetData){
-
-        return abort(404, 'Something went wrong');
+        return back()->with('success', 'Please check your email to reset your password.');
     }
 
-    $user = User::where('email', $resetData->email)->first();
+    // Reset Password View Method
+    public function resetPasswordView($token)
+    {
+        $resetData = PasswordReset::where('token', $token)->first();
 
-    return view('auth.reset-password', compact('user'));
-}
+        if (!$resetData) {
+            return abort(404, 'Something went wrong');
+        }
 
-// update password
+        $user = User::where('email', $resetData->email)->first();
 
-public function resetPassword(Request $request){
-    $request->validate([
-        'password' => 'required|confirmed',
-        'id' => 'required',
-    ]);
+        return view('auth.reset-password', compact('user'));
+    }
 
-    $user  = User::find($request->id);
-    $user->password = Hash::make($request->password);
-    $user->save();
+    // Reset Password Method
+    public function resetPassword(Request $request)
+    {
+        $request->validate([
+            'password' => 'required|confirmed',
+            'id' => 'required',
+        ]);
 
-    PasswordReset::where('email', $user->email)->delete();
+        $user = User::find($request->id);
+        $user->password = Hash::make($request->password);
+        $user->save();
 
-    return redirect()->route('passwordUpdated');
+        PasswordReset::where('email', $user->email)->delete();
 
+        return redirect()->route('passwordUpdated');
+    }
 
-}
-
-
-public function passwordUpdated(){
-
-    return view('auth.password-updated');
-}
-
-
-
-    
+    // Password Updated View Method
+    public function passwordUpdated()
+    {
+        return view('auth.password-updated');
+    }
 }

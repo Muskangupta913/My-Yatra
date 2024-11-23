@@ -345,7 +345,7 @@
                             Explore India's top ten must-see locations that offer life-changing experiences, 
                             from the magnificent Taj Mahal to the energetic streets of Jaipur.
                         </p>
-                        <a href="{{ url('link-to-full-post.html') }}" class="btn btn-primary">Read More</a>
+                        <!-- <a href="{{ url('link-to-full-post.html') }}" class="btn btn-primary">Read More</a> -->
                     </div>
                 </div>
             </div>
@@ -359,7 +359,7 @@
                             Are you making your first trip to India? These crucial pointers, which cover everything from 
                             packing necessities to cultural etiquette, will guarantee a seamless and joyful trip.
                         </p>
-                        <a href="{{ url('link-to-full-post.html') }}" class="btn btn-primary">Read More</a>
+                        <!-- <a href="{{ url('link-to-full-post.html') }}" class="btn btn-primary">Read More</a> -->
                     </div>
                 </div>
             </div>
@@ -373,7 +373,7 @@
                             Savor the excitement of India's wildlife safaris! Discover the top national parks and reserves 
                             to see amazing creatures in their native environment.
                         </p>
-                        <a href="{{ url('link-to-full-post.html') }}" class="btn btn-primary">Read More</a>
+                        <!-- <a href="{{ url('link-to-full-post.html') }}" class="btn btn-primary">Read More</a> -->
                     </div>
                 </div>
             </div>
@@ -490,17 +490,9 @@
     }
   });
 </script>
-
-
-  
    <!------ swiper section end-------->
-
-
-
  
-    <!-- categories section start-->
-    
-          
+    <!-- categories section start-->     
     <section class="festivals-section">
         <div class="container-fluid blog-categories text-center">
             <h2 class="mb-5">Explore Festivals by Regions</h2>
@@ -514,7 +506,7 @@
                             <p class="card-text"><strong>Major Festivals:</strong> Diwali, Holi, Lohri</p>
                             <p><strong>Significance:</strong> Celebrate the coming of spring and the victory of light over darkness.</p>
                             <p><strong>Best Places:</strong> Amritsar for Lohri, Mathura for Holi, and Varanasi for Diwali.</p>
-                            <a href="north-festivals.html" class="btn btn-primary">Explore North Festivals</a>
+                            <!-- <a href="north-festivals.html" class="btn btn-primary">Explore North Festivals</a> -->
                         </div>
                     </div>
                 </div>
@@ -527,7 +519,7 @@
                             <p class="card-text"><strong>Major Festivals:</strong> Pongal, Onam, Ugadi</p>
                             <p><strong>Significance:</strong> festivals of harvest that honor the area's agricultural heritage.</p>
                             <p><strong>Best Places:</strong> Karnataka celebrates Ugadi, Kerala celebrates Onam, while Tamil Nadu celebrates Pongal.</p>
-                            <a href="south-festivals.html" class="btn btn-primary">Explore South Festivals</a>
+                            <!-- <a href="south-festivals.html" class="btn btn-primary">Explore South Festivals</a> -->
                         </div>
                     </div>
                 </div>
@@ -540,7 +532,7 @@
                             <p class="card-text"><strong>Major Festivals:</strong> Durga Puja, Bihu,rath yatra</p>
                             <p><strong>Significance:</strong> Honoring the harvest season and the triumph of good over evil.</p>
                             <p><strong>Best Places:</strong> Kolkata for Durga Puja, Assam for Bihu, Puri for Rath Yatra.</p>
-                            <a href="east-festivals.html" class="btn btn-primary">Explore East Festivals</a>
+                            <!-- <a href="east-festivals.html" class="btn btn-primary">Explore East Festivals</a> -->
                         </div>
                     </div>
                 </div>
@@ -553,21 +545,15 @@
                             <p class="card-text"><strong>Major Festivals:</strong> Ganesh Chaturthi.</p>
                             <p><strong>Significance:</strong> Honoring deities and celebrating the harvest season.</p>
                             <p><strong>Best Places:</strong> Mumbai for Ganesh Chaturthi, Gujarat for Navratri, Rajasthan for Sankranti.</p>
-                            <a href="west-festivals.html" class="btn btn-primary">Explore West Festivals</a>
+                            <!-- <a href="west-festivals.html" class="btn btn-primary">Explore West Festivals</a> -->
                         </div>
                     </div>
                 </div>
             </div>
         </div>
     </section>
-    
-  
 
     <!-- categories section end-->
-
-
-
-
   
     <!-- travel tips section start-->
     
@@ -579,13 +565,14 @@
                 <!-- Festival Region Card -->
                 <div class="col-md-3 mb-4">
                     <div class="card festival-card">
-                        <img src="{{ asset('images/' . $region['image']) }}" class="card-img-top festival-img" alt="{{ $region['name'] }} Festivals">
+                        <img src="{{ asset('images/' . $region->image) }}" class="card-img-top festival-img" alt="{{ $region->name }} Festivals">
                         <div class="card-body">
-                            <h5 class="card-title">{{ $region['name'] }} Festivals</h5>
-                            <p class="card-text"><strong>Major Festivals:</strong> {{ implode(', ', $region['festivals']) }}</p>
-                            <p><strong>Significance:</strong> {{ $region['significance'] }}</p>
-                            <p><strong>Best Places:</strong> {{ implode(', ', $region['best_places']) }}</p>
-                            <a href="{{ url('festivals/' . Str::slug($region['name'])) }}" class="btn btn-primary">Explore {{ $region['name'] }} Festivals</a>
+                            <h5 class="card-title">{{ $region->name }} Festivals</h5>
+                            <p class="card-text"><strong>Major Festivals:</strong> Diwali, Holi, Eid</p>
+
+                            <p><strong>Significance:</strong> This region is known for its historical monuments.</p>
+                            <p><strong>Best Places:</strong> Taj Mahal, Red Fort, Qutub Minar</p>
+                            <a href="{{ url('festivals/' . Str::slug($region->name)) }}" class="btn btn-primary">Explore {{ $region->name }} Festivals</a>
                         </div>
                     </div>
                 </div>
@@ -599,39 +586,12 @@
     <div class="container tts">
         <h2 class="text-center mb-5">Essential Tips for Traveling in India</h2>
         <div class="row">
-            @foreach($travelTips as $tip)
-                <!-- Travel Tip Card -->
-                <div class="col-md-6 mb-4">
-                    <div class="card h-100">
-                        <div class="card-body tts-card bg-light">
-                            <div class="icon-box mb-3 text-center">
-                                <i class="{{ $tip['icon'] }}"></i>
-                            </div>
-                            <h5 class="card-title">{{ $tip['title'] }}</h5>
-                            <p class="card-text">{{ $tip['description'] }}</p>
-                            <ul>
-                                @foreach($tip['details'] as $detail)
-                                    <li>{{ $detail }}</li>
-                                @endforeach
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-            @endforeach
         </div>
     </div>
 </section>
     
     
  <!-- travel tips section start-->
-
-
-
-
-
-
-
-    
  <!-- food experiences section start-->
 
  
@@ -653,7 +613,7 @@
                                 <li>Punjab Grill, Amritsar</li>
                             </ul>
                         </p>
-                        <a href="{{ url('/north-indian-cuisine') }}" class="btn btn-primary">Discover More</a>
+                        <!-- <a href="{{ url('/north-indian-cuisine') }}" class="btn btn-primary">Discover More</a> -->
                     </div>
                 </div>
             </div>
@@ -671,7 +631,7 @@
                                 <li>Paradise Biryani, Hyderabad</li>
                             </ul>
                         </p>
-                        <a href="{{ url('/south-indian-cuisine') }}" class="btn btn-primary">Discover More</a>
+                        <!-- <a href="{{ url('/south-indian-cuisine') }}" class="btn btn-primary">Discover More</a> -->
                     </div>
                 </div>
             </div>
@@ -689,7 +649,7 @@
                                 <li>6 Ballygunge Place, Kolkata</li>
                             </ul>
                         </p>
-                        <a href="{{ url('/east-indian-cuisine') }}" class="btn btn-primary">Discover More</a>
+                        <!-- <a href="{{ url('/east-indian-cuisine') }}" class="btn btn-primary">Discover More</a> -->
                     </div>
                 </div>
             </div>
@@ -707,7 +667,7 @@
                                 <li>Sukanta, Pune</li>
                             </ul>
                         </p>
-                        <a href="{{ url('/west-indian-cuisine') }}" class="btn btn-primary">Discover More</a>
+                        <!-- <a href="{{ url('/west-indian-cuisine') }}" class="btn btn-primary">Discover More</a> -->
                     </div>
                 </div>
             </div>

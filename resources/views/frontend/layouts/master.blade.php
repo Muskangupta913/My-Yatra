@@ -41,8 +41,8 @@
     <div class="container">
       <div class="row align-items-center">
         <div class="col-md-6 col-lg-6 col-xl-6 d-none d-lg-block">
-          <a href="tel:(+91) 01204379908" target="_blank" class="text-white text-decoration-none px-2 "><i
-              class="fa-solid fa-phone px-1"></i> +91 1204379908</a>
+          <a href="tel:(+91) 1204223100" target="_blank" class="text-white text-decoration-none px-2 ">
+            <i class="fa-solid fa-phone px-1"></i> +91 1204223100</a>
           <a href="mailto:info@makemybharatyatra.com" target="_blank"
             class="text-white text-decoration-none border-start border-2 px-3"> <i
               class="fa-solid fa-envelope px-1"></i> info@makemybharatyatra.com</a>
@@ -90,7 +90,7 @@
               aria-expanded="false">Travel Packages</a>
             <div class="dropdown-menu mega-dropdown " aria-labelledby="dropdownId1">
           
-              <a class="dropdown-item" href="http://127.0.0.1:8000//holidays/goa-tour-package">Goa</a>
+              <a class="dropdown-item" href="http://127.0.0.1:8000/holidays/goa-tour-package">Goa</a>
               <a class="dropdown-item" href="http://127.0.0.1:8000/holidays/uttar-pradesh-tour-packages">Uttar Pradesh</a>
              
   
@@ -168,12 +168,12 @@
         <div class="col-md-3 quick-links col-lg-3 col-xl-3 mb-3">
           <h5>Top Destinations</h5>
           <ul>
-            <li><a href="#">Delhi</a></li>
-            <li><a href="#">Goa Tour</a></li>
-            <li><a href="#">Manali</a></li>
-            <li><a href="#">Kerala</a></li>
-            <li><a href="#">Coimbatore</a></li>
-            <li><a href="#">Mussoorie</a></li>
+             <li><a href="{{ route('delhi')}}">Delhi</a></li>
+             <li><a href="{{ route('goaTour')}}">Goa Tour</a></li>
+             <li><a href="{{ route('manali')}}">Manali</a></li>
+             <li><a href="{{ route('kerala')}}">Kerala</a></li>
+             <li><a href="{{ route('coimbatore')}}">Coimbatore</a></li>
+             <li><a href="{{ route('mussoorie')}}">Mussoorie</a></li>
           </ul>
         </div>
 
@@ -183,7 +183,7 @@
             <li> <i class="fa-solid fa-location-dot"></i> D-59, D-Block, Sector 63, Noida, <span class="px-lg-4">Uttar
                 Pradesh 201301, India</span></li>
             <li><a href="tel:(+91) 9871980066"> <i class="fa-solid fa-phone-volume"></i> +91 98719 80066</a></li>
-            <li><a href="tel:(+91 1204379908"> <i class="fa-solid fa-phone-volume"></i> +91 12043 79908</a></li>
+            <li><a href="tel:(+91 1204223100"> <i class="fa-solid fa-phone-volume"></i> +91 1204223100</a></li>
             <li><a href="mailto:info@makemybharatyatra.com"> <i class="fa-solid fa-envelope"></i>
                 info@makemybharatyatra.com</a></li>
             <li><a href="mailto:support@makemybharatyatra.com"> <i class="fa-solid fa-envelope"></i>

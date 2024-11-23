@@ -16,7 +16,7 @@
             <li>1.1 These Terms and Conditions apply to all services provided by Make My Bharat Yatra (hereinafter referred to as "the Company," "we," "us," or "our").</li>
             <li>1.2 By accessing our website or booking through any of our platforms, you agree to be bound by these terms.</li>
             <li>1.3 The Company reserves the right to modify or update these terms at any time without prior notice. Continued use of the website or services after any such changes constitutes your acceptance of the new terms.</li>
-            <li>1.4 All communication related to bookings, cancellations, inquiries, and support will be handled through our official contact channels: Helpline +91 12043 79908 and email <a href="mailto:hr@makemybharatyatra.com">hr@makemybharatyatra.com</a>.</li>
+            <li>1.4 All communication related to bookings, cancellations, inquiries, and support will be handled through our official contact channels: Helpline +91 1204223100 and email <a href="mailto:hr@makemybharatyatra.com">hr@makemybharatyatra.com</a>.</li>
         </ul>
     
         <h2>2. Bookings and Payments</h2>
@@ -75,7 +75,7 @@
     
         <p  class= "similer-pagecontent py-4">For any inquiries or assistance, please contact us at:</p>
         <ul class="tc-lastul py-2">
-            <li><strong>Helpline:</strong> +91 12043 79908</li>
+            <li><strong>Helpline:</strong> +91 1204223100</li>
             <li><strong>Email:</strong> <a href="mailto:hr@makemybharatyatra.com">hr@makemybharatyatra.com</a></li>
         </ul>
     </div>
