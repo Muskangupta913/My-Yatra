@@ -168,7 +168,7 @@
                 <p id="subtotal" class="details-value">₹0</p>
             </div>
             <div class="flex justify-between items-center mt-2">
-                <p class="summary-label">Tax (10%):</p>
+                <p class="summary-label">Tax (18%):</p>
                 <p id="tax" class="details-value">₹0</p>
             </div>
             <div class="flex justify-between items-center mt-2">

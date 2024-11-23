@@ -89,33 +89,24 @@ class HomeController extends Controller
 
     // Tour Type Category
     public function tourTypeData($slug){
-
-        //dd($slug);
-
         function slugToTitle($slug) {
             $title = str_replace('-', ' ', $slug);
             $title = ucwords($title);
             return $title;
         }
         $title = slugToTitle($slug);
-        
-        $newSlug  = $slug;
-
+        $newSlug = $slug;
+    
+        // Add null check before accessing id
         $tourTypes = TourType::whereRaw('LOWER(name) = ?', [strtolower($title)])->first();
-        $packages = Package::where('tour_type_id', $tourTypes->id)->get();
-       return view('frontend.tourType', compact('packages', 'tourTypes', 'newSlug'));
-    }
-
-
-    public function showTour($newSlug, $slug){
-        // dd($slug);
-
-        $package = Package::where('slug', $slug)->firstOrFail();
-
-       // dd($packages->package_name);
-
-       return view('frontend.touTypeDeatils', compact('package'));
         
+        if (!$tourTypes) {
+            // Handle the case when no tour type is found
+            return redirect()->back()->with('error', 'Tour type not found');
+        }
+    
+        $packages = Package::where('tour_type_id', $tourTypes->id)->get();
+        return view('frontend.tourType', compact('packages', 'tourTypes', 'newSlug'));
     }
 
 // booking Functions

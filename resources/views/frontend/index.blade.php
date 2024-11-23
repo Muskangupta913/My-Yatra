@@ -97,7 +97,7 @@
           <li class="nav-item" role="presentation">
             <button class="nav-link bg-danger text-white rounded-end-pill" id="pills-profile-tab" data-bs-toggle="pill"
               data-bs-target="#pills-profile" type="button" role="tab" aria-controls="pills-profile"
-              aria-selected="false">TOP DESTINATIONS</button>
+              aria-selected="true">TOP DESTINATIONS</button>
           </li>
         </ul>
 
