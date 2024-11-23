@@ -1,5 +1,11 @@
 @use "sass:math";
-
+body {
+    font-family: Arial, sans-serif;
+}
+header {
+    background: #007bff;
+    color: white;
+}
 :root {
     --theme-color: #1CA8CB;
     /* --title-color: #113D48; */
