@@ -142,9 +142,15 @@ Route::get('/verify/{token}', [AuthController::class, 'verify'])->name('verify')
 
 
  // use authenticate middle 
- Route::get('/addtocart/{id}', [HomeController::class, 'addtocart'])
- ->name('addtocart')
- ->middleware('auth');  
+//  Route::get('/addtocart/{id}', [HomeController::class, 'addtocart'])
+//  ->name('addtocart')
+//  ->middleware('auth');  
+
+
+ Route::middleware(['auth'])->group(function () {
+  Route::post('/addtocart/{id}', [HomeController::class, 'addtocart'])->name('addtocart');
+  Route::get('/cart/count', [HomeController::class, 'getCartCount'])->name('cart.count');
+});
 
 // User Dashboard Route
 Route::group(["middleware" => ['onlyAuthenticated']], function(){

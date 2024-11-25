@@ -592,32 +592,39 @@ $(document).ready(function() {
     function addToCart(id) {
     $.ajax({
         url: `/addtocart/${id}`,
-        method: 'GET',
+        method: 'POST',
         headers: {
             'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
         },
         success: function(response) {
             if (response.success) {
                 alert('Item added to cart successfully!');
-                if (response.cartCount) {
-                    updateCartCount(response.cartCount);
-                }
             } else {
                 alert(response.message || 'Failed to add item to cart');
             }
         },
         error: function(xhr, status, error) {
+            // Log the full error details to console
+            console.error('Error Details:', {
+                status: xhr.status,
+                responseText: xhr.responseText,
+                error: error
+            });
+            
             if (xhr.status === 401) {
-                // Redirect to login page if unauthorized
                 window.location.href = '/login';
             } else {
-                alert('Error adding item to cart');
+                // Try to get the error message from the response
+                try {
+                    const response = JSON.parse(xhr.responseText);
+                    alert(response.message || 'Server error occurred');
+                } catch (e) {
+                    alert('An error occurred while adding to cart. Please try again.');
+                }
             }
-            console.error('Error adding to cart:', error);
         }
     });
 }
-    
         
 
     // Booking Form Submission
@@ -728,7 +735,7 @@ $(document).ready(function() {
                         </small>
                     </div>
                     <div class="d-flex flex-column">
-                        <button class="btn btn-danger mb-2 rounded-0 booknow" data-slug="${item.slug}" data-newslug="${slug}">Book Now</button>
+                        <button class="btn btn-danger mb-2 rounded-0 booknow" data-slug="${item.slug}" data-newslug="${slug}">Details</button>
                         <button class="btn btn-outline-danger rounded-0 add-to-cart" data-id="${item.id}">Add To Cart</button>
 
                     </div>
