@@ -22,82 +22,120 @@ class AuthController extends Controller
             return abort(404, "Something went wrong");
         }
     }
-    public function register(Request $request){
+//     public function register(Request $request){
 
-         // Trim inputs
-         $request->merge([
-            'name' => trim($request->name),
-            'email' => trim($request->email),
-            'phone' => trim($request->phone),
-            'password' => trim($request->password),
-            'password_confirmation' => trim($request->password_confirmation),
-        ]);
+//          // Trim inputs
+//          $request->merge([
+//             'name' => trim($request->name),
+//             'email' => trim($request->email),
+//             'phone' => trim($request->phone),
+//             'password' => trim($request->password),
+//             'password_confirmation' => trim($request->password_confirmation),
+//         ]);
     
-            $request->validate([
-                'name' => 'required|string|max:255',
-                'email' => 'required|string|email|max:255|unique:users',
-                'phone' => 'required|numeric|digits:10',
-                'password' => [
-                    'required',
-                    'string',
-                    'min:8',
-                    'confirmed'
-                    ],
-            ]);
+//             $request->validate([
+//                 'name' => 'required|string|max:255',
+//                 'email' => 'required|string|email|max:255|unique:users',
+//                 'phone' => 'required|numeric|digits:10',
+//                 'password' => [
+//                     'required',
+//                     'string',
+//                     'min:8',
+//                     'confirmed'
+//                     ],
+//             ]);
     
-            $user = new User;
-            $user->name = $request->name;
-            $user->email = $request->email;
-            $user->phone = $request->phone;
-            $user->password = Hash::make($request->password);
-            $user->verification_token = Str::random(60);
-            $user->token_expires_at = Carbon::now()->addHour();
-            $user->save();
+//             $user = new User;
+//             $user->name = $request->name;
+//             $user->email = $request->email;
+//             $user->phone = $request->phone;
+//             $user->password = Hash::make($request->password);
+//             $user->verification_token = Str::random(60);
+//             $user->token_expires_at = Carbon::now()->addHour();
+//             $user->save();
 
-            // send mail 
+//             // send mail 
 
-            $this->sendVerificationMail($user);
+//             $this->sendVerificationMail($user);
     
-            return back()->with('success', 'Registration has been successful! Please check your email to verify your account.');
+//             return back()->with('success', 'Registration has been successful! Please check your email to verify your account.');
             
-    }
-    protected function sendVerificationMail($user)
+//     }
+//     protected function sendVerificationMail($user)
+// {
+//     try {
+//         $verificationUrl = url('/verify/' . $user->verification_token);
+//         Mail::send('mail.verification', ['name' => $user->name, 'url' => $verificationUrl], function($message) use ($user) {
+//             $message->to($user->email);
+//             $message->subject('Email Verification');
+//         });
+
+//     } catch (\Exception $e) {
+//         // Handle the error or log it
+//         return back()->with('Failed to send verification email: ' . $e->getMessage());
+//     }
+//     }
+
+//      public function verify($token){
+
+//         $user  = User::where('verification_token', $token)->first();
+
+//         if(!$user){
+//             return back()->with('error', 'Invalid token');
+//         }
+//         if($user->token_expires_at < Carbon::now()){
+
+//             $msg = 'Verification token has been expired. Please request a new Verification email.';
+//             return view('auth.verification-message', compact('msg'));
+
+//         }
+//         $user->is_verified = 1;
+//         $user->email_verified_at = Carbon::now();
+//         $user->verification_token = null;
+//         $user->token_expires_at = null;
+//         $user->save();
+
+//         $msg  = "Email Verified Successfully!";
+//         return view('auth.verification-message', compact('msg'));
+//      }
+
+
+
+
+public function register(Request $request)
 {
-    try {
-        $verificationUrl = url('/verify/' . $user->verification_token);
-        Mail::send('mail.verification', ['name' => $user->name, 'url' => $verificationUrl], function($message) use ($user) {
-            $message->to($user->email);
-            $message->subject('Email Verification');
-        });
+    // Trim inputs
+    $request->merge([
+        'name' => trim($request->name),
+        'email' => trim($request->email),
+        'phone' => trim($request->phone),
+        'password' => trim($request->password),
+        'password_confirmation' => trim($request->password_confirmation),
+    ]);
 
-    } catch (\Exception $e) {
-        // Handle the error or log it
-        return back()->with('Failed to send verification email: ' . $e->getMessage());
-    }
-    }
+    $request->validate([
+        'name' => 'required|string|max:255',
+        'email' => 'required|string|email|max:255|unique:users',
+        'phone' => 'required|numeric|digits:10',
+        'password' => [
+            'required',
+            'string',
+            'min:8',
+            'confirmed',
+        ],
+    ]);
 
-     public function verify($token){
+    $user = new User;
+    $user->name = $request->name;
+    $user->email = $request->email;
+    $user->phone = $request->phone;
+    $user->password = Hash::make($request->password);
+    $user->is_verified = 1; // Mark the user as verified by default
+    $user->save();
 
-        $user  = User::where('verification_token', $token)->first();
+    return redirect()->route('loginView')->with('success', 'Registration successful! Please login to continue.');
+}
 
-        if(!$user){
-            return back()->with('error', 'Invalid token');
-        }
-        if($user->token_expires_at < Carbon::now()){
-
-            $msg = 'Verification token has been expired. Please request a new Verification email.';
-            return view('auth.verification-message', compact('msg'));
-
-        }
-        $user->is_verified = 1;
-        $user->email_verified_at = Carbon::now();
-        $user->verification_token = null;
-        $user->token_expires_at = null;
-        $user->save();
-
-        $msg  = "Email Verified Successfully!";
-        return view('auth.verification-message', compact('msg'));
-     }
 
 // login methods
 public function loginView(){
@@ -113,35 +151,29 @@ public function loginView(){
                 'email' => trim($request->email),
                 'password' => trim($request->password),
             ]);
-
+    
             // Validate login inputs
             $request->validate([
                 'email' => 'required|email',
                 'password' => 'required',
             ]);
-
+    
             // Attempt login
             $credentials = $request->only(['email', 'password']);
             if (Auth::attempt($credentials)) {
-                // Check if the user is verified
-                if (Auth::user()->is_verified == 0) {
-                    Auth::logout();
-                    return back()->with('error', 'Please verify your email.');
+                if (Auth::user()->is_admin == 1) {
+                    return redirect()->route('dashboard');
+                } else {
+                    return redirect()->route('home');
                 }
-
-            if(Auth::user()->is_admin == 1){
-                return redirect()->route('dashboard');
-            }else{
-                return redirect()->route('user.dashboard');
+            } else {
+                return back()->with('error', 'Invalid email or password');
             }
-        }else{
-            return back()->with('error', 'Invalid email or password');
+        } catch (\Exception $e) {
+            return back()->with('msg', $e->getMessage());
         }
-        
-    }catch(\Exception $e){
-        return back()->with('msg', $e->getMessage());
     }
-}
+    
 
     // Forgot Password View Method
     public function forgotView()

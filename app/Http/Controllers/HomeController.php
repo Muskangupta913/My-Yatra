@@ -50,7 +50,7 @@ class HomeController extends Controller
 
        // dd($tourpackages);
         //dd($destinations);
-        return view('frontend.index', compact('destinations', 'tourTypes', 'tourpackages','cartCount'));
+        return view('frontend.index', compact('destinations', 'tourTypes', 'tourpackages'));
     }
 
     public function packages(Request $request, $slug){
