@@ -1,7 +1,6 @@
 @extends('frontend.layouts.master')
 @section('content')
 <section class="hero">
-
   <div class="container">
     <div class="row">
       <div class="card search-engine-card py-5 px-4" style="position: relative">
