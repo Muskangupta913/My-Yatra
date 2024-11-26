@@ -122,21 +122,23 @@
 </style>
 
 <section class="packages-bg-images d-flex justify-content-center align-items-center" style="background:linear-gradient(rgba(0, 0, 0, 0.554), rgba(0, 0, 0, 0.667)),  url('{{ asset("uploads/packages/" . $packages[0]->photo) }}'); height:300px; background-position:center center; background-size:cover;">
-<h1 class=" text-white ">{{$tourTypes->name}}</h1>
+  <h1 class=" text-white ">{{$tourTypes->name}}</h1>
 </section>
 <section class="tour-places tour-category mt-0 mb-1">
-<div class="container">
+  <div class="container">
     <h2 class="border-start border-4 mb-5 border-warning px-2" style="font-weight: 400;">
       <span style="font-size: 30px; font-weight:bold;">Tour Categories</span>
     </h2>
     <div class="topnav">
-      <b><a class="active" href="http://127.0.0.1:8000/tour-category/honeymoon">Honeymoon</a>
-      <a href="http://127.0.0.1:8000/tour-category/adventure">Adventure</a>
-      <a href="http://127.0.0.1:8000/tour-category/religious-places">Religious Places</a>
-      <a href="http://127.0.0.1:8000/tour-category/beach">Beaches</a>
-      <a href="http://127.0.0.1:8000/tour-category/beach">Trekking</a>
-      <a href="http://127.0.0.1:8000/tour-category/beach">Trekking</a>
-      <a href="http://127.0.0.1:8000/tour-category/beach">Beaches</a></b>
+      <b>
+        <a id="honeymoon" href="http://127.0.0.1:8000/tour-category/honeymoon" >Honeymoon</a>
+        <a id="adventure" href="http://127.0.0.1:8000/tour-category/adventure">Adventure</a>
+        <a id="religious-places" href="http://127.0.0.1:8000/tour-category/religious-places">Religious Places</a>
+        <a id="beach1" href="http://127.0.0.1:8000/tour-category/beach">Beaches</a>
+        <a id="trekking1" href="http://127.0.0.1:8000/tour-category/trekking">Trekking</a>
+        <a id="trekking2" href="http://127.0.0.1:8000/tour-category/trekking">Trekking</a>
+        <a id="beach2" href="http://127.0.0.1:8000/tour-category/beach">Beaches</a>
+      </b>
     </div>
   </div>
 </section>
@@ -735,17 +737,13 @@ $(document).ready(function() {
                     <div class="d-flex flex-column">
                         <button class="btn btn-danger mb-2 rounded-0 booknow" data-slug="${item.slug}" data-newslug="${slug}">Details</button>
                         <button class="btn btn-outline-danger rounded-0 add-to-cart" data-id="${item.id}">Add To Cart</button>
-
                     </div>
                 </div>
             </div>
         </div>
     </div>
 `;
-
 }
-
-
     // Initial load of packages
     fetchPackages();
 });

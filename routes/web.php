@@ -3,10 +3,12 @@
 use App\Http\Controllers\admin\AdminController;
 use App\Http\Controllers\admin\AuthController;
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\FlightController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Artisan;
 use App\Http\Controllers\CityController;
+
 
 
 
@@ -33,12 +35,17 @@ Route::get('/clear-cache', function() {
 });
 
 
+
 Route::get('/', [HomeController::class, 'index'])->name('home');
 // Route::get('/home', function(){
 //   return view('frontend.home');
 // });
+Route::get('/goa-section', function () {
+  return view('goa-section'); // Assuming the view file is goa-section.blade.php
+});
 
-
+Route::get('/flight-booking', [FlightController::class, 'index'])->name('flight.booking');
+Route::post('/search-flights', [FlightController::class, 'search'])->name('flight.search');
 
 Route::get('/holidays/{slug}', [HomeController::class, 'packages'])->name('packages');
 
