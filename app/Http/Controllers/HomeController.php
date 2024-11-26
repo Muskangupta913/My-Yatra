@@ -109,6 +109,18 @@ class HomeController extends Controller
         return view('frontend.tourType', compact('packages', 'tourTypes', 'newSlug'));
     }
 
+    public function showTour($newSlug, $slug){
+        // dd($slug);
+
+        $package = Package::where('slug', $slug)->firstOrFail();
+
+       // dd($packages->package_name);
+
+       return view('frontend.touTypeDeatils', compact('package'));
+        
+    }
+
+
 // booking Functions
     public function store(Request $request)
     {
