@@ -465,7 +465,7 @@
     <div class="modal-dialog modal-md">
         <div class="modal-content">
             <div class="modal-header bg-warning">
-                <h5 class="modal-title" id="bookingModalLabel">Confirm Your Booking</h5>
+                <h5 class="modal-title" id="bookingModalLabel">Confirm Yourrrr Booking</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
@@ -618,51 +618,114 @@ $(document).ready(function() {
     
         
 
+
+
+
+
+
     // Booking Form Submission
     $('#bookingForm').on('submit', function(e) {
-        e.preventDefault();
+    e.preventDefault();
 
-        // Clear previous validation errors
-        $('.form-control').removeClass('is-invalid');
-        $('.invalid-feedback').hide();
+    // Clear previous validation errors
+    $('.form-control').removeClass('is-invalid');
+    $('.invalid-feedback').hide();
 
-        // Gather form data
-        let formData = {
-            package_id: $('#package_id').val(),
-            full_name: $('#fullName').val(),
-            phone: $('#phone').val(),
-            email: $('#email').val(),
-            adults: $('#adults').val(),
-            children: $('#children').val(),
-            travel_date: $('#travelDate').val(),
-            terms: $('#terms').is(':checked') ? 1 : 0
-        };
+    // Gather form data
+    let formData = {
+        package_id: $('#package_id').val(),
+        full_name: $('#fullName').val(),
+        phone: $('#phone').val(),
+        email: $('#email').val(),
+        adults: $('#adults').val(),
+        children: $('#children').val(),
+        travel_date: $('#travelDate').val(),
+        terms: $('#terms').is(':checked') ? 1 : 0
+    };
 
-        $.ajax({
-            url: "{{ route('book.package') }}",
-            method: 'POST',
-            data: formData,
-            headers: {
-                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-            },
-            success: function(response) {
-                alert('Booking confirmed successfully!');
-                $('#bookingForm')[0].reset();
-                $('#bookingModal').modal('hide');
-            },
-            error: function(response) {
-                if (response.status === 422) {
-                    let errors = response.responseJSON.errors;
-                    $.each(errors, function(field, message) {
-                        $('#' + field).addClass('is-invalid');
-                        $('#' + field).next('.invalid-feedback').text(message[0]).show();
-                    });
-                } else {
-                    alert('An error occurred. Please try again.');
-                }
+    $.ajax({
+        url: "{{ route('book.package') }}",
+        method: 'POST',
+        data: formData,
+        headers: {
+            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+        },
+        success: function(response) {
+            alert('Booking confirmed successfully!');
+
+            // Redirect to the checkout page with the booking ID
+            // window.location.href = "{{ url('/booking') }}/" + response.booking_id;
+        },
+        error: function(response) {
+            if (response.status === 422) {
+                let errors = response.responseJSON.errors;
+                $.each(errors, function(field, message) {
+                    $('#' + field).addClass('is-invalid');
+                    $('#' + field).next('.invalid-feedback').text(message[0]).show();
+                });
+            } else {
+                alert('An error occurred. Please try again.');
             }
-        });
+        }
     });
+});
+
+    $('#bookingForm').on('submit', function(e) {
+    e.preventDefault();
+
+    // Clear previous validation errors
+    $('.form-control').removeClass('is-invalid');
+    $('.invalid-feedback').hide();
+
+    // Gather form data
+    let formData = {
+        package_id: $('#package_id').val(),
+        full_name: $('#fullName').val(),
+        phone: $('#phone').val(),
+        email: $('#email').val(),
+        adults: $('#adults').val(),
+        children: $('#children').val(),
+        travel_date: $('#travelDate').val(),
+        terms: $('#terms').is(':checked') ? 1 : 0
+    };
+
+    $.ajax({
+        url: "{{ route('book.package') }}",
+        method: 'POST',
+        data: formData,
+        headers: {
+            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+        },
+        success: function(response) {
+          console.log('Booking confirmed successfully!');
+
+// Debugging: Log the booking ID and the final URL
+console.log('Booking ID:', response.booking_id);
+var redirectUrl = "{{ url('/booking') }}/" + response.booking_id;
+console.log('Redirecting to:', redirectUrl);
+        },
+        error: function(response) {
+            if (response.status === 422) {
+                let errors = response.responseJSON.errors;
+                $.each(errors, function(field, message) {
+                    $('#' + field).addClass('is-invalid');
+                    $('#' + field).next('.invalid-feedback').text(message[0]).show();
+                });
+            } else {
+                alert('An error occurred. Please try again.');
+            }
+        }
+    });
+});
+
+
+
+
+
+
+
+
+
 
     // Package Filtering
     $('.filter-price, .filter-duration, .filter-type').on('change', function() {

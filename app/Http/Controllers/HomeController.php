@@ -120,69 +120,9 @@ class HomeController extends Controller
         
     }
 
+    
 
 // booking Functions
-    public function store(Request $request)
-    {
-        try {
-            // Validate incoming request data
-            $validatedData = $request->validate([
-                'package_id' => 'required',
-                'full_name' => 'required|string|max:255',
-                'phone' => [
-                    'required',
-                    'string',
-                    'regex:/^[0-9]{10}$/',
-                    function($attribute, $value, $fail) {
-            // Add custom logic to prevent invalid phone numbers
-            $invalidNumbers = [
-                '0000000000',
-                '1111111111',
-                '2222222222',
-                '3333333333',
-                '4444444444',
-                '5555555555',
-                '6666666666',
-                '7777777777',
-                '8888888888',
-                '9999999999',
-            ];
-
-            if (in_array($value, $invalidNumbers)) {
-                $fail('The phone number entered is invalid.');
-            }
-        }
-    ], // Proper phone validation
-                'email' => 'required|email|max:255',
-                'adults' => 'required|integer|min:1',
-                'children' => 'required|integer|min:0',
-                'travel_date' => 'required|date|after:today',
-                'terms' => 'required|boolean'
-            ]);
-
-            // If validation passes, store the booking in the database
-            Booking::create([
-                'package_id' => $validatedData['package_id'],
-                'full_name' => $validatedData['full_name'],
-                'phone' => $validatedData['phone'],
-                'email' => $validatedData['email'],
-                'adults' => $validatedData['adults'],
-                'children' => $validatedData['children'],
-                'travel_date' => $validatedData['travel_date'],
-                'terms_accepted' => $validatedData['terms'],
-            ]);
-
-            return response()->json(['success' => 'Booking confirmed successfully!']);
-        } catch (\Illuminate\Validation\ValidationException $e) {
-            // Catch validation errors and return them to the frontend
-            return response()->json([
-                'errors' => $e->validator->getMessageBag()
-            ], 422);
-        } catch (\Exception $e) {
-            // Catch any other exception
-            return response()->json(['error' => 'There was an error processing your booking.'], 500);
-        }
-    }
 
 
 // filter data
@@ -584,6 +524,10 @@ public function ourblog()
     return view('frontend.ourblog', compact('vacationSpots', 'festivalRegions'));
 }
 
+//confirm bookin 
+
+
+
 
 
 
@@ -624,5 +568,95 @@ public function ourblog()
     $cartCount = Cart::where('user_id', Auth::id())->count();
     return response()->json(['count' => $cartCount]);
 }
+
+
+//checkouttttt
+public function book($bookingId)
+{
+    // Fetch the booking using the provided booking ID, including the package relationship
+    $booking = Booking::with('package')->find($bookingId);
+
+    if (!$booking) {
+        // If booking is not found, abort with a 404 error
+        abort(404, 'Booking not found.');
+    }
+
+    // Return the view with the booking data
+    return view('frontend.bookingcheckout', compact('booking'));
 }
+
+
+
+public function store(Request $request) 
+{
+    try {
+        // Validate incoming request data
+        $validatedData = $request->validate([
+            'package_id' => 'required',
+            'full_name' => 'required|string|max:255',
+            'phone' => [
+                'required',
+                'string',
+                'regex:/^[0-9]{10}$/',
+                function($attribute, $value, $fail) {
+                    // Add custom logic to prevent invalid phone numbers
+                    $invalidNumbers = [
+                        '0000000000',
+                        '1111111111',
+                        '2222222222',
+                        '3333333333',
+                        '4444444444',
+                        '5555555555',
+                        '6666666666',
+                        '7777777777',
+                        '8888888888',
+                        '9999999999',
+                    ];
+                    
+                    if (in_array($value, $invalidNumbers)) {
+                        $fail('The phone number entered is invalid.');
+                    }
+                }
+            ],
+            'email' => 'required|email|max:255',
+            'adults' => 'required|integer|min:1',
+            'children' => 'required|integer|min:0',
+            'travel_date' => 'required|date|after:today',
+            'terms' => 'required|boolean'
+        ]);
+        
+        // Create the booking
+        $booking = Booking::create([
+            'package_id' => $validatedData['package_id'],
+            'full_name' => $validatedData['full_name'],
+            'phone' => $validatedData['phone'],
+            'email' => $validatedData['email'],
+            'adults' => $validatedData['adults'],
+            'children' => $validatedData['children'],
+            'travel_date' => $validatedData['travel_date'],
+            'terms_accepted' => $validatedData['terms'],
+        ]);
+        
+        // Return success response with booking ID
+        return response()->json([
+            'success' => 'Booking confirmed successfully!',
+            'booking_id' => $booking->id
+        ]);
+        
+    } catch (\Illuminate\Validation\ValidationException $e) {
+        // Catch validation errors
+        return response()->json([
+            'errors' => $e->validator->getMessageBag()
+        ], 422);
+    } catch (\Exception $e) {
+        // Catch any other exceptions
+        return response()->json([
+            'error' => 'There was an error processing your booking.'
+        ], 500);
+    }
+}
+
+}
+
+
   

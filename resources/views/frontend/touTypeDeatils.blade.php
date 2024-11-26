@@ -308,7 +308,7 @@
   <div class="modal-dialog modal-md">
     <div class="modal-content">
       <div class="modal-header bg-warning">
-        <h5 class="modal-title" id="bookingModalLabel">Confirm Your Booking</h5>
+        <h5 class="modal-title" id="bookingModalLabel">Confirmmmm Your Booking</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
@@ -438,9 +438,9 @@
 
 
     // Submit Form
-    $(document).ready(function() {
-    $('#bookingForm').on('submit', function(event) {
-        event.preventDefault(); // Prevent the form from submitting traditionally
+    $(document).ready(function () {
+    $('#bookingForm').on('submit', function (event) {
+        event.preventDefault(); // Prevent traditional form submission
 
         // Clear previous validation errors
         $('.form-control').removeClass('is-invalid');
@@ -455,28 +455,28 @@
             adults: $('#adults').val(),
             children: $('#children').val(),
             travel_date: $('#travelDate').val(),
-            terms: $('#terms').is(':checked') ? 1 : 0
+            terms: $('#terms').is(':checked') ? 1 : 0,
         };
 
         $.ajax({
-            url: "{{ route('book.package') }}",  // Laravel route for booking
+            url: "{{ route('book.package') }}", // Laravel route for booking
             method: 'POST',
             data: formData,
             headers: {
-                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content'),
             },
-            success: function(response) {
+            success: function (response) {
                 alert('Booking confirmed successfully!');
-                $('#bookingForm')[0].reset();  // Reset form
-                $('#bookingModal').modal('hide');  // Hide modal if using popup
+                // Navigate to the booking page with the dynamic booking ID
+                window.location.href = `/booking/${response.booking_id}`;
             },
-            error: function(response) {
+            error: function (response) {
                 // Handle validation errors
                 if (response.status === 422) {
                     let errors = response.responseJSON.errors;
 
                     // Loop through each error and display it
-                    $.each(errors, function(field, message) {
+                    $.each(errors, function (field, message) {
                         // Add the 'is-invalid' class to the corresponding form field
                         $('#' + field).addClass('is-invalid');
 
@@ -486,10 +486,11 @@
                 } else {
                     alert('An error occurred. Please try again.');
                 }
-            }
+            },
         });
     });
 });
+  
 
 
 

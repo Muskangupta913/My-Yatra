@@ -179,9 +179,9 @@
                 <p class="total-price">Total Price:</p>
                 <p id="total-price" class="total-price">₹0</p>
             </div>
-            <button type="submit" class="checkout-button w-full py-3 text-white rounded-lg mt-4">
-                <i class="fas fa-check-circle mr-2"></i> Proceed to Pay
-            </button>
+            <button type="button" class="checkout-button w-full py-3 text-white rounded-lg mt-4" onclick="window.location.href='{{ route('payment') }}'">
+             <i class="fas fa-check-circle mr-2"></i> Proceed to Pay
+         </button>
         </div>
     </div>
 

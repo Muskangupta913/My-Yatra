@@ -253,3 +253,6 @@ Route::get('/mussoorie', [CityController::class, 'mussoorie'])->name('mussoorie'
 
 });
 
+Route::get('/booking/{bookingId}', [HomeController::class, 'book'])->name('booking');
+
+
