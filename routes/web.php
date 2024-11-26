@@ -35,10 +35,14 @@ Route::get('/clear-cache', function() {
 });
 
 
+
 Route::get('/', [HomeController::class, 'index'])->name('home');
 // Route::get('/home', function(){
 //   return view('frontend.home');
 // });
+Route::get('/goa-section', function () {
+  return view('goa-section'); // Assuming the view file is goa-section.blade.php
+});
 
 Route::get('/flight-booking', [FlightController::class, 'index'])->name('flight.booking');
 Route::post('/search-flights', [FlightController::class, 'search'])->name('flight.search');
