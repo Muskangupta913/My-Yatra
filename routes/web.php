@@ -8,11 +8,6 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Artisan;
 use App\Http\Controllers\CityController;
-
-
-
-
-
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -42,6 +37,12 @@ Route::get('/', [HomeController::class, 'index'])->name('home');
 // });
 Route::get('/goa-section', function () {
   return view('goa-section'); // Assuming the view file is goa-section.blade.php
+});
+Route::get('/delhi-section', function () {
+  return view('delhi-section'); // Assuming the view file is delhi-section.blade.php
+});
+Route::get('/manali-section', function () {
+  return view('manali-section'); // Assuming the view file is manali-section.blade.php
 });
 
 Route::get('/flight-booking', [FlightController::class, 'index'])->name('flight.booking');
