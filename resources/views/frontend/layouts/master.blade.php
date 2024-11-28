@@ -1,13 +1,9 @@
 
-
 <!doctype html>
 <html lang="en">
-
 <head>
-
     <!-- Dynamic Title -->
     <title>@yield('title', 'Make My Bharat Yatra')</title>
-
     <!-- Dynamic Meta Description -->
     <meta name="description" content="@yield('meta_description', 'Make My Bharat Yatra')">
      <link rel="canonical" href="{{ request()->url() }}">
@@ -36,10 +32,7 @@
 
   gtag('config', 'G-6VR342NV7T');
 </script>
-
-
 </head>
-
 <body>
   <div class="topbar bg-dark text-white py-2">
     <div class="container">
@@ -64,8 +57,6 @@
               class="fa-solid fa-envelope px-1"></i></a>
           <a href="{{ route('loginView')}}" class="btn btn-warning btn-sm rounded-0 fw-bold mx-3 px-3"><i
               class="fa-regular fa-user"></i> LOGIN</a>
-
-
               <<a href="{{ route('checkout') }}" class="nav-link d-inline-block position-relative" style="margin-top: 5px;">
     <i class="fa fa-shopping-cart" style="font-size: 18px;"></i>
     <span id="cart-count" class="badge bg-danger rounded-pill position-absolute" 
@@ -93,7 +84,6 @@
             <a class="nav-link text-danger active" href="{{ route('home')}}" aria-current="page">Home
               <span class="visually-hidden">(current)</span></a>
           </li>
-
           <li class="nav-item dropdown">
             <a class="nav-link dropdown-toggle" href="#" id="dropdownId1" data-bs-toggle="dropdown" aria-haspopup="true"
               aria-expanded="false">Travel Packages</a>
@@ -101,8 +91,6 @@
           
               <a class="dropdown-item" href="http://127.0.0.1:8000/holidays/goa-tour-package">Goa</a>
               <a class="dropdown-item" href="http://127.0.0.1:8000/holidays/uttar-pradesh-tour-packages">Uttar Pradesh</a>
-             
-  
               
             </div>
           </li>
@@ -138,29 +126,21 @@
       </div>
     </div>
   </nav>
-
-
   @yield('content')
-
-
   <footer class="footer mt-5">
-
     <div class="container">
       <div class="row">
         <div class="col-lg-4 col-md-4 mb-3">
           <img src="{{ asset('assets/img/make-my-bharat-yatra-logo.png')}}" width="250" class="mb-3" alt="make-my-bharat-yatra-logo">
           <p>Make My Bharat Yatra offers expertly crafted, personalized Travel experiences across India. <br> Enjoy
             exceptional service, unique adventures, and seamless journeys to India's top destinations with us</p>
-
           <div class="SocialList">
             <a href=""><i class="fa-brands fa-facebook-f"></i></a>
             <a href="https://www.linkedin.com/in/make-my-bharatyatra-516776304/" target="_blank"><i class="fa-brands fa-linkedin"></i></a>
             <a href=""><i class="fa-brands fa-youtube"></i></a>
             <a href=""><i class="fa-brands fa-square-instagram"></i></a>
-
           </div>
         </div>
-
         <div class="col-md-2 quick-links col-lg-2 col-xl-2 mb-3">
           <h5>Quick Links</h5>
           <ul>
@@ -172,20 +152,17 @@
             <li><a href="{{ route('termsCondition')}}">Terms of Service</a></li>
           </ul>
         </div>
-
-
         <div class="col-md-3 quick-links col-lg-3 col-xl-3 mb-3">
           <h5>Top Destinations</h5>
           <ul>
-             <li><a href="{{ route('delhi')}}">Delhi</a></li>
-             <li><a href="{{ route('goaTour')}}">Goa Tour</a></li>
-             <li><a href="{{ route('manali')}}">Manali</a></li>
-             <li><a href="{{ route('kerala')}}">Kerala</a></li>
-             <li><a href="{{ route('coimbatore')}}">Coimbatore</a></li>
-             <li><a href="{{ route('mussoorie')}}">Mussoorie</a></li>
+             <li><a href="{{ url('/delhi-section')}}">Delhi</a></li>
+             <li><a href="{{ url('/goa-section')}}">Goa Tour</a></li>
+             <li><a href="{{ url('/manali-section')}}">Manali</a></li>
+             <li><a href="{{ url('/goa-section')}}">Kerala</a></li>
+             <li><a href="{{ url('/goa-section')}}">Coimbatore</a></li>
+             <li><a href="{{ url('/goa-section')}}">Mussoorie</a></li>
           </ul>
         </div>
-
         <div class="col-md-3 quick-links address col-lg-3 col-xl-3 mb-3 p-0">
           <h5>Contact</h5>
           <ul class="list-unstyled">
@@ -199,7 +176,6 @@
                 support@makemybharatyatra.com</a></li>
           </ul>
         </div>
-
         <div class="col-12">
           <div class="footer-bottom text-center">
             <p> <span style="font-size: 16px;">&copy;</span> 2018 Make My Bharat Yatra | All rights reserved</p>
@@ -207,16 +183,13 @@
         </div>
       </div>
     </div>
-
   </footer>
-
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
   <!-- Swiper JS -->
   <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
   <script src="https://code.jquery.com/ui/1.11.2/jquery-ui.js"></script>
-
 
   @yield('scripts')
 
@@ -305,8 +278,6 @@
       }
 
     });
-
-
     $(function () {
 
       // Initialize the datepicker
@@ -327,9 +298,6 @@
       $("#datepicker").datepicker("option", "onSelect")($.datepicker.formatDate("dd M, yy", new Date()), {});
 
     });
-
-
-
     var swiper = new Swiper(".serviceSlider", {
       navigation: {
         nextEl: ".swiper-button-next",
@@ -393,5 +361,4 @@ $(document).ready(function() {
 });
 </script>
 </body>
-
 </html>
