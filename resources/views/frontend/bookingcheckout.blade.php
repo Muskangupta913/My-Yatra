@@ -1,191 +1,260 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="csrf-token" content="{{ csrf_token() }}"> <!-- CSRF Token -->
     <title>Vacation Booking Checkout</title>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
     <style>
         body {
-            background-color: #f4f4f4;
-            font-family: 'Arial', sans-serif;
-            margin: 0;
-            padding: 0;
+            background: rgba(0, 0, 0, 0.6); /* Dark overlay */
+            background-size: cover;
+            background-blend-mode: overlay;
             min-height: 100vh;
+            font-family: 'Arial', sans-serif;
         }
 
-        .container {
+        .checkout-container {
             display: flex;
-            justify-content: space-between;
-            max-width: 1200px;
-            margin: 2rem auto;
-            gap: 2rem;
+            flex-wrap: wrap;
+            gap: 1.5rem;
+            margin-top: 2rem;
+            padding: 1rem;
         }
 
-        .left-panel {
-            flex: 2;
+        .details-card, .summary-card {
             background-color: #ffffff;
+            border: 1px solid #e0e0e0;
             padding: 1.5rem;
-            border-radius: 10px;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            border-radius: 1rem;
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+            width: 100%;
+        }
+
+        .summary-card {
+            max-width: 450px;
+            margin: 0 auto;
+        }
+
+        .checkout-button {
+            background-color: #f39c12;
+            transition: background-color 0.3s ease, transform 0.3s ease;
+            font-size: 1.125rem;
+            font-weight: bold;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .checkout-button:hover {
+            background-color: #d35400;
+            transform: scale(1.05);
         }
 
         .destination-item {
             display: flex;
-            justify-content: space-between;
+            flex-direction: row;
             align-items: center;
+            border: 1px solid #e0e0e0;
             padding: 1rem;
-            border: 1px solid #ddd;
-            background-color: #f9f9f9;
-            border-radius: 10px;
-            margin-bottom: 1rem;
+            border-radius: 0.75rem;
+            background-color: #f8f9fa;
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-        }
-
-        .destination-details {
-            flex-grow: 1;
+            margin-bottom: 1rem;
+            width: 100%;
+            position: relative;
         }
 
         .destination-item img {
-            width: 80px;
-            height: 80px;
-            border-radius: 10px;
-            margin-right: 1rem;
+            width: 250px; /* Increased size */
+            height: auto;
+            border-radius: 0.75rem;
             object-fit: cover;
+            margin-right: 1.5rem;
         }
 
-        .checkout-button {
-            background-color: #2874f0;
-            color: white;
-            font-size: 1rem;
-            font-weight: bold;
-            padding: 0.75rem 1.5rem;
-            border-radius: 5px;
-            transition: all 0.3s ease-in-out;
-            cursor: pointer;
-        }
-
-        .checkout-button:hover {
-            background-color: #1565c0;
-            transform: scale(1.05);
-        }
-
-        .right-panel {
+        .destination-item .destination-details {
             flex: 1;
-            background-color: #ffffff;
-            padding: 1.5rem;
-            border-radius: 10px;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-            max-height: fit-content;
         }
 
-        .summary-card p {
-            margin: 0.5rem 0;
-            font-size: 0.9rem;
+        .destination-item i {
+            position: absolute;
+            top: 0.5rem;
+            right: 0.5rem;
+            cursor: pointer;
+            color: #e74c3c;
+            font-size: 1.25rem;
+            transition: color 0.3s ease;
+        }
+
+        .destination-item i:hover {
+            color: #c0392b;
         }
 
         .total-price {
             font-size: 1.5rem;
             font-weight: bold;
-            color: #333;
-            margin-top: 1rem;
+            color: #2c3e50;
         }
 
-        .summary-card button {
-            background-color: #f39c12;
-            color: white;
-            font-size: 1.1rem;
-            font-weight: bold;
-            padding: 0.75rem;
-            border-radius: 5px;
-            margin-top: 1rem;
-            transition: all 0.3s ease-in-out;
+        .summary-label {
+            font-size: 0.875rem;
+            color: #000000;
         }
 
-        .summary-card button:hover {
-            background-color: #d35400;
-            transform: scale(1.05);
+        .details-card hr, .summary-card hr {
+            margin: 1rem 0;
+            border-color: #ddd;
         }
 
-        @media (max-width: 768px) {
-            .container {
-                flex-direction: column;
-                gap: 1.5rem;
-            }
-
-            .left-panel,
-            .right-panel {
-                width: 20%;
+        /* Responsive Design */
+        @media (max-width: 1024px) {
+            /* For tablets and smaller screens */
+            .checkout-container {
+                flex-direction: column; /* Stack sections vertically on smaller screens */
+                gap: 2rem;
             }
 
             .destination-item {
-                flex-direction: column;
-                align-items: flex-start;
+                flex-direction: column; /* Stack image and details vertically on smaller screens */
+            }
+
+            .destination-item img {
+                width: 100%; /* Full width on smaller screens */
+                height: auto;
+                margin-right: 0;
+                margin-bottom: 1rem;
+            }
+
+            .summary-card {
+                width: 100%; /* Take full width on smaller screens */
+            }
+        }
+
+        @media (max-width: 640px) {
+            /* For mobile screens */
+            .checkout-container {
+                padding: 1rem;
+            }
+
+            .destination-item img {
+                width: 100%; /* Full width on mobile */
+                height: auto;
+            }
+
+            .destination-item {
+                flex-direction: column; /* Stack image and details vertically */
+            }
+
+            .summary-card {
+                width: 100%; /* Full width on mobile */
             }
 
             .checkout-button {
-                width: 100%;
-                margin-top: 1rem;
+                font-size: 1rem; /* Adjust button size for mobile */
+                padding: 1rem;
+            }
+
+            .total-price {
+                font-size: 1.25rem; /* Adjust total price font for mobile */
             }
         }
     </style>
 </head>
-
 <body>
-    <div class="container">
-        <!-- Left Panel -->
-        <div class="left-panel" id="cart-items">
-            <!-- Example Destination Item -->
-            <div class="destination-item">
-                <div class="destination-details">
-                    <img src="https://via.placeholder.com/80" alt="Destination Image">
-                    <div>
-                        <h4 class="font-semibold">Package Name</h4>
-                        <p class="text-gray-600">Duration: 3 days</p>
-                        <p class="text-gray-600">Start Date: 2023-12-01</p>
-                        <p class="text-gray-600">Price: ₹5000.00</p>
-                    </div>
-                </div>
-                <button class="checkout-button">Proceed to Pay</button>
+    <div class="max-w-7xl mx-auto checkout-container">
+        <!-- Left Section (Booking Details) -->
+        <div class="details-card flex-1">
+            <h2 class="text-2xl font-bold text-gray-800 mb-4">Booking Details</h2>
+            <div id="destination-list"></div>
+            <hr>
+            <div class="flex justify-between items-center mt-2">
+                <p class="summary-label">Total Price for All Destinations:</p>
+                <p id="all-destinations-total" class="details-value">₹0</p>
             </div>
         </div>
 
-        <!-- Right Panel -->
-        <div class="right-panel summary-card">
-            <p>Subtotal: <span id="subtotal">₹0.00</span></p>
-            <p>Tax: <span id="tax">₹0.00</span></p>
-            <p>Travel Charge: ₹500.00</p>
-            <p class="total-price">Total: <span id="total-price">₹0.00</span></p>
-            <button type="button" onclick="window.location.href='{{ route('payment') }}'">
+        <!-- Right Section (Price Summary) -->
+        <div class="summary-card">
+            <h3 class="text-xl font-semibold text-gray-800 mb-4">Price Summary</h3>
+            <div id="price-summary"></div>
+            <hr>
+            <div class="flex justify-between items-center mt-4">
+                <p class="summary-label">Subtotal:</p>
+                <p id="subtotal" class="details-value">₹0</p>
+            </div>
+            <div class="flex justify-between items-center mt-2">
+                <p class="summary-label">Tax (18%):</p>
+                <p id="tax" class="details-value">₹0</p>
+            </div>
+            <div class="flex justify-between items-center mt-2">
+                <p class="summary-label">Travel Charge:</p>
+                <p id="travel-charge" class="details-value">₹500</p>
+            </div>
+            <div class="flex justify-between items-center mt-4 border-t-2 border-gray-200 pt-2">
+                <p class="total-price">Total Price:</p>
+                <p id="total-price" class="total-price">₹0</p>
+            </div>
+            <button type="button" class="checkout-button w-full py-3 text-white rounded-lg mt-4" onclick="window.location.href='{{ route('payment') }}'">
                 <i class="fas fa-check-circle mr-2"></i> Proceed to Pay
             </button>
         </div>
     </div>
 
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
-        // Fetch cart items dynamically here
-        $(document).ready(function () {
-            // Example for demonstration
-            $('#cart-items').append(`
-                <div class="destination-item">
-                    <div class="destination-details">
-                        <img src="https://via.placeholder.com/80" alt="Destination Image">
-                        <div>
-                            <h4 class="font-semibold">Demo Package</h4>
-                            <p class="text-gray-600">Duration: 5 days</p>
-                            <p class="text-gray-600">Start Date: 2024-01-01</p>
-                            <p class="text-gray-600">Price: ₹10000.00</p>
-                        </div>
+        // Fetching the booking data from the Laravel controller (as passed to the view)
+        let booking = @json($booking); // The single booking object
+
+        // A function to calculate and update the price summary
+        function updatePriceSummary() {
+            let subtotal = booking.package.price * (booking.adults + booking.children);
+            let tax = subtotal * 0.18; // 18% tax
+            let travelCharge = 500;
+            let totalPrice = subtotal + tax + travelCharge;
+
+            document.getElementById('subtotal').textContent = `₹${subtotal}`;
+            document.getElementById('tax').textContent = `₹${tax}`;
+            document.getElementById('total-price').textContent = `₹${totalPrice}`;
+
+            const totalAllDestinations = subtotal;
+            document.getElementById('all-destinations-total').textContent = `₹${totalAllDestinations}`;
+        }
+
+        // Function to render the booking details on the page
+        function renderBookingDetails() {
+            const destinationList = document.getElementById('destination-list');
+            destinationList.innerHTML = ''; // Clear previous content
+
+            const bookingTotal = (booking.package.price * booking.adults) + (booking.package.price * booking.children);
+
+            const div = document.createElement('div');
+            div.classList.add('destination-item');
+            div.innerHTML = `
+                <img src="{{ asset("assets/images/goa-about-img.jpg") }}" style="width: 250px; height: auto; object-fit: cover; border-radius: 0.75rem;" alt="${booking.package.package_name}">
+                <div class="destination-details">
+                    <h4 class="text-lg font-semibold">${booking.package.package_name}</h4>
+                    <p class="text-sm text-gray-600"><b>Name:</b> ${booking.full_name}</p>
+                    <p class="text-sm text-gray-600"><b>Phone no.:</b> ${booking.phone}</p>
+                    <p class="text-sm text-gray-600"><b>E-mail:</b> ${booking.email}</p>
+                    <p class="text-sm text-gray-600"><b>Adults:</b> ${booking.adults}</p>
+                    <p class="text-sm text-gray-600"><b>Children:</b> ${booking.children}</p>
+                    <p class="text-sm text-gray-600"><b>Travel Date:</b> ${booking.travel_date}</p>
+                    <i class="fas fa-trash" onclick="removeBooking()"></i>
+                    <div class="mt-4">
+                        <p class="font-semibold text-gray-800">Total Price: ₹${bookingTotal}</p>
                     </div>
-                    <button class="checkout-button">Proceed to Pay</button>
                 </div>
-            `);
-        });
+            `;
+            destinationList.appendChild(div);
+        }
+        // Function to remove the booking (can be modified if needed to interact with backend)
+        function removeBooking() {
+            alert("Booking has been removed.");
+            // Here, you would typically send a request to the backend to remove the booking.
+        }
+
+        // Initialize the page with booking data
+        renderBookingDetails();
+        updatePriceSummary();
     </script>
 </body>
-
 </html>
