@@ -1,6 +1,80 @@
 @extends('frontend.layouts.master')
 @section('content')
+<style>
+     /* kerala-tour-destination-section-start */
 
+ .kerala-section {
+    background: linear-gradient(rgba(0, 0, 0, 0.382), rgba(0, 0, 0, 0.366)), url('{{ asset("assets/images/kerala-banner.jpg") }}') no-repeat center center/cover;
+    height: 450px;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
+
+.kerala-banner h1 {
+    font-size: 3rem;
+    font-weight: 700;
+}
+
+.kerala-banner p{
+    font-weight: 500;
+    font-size: 1.5rem;
+    margin-top: 20px;
+}
+
+.about-section img {
+    max-width: 300px;
+    height: auto;
+}
+
+.card {
+    border: none;
+    transition: transform 0.3s ease;
+}
+/* 
+.card:hover {
+    transform: translateY(-10px);
+} */
+ 
+.kerala-destinations p{
+    padding: 0px 10px;
+}
+
+.kerala-destinations h3{
+ margin: 10px 0px;
+}
+
+
+@media only screen and (max-width: 600px) {
+
+  
+      .kerala-section {
+        background: linear-gradient(rgba(0, 0, 0, 0.382), rgba(0, 0, 0, 0.366)), url('../images/kerala-banner.jpg') no-repeat center center/cover;
+        height: 300px;
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+    }
+
+    .kerala-banner h1 {
+        font-size: 2rem;
+    }
+    
+    .kerala-banner p{
+        font-size: 1.2rem;
+    }
+   
+    .kerala-destinations img{
+        height: 200px;
+    }
+    }
+
+ /* keralatour-destination-section-end */
+</style>
   <!-- kerala banner Section  start -->
   <section class="kerala-section">
         <div class="container kerala-banner">
@@ -22,7 +96,7 @@
                 <p  class="ads-p-c mt-3 b-5">Kerala, often referred to as "God's Own Country," is a beautiful state in the southern part of India, known for its lush green landscapes, serene backwaters, and rich cultural heritage. The state's major attractions include the tranquil backwaters of Alleppey, the scenic hill stations like Munnar, pristine beaches such as Kovalam, and the vibrant traditions like Kathakali dance and Ayurveda. Kerala is also famous for its spice plantations and delicious cuisine. Its unique mix of natural beauty and rich history makes it a must-visit destination for travelers.
                 </p>
        
-                <img src="./images/kerala-view-img1.jpg" data-aos="flip-left"
+                <img src="{{ asset('assets/images/kerala-view-img1.jpg') }}" data-aos="flip-left"
                     width="400px" alt>
             </div>
 
@@ -54,7 +128,7 @@
           <div class="row">
   
               <div class="col-md-3 mb-3 mt-2">
-                  <img src="./images/kerala-attraction1-img.jpg" data-aos="fade-up"
+                  <img src="{{ asset('assets/images/kerala-attraction1-img.jpg') }}" data-aos="fade-up"
                       width="100%" height="250px" alt="">
                       <div class="manali-content border">
                   <h3>Alleppey Backwaters</h3>
@@ -65,7 +139,7 @@
 
 
               <div class="col-md-3 mb-3 mt-2">
-                <img src="./images/kerala-attraction2-img.jpg" data-aos="fade-up"
+                <img src="{{ asset('assets/images/kerala-attraction2-img.jpg') }}" data-aos="fade-up"
                     width="100%" height="250px" alt="">
                     <div class="manali-content border">
                 <h3>Munnar</h3>
@@ -78,7 +152,7 @@
 
 
             <div class="col-md-3 mb-3 mt-2">
-                <img src="./images/kerala-attraction3-img.webp" data-aos="fade-up"
+                <img src="{{ asset('assets/images/kerala-attraction3-img.webp') }}" data-aos="fade-up"
                     width="100%" height="250px" alt="">
                     <div class="manali-content border">
                 <h3>Kochi </h3>
@@ -90,7 +164,7 @@
 
 
             <div class="col-md-3 mb-3 mt-2">
-                <img src="./images/kerala-attraction4-img.jpg" data-aos="fade-up"
+                <img src="{{ asset('assets/images/kerala-attraction4-img.jpg') }}" data-aos="fade-up"
                     width="100%" height="250px" alt="">
                     <div class="manali-content border">
                 <h3>Thekkady </h3>
@@ -100,7 +174,7 @@
 
 
             <div class="col-md-3 mb-3 mt-2">
-                <img src="./images/kerala-attraction5-img.jpg" data-aos="fade-up"
+                <img src="{{ asset('assets/images/kerala-attraction5-img.jpg') }}" data-aos="fade-up"
                     width="100%" height="250px" alt="">
                     <div class="manali-content border">
                 <h3>Kovalam Beach</h3>
@@ -110,7 +184,7 @@
 
 
             <div class="col-md-3 mb-3 mt-2">
-                <img src="./images/kerala-attraction6-img.jfif" data-aos="fade-up"
+                <img src="{{ asset('assets/images/kerala-attraction6-img.jfif') }}" data-aos="fade-up"
                     width="100%" height="250px" alt="">
                     <div class="manali-content border">
                 <h3>Wayanad</h3>
@@ -120,7 +194,7 @@
 
 
             <div class="col-md-3 mb-3 mt-2">
-                <img src="./images/kerala-attraction7-img.jpg" data-aos="fade-up"
+                <img src="{{ asset('assets/images/kerala-attraction7-img.jpg') }}" data-aos="fade-up"
                     width="100%" height="250px" alt="">
                     <div class="manali-content border">
                 <h3>Varkala Beach</h3>
@@ -130,7 +204,7 @@
 
 
             <div class="col-md-3 mb-3 mt-2">
-                <img src="./images/kerala-attraction8-img.jpg" data-aos="fade-up"
+                <img src="{{ asset('assets/images/kerala-attraction8-img.jpg') }}" data-aos="fade-up"
                     width="100%" height="250px" alt="">
                     <div class="manali-content border">
                 <h3>Athirappilly Waterfalls</h3>
@@ -141,7 +215,7 @@
 
 
             <div class="col-md-3 mb-3 mt-2">
-                <img src="./images/kerala-attraction9-img.jfif" data-aos="fade-up"
+                <img src="{{ asset('assets/images/kerala-attraction9-img.jfif') }}" data-aos="fade-up"
                     width="100%" height="250px" alt="">
                     <div class="manali-content border">
                 <h3>Kumarakom </h3>
@@ -152,7 +226,7 @@
 
 
             <div class="col-md-3 mb-3 mt-2">
-                <img src="./images/kerala-attraction10-img.jpg" data-aos="fade-up"
+                <img src="{{ asset('assets/images/kerala-attraction10-img.jpg') }}" data-aos="fade-up"
                     width="100%" height="250px" alt="">
                     <div class="manali-content border">
                 <h3>Trivandrum </h3>
@@ -163,7 +237,7 @@
 
             
             <div class="col-md-3 mb-3 mt-2">
-                <img src="./images/kerala-attraction11-img.jpg" data-aos="fade-up"
+                <img src="{{ asset('assets/images/kerala-attraction11-img.jpg') }}" data-aos="fade-up"
                     width="100%" height="250px" alt="">
                     <div class="manali-content border">
                 <h3>Trissur </h3>
@@ -174,7 +248,7 @@
 
             
             <div class="col-md-3 mb-3 mt-2">
-                <img src="./images/kerala-attraction12-img.jpg" data-aos="fade-up"
+                <img src="{{ asset('assets/images/kerala-attraction12-img.jpg') }}" data-aos="fade-up"
                     width="100%" height="250px" alt="">
                     <div class="manali-content border">
                 <h3>Silent Valley National Park </h3>
@@ -378,40 +452,40 @@
                 <!-- Package 1 -->
                 <div class="col-lg-4 col-md-6 mb-4">
                     <div class="card">
-                        <img src="./images/kerala-houseboad-img.jfif" class="card-img-top" alt="Backwaters Package">
+                        <img src="{{ asset('assets/images/kerala-houseboad-img.jfif') }}"class="card-img-top" alt="Backwaters Package">
                         <div class="card-body">
                             <h5 class="card-title">Backwaters and Houseboat Tour</h5>
                             <p class="card-text">Enjoy a tranquil houseboat ride through the scenic backwaters of Alleppey.</p>
-                            <a href="#" class="btn btn-primary">Book Now</a>
+                            <a href="#" class="btn btn-primary">Add to cart</a>
                         </div>
                     </div>
                 </div>
                 <!-- Package 2 -->
                 <div class="col-lg-4 col-md-6 mb-4">
                     <div class="card">
-                        <img src="./images/kerala-beach-img.jpg" class="card-img-top" alt="Beach and Ayurveda">
+                        <img src="{{ asset('assets/images/kerala-beach-img.jpg') }}" class="card-img-top" alt="Beach and Ayurveda">
                         <div class="card-body">
                             <h5 class="card-title">Beach and Ayurveda Wellness Retreat</h5>
                             <p class="card-text">Relax on the golden beaches of Kovalam and indulge in Ayurvedic therapies.</p>
-                            <a href="#" class="btn btn-primary">Book Now</a>
+                            <a href="#" class="btn btn-primary">Add to cart</a>
                         </div>
                     </div>
                 </div>
                 <!-- Package 3 -->
                 <div class="col-lg-4 col-md-6 mb-4">
                     <div class="card">
-                        <img src="./images/kerala-munnar-hill-img.jpg" class="card-img-top" alt="Hill Station Escape">
+                        <img src="{{ asset('assets/images/kerala-munnar-hill-img.jpg') }}" class="card-img-top" alt="Hill Station Escape">
                         <div class="card-body">
                             <h5 class="card-title">Munnar Hill Station Escape</h5>
                             <p class="card-text">Breathe in the cool mountain air and explore the tea plantations of Munnar.</p>
-                            <a href="#" class="btn btn-primary">Book Now</a>
+                            <a href="#" class="btn btn-primary">Add to cart</a>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
     </section>
-      
+
 <!-- Travel Information Section start -->
 <section id="travel-info text-center" data-aos="zoom-in">
     <div class="container travel-information-container  bg-warning text-center mt-3 py-4">

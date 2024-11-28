@@ -308,7 +308,7 @@
   <div class="modal-dialog modal-md">
     <div class="modal-content">
       <div class="modal-header bg-warning">
-        <h5 class="modal-title" id="bookingModalLabel">Confirmmmm Your Booking</h5>
+        <h5 class="modal-title" id="bookingModalLabel">Confirm Your Booking</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
@@ -470,6 +470,7 @@
                 // Navigate to the booking page with the dynamic booking ID
                 window.location.href = `/booking/${response.booking_id}`;
             },
+
             error: function (response) {
                 // Handle validation errors
                 if (response.status === 422) {

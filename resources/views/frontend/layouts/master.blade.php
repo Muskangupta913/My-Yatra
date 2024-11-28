@@ -57,7 +57,7 @@
               class="fa-solid fa-envelope px-1"></i></a>
           <a href="{{ route('loginView')}}" class="btn btn-warning btn-sm rounded-0 fw-bold mx-3 px-3"><i
               class="fa-regular fa-user"></i> LOGIN</a>
-              <<a href="{{ route('checkout') }}" class="nav-link d-inline-block position-relative" style="margin-top: 5px;">
+            <<a href="{{ route('checkout') }}" class="nav-link d-inline-block position-relative" style="margin-top: 5px;">
     <i class="fa fa-shopping-cart" style="font-size: 18px;"></i>
     <span id="cart-count" class="badge bg-danger rounded-pill position-absolute" 
           style="top: -10px; right: -10px; font-size: 11px;">
@@ -158,8 +158,8 @@
              <li><a href="{{ url('/delhi-section')}}">Delhi</a></li>
              <li><a href="{{ url('/goa-section')}}">Goa Tour</a></li>
              <li><a href="{{ url('/manali-section')}}">Manali</a></li>
-             <li><a href="{{ url('/goa-section')}}">Kerala</a></li>
-             <li><a href="{{ url('/goa-section')}}">Coimbatore</a></li>
+             <li><a href="{{ url('/kerela-section')}}">Kerala</a></li>
+             <li><a href="{{ url('/coimbatore-section')}}">Coimbatore</a></li>
              <li><a href="{{ url('/mussoorie-section')}}">Mussoorie</a></li>
           </ul>
         </div>

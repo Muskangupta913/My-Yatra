@@ -30,6 +30,12 @@ class Booking extends Model
     {
         return $this->hasMany(Passenger::class, 'booking_id');
     }
+    public function user()
+{
+    return $this->belongsTo(User::class, 'user_id');
+}
+
+    
 }
 
 ?>
