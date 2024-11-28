@@ -160,7 +160,7 @@
              <li><a href="{{ url('/manali-section')}}">Manali</a></li>
              <li><a href="{{ url('/goa-section')}}">Kerala</a></li>
              <li><a href="{{ url('/goa-section')}}">Coimbatore</a></li>
-             <li><a href="{{ url('/goa-section')}}">Mussoorie</a></li>
+             <li><a href="{{ url('/mussoorie-section')}}">Mussoorie</a></li>
           </ul>
         </div>
         <div class="col-md-3 quick-links address col-lg-3 col-xl-3 mb-3 p-0">

@@ -44,6 +44,9 @@ Route::get('/delhi-section', function () {
 Route::get('/manali-section', function () {
   return view('manali-section'); // Assuming the view file is manali-section.blade.php
 });
+Route::get('/mussoorie-section', function () {
+  return view('mussoorie-section'); // Assuming the view file is manali-section.blade.php
+});
 
 Route::get('/flight-booking', [FlightController::class, 'index'])->name('flight.booking');
 Route::post('/search-flights', [FlightController::class, 'search'])->name('flight.search');
