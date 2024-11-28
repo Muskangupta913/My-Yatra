@@ -122,6 +122,9 @@
         <p>Tax: <span id="tax">₹0.00</span></p>
         <p>Travel Charge: ₹500.00</p>
         <p class="total-price">Total: <span id="total-price">₹0.00</span></p>
+        <button type="button" class="checkout-button w-full py-3 text-white rounded-lg mt-4" onclick="window.location.href='{{ route('payment') }}'">
+        <i class="fas fa-check-circle mr-2"></i> Proceeddddd to Pay
+        </button>
     </div>
 
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
