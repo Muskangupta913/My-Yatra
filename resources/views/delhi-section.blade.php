@@ -48,7 +48,6 @@
  margin: 10px 0px!important;
  }
 
-
  @media only screen and (max-width: 600px) {
 
     .delhi-destinations .col-md-3 img{   
@@ -155,7 +154,8 @@
 
         </div>
     </div>
-</section>            
+</section>  
+          
 <!-- Top Attractions Section -->
 <section id="attractions " data-aos="fade-up">
   <div class="container-fluid delhi-destinations  mb-4 mt-5 py-3 px-4 text-center">

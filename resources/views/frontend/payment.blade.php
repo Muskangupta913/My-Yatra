@@ -25,7 +25,7 @@
   align-items: center;    /* Center vertically */
   padding: 20px;
   min-height: 100vh;
-  background-image: url("{{ asset('assets/images/background_img.jpeg') }}");
+  background-image: url("{{ asset('assets/images/bg.webp') }}");
   background-repeat: no-repeat;
   background-size: cover;
 }
@@ -79,7 +79,7 @@
     background-color: rgba(0, 0, 0, 0.1);
 }
 .container form .row .col .inputBox input:focus {
-  border: 1px solid #27ae60; /* Highlights border on focus */
+  border: 1px solid #FF0000; /* Highlights border on focus */
   background-color: #fff; /* Changes background color on focus */
 }
 
@@ -135,11 +135,9 @@
 
 </style>
 </head>
-
 <body>
     <div class="container">
         <form action="">
-
             <!-- Billing Address Section -->
             <div class="row">
                 <div class="col">
@@ -180,7 +178,7 @@
                     <div class="payment-methods">
                         <label>
                             <input type="radio" name="payment-method" value="card" checked><b> Credit Card</b>
-                            <img src="{{ asset('assets/images/payment_img.jpeg') }}" alt="Payment Image">
+                            <!-- <img src="{{ asset('assets/images/pay.jpg') }}" alt="Payment Image" style="width: 50px; height: 50px;"/> -->
 
                         </label>
                         <label>
@@ -221,33 +219,29 @@
                     <!-- QR Payment Section -->
                     <div class="payment-option qr-option" style="display:none;">
                         <h4>Scan the QR Code</h4>
-                        <div id="qr-code">
-                      
-                            <img src="{{ asset('assets/images/qr1.jpeg')}}" alt="Scan the QR Code" />
+                        <div id="qr-code"style="text-align:center;">
+                            <img src="{{ asset('assets/images/qr.jpeg')}}" alt="Scan the QR Code" style="width: 200px; height: 200px;"/>
                             <p>Use any payment app to scan and pay.</p>
                         </div>
                     </div>
-
                     <!-- UPI Payment Section -->
                     <div class="payment-option upi-option" style="display:none;">
                         <h4>Pay via UPI</h4>
                         <div class="inputBox">
-                            <span>Enter UPI ID:</span>
-                            <input type="text" placeholder="example@upi" required>
+                        <img src="{{ asset('assets/images/upi.jpeg')}}" alt="Enter UPI ID:" />
+                            <!-- <span>Enter UPI ID:</span>
+                            <input type="text" placeholder="example@upi" required> -->
                         </div>
                         <p>Use your UPI app to make the payment to the provided UPI ID.</p>
                     </div>
-
                 </div>
             </div>
-
             <!-- Submit Button -->
             <div class="submit-btn-container">
                 <input type="submit" value="Proceed to Checkout" class="submit-btn">
             </div>
         </form>
     </div>
-
     <script>
         // JavaScript to handle showing and hiding of payment methods based on user selection
         document.addEventListener("DOMContentLoaded", function () {

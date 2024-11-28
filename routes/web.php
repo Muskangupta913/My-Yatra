@@ -44,6 +44,17 @@ Route::get('/delhi-section', function () {
 Route::get('/manali-section', function () {
   return view('manali-section'); // Assuming the view file is manali-section.blade.php
 });
+Route::get('/mussoorie-section', function () {
+  return view('mussoorie-section'); // Assuming the view file is mussoorie-section.blade.php
+});
+Route::get('/kerela-section', function () {
+  return view('kerela-section'); // Assuming the view file is kerela-section.blade.php
+});
+
+Route::get('/coimbatore-section', function () {
+  return view('coimbatore-section'); // Assuming the view file is kerela-section.blade.php
+});
+
 
 Route::get('/flight-booking', [FlightController::class, 'index'])->name('flight.booking');
 Route::post('/search-flights', [FlightController::class, 'search'])->name('flight.search');
@@ -266,5 +277,3 @@ Route::get('/mussoorie', [CityController::class, 'mussoorie'])->name('mussoorie'
 });
 
 Route::get('/booking/{bookingId}', [HomeController::class, 'book'])->name('booking');
-
-

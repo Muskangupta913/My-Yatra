@@ -80,7 +80,7 @@
         margin-top: 1.2rem;
       }    
   }
-  
+   
  /* manalitour-destination-section-end */
 
 </style>
@@ -263,13 +263,8 @@
     .</p>
 </div>
 </div>
-
-
-
 <div class="col-md-3  mt-2">
-  <img src='{{ asset("assets/images/manali-attraction12
-  -img.webp") }}' data-aos="fade-up"
-      width="100%" height="250px" alt="">
+  <img src='{{ asset("assets/images/manali-attraction13-img.webp") }}' data-aos="fade-up"  width="100%" height="250px" alt="">
       <div class="manali-content border">
   <h3> Gauri Shankar temple, Manali </h3>
   <p>Located just a short walk from the famous Calangute Beach, Villa Calangute offers a private, luxurious escape in Goa. Perfect for families or groups, this villa combines modern amenities with Goan charm, featuring spacious rooms, a private pool, lush gardens, and personalized service. Enjoy the best of Goa’s vibrant nightlife, shopping, and dining, all while relaxing in your private haven.
@@ -519,6 +514,4 @@
 </section>
 
 <!-- Travel Information Section end -->
-
-
 @endsection
