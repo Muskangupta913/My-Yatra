@@ -25,5 +25,10 @@ class Cart extends Model
     {
         return $this->belongsTo(Package::class);
     }
+    // Cart Model
+public function booking()
+{
+    return $this->hasOne(Booking::class, 'package_id', 'package_id')
+                ->where('user_id', $this->user_id);  // Ensures it’s the current user's booking
 }
-
+}

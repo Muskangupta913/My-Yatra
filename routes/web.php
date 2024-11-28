@@ -154,6 +154,10 @@ Route::get('/verify/{token}', [AuthController::class, 'verify'])->name('verify')
  Route::middleware(['auth'])->group(function () {
   Route::post('/addtocart/{id}', [HomeController::class, 'addtocart'])->name('addtocart');
   Route::get('/cart/count', [HomeController::class, 'getCartCount'])->name('cart.count');
+  Route::get('/cart/items', [HomeController::class, 'getCartItems']);
+  Route::delete('/cart/remove/{id}', [HomeController::class, 'removeFromCart']);
+  Route::post('/cart/update/{id}', [HomeController::class, 'updateCartItem']);
+
 });
 
 // User Dashboard Route

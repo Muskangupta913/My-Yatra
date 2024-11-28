@@ -502,7 +502,9 @@ public function  payment()
 }
 
 public function checkout(){
-    return view('frontend.checkout');
+    $cartItems = Cart::all(); // Example: Retrieve cart items from the database
+
+    return view('frontend.checkout',compact('cartItems'));
 }
 
 public function ourblog()
@@ -568,6 +570,119 @@ public function ourblog()
     $cartCount = Cart::where('user_id', Auth::id())->count();
     return response()->json(['count' => $cartCount]);
 }
+
+
+
+public function getCartItems()
+{
+    $cartItems = Cart::where('user_id', Auth::id())
+        ->with('package') // Assuming the `package` relation exists in your Cart model
+        ->get();
+
+    return response()->json($cartItems);
+}
+
+//remove cart
+
+public function removeFromCart($id)
+{
+    try {
+        $cartItem = Cart::findOrFail($id);
+        $cartItem->delete();
+
+        return response()->json(['success' => true, 'message' => 'Item removed from cart']);
+    } catch (\Exception $e) {
+        \Log::error('Remove Cart Error: ' . $e->getMessage());
+        return response()->json(['success' => false, 'message' => 'Failed to remove item from cart'], 500);
+    }
+}
+
+
+
+public function removeCartItem($cartId)
+{
+    try {
+        $cartItem = Cart::findOrFail($cartId);
+        $packageId = $cartItem->package_id;
+
+        // Delete the cart item
+        $cartItem->delete();
+
+        // Optionally, delete the booking associated with this cart item
+        $booking = Booking::where('package_id', $packageId)->first();
+        if ($booking) {
+            $booking->delete();
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Item removed from cart and associated booking deleted.',
+        ]);
+    } catch (\Exception $e) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Error removing cart item: ' . $e->getMessage(),
+        ], 500);
+    }
+}
+
+public function updateCartItem(Request $request, $cartId)
+{
+    $validated = $request->validate([
+        'adults' => 'required|integer|min:1',
+        'children' => 'required|integer|min:0',
+    ]);
+
+    try {
+        // Find the corresponding cart item by $cartId
+        $cartItem = Cart::findOrFail($cartId);
+
+        // Get the authenticated user
+        $user = Auth::user();
+
+        // Check if the cart item has an associated booking
+        $booking = Booking::where('package_id', $cartItem->package_id)
+                          ->where('user_id', $user->id) // Ensure it's the current user's booking
+                          ->first();
+
+        if ($booking) {
+            // Update the existing booking
+            $booking->update([
+                'adults' => $validated['adults'],
+                'children' => $validated['children'],
+                'full_name' => $user->name,
+                'email' => $user->email,
+                'phone' => $user->phone,
+            ]);
+        } else {
+            // Create a new booking if none exists for the given package_id and user_id
+            $booking = Booking::create([
+                'user_id' => $user->id,  // Associate booking with the user
+                'package_id' => $cartItem->package_id,
+                'adults' => $validated['adults'],
+                'children' => $validated['children'],
+                'full_name' => $user->name,
+                'email' => $user->email,
+                'phone' => $user->phone,
+                'terms_accepted' => true, // Assume terms are accepted by default
+                'travel_date' => now(),   // Set the travel date to the current date (or customize as needed)
+            ]);
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Booking updated successfully!',
+            'booking' => $booking,
+        ]);
+
+    } catch (\Exception $e) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Error updating booking: ' . $e->getMessage(),
+        ], 500);
+    }
+}
+
 
 
 //checkouttttt
