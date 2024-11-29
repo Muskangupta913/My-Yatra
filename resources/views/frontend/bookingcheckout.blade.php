@@ -21,6 +21,7 @@
             gap: 1.5rem;
             margin-top: 2rem;
             padding: 1rem;
+            justify-content: space-between;
         }
 
         .details-card, .summary-card {
@@ -29,12 +30,11 @@
             padding: 1.5rem;
             border-radius: 1rem;
             box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
-            width: 100%;
+            width: 48%; /* Adjusted for side-by-side layout */
         }
 
         .summary-card {
             max-width: 450px;
-            margin: 0 auto;
         }
 
         .checkout-button {
@@ -52,24 +52,24 @@
 
         .destination-item {
             display: flex;
-            flex-direction: row;
             align-items: center;
             border: 1px solid #e0e0e0;
-            padding: 1rem;
+            padding: 1.5rem;
             border-radius: 0.75rem;
             background-color: #f8f9fa;
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
             margin-bottom: 1rem;
             width: 100%;
             position: relative;
+            flex-direction: row-reverse; /* Image will be on the right */
         }
 
         .destination-item img {
-            width: 250px; /* Increased size */
-            height: auto;
+            width: 200px; /* Adjusted size */
+            height: 150px; /* Fixed height */
             border-radius: 0.75rem;
             object-fit: cover;
-            margin-right: 1.5rem;
+            margin-left: 2rem; /* Increased space between image and details */
         }
 
         .destination-item .destination-details {
@@ -108,10 +108,12 @@
 
         /* Responsive Design */
         @media (max-width: 1024px) {
-            /* For tablets and smaller screens */
             .checkout-container {
                 flex-direction: column; /* Stack sections vertically on smaller screens */
-                gap: 2rem;
+            }
+
+            .details-card, .summary-card {
+                width: 100%; /* Full width for smaller screens */
             }
 
             .destination-item {
@@ -119,25 +121,24 @@
             }
 
             .destination-item img {
-                width: 100%; /* Full width on smaller screens */
+                width: 100%; /* Full width image on smaller screens */
                 height: auto;
                 margin-right: 0;
                 margin-bottom: 1rem;
             }
 
             .summary-card {
-                width: 100%; /* Take full width on smaller screens */
+                width: 100%; /* Full width summary */
             }
         }
 
         @media (max-width: 640px) {
-            /* For mobile screens */
             .checkout-container {
                 padding: 1rem;
             }
 
             .destination-item img {
-                width: 100%; /* Full width on mobile */
+                width: 100%; /* Full width image on mobile */
                 height: auto;
             }
 
@@ -145,12 +146,8 @@
                 flex-direction: column; /* Stack image and details vertically */
             }
 
-            .summary-card {
-                width: 100%; /* Full width on mobile */
-            }
-
             .checkout-button {
-                font-size: 1rem; /* Adjust button size for mobile */
+                font-size: 1rem;
                 padding: 1rem;
             }
 
@@ -202,21 +199,27 @@
 
     <script>
         // Fetching the booking data from the Laravel controller (as passed to the view)
-        let booking = @json($booking); // The single booking object
+        let booking = @json($booking);
+        const package = booking.package;  // The single booking object
+        console.log('Booking', booking);
+        console.log('Package', package);
 
         // A function to calculate and update the price summary
         function updatePriceSummary() {
-            let subtotal = booking.package.price * (booking.adults + booking.children);
-            let tax = subtotal * 0.18; // 18% tax
-            let travelCharge = 500;
-            let totalPrice = subtotal + tax + travelCharge;
+            let adultPrice = package.ragular_price * 2 * booking.adults;  // Double the price for each adult
+            let childrenPrice = package.ragular_price * 0.5 * booking.children;  // Halve the price for each child
+            let subtotal = adultPrice + childrenPrice; // Total price from adults and children
 
+            // Tax and travel charge
+            let tax = subtotal * 0.18; // 18% tax
+            let travelCharge = 500; // Travel charge
+            let totalPrice = subtotal + tax + travelCharge; // Final total price including tax and travel charge
+
+            // Update the HTML with the calculated values
             document.getElementById('subtotal').textContent = `₹${subtotal}`;
             document.getElementById('tax').textContent = `₹${tax}`;
             document.getElementById('total-price').textContent = `₹${totalPrice}`;
-
-            const totalAllDestinations = subtotal;
-            document.getElementById('all-destinations-total').textContent = `₹${totalAllDestinations}`;
+            document.getElementById('all-destinations-total').textContent = `₹${subtotal}`;
         }
 
         // Function to render the booking details on the page
@@ -224,14 +227,16 @@
             const destinationList = document.getElementById('destination-list');
             destinationList.innerHTML = ''; // Clear previous content
 
-            const bookingTotal = (booking.package.price * booking.adults) + (booking.package.price * booking.children);
+            const bookingTotal = package.ragular_price * (booking.adults + booking.children);
 
             const div = document.createElement('div');
             div.classList.add('destination-item');
             div.innerHTML = `
-                <img src="{{ asset("assets/images/goa-about-img.jpg") }}" style="width: 250px; height: auto; object-fit: cover; border-radius: 0.75rem;" alt="${booking.package.package_name}">
                 <div class="destination-details">
-                    <h4 class="text-lg font-semibold">${booking.package.package_name}</h4>
+                 <p class="text-sm text-gray-600"><b>Package:</b> ${package.package_name}</p>
+                    <p class="text-sm text-gray-600"><b>Duration:</b> ${package.duration}</p>
+                    <p class="text-sm text-gray-600"><b>Start Date:</b> ${package.start_date}</p>
+                    <p class="text-sm text-gray-600"><b>End Date:</b> ${package.end_date}</p>
                     <p class="text-sm text-gray-600"><b>Name:</b> ${booking.full_name}</p>
                     <p class="text-sm text-gray-600"><b>Phone no.:</b> ${booking.phone}</p>
                     <p class="text-sm text-gray-600"><b>E-mail:</b> ${booking.email}</p>
@@ -243,9 +248,11 @@
                         <p class="font-semibold text-gray-800">Total Price: ₹${bookingTotal}</p>
                     </div>
                 </div>
+                <img src="/uploads/packages/${package.photo}" alt="${package.package_name}">
             `;
             destinationList.appendChild(div);
         }
+
         // Function to remove the booking (can be modified if needed to interact with backend)
         function removeBooking() {
             alert("Booking has been removed.");

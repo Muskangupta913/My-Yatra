@@ -565,6 +565,8 @@ public function ourblog()
           ], 500);
       }
     }
+
+
       public function getCartCount()
 {
     $cartCount = Cart::where('user_id', Auth::id())->count();
@@ -751,11 +753,13 @@ public function store(Request $request)
             'travel_date' => $validatedData['travel_date'],
             'terms_accepted' => $validatedData['terms'],
         ]);
+        $package = Package::findOrFail($validatedData['package_id']);
         
         // Return success response with booking ID
         return response()->json([
             'success' => 'Booking confirmed successfully!',
-            'booking_id' => $booking->id
+            'booking_id' => $booking->id,
+            'package' => $package
         ]);
         
     } catch (\Illuminate\Validation\ValidationException $e) {
