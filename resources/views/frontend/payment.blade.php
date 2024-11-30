@@ -191,7 +191,6 @@
 
                     <!-- Card Payment Section -->
                     <div class="payment-option card-option">
-
                         <div class="inputBox">
                             <span>Name on Card:</span>
                             <input type="text" placeholder="Make My Bharat Yatra" required>
@@ -215,7 +214,6 @@
                             </div>
                         </div>
                     </div>
-
                     <!-- QR Payment Section -->
                     <div class="payment-option qr-option" style="display:none;">
                         <h4>Scan the QR Code</h4>
@@ -258,7 +256,6 @@
                     showPaymentOption(event.target.value);
                 });
             });
-
             function showPaymentOption(method) {
                 // Hide all options first
                 cardOption.style.display = 'none';
@@ -275,6 +272,17 @@
                 }
             }
         });
+
+       // for disabling to see source code
+    document.addEventListener("contextmenu", (e) => e.preventDefault()); // Disable right-click
+    document.addEventListener("keydown", (e) => {
+        if (e.ctrlKey && (e.key === 'u' || e.key === 's' || e.key === 'p')) {
+            // Disable Ctrl+U (View Source), Ctrl+S (Save Page), and Ctrl+P (Print)
+            e.preventDefault();
+        }
+    });
+
+
     </script>
 </body>
 

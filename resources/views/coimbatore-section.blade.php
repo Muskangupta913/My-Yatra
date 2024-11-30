@@ -118,7 +118,7 @@
                 <h2>About Coimbatore</h2>
                 <p class="ads-p-c mt-3 b-5">Manali, a popular hill station nestled in the mountains of Himachal Pradesh, offers stunning views, adventure activities, and a serene environment. It’s the perfect destination for nature lovers and adventure enthusiasts alike.</p>
        
-                <img src="./images/about-coimbatore-img.jpg" data-aos="flip-left"
+                <img src="{{ asset('assets/images/about-coimbatore-img.jpg') }}" data-aos="flip-left"
                     width="400px" alt>
             </div>
 
@@ -157,7 +157,7 @@
 
 
               <div class="col-md-3 mb-3 mt-2">
-                <img src="{{ asset('assets/images/coimbatore-attraction2-img.jpg') }}" data-aos="fade-up"
+                <img src="{{ asset('assets/images/coimbatore-attraction2-img.avif') }}" data-aos="fade-up"
                     width="100%" height="250px" alt="">
                     <div class="coimbatore-content border">
                 <h3> Vydehi Falls </h3>
@@ -215,7 +215,7 @@
 
             
             <div class="col-md-3 mb-3 mt-2">
-                <img src="{{ asset('assets/images/coimbatore-attraction7-img.webp') }}"avif" data-aos="fade-up"
+                <img src="{{ asset('assets/images/coimbatore-attraction7-img.avif') }}" data-aos="fade-up"
                     width="100%" height="250px" alt="">
                     <div class="coimbatore-content border">
                 <h3> Black Thunder Water Park  </h3>
@@ -228,7 +228,7 @@
 
             
             <div class="col-md-3 mb-3 mt-2">
-                <img src="./images/coimbatore-attraction8-img.webp" data-aos="fade-up"
+                <img src="{{ asset('assets/images/coimbatore-attraction8-img.webp') }}" data-aos="fade-up"
                     width="100%" height="250px" alt="">
                     <div class="coimbatore-content border">
                 <h3> VOC Park & Zoo </h3>
@@ -240,7 +240,7 @@
 
             
             <div class="col-md-3 mb-3 mt-2">
-                <img src="./images/coimbatore-attraction9-img.jpg" data-aos="fade-up"
+                <img src="{{ asset('assets/images/coimbatore-attraction9-img.jpg') }}" data-aos="fade-up"
                     width="100%" height="250px" alt="">
                     <div class="coimbatore-content border">
                 <h3> TNAU Botanical Garden </h3>
@@ -251,7 +251,7 @@
 
 
             <div class="col-md-3 mb-3 mt-2">
-                <img src="./images/coimbatore-attraction10-img.jpg" data-aos="fade-up"
+                <img src="{{ asset('assets/images/coimbatore-attraction10-img.jpg') }}" data-aos="fade-up"
                     width="100%" height="250px" alt="">
                     <div class="coimbatore-content border">
                 <h3> Eachanari Vinayagar Temple </h3>
@@ -261,11 +261,8 @@
             </div>
         </div>
 
-
-
-
         <div class="col-md-3 mb-3 mt-2">
-            <img src="./images/coimbatore-attractioin11-img.jpg" data-aos="fade-up"
+            <img src="{{ asset('assets/images/coimbatore-attractioin11-img.jpg') }}" data-aos="fade-up"
                 width="100%" height="250px" alt="">
                 <div class="coimbatore-content border">
             <h3> Velliangiri Hill Temple </h3>
@@ -274,11 +271,8 @@
         </div>
     </div>
 
-
-
-
     <div class="col-md-3 mb-3 mt-2">
-        <img src="./images/coimbatore-attraction12-img.png" data-aos="fade-up"
+        <img src="{{ asset('assets/images/coimbatore-attraction12-img.png') }}" data-aos="fade-up"
             width="100%" height="250px" alt="">
             <div class="coimbatore-content border">
         <h3> Nehru Park </h3>
@@ -488,7 +482,7 @@
       <!-- Tour Package 1 -->
       <div class="col-md-6 col-lg-4">
         <div class="card h-100">
-          <img src="tour-image-1.jpg" class="card-img-top" alt="Coimbatore Heritage Tour">
+          <img src="{{ asset('assets/images/t1.jpg') }}" class="card-img-top" alt="Coimbatore Heritage Tour">
           <div class="card-body">
             <h5 class="card-title">Coimbatore Heritage Tour Package</h5>
             <p class="card-text">Explore Red Fort, Qutub Minar, Humayun’s Tomb, and more on this 3-day cultural journey.</p>
@@ -503,7 +497,7 @@
        <!-- Tour Package 2 -->
        <div class="col-md-6 col-lg-4">
         <div class="card h-100">
-          <img src="tour-image-2.jpg" class="card-img-top" alt="Cultural & Shopping Tour">
+          <img src="{{ asset('assets/images/t3.jpg') }}" class="card-img-top" alt="Cultural & Shopping Tour">
           <div class="card-body">
             <h5 class="card-title">Coimbatore Cultural & Shopping Tour</h5>
             <p class="card-text">Discover Delhi’s vibrant culture, shop in local markets, and indulge in street food.</p>
@@ -515,7 +509,7 @@
       </div>
       
       <!-- Tour Package 3 -->
-      <div class="col-md-6 col-lg-4">
+      <!-- <div class="col-md-6 col-lg-4">
         <div class="card h-100">
           <img src="tour-image-3.jpg" class="card-img-top" alt="Spiritual Tour">
           <div class="card-body">
@@ -526,13 +520,13 @@
             <a href="#" class="btn btn-primary">Book Now</a>
           </div>
         </div>
-      </div>
+      </div> -->
 
 
        <!-- Tour Package 4 -->
        <div class="col-md-6 col-lg-4">
         <div class="card h-100">
-          <img src="tour-image-4.jpg" class="card-img-top" alt="Adventure Tour">
+          <img src="{{ asset('assets/images/t2.jpg') }}" class="card-img-top" alt="Adventure Tour">
           <div class="card-body">
             <h5 class="card-title">Coimbatore Adventure & Outdoor Tour</h5>
             <p class="card-text">Experience nature, cycling tours, and hot air balloon rides with this adventurous package.</p>
@@ -544,7 +538,7 @@
       </div>
 
       <!-- Tour Package 5 -->
-      <div class="col-md-6 col-lg-4">
+      <!-- <div class="col-md-6 col-lg-4">
         <div class="card h-100">
           <img src="tour-image-5.jpg" class="card-img-top" alt="Express Tour">
           <div class="card-body">
@@ -555,11 +549,11 @@
             <a href="#" class="btn btn-primary">Book Now</a>
           </div>
         </div>
-      </div>
+      </div> -->
 
 
        <!-- Custom Tour -->
-       <div class="col-md-6 col-lg-4">
+       <!-- <div class="col-md-6 col-lg-4">
         <div class="card h-100">
           <img src="tour-image-6.jpg" class="card-img-top" alt="Custom Tour">
           <div class="card-body">
@@ -568,7 +562,7 @@
             <a href="#" class="btn btn-secondary">Customize Now</a>
           </div>
         </div>
-      </div>
+      </div> -->
 
     </div>
   </div>
