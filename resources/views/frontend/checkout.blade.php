@@ -139,8 +139,15 @@
 
                     $.each(cartItems, function (index, item) {
                         const pkg = item.package; // Access the package object
-                        const price = parseFloat(pkg.offer_price || pkg.regular_price);
-                        subtotal += price;
+                        const basePrice = parseFloat(pkg.offer_price || pkg.regular_price);
+
+                        // Default to 1 adult and 0 children if not defined
+                        const adults = item.booking ? item.booking.adults || 1 : 1;
+                        const children = item.booking ? item.booking.children || 0 : 0;
+
+                        // Calculate dynamic price based on adults and children
+                        const totalPrice = basePrice * (adults * 2 + children * 0.5);
+                        subtotal += totalPrice;
 
                         itemsHTML += `
                             <div class="destination-item flex items-start gap-4">
@@ -149,15 +156,16 @@
                                     <h4 class="text-lg font-semibold">${pkg.package_name}</h4>
                                     <p class="text-sm text-gray-600">Duration: ${pkg.duration}</p>
                                     <p class="text-sm text-gray-600">Start Date: ${pkg.start_date}</p>
-                                    <p class="text-sm text-gray-600">Price: ₹${price.toFixed(2)}</p>
+                                    <p class="text-sm text-gray-600">Base Price: ₹${basePrice.toFixed(2)}</p>
+                                    <p class="text-sm text-gray-600 font-bold">Total Price: ₹${totalPrice.toFixed(2)}</p>
                                     <div class="flex gap-4 mt-2">
                                         <div>
                                             <label for="adults-${item.id}">Adults:</label>
-                                            <input type="number" id="adults-${item.id}" value="${item.booking ? item.booking.adults : 1}" min="1">
+                                            <input type="number" id="adults-${item.id}" value="${adults}" min="1" onchange="recalculateItem(${item.id}, ${basePrice})">
                                         </div>
                                         <div>
                                             <label for="children-${item.id}">Children:</label>
-                                            <input type="number" id="children-${item.id}" value="${item.booking ? item.booking.children : 0}" min="0">
+                                            <input type="number" id="children-${item.id}" value="${children}" min="0" onchange="recalculateItem(${item.id}, ${basePrice})">
                                         </div>
                                         <button class="mt-2 bg-yellow-500 text-white px-4 py-2 rounded hover:bg-yellow-600" 
                                         onclick="updateCartItem(${item.id}, ${pkg.id})">
@@ -177,6 +185,25 @@
                     alert('Failed to fetch cart items. Please try again.');
                 }
             });
+        }
+
+        function recalculateItem(cartId, basePrice) {
+            // Recalculate total price for an individual item
+            const adults = $(`#adults-${cartId}`).val();
+            const children = $(`#children-${cartId}`).val();
+            const totalPrice = basePrice * (adults * 2 + children * 0.5);
+
+            // Update subtotal
+            let subtotal = 0;
+            $('.destination-item').each(function () {
+                const itemId = $(this).find('input[type="number"]').attr('id').split('-')[1];
+                if (itemId == cartId) {
+                    $(this).find('.font-bold').text(`Total Price: ₹${totalPrice.toFixed(2)}`);
+                }
+                subtotal += totalPrice;
+            });
+
+            updatePriceSummary(subtotal);
         }
 
         function updatePriceSummary(subtotal) {
@@ -208,32 +235,33 @@
                     } else {
                         alert('Failed to update booking: ' + response.message);
                     }
-                },
-                error: function () {
-                    alert('An error occurred while updating the cart item.');
                 }
             });
         }
 
-        function removeCartItem(id) {
-            $.ajax({
-                url: `/cart/remove/${id}`,
-                type: 'DELETE',
-                headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
-                success: function (response) {
-                    if (response.success) {
-                        fetchCartItems();
-                    } else {
-                        alert('Failed to remove cart item.');
+        function removeCartItem(cartId) {
+            if (confirm('Are you sure you want to remove this item from your cart?')) {
+                $.ajax({
+                    url: `/cart/remove/${cartId}`,
+                    method: 'DELETE',
+                    data: {
+                        _token: $('meta[name="csrf-token"]').attr('content')
+                    },
+                    success: function (response) {
+                        if (response.success) {
+                            fetchCartItems();
+                        } else {
+                            alert('Failed to remove item: ' + response.message);
+                        }
                     }
-                },
-                error: function () {
-                    alert('Error removing cart item.');
-                }
-            });
+                });
+            }
         }
 
-        $(document).ready(fetchCartItems);
+        // Fetch cart items on page load
+        $(document).ready(function () {
+            fetchCartItems();
+        });
     </script>
 </body>
 

@@ -253,7 +253,7 @@
                       <small class="text-muted d-block" style="text-decoration: line-through;margin-top:-10px; font-size:14px; font-weight:600;">₹{{ number_format($package->ragular_price) }}</small>
                        <small>Excluding applicable taxes</small>
                       </div>
-                      <button class="btn btn-danger btn-lg rounded-0" id="booknow" data-bs-toggle="modal" data-bs-target="#bookingModal">Book Now</button>
+                      <button class="btn btn-danger btn-lg rounded-0" id="booknow" data-bs-toggle="modal" data-bs-target="#bookingModal">Bookkkk Now</button>
                      </div>
                 </div>
             </div>

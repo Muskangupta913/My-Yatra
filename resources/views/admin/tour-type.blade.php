@@ -580,41 +580,41 @@ $(document).ready(function() {
 
     // Add to Cart Button Click Handler
 
-    $(document).on('click', '.add-to-cart', function(event) {
-        event.preventDefault();
-        const itemId = $(this).data('id');
-        addToCart(itemId);
-    });
+    // $(document).on('click', '.add-to-cart', function(event) {
+    //     event.preventDefault();
+    //     const itemId = $(this).data('id');
+    //     addToCart(itemId);
+    // });
 
     // Add to Cart Function
-    function addToCart(id) {
-    $.ajax({
-        url: /addtocart/${id},
-        method: 'GET',
-        headers: {
-            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-        },
-        success: function(response) {
-            if (response.success) {
-                alert('Item added to cart successfully!');
-                if (response.cartCount) {
-                    updateCartCount(response.cartCount);
-                }
-            } else {
-                alert(response.message || 'Failed to add item to cart');
-            }
-        },
-        error: function(xhr, status, error) {
-            if (xhr.status === 401) {
-                // Redirect to login page if unauthorized
-                window.location.href = '/login';
-            } else {
-                alert('Error adding item to cart');
-            }
-            console.error('Error adding to cart:', error);
-        }
-    });
-}
+//     function addToCart(id) {
+//     $.ajax({
+//         url: /addtocart/${id},
+//         method: 'GET',
+//         headers: {
+//             'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+//         },
+//         success: function(response) {
+//             if (response.success) {
+//                 alert('Item added to cart successfully!');
+//                 if (response.cartCount) {
+//                     updateCartCount(response.cartCount);
+//                 }
+//             } else {
+//                 alert(response.message || 'Failed to add item to cart');
+//             }
+//         },
+//         error: function(xhr, status, error) {
+//             if (xhr.status === 401) {
+//                 // Redirect to login page if unauthorized
+//                 window.location.href = '/login';
+//             } else {
+//                 alert('Error adding item to cart');
+//             }
+//             console.error('Error adding to cart:', error);
+//         }
+//     });
+// }
     
         
 

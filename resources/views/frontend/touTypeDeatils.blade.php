@@ -467,21 +467,15 @@
             },
             success: function (response) {
                 alert('Booking confirmed successfully!');
-                // Navigate to the booking page with the dynamic booking ID
+                // Navigate to the booking page with the dynamic booking ID and package details
                 window.location.href = `/booking/${response.booking_id}`;
             },
 
             error: function (response) {
-                // Handle validation errors
                 if (response.status === 422) {
                     let errors = response.responseJSON.errors;
-
-                    // Loop through each error and display it
                     $.each(errors, function (field, message) {
-                        // Add the 'is-invalid' class to the corresponding form field
                         $('#' + field).addClass('is-invalid');
-
-                        // Display the error message in the next sibling .invalid-feedback div
                         $('#' + field).next('.invalid-feedback').text(message[0]).show();
                     });
                 } else {
@@ -491,6 +485,7 @@
         });
     });
 });
+
   
 
 

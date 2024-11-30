@@ -170,16 +170,17 @@ Route::get('/verify/{token}', [AuthController::class, 'verify'])->name('verify')
   Route::get('/cart/items', [HomeController::class, 'getCartItems']);
   Route::delete('/cart/remove/{id}', [HomeController::class, 'removeFromCart']);
   Route::post('/cart/update/{id}', [HomeController::class, 'updateCartItem']);
+  Route::get('/booking/{bookingId}', [HomeController::class, 'book'])->name('booking');
 
 });
 
 // User Dashboard Route
-Route::group(["middleware" => ['onlyAuthenticated']], function(){
-  Route::get('/dashboard', function(){
-    return view('user.dashboard');
-  })->name('user.dashboard');
-  Route::get('/logout', [AdminController::class, 'logout'])->name('user.logout');
-});
+// Route::group(["middleware" => ['onlyAuthenticated']], function(){
+//   Route::get('/dashboard', function(){
+//     return view('user.dashboard');
+//   })->name('user.dashboard');
+//   Route::get('/logout', [AdminController::class, 'logout'])->name('user.logout');
+// });
 
 
 Route::prefix('admin')->middleware(['onlyAuthenticated', 'onlyAdmin'])->group(function () {
@@ -277,4 +278,4 @@ Route::get('/mussoorie', [CityController::class, 'mussoorie'])->name('mussoorie'
 
 });
 
-Route::get('/booking/{bookingId}', [HomeController::class, 'book'])->name('booking');
+
