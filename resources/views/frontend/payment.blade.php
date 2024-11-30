@@ -138,6 +138,11 @@
 <body>
     <div class="container">
         <form action="">
+            <!-- Red Alert for Credit Card Unavailability -->
+            <div id="credit-card-alert" class="alert alert-danger" style="display: none; padding: 10px; background-color: #f8d7da; border: 1px solid #f5c6cb; border-radius: 5px; color: #721c24; font-weight: bold; margin-bottom: 10px;">
+                Credit card payments are temporarily unavailable. Please try again later or choose another payment method. We apologize for the inconvenience.
+            </div>
+
             <!-- Billing Address Section -->
             <div class="row">
                 <div class="col">
@@ -177,15 +182,13 @@
                     <!-- Payment Methods -->
                     <div class="payment-methods">
                         <label>
-                            <input type="radio" name="payment-method" value="card" checked><b> Credit Card</b>
-                            <!-- <img src="{{ asset('assets/images/pay.jpg') }}" alt="Payment Image" style="width: 50px; height: 50px;"/> -->
-
+                            <input type="radio" name="payment-method" value="card"  onclick="showCreditCardAlert()"><b> Credit Card</b>
                         </label>
                         <label>
-                            <input type="radio" name="payment-method" value="qr"> <b>QR Code</b>
+                            <input type="radio" name="payment-method" value="qr" onclick="hideCreditCardAlert()"> <b>QR Code</b>
                         </label>
                         <label>
-                            <input type="radio" name="payment-method" value="upi"> <b>UPI</b>
+                            <input type="radio" name="payment-method" value="upi" onclick="hideCreditCardAlert()"> <b>UPI</b>
                         </label>
                     </div>
 
@@ -214,32 +217,34 @@
                             </div>
                         </div>
                     </div>
+
                     <!-- QR Payment Section -->
                     <div class="payment-option qr-option" style="display:none;">
                         <h4>Scan the QR Code</h4>
-                        <div id="qr-code"style="text-align:center;">
+                        <div id="qr-code" style="text-align:center;">
                             <img src="{{ asset('assets/images/qr.jpeg')}}" alt="Scan the QR Code" style="width: 200px; height: 200px;"/>
                             <p>Use any payment app to scan and pay.</p>
                         </div>
                     </div>
+
                     <!-- UPI Payment Section -->
                     <div class="payment-option upi-option" style="display:none;">
                         <h4>Pay via UPI</h4>
                         <div class="inputBox">
-                        <img src="{{ asset('assets/images/upi.jpeg')}}" alt="Enter UPI ID:" />
-                            <!-- <span>Enter UPI ID:</span>
-                            <input type="text" placeholder="example@upi" required> -->
+                            <img src="{{ asset('assets/images/upi.jpeg')}}" alt="Enter UPI ID:" />
                         </div>
                         <p>Use your UPI app to make the payment to the provided UPI ID.</p>
                     </div>
                 </div>
             </div>
+
             <!-- Submit Button -->
             <div class="submit-btn-container">
                 <input type="submit" value="Proceed to Checkout" class="submit-btn">
             </div>
         </form>
     </div>
+
     <script>
         // JavaScript to handle showing and hiding of payment methods based on user selection
         document.addEventListener("DOMContentLoaded", function () {
@@ -256,6 +261,7 @@
                     showPaymentOption(event.target.value);
                 });
             });
+
             function showPaymentOption(method) {
                 // Hide all options first
                 cardOption.style.display = 'none';
@@ -273,17 +279,26 @@
             }
         });
 
-       // for disabling to see source code
-    document.addEventListener("contextmenu", (e) => e.preventDefault()); // Disable right-click
-    document.addEventListener("keydown", (e) => {
-        if (e.ctrlKey && (e.key === 'u' || e.key === 's' || e.key === 'p')) {
-            // Disable Ctrl+U (View Source), Ctrl+S (Save Page), and Ctrl+P (Print)
-            e.preventDefault();
+        // Show Credit Card Alert
+        function showCreditCardAlert() {
+            document.getElementById("credit-card-alert").style.display = "block";
         }
-    });
 
+        // Hide Credit Card Alert when other payment methods are selected
+        function hideCreditCardAlert() {
+            document.getElementById("credit-card-alert").style.display = "none";
+        }
 
+        // Disable right-click and certain keyboard shortcuts
+        document.addEventListener("contextmenu", (e) => e.preventDefault()); // Disable right-click
+        document.addEventListener("keydown", (e) => {
+            if (e.ctrlKey && (e.key === 'u' || e.key === 's' || e.key === 'p')) {
+                // Disable Ctrl+U (View Source), Ctrl+S (Save Page), and Ctrl+P (Print)
+                e.preventDefault();
+            }
+        });
     </script>
 </body>
+
 
 </html>

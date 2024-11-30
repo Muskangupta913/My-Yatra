@@ -7,154 +7,225 @@
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
     <style>
-        body {
-            background: rgba(0, 0, 0, 0.6); /* Dark overlay */
-            background-size: cover;
-            background-blend-mode: overlay;
-            min-height: 100vh;
-            font-family: 'Arial', sans-serif;
-        }
+       /* General Styling */
+body {
+    background: rgba(0, 0, 0, 0.6); /* Dark overlay */
+    background-image: url("{{ asset('assets/images/goa-about-img.jpg') }}");
+    background-size: cover;
+    background-blend-mode: overlay;
+    min-height: 100vh;
+    font-family: 'Arial', sans-serif;
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
 
-        .checkout-container {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 1.5rem;
-            margin-top: 2rem;
-            padding: 1rem;
-            justify-content: space-between;
-        }
+.checkout-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+    margin-top: 2rem;
+    padding: 1rem;
+    justify-content: space-between;
+}
 
-        .details-card, .summary-card {
-            background-color: #ffffff;
-            border: 1px solid #e0e0e0;
-            padding: 1.5rem;
-            border-radius: 1rem;
-            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
-            width: 48%; /* Adjusted for side-by-side layout */
-        }
+.details-card,
+.summary-card {
+    background-color: #ffffff;
+    border: 1px solid #e0e0e0;
+    padding: 1.5rem;
+    border-radius: 1rem;
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+    width: 48%; /* Default side-by-side layout */
+}
 
-        .summary-card {
-            max-width: 450px;
-        }
+.summary-card {
+    max-width: 450px;
+}
 
-        .checkout-button {
-            background-color: #f39c12;
-            transition: background-color 0.3s ease, transform 0.3s ease;
-            font-size: 1.125rem;
-            font-weight: bold;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-        }
+.checkout-button {
+    background-color: #f39c12;
+    transition: background-color 0.3s ease, transform 0.3s ease;
+    font-size: 1.125rem;
+    font-weight: bold;
+    padding: 0.75rem 1.5rem;
+    color: #ffffff;
+    border: none;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
 
-        .checkout-button:hover {
-            background-color: #d35400;
-            transform: scale(1.05);
-        }
+.checkout-button:hover {
+    background-color: #d35400;
+    transform: scale(1.05);
+}
 
-        .destination-item {
-            display: flex;
-            align-items: center;
-            border: 1px solid #e0e0e0;
-            padding: 1.5rem;
-            border-radius: 0.75rem;
-            background-color: #f8f9fa;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-            margin-bottom: 1rem;
-            width: 100%;
-            position: relative;
-            flex-direction: row-reverse; /* Image will be on the right */
-        }
+/* Destination Item Styling */
+.destination-item {
+    display: flex;
+    align-items: flex-start;
+    border: 1px solid #e0e0e0;
+    padding: 1.5rem;
+    border-radius: 0.75rem;
+    background-color: #ffffff;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    margin-bottom: 1rem;
+    width: 100%;
+    position: relative;
+    gap: 1.5rem;
+    flex-direction: row-reverse; /* Change to row-reverse to place image on the right */
+}
 
-        .destination-item img {
-            width: 200px; /* Adjusted size */
-            height: 150px; /* Fixed height */
-            border-radius: 0.75rem;
-            object-fit: cover;
-            margin-left: 2rem; /* Increased space between image and details */
-        }
+.destination-item img {
+    width: 250px; /* Image size for larger screens */
+    height: 175px;
+    border-radius: 0.75rem;
+    object-fit: cover;
+}
 
-        .destination-item .destination-details {
-            flex: 1;
-        }
+.destination-item .destination-details {
+    flex: 1;
+    font-size: 0.95rem;
+    line-height: 1.6;
+    color: #333333;
+}
 
-        .destination-item i {
-            position: absolute;
-            top: 0.5rem;
-            right: 0.5rem;
-            cursor: pointer;
-            color: #e74c3c;
-            font-size: 1.25rem;
-            transition: color 0.3s ease;
-        }
+.destination-item .destination-details p {
+    margin: 0.5rem 0;
+}
 
-        .destination-item i:hover {
-            color: #c0392b;
-        }
+.destination-item i {
+    position: absolute;
+    top: 0.75rem;
+    right: 0.75rem;
+    cursor: pointer;
+    color: #e74c3c;
+    font-size: 1.5rem;
+    transition: color 0.3s ease;
+    padding: 0.25rem; /* Adds some space around the trash icon */
+    background-color: #ffffff; /* Optional background for visibility */
+}
 
-        .total-price {
-            font-size: 1.5rem;
-            font-weight: bold;
-            color: #2c3e50;
-        }
+.destination-item i:hover {
+    color: #c0392b;
+}
 
-        .summary-label {
-            font-size: 0.875rem;
-            color: #000000;
-        }
+.destination-item .font-semibold {
+    font-size: 1rem;
+    font-weight: bold;
+    color: #2c3e50;
+}
 
-        .details-card hr, .summary-card hr {
-            margin: 1rem 0;
-            border-color: #ddd;
-        }
+.total-price {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #2c3e50;
+    margin-top: 0.5rem;
+}
 
-        /* Responsive Design */
-        @media (max-width: 1024px) {
-            .checkout-container {
-                flex-direction: column; /* Stack sections vertically on smaller screens */
-            }
+.summary-label {
+    font-size: 0.875rem;
+    color: #000000;
+}
 
-            .details-card, .summary-card {
-                width: 100%; /* Full width for smaller screens */
-            }
+.details-card hr,
+.summary-card hr {
+    margin: 1rem 0;
+    border-color: #ddd;
+}
 
-            .destination-item {
-                flex-direction: column; /* Stack image and details vertically on smaller screens */
-            }
+/* Responsive Design */
 
-            .destination-item img {
-                width: 100%; /* Full width image on smaller screens */
-                height: auto;
-                margin-right: 0;
-                margin-bottom: 1rem;
-            }
+/* Large Desktops */
+@media (min-width: 1280px) {
+    .checkout-container {
+        padding: 2rem;
+    }
 
-            .summary-card {
-                width: 100%; /* Full width summary */
-            }
-        }
+    .details-card,
+    .summary-card {
+        width: 48%;
+    }
 
-        @media (max-width: 640px) {
-            .checkout-container {
-                padding: 1rem;
-            }
+    .destination-item img {
+        width: 300px;
+        height: 200px;
+    }
 
-            .destination-item img {
-                width: 100%; /* Full width image on mobile */
-                height: auto;
-            }
+    .checkout-button {
+        font-size: 1.25rem;
+    }
+}
 
-            .destination-item {
-                flex-direction: column; /* Stack image and details vertically */
-            }
+/* Laptops (1024px to 1279px) */
+@media (max-width: 1279px) {
+    .checkout-container {
+        padding: 1.5rem;
+    }
 
-            .checkout-button {
-                font-size: 1rem;
-                padding: 1rem;
-            }
+    .details-card,
+    .summary-card {
+        width: 48%;
+    }
 
-            .total-price {
-                font-size: 1.25rem; /* Adjust total price font for mobile */
-            }
-        }
+    .destination-item img {
+        width: 250px;
+        height: 175px;
+    }
+}
+
+/* Tablets (768px to 1023px) */
+@media (max-width: 1023px) {
+    .checkout-container {
+        flex-direction: column; /* Stack sections vertically */
+    }
+
+    .details-card,
+    .summary-card {
+        width: 100%; /* Full width for smaller screens */
+    }
+
+    .destination-item {
+        flex-direction: column; /* Stack image and details vertically */
+    }
+
+    .destination-item img {
+        width: 100%; /* Full width image on tablets */
+        height: auto;
+        margin-bottom: 1rem;
+    }
+}
+
+/* Mobile Devices (Up to 767px) */
+@media (max-width: 767px) {
+    .checkout-container {
+        padding: 1rem;
+    }
+
+    .destination-item img {
+        width: 100%; /* Full width image on mobile */
+        height: auto;
+    }
+
+    .destination-item {
+        flex-direction: column;
+    }
+
+    .checkout-button {
+        font-size: 1rem;
+        padding: 1rem;
+    }
+
+    .total-price {
+        font-size: 1.25rem; /* Adjust font size for mobile */
+    }
+
+    .details-card,
+    .summary-card {
+        width: 100%;
+    }
+}
     </style>
 </head>
 <body>
@@ -233,7 +304,7 @@
             div.classList.add('destination-item');
             div.innerHTML = `
                 <div class="destination-details">
-                 <p class="text-sm text-gray-600"><b>Package:</b> ${package.package_name}</p>
+                    <p class="text-sm text-gray-600"><b>Package:</b> ${package.package_name}</p>
                     <p class="text-sm text-gray-600"><b>Duration:</b> ${package.duration}</p>
                     <p class="text-sm text-gray-600"><b>Start Date:</b> ${package.start_date}</p>
                     <p class="text-sm text-gray-600"><b>End Date:</b> ${package.end_date}</p>
@@ -248,11 +319,10 @@
                         <p class="font-semibold text-gray-800">Total Price: ₹${bookingTotal}</p>
                     </div>
                 </div>
-                <img src="/uploads/packages/${package.photo}" alt="${package.package_name}">
+                 <img src="/uploads/packages/${package.photo}" alt="${package.package_name}">
             `;
             destinationList.appendChild(div);
         }
-
         // Function to remove the booking (can be modified if needed to interact with backend)
         function removeBooking() {
             alert("Booking has been removed.");
