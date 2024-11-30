@@ -281,8 +281,6 @@
             e.preventDefault();
         }
     });
-
-
     </script>
 </body>
 
