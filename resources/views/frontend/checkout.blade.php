@@ -167,11 +167,12 @@
                                             <label for="children-${item.id}">Children:</label>
                                             <input type="number" id="children-${item.id}" value="${children}" min="0" onchange="recalculateItem(${item.id}, ${basePrice})">
                                         </div>
-                                    </div>
-                                    <button class="mt-2 bg-yellow-500 text-white px-4 py-2 rounded hover:bg-yellow-600" 
+                                        <button class="mt-2 bg-yellow-500 text-white px-4 py-2 rounded hover:bg-yellow-600" 
                                         onclick="updateCartItem(${item.id}, ${pkg.id})">
                                         Update
                                     </button>
+                                    </div>
+                                    
                                 </div>
                                 <i class="fas fa-trash remove-item" onclick="removeCartItem(${item.id})"></i>
                             </div>`;

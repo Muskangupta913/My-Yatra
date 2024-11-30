@@ -65,6 +65,7 @@
   }
 }
 
+
 </style>
 
 <section class="packages-bg-images d-flex justify-content-center align-items-center" style="background:linear-gradient(rgba(0, 0, 0, 0.554), rgba(0, 0, 0, 0.667)), url({{ asset("uploads/destination/$destinations->photo")}}); height:300px; background-position:center center; background-size:cover;">
@@ -516,6 +517,56 @@ const travelDateInput = document.getElementById('travelDate');
         $('#package_id').val(id);
 
     });
+
+
+
+    $(document).on('click', '.add-to-cart', function(event) {
+        event.preventDefault();
+        const itemId = $(this).data('id');
+        addToCart(itemId);
+    });
+
+    // Add to Cart Function
+    function addToCart(id) {
+    $.ajax({
+        url: `/addtocart/${id}`,
+        method: 'POST',
+        headers: {
+            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+        },
+        success: function(response) {
+            if (response.success) {
+                alert('Item added to cart successfully!');
+            } else {
+                alert(response.message || 'Failed to add item to cart');
+            }
+        },
+        error: function(xhr, status, error) {
+            // Log the full error details to console
+            console.error('Error Details:', {
+                status: xhr.status,
+                responseText: xhr.responseText,
+                error: error
+            });
+            
+            if (xhr.status === 401) {
+                window.location.href = '/login';
+            } else {
+                // Try to get the error message from the response
+                try {
+                    const response = JSON.parse(xhr.responseText);
+                    alert(response.message || 'Server error occurred');
+                } catch (e) {
+                    alert('An error occurred while adding to cart. Please try again.');
+                }
+            }
+        }
+    });
+}
+        
+
+
+
      
      $('#bookingForm').on('submit', function(e) {
             e.preventDefault(); // Prevent the form from submitting traditionally
@@ -613,36 +664,40 @@ function fetchPackages(selectedPrice, selectedDuration, selectedType) {
         let discount = ((item.ragular_price - item.offer_price) / item.ragular_price) * 100;
 
         let packageHtml = `
-            <div class="col-md-6 mb-3">
-                <div class="card shadow card-body p-0">
+           <div class="col-md-6 mb-3">
+    <div class="card shadow card-body p-0">
+        <a href="/holidays/${response.destinations.slug}/${item.slug}" class="text-decoration-none text-dark">
+            <img src="/uploads/packages/${item.photo}" width="100%" style="height:250px; object-fit:cover;" alt="">
+            <div class="package-desc py-3 px-2">
+                <h5>${item.package_name.length > 38 ? item.package_name.substring(0, 38) + '...' : item.package_name}</h5>
+            </a>
+            <div class="d-flex justify-content-between">
+                <p class="btn btn-outline-danger fw-semibold btn-sm">${item.duration}</p>
+                <ul class="d-flex list-unstyled">
+                    <li><i class="fa-solid fa-hotel text-warning px-2"></i></li>
+                    <li><i class="fa-solid fa-car text-danger px-2"></i></li>
+                    <li><i class="fa-solid fa-utensils text-success px-2"></i></li>
+                </ul>
+            </div>
+            <div class="price-offer d-flex justify-content-between align-items-center">
+                <div>
+                    <p>Starting Price Per Adult</p>
+                    <p style="font-size: 20px; margin-top:-10px; font-weight:bold;">₹${Number(item.offer_price).toLocaleString('en-IN')} 
+                        <small style="font-size:14px; font-weight:600; color:green;">${discount.toFixed(2)}% Off</small>
+                    </p>
+                    <small class="text-muted d-block" style="text-decoration: line-through; margin-top:-10px; font-size:14px; font-weight:600;">₹${Number(item.ragular_price).toLocaleString('en-IN')}</small>
+                </div>
+                <div class="button-group d-flex justify-content-between w-100 mt-2">
                     <a href="/holidays/${response.destinations.slug}/${item.slug}" class="text-decoration-none text-dark">
-                        <img src="/uploads/packages/${item.photo}" width="100%" style="height:250px; object-fit:cover;" alt="">
-                        <div class="package-desc py-3 px-2">
-                            <h5>${item.package_name.length > 38 ? item.package_name.substring(0, 38) + '...' : item.package_name}</h5>
-                        </a>
-                        <div class="d-flex justify-content-between">
-                            <p class="btn btn-outline-danger fw-semibold btn-sm">${item.duration}</p>
-                            <ul class="d-flex list-unstyled">
-                                <li><i class="fa-solid fa-hotel text-warning px-2"></i></li>
-                                <li><i class="fa-solid fa-car text-danger px-2"></i></li>
-                                <li><i class="fa-solid fa-utensils text-success px-2"></i></li>
-                            </ul>
-                        </div>
-                        <div class="price-offer d-flex justify-content-between align-items-center">
-                            <div>
-                                <p>Starting Price Per Adult</p>
-                                <p style="font-size: 20px; margin-top:-10px; font-weight:bold;">₹${Number(item.offer_price).toLocaleString('en-IN')} 
-                                    <small style="font-size:14px; font-weight:600; color:green;">${discount.toFixed(2)}% Off</small>
-                                </p>
-                                <small class="text-muted d-block" style="text-decoration: line-through; margin-top:-10px; font-size:14px; font-weight:600;">₹${Number(item.ragular_price).toLocaleString('en-IN')}</small>
-                            </div>
-                               <a href="/holidays/${response.destinations.slug}/${item.slug}" class="text-decoration-none text-dark">
-                            <button class="btn btn-danger mx-2 btn-lg rounded-0 booknow" data-id="${item.id}">Book Now</button>
-                            </a>
-                        </div>
-                    </div>
+                        <button class="btn btn-danger mx-2 btn-lg rounded-0 booknow" data-id="${item.id}">Details</button>
+                    </a>
+                    <button class="btn btn-outline-danger rounded-0 add-to-cart" data-id="${item.id}">Add To Cart</button>
                 </div>
             </div>
+        </div>
+    </div>
+</div>
+
         `;
 
         // Append each package HTML to the list container
