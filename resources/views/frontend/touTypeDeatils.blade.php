@@ -305,6 +305,7 @@
 
 <!-- The Modal -->
 <div class="modal fade" id="bookingModal" tabindex="-1" aria-labelledby="bookingModalLabel" aria-hidden="true">
+<div id="alert-container"></div>
   <div class="modal-dialog modal-md">
     <div class="modal-content">
       <div class="modal-header bg-warning">
@@ -312,6 +313,7 @@
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
+     
         <form id="bookingForm">
           <div class="row">
               <div class="col-md-6 mb-3">
@@ -439,6 +441,26 @@
 
     // Submit Form
     $(document).ready(function () {
+
+      function showAlert(type, message, duration = 3000) {
+    // Create the alert HTML with a custom position
+    const alertHtml = `
+        <div class="alert alert-${type} alert-dismissible fade show  m-3 position-fixed top-0 end-0
+" role="alert" style="z-index: 1050;">
+            <strong>${message}</strong>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    `;
+
+    // Append the alert to the alert-container or body
+    $('body').append(alertHtml);
+
+    // Set a timeout to remove the alert after the specified duration
+    setTimeout(() => {
+        $('.alert').alert('close');
+    }, duration);
+}
+
     $('#bookingForm').on('submit', function (event) {
         event.preventDefault(); // Prevent traditional form submission
 
@@ -466,7 +488,7 @@
                 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content'),
             },
             success: function (response) {
-                alert('Booking confirmed successfully!');
+              showAlert('success', 'Booking confirmed successfully!');
                 // Navigate to the booking page with the dynamic booking ID and package details
                 window.location.href = `/booking/${response.booking_id}`;
             },
