@@ -2,6 +2,8 @@
 @section('title', $package->title)
 @section('meta_description', $package->meta_description)
 @section('styles')
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/css/toastr.min.css">
+
 <style>
 .packageDetailsSlider .swiper-slide img {
   
@@ -302,7 +304,6 @@
         </div>
     </div>
 </div>
-
 <!-- The Modal -->
 <div class="modal fade" id="bookingModal" tabindex="-1" aria-labelledby="bookingModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-md">
@@ -380,6 +381,8 @@
 @endsection
 
 @section('scripts')
+<script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/js/toastr.min.js"></script>
+
 
 <script>
     var swiper = new Swiper(".packageDetailsSlider", {
@@ -466,11 +469,10 @@
                 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content'),
             },
             success: function (response) {
-                alert('Booking confirmed successfully!');
+                toastr.success('Booking confirmed successfully!'); // Show success message
                 // Navigate to the booking page with the dynamic booking ID and package details
                 window.location.href = `/booking/${response.booking_id}`;
             },
-
             error: function (response) {
                 if (response.status === 422) {
                     let errors = response.responseJSON.errors;
@@ -479,16 +481,30 @@
                         $('#' + field).next('.invalid-feedback').text(message[0]).show();
                     });
                 } else {
-                    alert('An error occurred. Please try again.');
+                    toastr.error('An error occurred. Please try again.'); // Show error message
                 }
             },
         });
     });
 });
 
-  
-
-
+toastr.options = {
+        "closeButton": true,
+        "debug": false,
+        "newestOnTop": false,
+        "progressBar": true,
+        "positionClass": "toast-top-right", // Positioning the toast
+        "preventDuplicates": true,
+        "showDuration": "300", // Show duration
+        "hideDuration": "0", // Hide duration
+        "timeOut": "0", // Disable auto-dismiss
+        "extendedTimeOut": "0", // Disable auto-dismiss on hover
+        "showEasing": "swing",
+        "hideEasing": "linear",
+        "showMethod": "fadeIn",
+        "hideMethod": "fadeOut"
+    };
 
 </script>
+
 @endsection

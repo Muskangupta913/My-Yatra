@@ -702,8 +702,6 @@ public function book($bookingId)
     return view('frontend.bookingcheckout', compact('booking'));
 }
 
-
-
 public function store(Request $request) 
 {
     try {
@@ -718,16 +716,8 @@ public function store(Request $request)
                 function($attribute, $value, $fail) {
                     // Add custom logic to prevent invalid phone numbers
                     $invalidNumbers = [
-                        '0000000000',
-                        '1111111111',
-                        '2222222222',
-                        '3333333333',
-                        '4444444444',
-                        '5555555555',
-                        '6666666666',
-                        '7777777777',
-                        '8888888888',
-                        '9999999999',
+                        '0000000000', '1111111111', '2222222222', '3333333333', '4444444444', 
+                        '5555555555', '6666666666', '7777777777', '8888888888', '9999999999'
                     ];
                     
                     if (in_array($value, $invalidNumbers)) {
@@ -753,9 +743,13 @@ public function store(Request $request)
             'travel_date' => $validatedData['travel_date'],
             'terms_accepted' => $validatedData['terms'],
         ]);
+        
         $package = Package::findOrFail($validatedData['package_id']);
         
-        // Return success response with booking ID
+        // Set a success message for Toastr notification
+        session()->flash('booking_success', 'Your booking has been confirmed successfully!');
+        
+        // Return a JSON response with booking details
         return response()->json([
             'success' => 'Booking confirmed successfully!',
             'booking_id' => $booking->id,
@@ -774,6 +768,7 @@ public function store(Request $request)
         ], 500);
     }
 }
+
 
 }
 
