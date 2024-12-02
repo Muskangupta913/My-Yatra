@@ -6,7 +6,7 @@
 @section('content')
 {{-- package details --}}
 
-
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/css/toastr.min.css">
 <style>
    .price-filter {
 
@@ -378,7 +378,7 @@
       </div>
     </div>
          <!-- Apply Button -->
-         <button type="submit" class="btn btn-danger w-100 mt-3">Apply</button> 
+         <!-- <button type="submit" class="btn btn-danger w-100 mt-3">Apply</button>  -->
 
 
          </div>
@@ -466,6 +466,7 @@
 </div>
 @endsection
 @section('scripts')
+<script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/js/toastr.min.js"></script>
 <script>
 
 const travelDateInput = document.getElementById('travelDate');
@@ -526,7 +527,7 @@ const travelDateInput = document.getElementById('travelDate');
         addToCart(itemId);
     });
 
-    // Add to Cart Function
+    // Add to Cart Function 
     function addToCart(id) {
     $.ajax({
         url: `/addtocart/${id}`,
@@ -534,12 +535,13 @@ const travelDateInput = document.getElementById('travelDate');
         headers: {
             'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
         },
-        success: function(response) {
-            if (response.success) {
-                alert('Item added to cart successfully!');
-            } else {
-                alert(response.message || 'Failed to add item to cart');
-            }
+          success: function(response) {
+            toastr.success('Item added to cart successfully'); // Show success message
+            // if (response.success) {
+            //     alert('Item added to cart successfully!');
+            // } else {
+            //     alert(response.message || 'Failed to add item to cart');
+            // }
         },
         error: function(xhr, status, error) {
             // Log the full error details to console
@@ -552,7 +554,8 @@ const travelDateInput = document.getElementById('travelDate');
             if (xhr.status === 401) {
                 window.location.href = '/login';
             } else {
-                // Try to get the error message from the response
+                   // Try to get the error message from the response
+                   toastr.error('Failed to add item to cart'); // Show error message
                 try {
                     const response = JSON.parse(xhr.responseText);
                     alert(response.message || 'Server error occurred');
@@ -593,8 +596,8 @@ const travelDateInput = document.getElementById('travelDate');
             headers: {
                 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
             },
-            success: function(response) {
-                alert('Booking confirmed successfully!');
+            success: function (response) {
+              toastr.success('Booking confirmed successfully!'); // Show success message
                 $('#bookingForm')[0].reset();  // Reset form
                 $('#bookingModal').modal('hide');  // Hide modal if using popup
             },
@@ -612,13 +615,11 @@ const travelDateInput = document.getElementById('travelDate');
                         $('#' + field).next('.invalid-feedback').text(message[0]).show();
                     });
                 } else {
-                    alert('An error occurred. Please try again.');
+                  toastr.error('An error occurred. Please try again.'); // Show error message
                 }
             }
         });
     });
-
-
 
 // Filter Packages Query
 
@@ -710,12 +711,23 @@ function fetchPackages(selectedPrice, selectedDuration, selectedType) {
     }
 });
 }
-
-
-
-
-
    
 });
+toastr.options = {
+        "closeButton": true,
+        "debug": false,
+        "newestOnTop": false,
+        "progressBar": true,
+        "positionClass": "toast-top-center", // Positioning the toast
+        "preventDuplicates": true,
+        "showDuration": "3000", // Show duration
+        "hideDuration": "0", // Hide duration
+        "timeOut": "20000", // Disable auto-dismiss
+        "extendedTimeOut": "0", // Disable auto-dismiss on hover
+        "showEasing": "swing",
+        "hideEasing": "linear",
+        "showMethod": "fadeIn",
+        "hideMethod": "fadeOut"
+    };
 </script>
 @endsection

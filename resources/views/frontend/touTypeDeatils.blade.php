@@ -492,8 +492,11 @@
             },
             success: function (response) {
                 toastr.success('Booking confirmed successfully!'); // Show success message
-                // Navigate to the booking page with the dynamic booking ID and package details
-                window.location.href = `/booking/${response.booking_id}`;
+                
+                setTimeout(function () {
+            // Navigate to the booking page with the dynamic booking ID and package details
+            window.location.href = `/booking/${response.booking_id}`;
+        }, 5000); // 5000ms = 5 seconds
             },
             error: function (response) {
                 if (response.status === 422) {
@@ -515,11 +518,11 @@ toastr.options = {
         "debug": false,
         "newestOnTop": false,
         "progressBar": true,
-        "positionClass": "toast-top-right", // Positioning the toast
+        "positionClass": "toast-top-center", // Positioning the toast
         "preventDuplicates": true,
-        "showDuration": "300", // Show duration
+        "showDuration": "3000", // Show duration
         "hideDuration": "0", // Hide duration
-        "timeOut": "0", // Disable auto-dismiss
+        "timeOut": "20000", // Disable auto-dismiss
         "extendedTimeOut": "0", // Disable auto-dismiss on hover
         "showEasing": "swing",
         "hideEasing": "linear",

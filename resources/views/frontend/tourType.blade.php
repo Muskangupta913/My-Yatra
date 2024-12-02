@@ -3,6 +3,8 @@
 @section('meta_description', $tourTypes->name)
 @section('content')
 {{-- package details --}}
+@section('styles')
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/css/toastr.min.css">
 
 <style>
 .price-filter {
@@ -120,7 +122,7 @@
 }
 
 </style>
-
+@endsection
 <section class="packages-bg-images d-flex justify-content-center align-items-center" style="background:linear-gradient(rgba(0, 0, 0, 0.554), rgba(0, 0, 0, 0.667)),  url('{{ asset("uploads/packages/" . $packages[0]->photo) }}'); height:300px; background-position:center center; background-size:cover;">
   <h1 class=" text-white ">{{$tourTypes->name}}</h1>
 </section>
@@ -136,8 +138,8 @@
         <a id="religious-places" href="http://127.0.0.1:8000/tour-category/religious-places">Religious Places</a>
         <a id="beach1" href="http://127.0.0.1:8000/tour-category/beach">Beaches</a>
         <a id="trekking1" href="http://127.0.0.1:8000/tour-category/trekking">Trekking</a>
-        <a id="trekking2" href="http://127.0.0.1:8000/tour-category/trekking">Trekking</a>
-        <a id="beach2" href="http://127.0.0.1:8000/tour-category/beach">Beaches</a>
+        <!-- <a id="trekking2" href="http://127.0.0.1:8000/tour-category/trekking">Historical</a>
+        <a id="beach2" href="http://127.0.0.1:8000/tour-category/beach">Beaches</a> -->
       </b>
     </div>
   </div>
@@ -450,7 +452,7 @@
           </div>
         </div> 
          <!-- Apply Button -->
-         <button type="submit" class="btn btn-danger w-100 mt-3">Apply</button>    
+         <!-- <button type="submit" class="btn btn-danger w-100 mt-3">Apply</button>     -->
          </div>
 
          <div class="col-md-9">
@@ -542,6 +544,7 @@
 @endsection
 
 @section('scripts')
+<script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/js/toastr.min.js"></script>
 <script>
 $(document).ready(function() {
     // Initialize date restrictions
@@ -597,11 +600,14 @@ $(document).ready(function() {
             'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
         },
         success: function(response) {
-            if (response.success) {
-                alert('Item added to cart successfully!');
-            } else {
-                alert(response.message || 'Failed to add item to cart');
-            }
+          toastr.success('Item added to cart successfully'); // Show success message
+
+            // if (response.success) {
+            //     alert('Item added to cart successfully!');
+            // } 
+            // else {
+            //     alert(response.message || 'Failed to add item to cart');
+            // }
         },
         error: function(xhr, status, error) {
             // Log the full error details to console
@@ -615,6 +621,7 @@ $(document).ready(function() {
                 window.location.href = '/login';
             } else {
                 // Try to get the error message from the response
+                toastr.error('Failed to add item to cart'); // Show error message
                 try {
                     const response = JSON.parse(xhr.responseText);
                     alert(response.message || 'Server error occurred');

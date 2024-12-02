@@ -8,9 +8,11 @@
     <title>Vacation Booking Checkout</title>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/css/toastr.min.css">
     <style>
         body {
             background-color: #f9fafb;
+            background-image: linear-gradient(rgba(0, 0, 0, 0.533), rgba(0, 0, 0, 0.511)), url('{{ asset("assets/images/goa-about-img.jpg") }}');
             font-family: 'Arial', sans-serif;
         }
 
@@ -122,6 +124,8 @@
     </div>
 
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/js/toastr.min.js"></script>
+    
     <script>
         function fetchCartItems() {
             $.ajax({
@@ -240,23 +244,43 @@
         }
 
         function removeCartItem(cartId) {
-            if (confirm('Are you sure you want to remove this item from your cart?')) {
-                $.ajax({
-                    url: `/cart/remove/${cartId}`,
-                    method: 'DELETE',
-                    data: {
-                        _token: $('meta[name="csrf-token"]').attr('content')
-                    },
-                    success: function (response) {
-                        if (response.success) {
-                            fetchCartItems();
-                        } else {
-                            alert('Failed to remove item: ' + response.message);
-                        }
-                    }
-                });
+    $.ajax({
+        url: `/cart/remove/${cartId}`,
+        method: 'DELETE',
+        data: {
+            _token: $('meta[name="csrf-token"]').attr('content')
+        },
+        success: function (response) {
+            if (response.success) {
+                toastr.success('Item removed from cart successfully!'); // Show Toastr notification
+                fetchCartItems();
+            } else {
+                toastr.error('Failed to remove item: ' + response.message);
             }
+        },
+        error: function () {
+            toastr.error('An error occurred while removing the item.');
         }
+    });
+}
+
+toastr.options = {
+    "closeButton": true,
+    "debug": false,
+    "newestOnTop": false,
+    "progressBar": true,
+    "positionClass": "toast-top-center",
+    "preventDuplicates": true,
+    "showDuration": "300",
+    "hideDuration": "1000",
+    "timeOut": "1000",
+    "extendedTimeOut": "1000",
+    "showEasing": "swing",
+    "hideEasing": "linear",
+    "showMethod": "fadeIn",
+    "hideMethod": "fadeOut"
+};
+
 
         // Fetch cart items on page load
         $(document).ready(function () {
