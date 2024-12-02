@@ -550,6 +550,9 @@ public function ourblog()
   
           // Get the updated cart count for this user
           $cartCount = Cart::where('user_id', Auth::id())->count();
+
+           // Set a success message for Toastr notification
+        session()->flash('cart_success', 'Item added to cart successfully!');
   
           return response()->json([
               'success' => true,
@@ -592,7 +595,7 @@ public function removeFromCart($id)
         $cartItem = Cart::findOrFail($id);
         $cartItem->delete();
 
-        return response()->json(['success' => true, 'message' => 'Item removed from cart']);
+          return response()->json(['success' => true, 'message' => 'Item removed from cart']);
     } catch (\Exception $e) {
         \Log::error('Remove Cart Error: ' . $e->getMessage());
         return response()->json(['success' => false, 'message' => 'Failed to remove item from cart'], 500);
@@ -615,6 +618,8 @@ public function removeCartItem($cartId)
         if ($booking) {
             $booking->delete();
         }
+         // Set a success message for Toastr notification
+         session()->flash('cart_success', 'Removed successfully!');
 
         return response()->json([
             'success' => true,
@@ -768,6 +773,7 @@ public function store(Request $request)
         ], 500);
     }
 }
+
 
 
 }
