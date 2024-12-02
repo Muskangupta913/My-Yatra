@@ -751,7 +751,7 @@ public function store(Request $request)
         
         // Return a JSON response with booking details
         return response()->json([
-            'success' => 'Booking confirmed successfully!',
+            'success' => '',
             'booking_id' => $booking->id,
             'package' => $package
         ]);

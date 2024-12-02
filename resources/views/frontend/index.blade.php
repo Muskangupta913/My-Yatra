@@ -345,12 +345,12 @@
                   <del>{{ number_format($item->ragular_price) }} /-</del>
                   <span class="person"> per person</span>
                   <a href="{{ url('holiday-packages', $item->slug)}}" 
-       style="display: inline-block; background-color: #ff9800; margin: 0 0 0 240px; color: white; text-decoration: none; 
-              padding: 10px 20px; font-size: 16px; font-weight: 600; border-radius: 5px; 
-              box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1); transition: background-color 0.3s ease;">
-      Details
-    </a>
-             </div>
+                   style="display: inline-block; background-color: #ff9800; margin: 0 0 0 240px; color: white; text-decoration: none; 
+                   padding: 10px 20px; font-size: 16px; font-weight: 600; border-radius: 5px; 
+                   box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1); transition: background-color 0.3s ease;">
+                   Details
+                  </a>
+                  </div>
                 </span> 
               </div>   
             </div>
