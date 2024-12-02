@@ -6,13 +6,13 @@
       <div class="card search-engine-card py-5 px-4" style="position: relative">
         <ul class="nav nav-tabs border-0" style="position: absolute; top:0; left:1%; transform:translateY(-50%);"
           id="myTab" role="tablist">
-          <li class="nav-item" role="presentation">
+          <!-- <li class="nav-item" role="presentation">
             <button class="nav-link px-4 shadow border-0" id="home-tab" data-bs-toggle="tab" data-bs-target="#home"
               type="button" role="tab" aria-controls="home" aria-selected="true">
               <i class="fa-solid fa-plane-departure d-block"></i>
               <small>Flight</small>
             </button>
-          </li>
+          </li> -->
           <li class="nav-item" role="presentation">
             <button class="nav-link  px-4 shadow border-0" id="profile-tab" data-bs-toggle="tab"
               data-bs-target="#profile" type="button" role="tab" aria-controls="profile" aria-selected="false">
@@ -33,8 +33,64 @@
             <p>Comming Soon!</p>
           </div>
           <div class="tab-pane fade" id="profile" role="tabpanel" aria-labelledby="profile-tab">
-            <p>Comming Soon!</p>
+               <h4 class="mb-5" id="hotel-title">Book Hotels in India</h4>
+                     <hr class="searchline">
+                 <form action="{{ route('searchHotels') }}" method="GET">
+                <div class="row">
+         <div class="mb-3 col-md-3 hotel-search">
+            <div class="date-caption">City</div>
+               <input type="text" class="form-control rounded-0 py-3" name="searchCity" id="hotelSearchCity"
+                placeholder="Enter City" required>
+              <div id="hotelCityList" class="card" style="position: absolute; width: 95%; max-height: 150px; overflow-y: scroll; display: none;">
+            </div>
           </div>
+           <div class="mb-3 col-md-2">
+              <div class="date-caption">Check-in Date</div>
+                      <input type="text" id="checkinDatepicker" name="check_in_date" class="form-control rounded-0 py-3" placeholder="Select Check-in Date" required>
+            </div>
+      <div class="mb-3 col-md-2">
+        <div class="date-caption">Check-out Date</div>
+        <input type="text" id="checkoutDatepicker" name="check_out_date" class="form-control rounded-0 py-3" placeholder="Select Check-out Date" required>
+      </div>
+      <div class="mb-3 col-md-2">
+        <div class="date-caption">Guests</div>
+        <div class="dropdown">
+          <input type="text" class="form-control rounded-0 py-3" id="guestDropdown" data-bs-toggle="dropdown" 
+            placeholder="Guests" readonly required>
+          <ul class="dropdown-menu p-3" aria-labelledby="guestDropdown">
+            <li class="mb-2">
+              <div class="d-flex justify-content-between align-items-center">
+                <span>Adults</span>
+                <div class="btn-group" role="group">
+                  <button type="button" class="btn btn-outline-secondary btn-sm" id="adultMinus">-</button>
+                  <span class="btn btn-outline-secondary btn-sm" id="adultCount">1</span>
+                  <button type="button" class="btn btn-outline-secondary btn-sm" id="adultPlus">+</button>
+                </div>
+              </div>
+            </li>
+            <li class="mb-2">
+              <div class="d-flex justify-content-between align-items-center">
+                <span>Children</span>
+                <div class="btn-group" role="group">
+                  <button type="button" class="btn btn-outline-secondary btn-sm" id="childMinus">-</button>
+                  <span class="btn btn-outline-secondary btn-sm" id="childCount">0</span>
+                  <button type="button" class="btn btn-outline-secondary btn-sm" id="childPlus">+</button>
+                </div>
+              </div>
+            </li>
+            <li>
+              <button type="button" class="btn btn-warning w-100" id="applyGuests">Apply</button>
+            </li>
+          </ul>
+        </div>
+      </div>
+      <div class="mb-3 col-md-2">
+        <div class="date-caption" style="visibility: hidden">Search</div>
+        <button type="submit" class="btn btn-warning w-100 rounded-0 py-3 fw-bold hotelbuttonsearch">Search</button>
+      </div>
+    </div>
+  </form>
+</div>
           <div class="tab-pane fade mt-5 show active" id="contact" role="tabpanel" aria-labelledby="contact-tab">
             {{-- holiday packages searches --}}
             <h4 class="mb-5" id="tour-title">Book Domestic and International Holiday Packages
@@ -44,8 +100,6 @@
               <div class="row">
                 <div class="mb-3 col-md-4 holiday-search">
                   <div class="date-caption">Search Destination</div>
-                  
-      
                   <input type="text" class="form-control rounded-0 py-3" name="searchDestination" id="searchDestination"
                     placeholder="Search Destination" required>
                   <div class="search-icon">
@@ -54,9 +108,7 @@
                   <div id="destinationList" class="card" style=" position: absolute;
                       width: 95%; max-height: 150px; overflow-y: scroll; display: none;">
                       </div>
-
                 </div>
-
                 <div class="mb-3 col-md-3">
                   <div class="date-caption">Select City</div>
                   <input type="text" class="form-control rounded-0 py-3" name="searchCity" id="searchCity"
@@ -64,7 +116,6 @@
                   <div id="cityList" class="list-group mt-2" style="position: absolute;
                                 width: 23%; max-height: 150px; overflow-y: scroll;"></div>
                 </div>
-
                 <div class="mb-3 col-md-3">
                   <div class="date-caption">Travel Date</div>
                   <input type="text" id="datepicker" name="travel_date" class="form-control rounded-0 py-3">
@@ -257,12 +308,9 @@
     <h3 class="border-start border-4 border-warning px-3 mb-4">Best Selling India
       Holiday Packages</h3>
     <div class="swiper mySwiperHoliday  best-places">
-          
-      
       <div class="swiper-wrapper shadow">
         @if ($tourpackages->count() > 0)
         @foreach ($tourpackages as $item)
-
         <div class="swiper-slide holiday-packages-swiper mt-3">
           <div class="card">
             <div class="card-body items p-0">
@@ -272,7 +320,6 @@
               <a href="{{ url('holiday-packages', $item->slug)}}">
                 <img src="{{asset('uploads/packages/'.$item->photo)}}" class="w-100" alt="{{$item->package_name}}">
                 <div class="recommended under-checkbox">{{ round($discount, 2) }}% OFF<span></span></div>
-
                 <div class="duration">
                   <div class="duration-days">
                     <small style="font-size: 14px;
@@ -283,13 +330,11 @@
                     <i class="fa-solid fa-car"></i>
                     <i class="fa-solid fa-utensils"></i>
                   </div>
-
                 </div>
               </a>
             </div>
             <div class="card-footer py-3 bg-white">
               <div class="desc">
-
              <h5 class="title"><a href="{{ url('holiday-packages', $item->slug)}}" class="title text-decoration-none">
                     {{ \Illuminate\Support\Str::limit($item->package_name, 32, '...') }}</a> </h5>
                 <p class="sub-title fs-5 text-secondary">{{$item->destination->destination_name}}</p>
@@ -299,28 +344,24 @@
                   <div class="item-center">
                   <del>{{ number_format($item->ragular_price) }} /-</del>
                   <span class="person"> per person</span>
-             </div>
-                 
-                
-                </span>
-              </div>
-           
-                  
+                  <a href="{{ url('holiday-packages', $item->slug)}}" 
+                   style="display: inline-block; background-color: #ff9800; margin: 0 0 0 240px; color: white; text-decoration: none; 
+                   padding: 10px 20px; font-size: 16px; font-weight: 600; border-radius: 5px; 
+                   box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1); transition: background-color 0.3s ease;">
+                   Details
+                  </a>
+                  </div>
+                </span> 
+              </div>   
             </div>
           </div>
         </div>
-
         @endforeach
         @endif
       </div>
-   
-
     </div>
-
-
   </div>
   </div>
-
 </section>
 
 {{-- <section class="best-destination mt-5">
@@ -360,6 +401,114 @@
 
 @section('scripts')
 <script>
+
+  // Hotal
+$(document).ready(function() {
+  // Guest Selection Logic
+  let adults = 1;
+  let children = 0;
+
+  $('#adultPlus').click(function() {
+    adults++;
+    $('#adultCount').text(adults);
+  });
+
+  $('#adultMinus').click(function() {
+    if (adults > 1) {
+      adults--;
+      $('#adultCount').text(adults);
+    }
+  });
+
+  $('#childPlus').click(function() {
+    children++;
+    $('#childCount').text(children);
+  });
+
+  $('#childMinus').click(function() {
+    if (children > 0) {
+      children--;
+      $('#childCount').text(children);
+    }
+  });
+
+  $('#applyGuests').click(function() {
+    $('#guestDropdown').val(${adults} Adults, ${children} Children);
+    $('#guestDropdown').dropdown('toggle');
+  });
+
+  // City Search Similar to Destination Search
+  function fetchAllCities() {
+    $.ajax({
+      url: "{{ route('fetch.all.cities') }}", 
+      method: "GET",
+      success: function (data) {
+        $('#hotelCityList').empty();
+
+        $.each(data, function (index, city) {
+          $('#hotelCityList').append('<div class="list-group-item" style="cursor: pointer;" data-id="' + city.id + '"> <i class="fa-solid fa-location-dot"></i> ' + city.city_name + '</div>');
+        });
+
+        $('#hotelCityList').show();
+
+        $('.list-group-item').on('click', function () {
+          var selectedValue = $(this).text();
+          $('#hotelSearchCity').val(selectedValue);
+          $('#hotelCityList').hide();
+        });
+      }
+    });
+  }
+
+  $('#hotelSearchCity').on('focus', function () {
+    fetchAllCities();
+  });
+
+  $('#hotelSearchCity').on('keyup', function () {
+    var query = $(this).val();
+    if (query.length > 0) {
+      $.ajax({
+        url: "{{ route('search.cities') }}",
+        method: 'GET',
+        data: { query: query },
+        success: function (data) {
+          $('#hotelCityList').empty();
+          if (data.length > 0) {
+            $.each(data, function (index, city) {
+              $('#hotelCityList').append('<div class="list-group-item" style="cursor: pointer;" data-id="' + city.id + '"> <i class="fa-solid fa-location-dot"></i> ' + city.city_name + '</div>');
+            });
+
+            $('.list-group-item').on('click', function () {
+              var selectedValue = $(this).text();
+              $('#hotelSearchCity').val(selectedValue);
+              $('#hotelCityList').empty();
+            });
+          } else {
+            $('#hotelCityList').append('<div class="list-group-item">No results found</div>');
+          }
+        }
+      });
+    } else {
+      $('#hotelCityList').empty();
+    }
+  });
+
+  // Date Pickers
+  $('#checkinDatepicker, #checkoutDatepicker').datepicker({
+    format: 'yyyy-mm-dd',
+    autoclose: true,
+    startDate: 'today'
+  });
+
+  // Hide city list if clicked outside
+  $(document).on('click', function (e) {
+    if (!$(e.target).closest('#hotelSearchCity, #hotelCityList').length) {
+      $('#hotelCityList').hide();
+    }
+  });
+});
+
+
   $(document).ready(function () {
     // Fetch all states from the database on page load
     function fetchAllStates() {

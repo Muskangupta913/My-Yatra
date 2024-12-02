@@ -597,7 +597,7 @@ const travelDateInput = document.getElementById('travelDate');
                 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
             },
             success: function (response) {
-              toastr.success('Booking confirmed successfully!'); // Show success message
+              // toastr.success('Booking confirmed successfully!'); // Show success message
                 $('#bookingForm')[0].reset();  // Reset form
                 $('#bookingModal').modal('hide');  // Hide modal if using popup
             },
@@ -615,11 +615,13 @@ const travelDateInput = document.getElementById('travelDate');
                         $('#' + field).next('.invalid-feedback').text(message[0]).show();
                     });
                 } else {
-                  toastr.error('An error occurred. Please try again.'); // Show error message
+                  // toastr.error('An error occurred. Please try again.'); // Show error message
                 }
             }
         });
     });
+
+
 
 // Filter Packages Query
 
@@ -711,6 +713,7 @@ function fetchPackages(selectedPrice, selectedDuration, selectedType) {
     }
 });
 }
+
    
 });
 toastr.options = {

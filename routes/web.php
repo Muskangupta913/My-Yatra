@@ -132,7 +132,8 @@ Route::post('/job-apply', [HomeController::class, 'jobApply'])->name('jobApply')
 
 
 
-Route::get('/checkout', [HomeController::class, 'checkout'])->name('checkout');
+
+
 Route::get('/payment',[HomeController::class, 'payment'])->name('payment');
 Route::get('/blog',[HomeController::class, 'ourblog'])->name('blog');
 
@@ -171,6 +172,7 @@ Route::get('/verify/{token}', [AuthController::class, 'verify'])->name('verify')
   Route::delete('/cart/remove/{id}', [HomeController::class, 'removeFromCart']);
   Route::post('/cart/update/{id}', [HomeController::class, 'updateCartItem']);
   Route::get('/booking/{bookingId}', [HomeController::class, 'book'])->name('booking');
+  Route::get('/checkout', [HomeController::class, 'checkout'])->name('checkout');
 
 });
 
@@ -266,6 +268,12 @@ Route::prefix('admin')->middleware(['onlyAuthenticated', 'onlyAdmin'])->group(fu
       
           return view('festivals', compact('festivalRegions'));
       });
+
+      // Hotel Route
+Route::get('/search-hotels', [HotelController::class, 'searchHotels'])->name('searchHotels');
+//city
+Route::get('/fetch-all-cities', [CityController::class, 'fetchAllCities'])->name('fetch.all.cities');
+Route::get('/search-cities', [CityController::class, 'searchCities'])->name('search.cities');
       
 
 // top destination 

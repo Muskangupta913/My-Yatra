@@ -662,7 +662,7 @@ $(document).ready(function() {
                 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
             },
             success: function(response) {
-                alert('Booking confirmed successfully!');
+                alert('Bookinggg confirmed successfully!');
                 $('#bookingForm')[0].reset();
                 $('#bookingModal').modal('hide');
             },

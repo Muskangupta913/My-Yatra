@@ -478,8 +478,9 @@
             },
             success: function(response) {
                 alert('Booking confirmed successfully!');
-                $('#bookingForm')[0].reset();  // Reset form
-                $('#bookingModal').modal('hide');  // Hide modal if using popup
+                // $('#bookingForm')[0].reset();  // Reset form
+                // $('#bookingModal').modal('hide');  // Hide modal if using popup
+                window.location.href = `/booking/${response.booking_id}`;
             },
             error: function(response) {
                 // Handle validation errors
