@@ -296,11 +296,16 @@
                 <p class="sub-titles">Starting From</p>
                 <span class="price">
                   <span>₹{{ number_format($item->offer_price) }}</span>
-
+                  <div class="item-center">
                   <del>{{ number_format($item->ragular_price) }} /-</del>
                   <span class="person"> per person</span>
+             </div>
+                 
+                
                 </span>
               </div>
+           
+                  
             </div>
           </div>
         </div>

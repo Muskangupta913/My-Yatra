@@ -20,6 +20,6 @@ class IsAuthenticated
         }else if(auth()->check()){
             return redirect()->route('home');
         }
-        return $next($request);
+        return $next($request);                                     
     }
 }
