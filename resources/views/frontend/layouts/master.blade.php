@@ -2,6 +2,11 @@
 <!doctype html>
 <html lang="en">
 <head>
+  <!-- Toastr CSS -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
+<!-- Toastr JS -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+
     <!-- Dynamic Title -->
     <title>@yield('title', 'Make My Bharat Yatra')</title>
     <!-- Dynamic Meta Description -->
