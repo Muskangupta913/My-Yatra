@@ -419,7 +419,7 @@ const travelDateInput = document.getElementById('travelDate');
                 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
             },
             success: function(response) {
-                alert('Booking confirmed successfully!');
+                alert('');
                 $('#bookingForm')[0].reset();  // Reset form
                 $('#bookingModal').modal('hide');  // Hide modal if using popup
             },
