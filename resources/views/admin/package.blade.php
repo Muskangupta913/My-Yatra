@@ -73,7 +73,7 @@
         <div class="card-body">
             
             <h5>Are you sure want to delete?</h5>
-            <form action="{{ route("package.delete")}}" method="POST">
+            <form action='{{ route("package.delete")}}' method="POST">
                 @csrf
             <input type="hidden" id="packageId" name="id">
         </div>

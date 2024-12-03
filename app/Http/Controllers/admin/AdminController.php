@@ -24,14 +24,15 @@ class AdminController extends Controller
     public function dashboard(){
         $packageCount = DB::table('package')->count();
         $destinationCount = DB::table('destination')->count();
+        $bookingCount = DB::table('bookings')->count();
 
         $bookings = DB::table('bookings')
-        ->whereDate('created_at', Carbon::today())
-        ->count();
+            ->whereDate('created_at', Carbon::today())
+            ->count();
 
         $jobs = DB::table('job_applications')->count();
        
-        return view('admin.dashboard', compact('packageCount', 'destinationCount', 'bookings', 'jobs'));
+        return view('admin.dashboard', compact('packageCount', 'destinationCount','bookingCount', 'bookings', 'jobs'));
     }
 
     public function logout()
@@ -71,7 +72,7 @@ class AdminController extends Controller
       
         
         $data = DB::table('tour_type')->where('id', $id)->first();
-        // dd($data);
+         dd($data);
         return view('admin.tour-type-edit', compact('data'));
     }
 
