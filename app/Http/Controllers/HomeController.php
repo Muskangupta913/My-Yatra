@@ -37,8 +37,6 @@ class HomeController extends Controller
 
        // dd($tourTypes);
 
-       
-
         // Get Packages  Data
 
        $tourpackages = Package::with('destination')->orderBy('id', 'desc')->limit(12)->get();
@@ -52,6 +50,12 @@ class HomeController extends Controller
         //dd($destinations);
         return view('frontend.index', compact('destinations', 'tourTypes', 'tourpackages'));
     }
+
+    public function kashmir()
+{
+    // Any logic for fetching data for Kashmir packages can go here
+    return view('Kashmir'); // This loads the Kashmir.blade.php file
+}
 
     public function packages(Request $request, $slug){
 

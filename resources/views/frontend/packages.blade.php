@@ -519,8 +519,6 @@ const travelDateInput = document.getElementById('travelDate');
 
     });
 
-
-
     $(document).on('click', '.add-to-cart', function(event) {
         event.preventDefault();
         const itemId = $(this).data('id');
