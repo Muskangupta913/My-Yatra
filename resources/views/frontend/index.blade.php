@@ -220,7 +220,7 @@
   </div>
 </section>
 
-<section class="tour-places tour-category mt-5 mb-5">
+<section id="tour-places" class="tour-places tour-category mt-5 mb-5">
   <div class="container">
     <h2 class="border-start border-4 mb-5 border-warning px-2" style="font-weight: 400;">Wonderful Place For You<span
         style="font-size: 30px; font-weight:bold;"> Tour Categories</span> </h2>
@@ -380,13 +380,18 @@
     <h3 class="border-start border-4 mb-4 border-warning px-3">Trending Destinations</h3>
       <div class="row gy-24">
         <div class="col-xl-4 col-lg-4 mb-3 col-md-12 ">
-          <img src="{{ asset('assets/images/offer-2.webp')}}" class="shadow" width="100%" alt="">
+        <a href="{{ route('kashmir') }}"> <!-- Link to the 'kashmir' route -->
+        <img src="{{ asset('assets/images/offer-2.webp') }}" class="shadow" width="100%" alt="">
+    </a>
         </div>
           <div class="col-xl-4 col-lg-4  mb-3 col-md-12">
+          <a href="#tour-places">
              <img src="{{ asset('assets/images/offer-1.webp')}}" class="shadow" width="100%" alt="">
+          </a>
           </div>
          <div class="col-xl-4 col-lg-4  mb-3 col-md-12">
-          <img src="{{ asset('assets/images/offer-3.webp')}}" class="shadow" width="100%" alt="">
+         <a href="{{ route('rishikesh') }}"> <!-- Link to the 'rishikesh' route -->
+          <img src="{{ asset('assets/images/offer-3.webp')}}" class="shadow" width="100%" alt=""></a>
        </div>
          
       </div>

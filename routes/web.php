@@ -29,7 +29,12 @@ Route::get('/clear-cache', function() {
   return "All cache has been cleared!";
 });
 
-
+Route::get('/kashmir', function () {
+  return view('kashmir'); // Replace 'kashmir' with the actual Blade file name without the .blade.php extension.
+})->name('kashmir');
+Route::get('/rishikesh', function () {
+  return view('rishikesh'); // Replace 'rishikesh' with the actual Blade file name without the .blade.php extension.
+})->name('rishikesh');
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
 // Route::get('/home', function(){
@@ -197,7 +202,6 @@ Route::prefix('admin')->middleware(['onlyAuthenticated', 'onlyAdmin'])->group(fu
         Route::get('/create', [AdminController::class, 'createTourType'])->name('create_type_type');
         Route::post('/createTour', [AdminController::class, 'createTour'])->name('createTour');
         Route::get('/tour-types/edit/{id}', [AdminController::class, 'editTour'])->name('editTour');
-        Route::get('/tour-types', [AdminController::class, 'tourType'])->name('tourType');
         Route::post('/updateTour', [AdminController::class, 'updateTour'])->name('updateTour');
         Route::post('/deleteTour', [AdminController::class, 'deleteTour'])->name('deleteTour');
      });
