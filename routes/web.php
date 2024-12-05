@@ -4,6 +4,8 @@ use App\Http\Controllers\admin\AdminController;
 use App\Http\Controllers\admin\AuthController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\HotelController;
+use App\Http\Controllers\BusController;
+use App\Http\Controllers\CarController;
 use App\Http\Controllers\FlightController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
@@ -29,6 +31,11 @@ Route::get('/clear-cache', function() {
 
   return "All cache has been cleared!";
 });
+// Car Route
+Route::get('/cars', [CarController::class, 'index'])->name('cars');
+// Bus Route
+Route::get('/bus', [BusController::class, 'index'])->name('bus');
+
 // Hotel Route
 // Route::get('/search-hotels', [HotelController::class, 'searchHotels'])->name('searchHotels');
 Route::get('/hotels', [HotelController::class, 'index'])->name('hotels');
@@ -277,11 +284,6 @@ Route::prefix('admin')->middleware(['onlyAuthenticated', 'onlyAdmin'])->group(fu
       
           return view('festivals', compact('festivalRegions'));
       });
-
-     // Hotel Route
-// Route::get('/search-hotels', [HotelController::class, 'searchHotels'])->name('searchHotels');
-Route::get('/hotels', [HotelController::class, 'index'])->name('hotels');
-
 
 
 //city

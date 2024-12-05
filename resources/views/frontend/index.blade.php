@@ -1,5 +1,16 @@
 @extends('frontend.layouts.master')
 @section('content')
+<style>
+.flatpickr-calendar {
+  font-family: 'Arial', sans-serif;
+  border: 1px solid #ccc;
+}
+
+.flatpickr-day {
+  padding: 8px;
+}
+</style>
+
 <section class="hero">
   <div class="container">
     <div class="row">
@@ -28,15 +39,15 @@
             </button>
           </li>
           <li class="nav-item" role="presentation">
-            <button class="nav-link px-4 shadow border-0" id="home-tab" data-bs-toggle="tab" data-bs-target="#home"
-              type="button" role="tab" aria-controls="home" aria-selected="true">
+            <button class="nav-link px-4 shadow border-0" id="bus-tab" data-bs-toggle="tab" data-bs-target="#bus"
+              type="button" role="tab" aria-controls="bus" aria-selected="false">
               <i class="fa-solid fa-bus"></i><br>
               <small>Bus</small>
             </button>
           </li>
           <li class="nav-item" role="presentation">
-            <button class="nav-link px-4 shadow border-0" id="home-tab" data-bs-toggle="tab" data-bs-target="#home"
-              type="button" role="tab" aria-controls="home" aria-selected="true">
+            <button class="nav-link px-4 shadow border-0" id="car-tab" data-bs-toggle="tab" data-bs-target="#car"
+              type="button" role="tab" aria-controls="car" aria-selected="false">
               <i class="fa-solid fa-car"></i><br>
               <small>Car</small>
             </button>
@@ -47,7 +58,7 @@
             <p>Comming Soon!</p>
           </div>
           <!-- // hotel booking -->
-          <div class="tab-pane fade" id="profile" role="tabpanel" aria-labelledby="profile-tab">
+          <div class="tab-pane fade mt-5" id="profile" role="tabpanel" aria-labelledby="profile-tab">
                <h4 class="mb-5" id="hotel-title">Book Hotels in India</h4>
                 <hr class="searchline">
                 <form action="{{ route('hotels') }}" method="GET">
@@ -77,7 +88,7 @@
 </div>
 
 <!-- // flight booking -->
-<div class="tab-pane fade" id="flight" role="tabpanel" aria-labelledby="home-tab">
+<div class="tab-pane fade mt-5" id="flight" role="tabpanel" aria-labelledby="home-tab">
   <h4 class="mb-5" id="flight-title">Book Flights</h4>
   <hr class="searchline">
   <form action="{{ route('flight.booking') }}" method="GET">
@@ -107,7 +118,66 @@
     </div>
   </form>
 </div>
- 
+ <!-- Car Booking -->
+<div class="tab-pane fade mt-5" id="car" role="tabpanel" aria-labelledby="car-tab">
+  <h4 class="mb-5" id="car-title">Book Cars</h4>
+  <hr class="searchline">
+  <form action="{{ route('cars') }}" method="GET">
+    <div class="row">
+      <div class="mb-3 col-md-3">
+        <div class="date-caption">Pickup Location</div>
+        <input type="text" class="form-control rounded-0 py-3" name="pickupLocation" id="carPickupLocation" placeholder="Enter Pickup Location" required>
+        <div id="carPickupLocationList" class="card" style="position: absolute; width: 95%; max-height: 150px; overflow-y: scroll; display: none;"></div>
+      </div>
+      <div class="mb-3 col-md-3">
+        <div class="date-caption">Drop-off Location</div>
+        <input type="text" class="form-control rounded-0 py-3" name="dropoffLocation" id="carDropoffLocation" placeholder="Enter Drop-off Location" required>
+        <div id="carDropoffLocationList" class="card" style="position: absolute; width: 95%; max-height: 150px; overflow-y: scroll; display: none;"></div>
+      </div>
+      <div class="mb-3 col-md-2">
+        <div class="date-caption">Pickup Date</div>
+        <input type="text" id="carPickupDate" name="pickup_date" class="form-control rounded-0 py-3 " placeholder="Select Pickup Date" required>
+      </div>
+      <div class="mb-3 col-md-2">
+        <div class="date-caption">Drop-off Date</div>
+        <input type="text" id="carDropoffDate" name="dropoff_date" class="form-control rounded-0 py-3" placeholder="Select Drop-off Date" required>
+      </div>
+      <div class="mb-3 col-md-2">
+        <div class="date-caption" style="visibility: hidden">Search</div>
+        <button type="submit" class="btn btn-warning w-100 rounded-0 py-3 fw-bold">Search Cars</button>
+      </div>
+    </div>
+  </form>
+</div>
+
+ <!-- Bus Booking -->
+<div class="tab-pane fade mt-5" id="bus" role="tabpanel" aria-labelledby="bus-tab">
+  <h4 class="mb-5" id="bus-title">Book Bus Tickets</h4>
+  <hr class="searchline">
+  <form action="{{ route('bus') }}" method="GET">
+    <div class="row">
+      <div class="mb-3 col-md-3">
+        <div class="date-caption">From</div>
+        <input type="text" class="form-control rounded-0 py-3" name="fromCity" id="busFromCity" placeholder="Enter Departure City" required>
+        <div id="busFromCityList" class="card" style="position: absolute; width: 95%; max-height: 150px; overflow-y: scroll; display: none;"></div>
+      </div>
+      <div class="mb-3 col-md-3">
+        <div class="date-caption">To</div>
+        <input type="text" class="form-control rounded-0 py-3" name="toCity" id="busToCity" placeholder="Enter Destination City" required>
+        <div id="busToCityList" class="card" style="position: absolute; width: 95%; max-height: 150px; overflow-y: scroll; display: none;"></div>
+      </div>
+      <div class="mb-3 col-md-3">
+        <div class="date-caption">Journey Date</div>
+        <input type="text" id="busJourneyDate" name="journey_date" class="form-control rounded-0 py-3 datepicker" placeholder="Select Journey Date" required>
+      </div>
+      <div class="mb-3 col-md-3">
+        <div class="date-caption" style="visibility: hidden">Search</div>
+        <button type="submit" class="btn btn-warning w-100 rounded-0 py-3 fw-bold">Search Buses</button>
+      </div>
+    </div>
+  </form>
+</div>
+
 <!-- holiday booking  -->
 
           <div class="tab-pane fade mt-5 show active" id="contact" role="tabpanel" aria-labelledby="contact-tab">
@@ -414,6 +484,27 @@
 @endsection
 @section('scripts')
 <script>
+  document.addEventListener('DOMContentLoaded', function () {
+    // Select all the datepicker inputs
+    const dateInputs = [
+      '#carPickupDate', '#carDropoffDate', 
+      '#flightDepartureDate', '#flightReturnDate', 
+      '#checkinDatepicker', '#checkoutDatepicker', 
+      '#busJourneyDate'
+    ];
+
+    // Initialize flatpickr for each input
+    dateInputs.forEach(input => {
+      flatpickr(input, {
+        minDate: 'today', // Prevent selecting past dates
+        dateFormat: 'd-m-Y', // Desired date format
+      });
+    });
+  });
+</script>
+
+
+<script>
   // Hotel
 $(document).ready(function() {
   // Guest Selection Logic
@@ -504,33 +595,6 @@ $(document).ready(function() {
       $('#hotelCityList').empty();
     }
   });
-
-  // Date Pickers
-  // Initialize datepicker for all date fields initially
-// $('.datepicker').datepicker({
-//   format: 'yyyy-mm-dd',
-//   autoclose: true,
-//   startDate: 'today'
-// });
-
-// // Reinitialize the datepicker when the flight tab is shown
-// $('#flight-tab').on('shown.bs.tab', function () {
-//   $('#flightDepartureDate, #flightReturnDate').datepicker({
-//     format: 'yyyy-mm-dd',
-//     autoclose: true,
-//     startDate: 'today'
-//   });
-// });
-
-// // Also reinitialize the datepicker when the holiday tab is shown (if needed)
-// $('#contact-tab').on('shown.bs.tab', function () {
-//   $('#datepicker').datepicker({
-//     format: 'yyyy-mm-dd',
-//     autoclose: true,
-//     startDate: 'today'
-//   });
-// });
-
 
   // Hide city list if clicked outside
   $(document).on('click', function (e) {
