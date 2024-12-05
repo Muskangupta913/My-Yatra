@@ -48,8 +48,8 @@
           </div>
           <div class="tab-pane fade" id="profile" role="tabpanel" aria-labelledby="profile-tab">
                <h4 class="mb-5" id="hotel-title">Book Hotels in India</h4>
-                     <hr class="searchline">
-                 <form action="{{ route('searchHotels') }}" method="GET">
+                <hr class="searchline">
+                <form action="{{ route('hotels') }}" method="GET">
                 <div class="row">
          <div class="mb-3 col-md-3 hotel-search">
             <div class="date-caption">City</div>
@@ -66,38 +66,7 @@
         <div class="date-caption">Check-out Date</div>
         <input type="text" id="checkoutDatepicker" name="check_out_date" class="form-control rounded-0 py-3" placeholder="Select Check-out Date" required>
       </div>
-      <div class="mb-3 col-md-2">
-        <div class="date-caption">Guests</div>
-        <div class="dropdown">
-          <input type="text" class="form-control rounded-0 py-3" id="guestDropdown" data-bs-toggle="dropdown" 
-            placeholder="Guests" readonly required>
-          <ul class="dropdown-menu p-3" aria-labelledby="guestDropdown">
-            <li class="mb-2">
-              <div class="d-flex justify-content-between align-items-center">
-                <span>Adults</span>
-                <div class="btn-group" role="group">
-                  <button type="button" class="btn btn-outline-secondary btn-sm" id="adultMinus">-</button>
-                  <span class="btn btn-outline-secondary btn-sm" id="adultCount">1</span>
-                  <button type="button" class="btn btn-outline-secondary btn-sm" id="adultPlus">+</button>
-                </div>
-              </div>
-            </li>
-            <li class="mb-2">
-              <div class="d-flex justify-content-between align-items-center">
-                <span>Children</span>
-                <div class="btn-group" role="group">
-                  <button type="button" class="btn btn-outline-secondary btn-sm" id="childMinus">-</button>
-                  <span class="btn btn-outline-secondary btn-sm" id="childCount">0</span>
-                  <button type="button" class="btn btn-outline-secondary btn-sm" id="childPlus">+</button>
-                </div>
-              </div>
-            </li>
-            <li>
-              <button type="button" class="btn btn-warning w-100" id="applyGuests">Apply</button>
-            </li>
-          </ul>
-        </div>
-      </div>
+
       <div class="mb-3 col-md-2">
         <div class="date-caption" style="visibility: hidden">Search</div>
         <button type="submit" class="btn btn-warning w-100 rounded-0 py-3 fw-bold hotelbuttonsearch">Search</button>
@@ -712,7 +681,7 @@ $('#contact-tab').on('shown.bs.tab', function () {
         $('#destinationList').hide();
         //  $('#cityList').hide();
       }
-    });
+    }); 
   });
 </script>
 @endsection
