@@ -505,6 +505,7 @@ public function  payment()
     return view('frontend.payment');
 }
 
+
 public function checkout(){
     $cartItems = Cart::all(); // Example: Retrieve cart items from the database
 
@@ -582,13 +583,48 @@ public function ourblog()
 
 
 
-public function getCartItems()
-{
+public function getCartItems() {
     $cartItems = Cart::where('user_id', Auth::id())
         ->with('package') // Assuming the `package` relation exists in your Cart model
         ->get();
+    
+    // Calculate pricing details
+    $subtotal = 0;
+    $taxRate = 0.18; // 18% tax rate
+    $travelCharge = 500;
 
-    return response()->json($cartItems);
+    // Calculate subtotal with dynamic pricing based on adults and children
+    foreach ($cartItems as $item) {
+        $package = $item->package;
+        $booking = Booking::where('package_id', $package->id)
+                          ->where('user_id', Auth::id())
+                          ->first();
+
+        // Default to 1 adult and 0 children if no booking exists
+        $adults = $booking ? $booking->adults : 1;
+        $children = $booking ? $booking->children : 0;
+
+        // Base price from package (use offer price if available, otherwise regular price)
+        $basePrice = $package->offer_price ?? $package->ragular_price;
+
+        // Calculate item total (adults count as full price, children as half price)
+        $itemTotal = $basePrice * ($adults * 2 + $children * 0.5);
+        $subtotal += $itemTotal;
+    }
+
+    // Calculate tax and total
+    $tax = $subtotal * $taxRate;
+    $total = $subtotal + $tax + $travelCharge;
+
+    return response()->json([
+        'cartItems' => $cartItems,
+        'pricing' => [
+            'subtotal' => round($subtotal, 2),
+            'tax' => round($tax, 2),
+            'travelCharge' => $travelCharge,
+            'total' => round($total, 2)
+        ]
+    ]);
 }
 
 //remove cart
@@ -645,45 +681,34 @@ public function updateCartItem(Request $request, $cartId)
     ]);
 
     try {
-        // Find the corresponding cart item by $cartId
         $cartItem = Cart::findOrFail($cartId);
-
-        // Get the authenticated user
         $user = Auth::user();
 
-        // Check if the cart item has an associated booking
-        $booking = Booking::where('package_id', $cartItem->package_id)
-                          ->where('user_id', $user->id) // Ensure it's the current user's booking
-                          ->first();
-
-        if ($booking) {
-            // Update the existing booking
-            $booking->update([
-                'adults' => $validated['adults'],
-                'children' => $validated['children'],
-                'full_name' => $user->name,
-                'email' => $user->email,
-                'phone' => $user->phone,
-            ]);
-        } else {
-            // Create a new booking if none exists for the given package_id and user_id
-            $booking = Booking::create([
-                'user_id' => $user->id,  // Associate booking with the user
+        // Find or create a booking
+        $booking = Booking::updateOrCreate(
+            [
                 'package_id' => $cartItem->package_id,
+                'user_id' => $user->id,
+            ],
+            [
                 'adults' => $validated['adults'],
                 'children' => $validated['children'],
                 'full_name' => $user->name,
                 'email' => $user->email,
                 'phone' => $user->phone,
-                'terms_accepted' => true, // Assume terms are accepted by default
-                'travel_date' => now(),   // Set the travel date to the current date (or customize as needed)
-            ]);
-        }
+                'terms_accepted' => true,
+                'travel_date' => now(),
+            ]
+        );
+
+        // Recalculate price
+        $basePrice = $cartItem->package->offer_price ?? $cartItem->package->ragular_price;
+        $totalPrice = $basePrice * ($validated['adults'] * 2 + $validated['children'] * 0.5);
 
         return response()->json([
             'success' => true,
             'message' => 'Booking updated successfully!',
-            'booking' => $booking,
+            'totalPrice' => round($totalPrice, 2),
         ]);
 
     } catch (\Exception $e) {
@@ -693,7 +718,6 @@ public function updateCartItem(Request $request, $cartId)
         ], 500);
     }
 }
-
 
 
 //checkouttttt
@@ -777,6 +801,8 @@ public function store(Request $request)
         ], 500);
     }
 }
+
+// hotels controllerr
 
 
 

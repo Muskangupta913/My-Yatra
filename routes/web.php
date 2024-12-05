@@ -3,6 +3,7 @@
 use App\Http\Controllers\admin\AdminController;
 use App\Http\Controllers\admin\AuthController;
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\HotelController;
 use App\Http\Controllers\FlightController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
@@ -275,7 +276,12 @@ Route::prefix('admin')->middleware(['onlyAuthenticated', 'onlyAdmin'])->group(fu
       });
 
       // Hotel Route
-Route::get('/search-hotels', [HotelController::class, 'searchHotels'])->name('searchHotels');
+// Route::get('/search-hotels', [HotelController::class, 'searchHotels'])->name('searchHotels');
+Route::get('/hotels', [HotelController::class, 'index'])->name('hotels');
+
+
+
+
 //city
 Route::get('/fetch-all-cities', [CityController::class, 'fetchAllCities'])->name('fetch.all.cities');
 Route::get('/search-cities', [CityController::class, 'searchCities'])->name('search.cities');
