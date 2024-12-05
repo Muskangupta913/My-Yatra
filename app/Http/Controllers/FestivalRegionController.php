@@ -6,7 +6,7 @@ use App\Models\FestivalRegion;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
-class FestivalRegionsController extends Controller
+class FestivalRegionController extends Controller
 {
     /**
      * Display a listing of festival regions.

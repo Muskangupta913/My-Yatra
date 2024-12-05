@@ -6,13 +6,13 @@
       <div class="card search-engine-card py-5 px-4" style="position: relative">
         <ul class="nav nav-tabs border-0" style="position: absolute; top:0; left:1%; transform:translateY(-50%);"
           id="myTab" role="tablist">
-          <!-- <li class="nav-item" role="presentation">
-            <button class="nav-link px-4 shadow border-0" id="home-tab" data-bs-toggle="tab" data-bs-target="#home"
-              type="button" role="tab" aria-controls="home" aria-selected="true">
+          <li class="nav-item" role="presentation">
+            <button class="nav-link px-4 shadow border-0" id="flight-tab" data-bs-toggle="tab" data-bs-target="#flight"
+              type="button" role="tab" aria-controls="flight" aria-selected="false">
               <i class="fa-solid fa-plane-departure d-block"></i>
               <small>Flight</small>
             </button>
-          </li> -->
+          </li>
           <li class="nav-item" role="presentation">
             <button class="nav-link  px-4 shadow border-0" id="profile-tab" data-bs-toggle="tab"
               data-bs-target="#profile" type="button" role="tab" aria-controls="profile" aria-selected="false">
@@ -25,6 +25,20 @@
               data-bs-target="#contact" type="button" role="tab" aria-controls="contact" aria-selected="false">
               <i class="fa-solid fa-umbrella-beach d-block"></i>
               <small>Holidays</small>
+            </button>
+          </li>
+          <li class="nav-item" role="presentation">
+            <button class="nav-link px-4 shadow border-0" id="home-tab" data-bs-toggle="tab" data-bs-target="#home"
+              type="button" role="tab" aria-controls="home" aria-selected="true">
+              <i class="fa-solid fa-bus"></i><br>
+              <small>Bus</small>
+            </button>
+          </li>
+          <li class="nav-item" role="presentation">
+            <button class="nav-link px-4 shadow border-0" id="home-tab" data-bs-toggle="tab" data-bs-target="#home"
+              type="button" role="tab" aria-controls="home" aria-selected="true">
+              <i class="fa-solid fa-car"></i><br>
+              <small>Car</small>
             </button>
           </li>
         </ul>
@@ -91,6 +105,41 @@
     </div>
   </form>
 </div>
+
+<!-- // flight booking -->
+<div class="tab-pane fade" id="flight" role="tabpanel" aria-labelledby="home-tab">
+  <h4 class="mb-5" id="flight-title">Book Flights</h4>
+  <hr class="searchline">
+  <form action="{{ route('flight.booking') }}" method="GET">
+    <div class="row">
+      <div class="mb-3 col-md-3">
+        <div class="date-caption">From</div>
+        <input type="text" class="form-control rounded-0 py-3" name="fromCity" id="flightFromCity" placeholder="Enter Departure City" required>
+        <div id="flightFromCityList" class="card" style="position: absolute; width: 95%; max-height: 150px; overflow-y: scroll; display: none;"></div>
+      </div>
+      <div class="mb-3 col-md-3">
+        <div class="date-caption">To</div>
+        <input type="text" class="form-control rounded-0 py-3" name="toCity" id="flightToCity" placeholder="Enter Destination City" required>
+        <div id="flightToCityList" class="card" style="position: absolute; width: 95%; max-height: 150px; overflow-y: scroll; display: none;"></div>
+      </div>
+      <div class="mb-3 col-md-2">
+        <div class="date-caption">Departure Date</div>
+        <input type="text" id="flightDepartureDate" name="departure_date" class="form-control rounded-0 py-3 datepicker" placeholder="Select Departure Date" required>
+      </div>
+      <div class="mb-3 col-md-2">
+        <div class="date-caption">Return Date</div>
+        <input type="text" id="flightReturnDate" name="return_date" class="form-control rounded-0 py-3" placeholder="Select Return Date">
+      </div>
+      <div class="mb-3 col-md-2">
+        <div class="date-caption" style="visibility: hidden">Search</div>
+        <button type="submit" class="btn btn-warning w-100 rounded-0 py-3 fw-bold">Search Flights</button>
+      </div>
+    </div>
+  </form>
+</div>
+ 
+<!-- holiday booking  -->
+
           <div class="tab-pane fade mt-5 show active" id="contact" role="tabpanel" aria-labelledby="contact-tab">
             {{-- holiday packages searches --}}
             <h4 class="mb-5" id="tour-title">Book Domestic and International Holiday Packages
@@ -120,18 +169,14 @@
                   <div class="date-caption">Travel Date</div>
                   <input type="text" id="datepicker" name="travel_date" class="form-control rounded-0 py-3">
                 </div>
-
                 <div class="mb-3 col-md-2">
                   <div class="date-caption" style="visibility: hidden">Search</div>
                   <button type="submit" class="btn btn-warning w-100 rounded-0 py-3 fw-bold tourbuttonsearch">Search</button>
                 </div>
               </div>
             </form>
-
           </div>
         </div>
-
-
       </div>
     </div>
   </div>
@@ -165,7 +210,6 @@
                 <option value="2">3 Days 2 Nights</option>
                 <option value="3">4 Days 3 Nights</option>
               </select>
-
               <button class="btn btn-warning rounded-end-pill px-4" type="submit"
                 onclick="alert('Wait')">Search</button>
             </div>
@@ -397,17 +441,10 @@
       </div>
   </div>
 </section>
-
-
-
 @endsection
-
-
-
 @section('scripts')
 <script>
-
-  // Hotal
+  // Hotel
 $(document).ready(function() {
   // Guest Selection Logic
   let adults = 1;
@@ -499,11 +536,31 @@ $(document).ready(function() {
   });
 
   // Date Pickers
-  $('#checkinDatepicker, #checkoutDatepicker').datepicker({
+  // Initialize datepicker for all date fields initially
+$('.datepicker').datepicker({
+  format: 'yyyy-mm-dd',
+  autoclose: true,
+  startDate: 'today'
+});
+
+// Reinitialize the datepicker when the flight tab is shown
+$('#flight-tab').on('shown.bs.tab', function () {
+  $('#flightDepartureDate, #flightReturnDate').datepicker({
     format: 'yyyy-mm-dd',
     autoclose: true,
     startDate: 'today'
   });
+});
+
+// Also reinitialize the datepicker when the holiday tab is shown (if needed)
+$('#contact-tab').on('shown.bs.tab', function () {
+  $('#datepicker').datepicker({
+    format: 'yyyy-mm-dd',
+    autoclose: true,
+    startDate: 'today'
+  });
+});
+
 
   // Hide city list if clicked outside
   $(document).on('click', function (e) {
@@ -643,8 +700,6 @@ $(document).ready(function() {
       });
     }
 
-    
-
     // Show state list when the input is clicked
     $('#searchDestination').on('focus', function () {
       fetchAllStates();
@@ -656,7 +711,6 @@ $(document).ready(function() {
       if (!$(e.target).closest('#searchDestination, #destinationList, #searchCity, #cityList').length) {
         $('#destinationList').hide();
         //  $('#cityList').hide();
-
       }
     });
   });
