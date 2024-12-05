@@ -29,6 +29,9 @@ Route::get('/clear-cache', function() {
 
   return "All cache has been cleared!";
 });
+// Hotel Route
+// Route::get('/search-hotels', [HotelController::class, 'searchHotels'])->name('searchHotels');
+Route::get('/hotels', [HotelController::class, 'index'])->name('hotels');
 
 Route::get('/kashmir', function () {
   return view('kashmir'); // Replace 'kashmir' with the actual Blade file name without the .blade.php extension.
@@ -275,10 +278,9 @@ Route::prefix('admin')->middleware(['onlyAuthenticated', 'onlyAdmin'])->group(fu
           return view('festivals', compact('festivalRegions'));
       });
 
-      // Hotel Route
+     // Hotel Route
 // Route::get('/search-hotels', [HotelController::class, 'searchHotels'])->name('searchHotels');
 Route::get('/hotels', [HotelController::class, 'index'])->name('hotels');
-
 
 
 

@@ -9,6 +9,6 @@ class HotelController extends Controller
 {
     public function  index()
 {
-    return view('frontend.hotels');
+    return view('hotels');
 }
 }

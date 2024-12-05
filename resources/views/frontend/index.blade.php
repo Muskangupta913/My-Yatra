@@ -46,6 +46,7 @@
           <div class="tab-pane fade" id="home" role="tabpanel" aria-labelledby="home-tab">
             <p>Comming Soon!</p>
           </div>
+          <!-- // hotel booking -->
           <div class="tab-pane fade" id="profile" role="tabpanel" aria-labelledby="profile-tab">
                <h4 class="mb-5" id="hotel-title">Book Hotels in India</h4>
                 <hr class="searchline">
@@ -506,29 +507,29 @@ $(document).ready(function() {
 
   // Date Pickers
   // Initialize datepicker for all date fields initially
-$('.datepicker').datepicker({
-  format: 'yyyy-mm-dd',
-  autoclose: true,
-  startDate: 'today'
-});
+// $('.datepicker').datepicker({
+//   format: 'yyyy-mm-dd',
+//   autoclose: true,
+//   startDate: 'today'
+// });
 
-// Reinitialize the datepicker when the flight tab is shown
-$('#flight-tab').on('shown.bs.tab', function () {
-  $('#flightDepartureDate, #flightReturnDate').datepicker({
-    format: 'yyyy-mm-dd',
-    autoclose: true,
-    startDate: 'today'
-  });
-});
+// // Reinitialize the datepicker when the flight tab is shown
+// $('#flight-tab').on('shown.bs.tab', function () {
+//   $('#flightDepartureDate, #flightReturnDate').datepicker({
+//     format: 'yyyy-mm-dd',
+//     autoclose: true,
+//     startDate: 'today'
+//   });
+// });
 
-// Also reinitialize the datepicker when the holiday tab is shown (if needed)
-$('#contact-tab').on('shown.bs.tab', function () {
-  $('#datepicker').datepicker({
-    format: 'yyyy-mm-dd',
-    autoclose: true,
-    startDate: 'today'
-  });
-});
+// // Also reinitialize the datepicker when the holiday tab is shown (if needed)
+// $('#contact-tab').on('shown.bs.tab', function () {
+//   $('#datepicker').datepicker({
+//     format: 'yyyy-mm-dd',
+//     autoclose: true,
+//     startDate: 'today'
+//   });
+// });
 
 
   // Hide city list if clicked outside
