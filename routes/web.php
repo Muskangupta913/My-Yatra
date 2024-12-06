@@ -31,21 +31,7 @@ Route::get('/clear-cache', function() {
 
   return "All cache has been cleared!";
 });
-// Car Route
-Route::get('/cars', [CarController::class, 'index'])->name('cars');
-// Bus Route
-Route::get('/bus', [BusController::class, 'index'])->name('bus');
 
-// Hotel Route
-// Route::get('/search-hotels', [HotelController::class, 'searchHotels'])->name('searchHotels');
-Route::get('/hotels', [HotelController::class, 'index'])->name('hotels');
-
-Route::get('/kashmir', function () {
-  return view('kashmir'); // Replace 'kashmir' with the actual Blade file name without the .blade.php extension.
-})->name('kashmir');
-Route::get('/rishikesh', function () {
-  return view('rishikesh'); // Replace 'rishikesh' with the actual Blade file name without the .blade.php extension.
-})->name('rishikesh');
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
 // Route::get('/home', function(){
@@ -201,7 +187,7 @@ Route::get('/verify/{token}', [AuthController::class, 'verify'])->name('verify')
 // });
 
 
-Route::prefix('admin')->middleware(['onlyAuthenticated', 'onlyAdmin'])->group(function () {
+Route::prefix('admin')->middleware(['onlyAuthenticated'])->group(function () {
 
        Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('admin.dashboard');
        Route::get('/logout', [AdminController::class, 'logout'])->name('logout');
@@ -298,5 +284,22 @@ Route::get('/manali', [CityController::class, 'manali'])->name('manali');
 Route::post('/kerala', [CityController::class, 'kerala'])->name('kerala'); 
 Route::get('/coimbatore', [CityController::class, 'coimbatore'])->name('coimbatore');
 Route::get('/mussoorie', [CityController::class, 'mussoorie'])->name('mussoorie');
+
+Route::get('/kashmir', function () {
+  return view('kashmir'); // Replace 'kashmir' with the actual Blade file name without the .blade.php extension.
+})->name('kashmir');
+Route::get('/rishikesh', function () {
+  return view('rishikesh'); // Replace 'rishikesh' with the actual Blade file name without the .blade.php extension.
+})->name('rishikesh');
+
+// Car Route
+Route::get('/cars', [CarController::class, 'index'])->name('cars');
+// Bus Route
+Route::get('/bus', [BusController::class, 'index'])->name('bus');
+
+// Hotel Route
+// Route::get('/search-hotels', [HotelController::class, 'searchHotels'])->name('searchHotels');
+Route::get('/hotels', [HotelController::class, 'index'])->name('hotels');
+
 
 });
