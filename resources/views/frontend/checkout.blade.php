@@ -237,7 +237,7 @@
                 },
                 success: function(response) {
                     if (response.success) {
-                        toastr.success('Item removed from cart successfully!');
+                        toastr.success('Item removed from cart ');
                         fetchCartItems(); 
                     } else {
                         toastr.error('Failed to remove item: ' + response.message);

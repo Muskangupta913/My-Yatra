@@ -600,7 +600,7 @@ $(document).ready(function() {
             'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
         },
         success: function(response) {
-          toastr.success('Item added to cart successfully'); // Show success message
+          toastr.success('Item added to cart '); // Show success message
 
             // if (response.success) {
             //     alert('Item added to cart successfully!');
@@ -632,7 +632,6 @@ $(document).ready(function() {
         }
     });
 }
-        
 
     // Booking Form Submission
     $('#bookingForm').on('submit', function(e) {
@@ -742,7 +741,7 @@ $(document).ready(function() {
                         </small>
                     </div>
                     <div class="d-flex flex-column">
-                        <button class="btn btn-danger mb-2 rounded-0 booknow" data-slug="${item.slug}" data-newslug="${slug}">Details</button>
+                        <button class="btn btn-danger mb-2 rounded-0 booknow" data-slug="${item.slug}" data-newslug="${slug}">Detailss</button>
                         <button class="btn btn-outline-danger rounded-0 add-to-cart" data-id="${item.id}">Add To Cart</button>
                     </div>
                 </div>

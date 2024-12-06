@@ -801,12 +801,5 @@ public function store(Request $request)
         ], 500);
     }
 }
-
 // hotels controllerr
-
-
-
 }
-
-
-  

@@ -149,7 +149,6 @@
     </div>
   </form>
 </div>
-
  <!-- Bus Booking -->
 <div class="tab-pane fade mt-5" id="bus" role="tabpanel" aria-labelledby="bus-tab">
   <h4 class="mb-5" id="bus-title">Book Bus Tickets</h4>
@@ -177,9 +176,7 @@
     </div>
   </form>
 </div>
-
 <!-- holiday booking  -->
-
           <div class="tab-pane fade mt-5 show active" id="contact" role="tabpanel" aria-labelledby="contact-tab">
             {{-- holiday packages searches --}}
             <h4 class="mb-5" id="tour-title">Book Domestic and International Holiday Packages

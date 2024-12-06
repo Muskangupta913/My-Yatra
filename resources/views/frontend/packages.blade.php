@@ -534,7 +534,7 @@ const travelDateInput = document.getElementById('travelDate');
             'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
         },
           success: function(response) {
-            toastr.success('Item added to cart successfully'); // Show success message
+            toastr.success('Item added to cart '); // Show success message
             // if (response.success) {
             //     alert('Item added to cart successfully!');
             // } else {
@@ -686,11 +686,13 @@ function fetchPackages(selectedPrice, selectedDuration, selectedType) {
                     <p style="font-size: 20px; margin-top:-10px; font-weight:bold;">₹${Number(item.offer_price).toLocaleString('en-IN')} 
                         <small style="font-size:14px; font-weight:600; color:green;">${discount.toFixed(2)}% Off</small>
                     </p>
-                    <small class="text-muted d-block" style="text-decoration: line-through; margin-top:-10px; font-size:14px; font-weight:600;">₹${Number(item.ragular_price).toLocaleString('en-IN')}</small>
+                    <small class="text-muted d-block" style="text-decoration: line-through; margin-top:-10px; font-size:14px; font-weight:600;">
+                    ₹${Number(item.ragular_price).toLocaleString('en-IN')}
+                    </small>
                 </div>
-                <div class="button-group d-flex justify-content-between w-100 mt-2">
+            <div class="button-group d-flex flex-column justify-content-between  mt-2">
                     <a href="/holidays/${response.destinations.slug}/${item.slug}" class="text-decoration-none text-dark">
-                        <button class="btn btn-danger mx-2 btn-lg rounded-0 booknow" data-id="${item.id}">Details</button>
+                        <button class="btn btn-danger mb-2  rounded-0 booknow w-100" data-id="${item.id}">Detailss</button>
                     </a>
                     <button class="btn btn-outline-danger rounded-0 add-to-cart" data-id="${item.id}">Add To Cart</button>
                 </div>
@@ -718,13 +720,13 @@ toastr.options = {
         "closeButton": true,
         "debug": false,
         "newestOnTop": false,
-        "progressBar": true,
-        "positionClass": "toast-top-center", // Positioning the toast
-        "preventDuplicates": true,
-        "showDuration": "3000", // Show duration
-        "hideDuration": "0", // Hide duration
-        "timeOut": "20000", // Disable auto-dismiss
-        "extendedTimeOut": "0", // Disable auto-dismiss on hover
+        "progressBar": false,
+        "positionClass": "toast-top-right", // Positioning the toast
+        "preventDuplicates": false,
+        "showDuration": "300", // Show duration
+        "hideDuration": "1000", // Hide duration
+        "timeOut": "5000", // Disable auto-dismiss
+        "extendedTimeOut": "1000", // Disable auto-dismiss on hover
         "showEasing": "swing",
         "hideEasing": "linear",
         "showMethod": "fadeIn",

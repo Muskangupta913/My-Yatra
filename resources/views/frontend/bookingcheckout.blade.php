@@ -314,7 +314,6 @@ body {
                     <p class="text-sm text-gray-600"><b>Adults:</b> ${booking.adults}</p>
                     <p class="text-sm text-gray-600"><b>Children:</b> ${booking.children}</p>
                     <p class="text-sm text-gray-600"><b>Travel Date:</b> ${booking.travel_date}</p>
-                    <i class="fas fa-trash" onclick="removeBooking()"></i>
                     <div class="mt-4">
                         <p class="font-semibold text-gray-800">Total Price: ₹${bookingTotal}</p>
                     </div>
@@ -328,7 +327,6 @@ body {
             alert("Booking has been removed.");
             // Here, you would typically send a request to the backend to remove the booking.
         }
-
         // Initialize the page with booking data
         renderBookingDetails();
         updatePriceSummary();

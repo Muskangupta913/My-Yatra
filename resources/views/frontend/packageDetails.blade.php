@@ -2,6 +2,7 @@
 @section('title', $package->title)
 @section('meta_description', $package->meta_description)
 @section('styles')
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/css/toastr.min.css">
 <style>
 .packageDetailsSlider .swiper-slide img {
   
@@ -236,13 +237,13 @@
     <div class="swiper-pagination"></div>
   </div>
         </div>
-        <div class="col-md-4  mb-3">
+        <div class="col-md-4 sticky-price mb-3">
             <div class="card shadow py-3 border-0 rounded-0">
                 <div class="card-body">
                   @php
                   $discount = (($package->ragular_price - $package->offer_price) / $package->ragular_price) * 100;
                   @endphp
-                    <h4>Price Details</h4>
+                    <h4>Prices Details</h4>
                     <hr>
                     <div class="price-offer d-flex justify-content-between align-items-center">
                       <div>
@@ -383,6 +384,7 @@
 @endsection
 
 @section('scripts')
+<script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/js/toastr.min.js"></script>
 
 <script>
     var swiper = new Swiper(".packageDetailsSlider", {
@@ -399,7 +401,6 @@
       },
     });
   </script>
-
 <script>
   const travelDateInput = document.getElementById('travelDate');
   const today = new Date().toISOString().split('T')[0];
@@ -468,9 +469,12 @@
             headers: {
                 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
             },
-            success: function(response) {
-                alert('Booking confirmed successfully!');
-                window.location.href = `/booking/${response.booking_id}`;
+            success: function (response) {
+              toastr.success('Booking confirmed successfully!'); // Show success message
+              setTimeout(function () {
+            // Navigate to the booking page with the dynamic booking ID and package details
+            window.location.href = `/booking/${response.booking_id}`;
+        }, 5000); // 5000ms = 5 seconds
             },
             error: function(response) {
                 // Handle validation errors
@@ -486,12 +490,28 @@
                         $('#' + field).next('.invalid-feedback').text(message[0]).show();
                     });
                 } else {
-                    alert('An error occurred. Please try again.');
+                    toastr.error('An error occurred. Please try again.'); // Show error message
                 }
             }
         });
     });
 });
+toastr.options = {
+        "closeButton": true,
+        "debug": false,
+        "newestOnTop": false,
+        "progressBar": true,
+        "positionClass": "toast-top-right", // Positioning the toast
+        "preventDuplicates": true,
+        "showDuration": "3000", // Show duration
+        "hideDuration": "0", // Hide duration
+        "timeOut": "20000", // Disable auto-dismiss
+        "extendedTimeOut": "0", // Disable auto-dismiss on hover
+        "showEasing": "swing",
+        "hideEasing": "linear",
+        "showMethod": "fadeIn",
+        "hideMethod": "fadeOut"
+    };
 
 </script>
 @endsection

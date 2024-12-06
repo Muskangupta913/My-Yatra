@@ -518,7 +518,7 @@ toastr.options = {
         "debug": false,
         "newestOnTop": false,
         "progressBar": true,
-        "positionClass": "toast-top-center", // Positioning the toast
+        "positionClass": "toast-top-right", // Positioning the toast
         "preventDuplicates": true,
         "showDuration": "3000", // Show duration
         "hideDuration": "0", // Hide duration

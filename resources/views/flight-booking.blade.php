@@ -65,8 +65,18 @@
     transform: scale(1.02);
     transition: transform 0.2s ease-in-out;
 }
+.card {
+    height: 100%; /* Ensures cards expand equally */
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
 
 .card-body {
+       flex-grow: 1; /* Makes the body fill the available space */
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
     padding: 0.5rem;
 }
 
@@ -568,11 +578,9 @@
         </div>
     </div>
 </div>
-
 <script>
     document.getElementById('priceRange').addEventListener('input', function () {
         document.getElementById('priceValue').innerText = `Selected: $${this.value}`;
     });
 </script>
-
 @endsection
