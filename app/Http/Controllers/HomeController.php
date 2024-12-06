@@ -194,20 +194,17 @@ public function filterPackages(Request $request, $slug)
 // Search Engine
 public function search(Request $request)
 {
-    $searchTerm = $request->input('query');
-
-    // Fetch matching destinations from the database
-    $destinations = State::where('destination_name', 'LIKE', "{$searchTerm}%")->get();
-
-    // Return only the relevant data
+    $query = $request->input('query');
+    $destinations = State::where('destination_name', 'LIKE', "%{$query}%")->get();
     return response()->json($destinations);
 }
 
 public function fetchAllStates()
 {
-    $states = DB::table('states')->get();  // Fetch all states from the 'states' table
-    return response()->json($states);  // Return the result as a JSON response
+    $states = State::all(); // Ensure 'State' model and table are correctly configured
+    return response()->json($states);
 }
+
 
 public function searchCities(Request $request)
 {

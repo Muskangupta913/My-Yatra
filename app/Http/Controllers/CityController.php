@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 use Illuminate\Http\Request;
+use App\Models\City;
 
 class CityController extends Controller
 {
@@ -34,4 +35,18 @@ class CityController extends Controller
     {
         return view('mussoorie');
     }
+    public function fetchAllCities()
+    {
+        $cities = City::all(); // Ensure 'City' model and table are correctly configured
+        return response()->json($cities);
+    }
+    
+     
+    public function searchCities(Request $request)
+{
+    $stateId = $request->input('state_id');
+    $cities = City::where('state_id', $stateId)->get();
+    return response()->json($cities);
+}
+
 }
