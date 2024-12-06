@@ -127,7 +127,7 @@
       <div class="mb-3 col-md-3">
         <div class="date-caption">Pickup Location</div>
         <input type="text" class="form-control rounded-0 py-3" name="pickupLocation" id="carPickupLocation" placeholder="Enter Pickup Location" required>
-        <div id="carPickupLocationList" class="card" style="position: absolute; width: 95%; max-height: 150px; overflow-y: scroll; display: none;"></div>
+        <div id="carPickupLocationList" class="card" style="position: absolute; width: 95%; max-height: 150px; overflow-y: scroll;"></div>
       </div>
       <div class="mb-3 col-md-3">
         <div class="date-caption">Drop-off Location</div>
@@ -480,6 +480,8 @@
 </section>
 @endsection
 @section('scripts')
+
+
 <script>
   document.addEventListener('DOMContentLoaded', function () {
     // Select all the datepicker inputs
@@ -502,7 +504,6 @@
 
 
 <script>
-  // Hotel
   $(document).ready(function () {
     // CSRF Token setup for AJAX
     $.ajaxSetup({
@@ -510,95 +511,145 @@
             'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content'),
         },
     });
-  
 
-  // City Search Similar to Destination Search
-  function fetchAllCities() {
-        console.log("Fetching all cities...");
-        $.ajax({
-            url: "{{ route('fetch.all.cities') }}", // Laravel route to get all cities
-            method: "GET",
-            success: function (data) {
-                console.log("Cities fetched successfully:", data);
-                $('#cityList').empty(); // Clear previous data
-                if (data.length > 0) {
-                    $.each(data, function (index, city) {
-                        $('#cityList').append(
-                            `<div class="list-group-item" style="cursor: pointer;" data-id="${city.id}">
-                                <i class="fa-solid fa-location-dot"></i> ${city.city_name}
-                             </div>`
-                        );
-                    });
+    // City Search Similar to Destination Search
+    function fetchAllCities() {
+    console.log("Fetching all cities...");
+    $.ajax({
+        url: "{{ route('fetch.all.cities') }}", // Laravel route to get all cities
+        method: "GET",
+        success: function (data) {
+            console.log("Cities fetched successfully:", data);
 
-                    // Add click handler for cities
-                    $('.list-group-item').on('click', function () {
-                        var selectedValue = $(this).text();
-                        $('#searchCity').val(selectedValue); // Set selected city
-                        $('#cityList').hide(); // Hide list
-                    });
-                } else {
-                    $('#cityList').append('<div class="list-group-item">No cities found</div>');
-                }
-            },
-            error: function (xhr) {
-                console.error("Error fetching cities:", xhr.responseText);
-            },
-        });
-    }
-    $('#searchCity').on('focus', function () {
-        fetchAllCities();
-        $('#cityList').show();
+            // Clear dropdowns for cities
+            $('#cityList, #carPickupLocationList, #carDropoffLocationList, #busFromCityList, #busToCityList').empty();
+
+            if (data.length > 0) {
+                $.each(data, function (index, city) {
+                    const cityHTML = `
+                        <div class="list-group-item" style="cursor: pointer;" data-id="${city.id}">
+                            <i class="fa-solid fa-location-dot"></i> ${city.city_name}
+                        </div>`;
+
+                    // Append cities to all relevant dropdowns
+                    $('#cityList').append(cityHTML);
+                    $('#carPickupLocationList').append(cityHTML);
+                    $('#carDropoffLocationList').append(cityHTML);
+                    $('#busFromCityList').append(cityHTML);
+                    $('#busToCityList').append(cityHTML);
+                });
+
+                // Add click handlers for the dynamically created list items
+                $('#cityList .list-group-item').on('click', function () {
+                    const selectedValue = $(this).text();
+                    $('#searchCity').val(selectedValue);
+                    $('#cityList').hide();
+                });
+
+                $('#carPickupLocationList .list-group-item').on('click', function () {
+                    const selectedValue = $(this).text();
+                    $('#carPickupLocation').val(selectedValue);
+                    $('#carPickupLocationList').hide();
+                });
+
+                $('#carDropoffLocationList .list-group-item').on('click', function () {
+                    const selectedValue = $(this).text();
+                    $('#carDropoffLocation').val(selectedValue);
+                    $('#carDropoffLocationList').hide();
+                });
+
+                $('#busFromCityList').on('click', '.list-group-item', function () {
+                    const selectedValue = $(this).text();
+                    $('#busFromCity').val(selectedValue);
+                    $('#busFromCityList').hide();
+                });
+
+                $('#busToCityList').on('click', '.list-group-item', function () {
+                    const selectedValue = $(this).text();
+                    $('#busToCity').val(selectedValue);
+                    $('#busToCityList').hide();
+                });
+            } else {
+                const noCitiesHTML = '<div class="list-group-item">No cities found</div>';
+                $('#cityList, #carPickupLocationList, #carDropoffLocationList, #busFromCityList, #busToCityList').append(noCitiesHTML);
+            }
+        },
+        error: function (xhr) {
+            console.error("Error fetching cities:", xhr.responseText);
+        },
     });
-    $(document).on('click', function (e) {
-        if (!$(e.target).closest('#searchDestination, #destinationList, #searchCity, #cityList').length) {
-            $('#destinationList').hide();
-            $('#cityList').hide();
+}
+
+// Show dropdowns and fetch data on input focus
+$('#searchCity').on('focus', function () {
+    fetchAllCities();
+    $('#cityList').show();
+});
+
+$('#carPickupLocation').on('focus', function () {
+    fetchAllCities();
+    $('#carPickupLocationList').show();
+});
+
+$('#carDropoffLocation').on('focus', function () {
+    fetchAllCities();
+    $('#carDropoffLocationList').show();
+});
+
+$('#busFromCity').on('focus', function () {
+    fetchAllCities();
+    $('#busFromCityList').show();
+});
+
+$('#busToCity').on('focus', function () {
+    fetchAllCities();
+    $('#busToCityList').show();
+});
+
+// Hide dropdowns when clicking outside
+$(document).on('click', function (e) {
+    if (!$(e.target).closest('#searchCity, #cityList, #carPickupLocation, #carPickupLocationList, #carDropoffLocation, #carDropoffLocationList, #busFromCity, #busFromCityList, #busToCity, #busToCityList').length) {
+        $('#cityList, #carPickupLocationList, #carDropoffLocationList, #busFromCityList, #busToCityList').hide();
+    }
+});
+    // Search functionality when typing in the searchCity input
+    $('#searchCity').on('keyup', function () {
+        var query = $(this).val();
+        if (query.length > 0) {
+            $.ajax({
+                url: "{{ route('search.cities') }}", // Laravel route to search cities
+                method: "GET",
+                data: { query: query },
+                success: function (data) {
+                    $('#cityList').empty();
+                    if (data.length > 0) {
+                        $.each(data, function (index, city) {
+                            $('#cityList').append(
+                                `<div class="list-group-item" style="cursor: pointer;" data-id="${city.id}">
+                                    <i class="fa-solid fa-location-dot"></i> ${city.city_name}
+                                 </div>`
+                            );
+                        });
+
+                        // Add click handler for cities
+                        $('#cityList .list-group-item').on('click', function () {
+                            var selectedValue = $(this).text();
+                            $('#searchCity').val(selectedValue);
+                            $('#cityList').hide();
+                        });
+                    } else {
+                        $('#cityList').append('<div class="list-group-item">No results found</div>');
+                    }
+                }
+            });
+        } else {
+            $('#cityList').empty();
+            fetchAllCities(); // Show all cities if search is cleared
         }
     });
 
-$('#searchCity').on('keyup', function () {
-    var query = $(this).val();
-    if (query.length > 0) {
-        $.ajax({
-            url: "{{ route('search.cities') }}",
-            method: "GET",
-            data: { query: query },
-            success: function (data) {
-                $('#cityList').empty();
-                if (data.length > 0) {
-                    $.each(data, function (index, city) {
-                        $('#cityList').append(
-                            '<div class="list-group-item" style="cursor: pointer;" data-id="' + city.id + '">' +
-                            '<i class="fa-solid fa-location-dot"></i> ' + city.city_name +
-                            '</div>'
-                        );
-                    });
-
-                    $('.list-group-item').on('click', function () {
-                        var selectedValue = $(this).text();
-                        $('#searchCity').val(selectedValue);
-                        $('#cityList').hide();
-                    });
-                } else {
-                    $('#cityList').append('<div class="list-group-item">No results found</div>');
-                }
-            }
-        });
-    } else {
-        $('#cityList').empty();
-        fetchAllCities(); // Show all cities if search is cleared
-    }
-});
-
-$(document).on('click', function (e) {
-    if (!$(e.target).closest('#searchCity, #cityList').length) {
-        $('#cityList').hide();
-    }
-});
-
-
-
- function fetchAllStates() {
+    // Fetch states
+    function fetchAllStates() {
         console.log("Fetching all states...");
         $.ajax({
             url: "{{ route('fetch.all.states') }}", // Laravel route to get all states
@@ -616,11 +667,11 @@ $(document).on('click', function (e) {
                     });
 
                     // Add click handler for states
-                    $('.list-group-item').on('click', function () {
+                    $('#destinationList .list-group-item').on('click', function () {
                         var selectedStateId = $(this).data('id');
                         var selectedValue = $(this).text();
                         $('#searchDestination').val(selectedValue); // Set selected state
-                        $('#destinationList').hide(); // Hide list
+                        $('#destinationList').hide(); // Hide list after selection
                         fetchCities(selectedStateId); // Fetch cities for the selected state
                     });
                 } else {
@@ -633,104 +684,87 @@ $(document).on('click', function (e) {
         });
     }
 
-
-
-     
-    // Search functionality when typing in the state input
+    // Search functionality for destination input (state)
     $('#searchDestination').on('keyup', function () {
-      var query = $(this).val();
-      if (query.length > 0) {
-        $.ajax({
-          url: "{{ route('search.destination') }}",
-          method: 'GET',
-          headers: {
-            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-          },
-          data: { query: query },
-          success: function (data) {
-            $('#destinationList').empty();
-            if (data.length > 0) {
-              $.each(data, function (index, destination) {
-                $('#destinationList').append('<div class="list-group-item" style="cursor: pointer;" data-id="' + destination.id + '"> <i class="fa-solid fa-location-dot"></i> ' + destination.destination_name + '</div>');
-              });
+        var query = $(this).val();
+        if (query.length > 0) {
+            $.ajax({
+                url: "{{ route('search.destination') }}", // Laravel route to search destinations
+                method: 'GET',
+                data: { query: query },
+                success: function (data) {
+                    $('#destinationList').empty();
+                    if (data.length > 0) {
+                        $.each(data, function (index, destination) {
+                            $('#destinationList').append(
+                                `<div class="list-group-item" style="cursor: pointer;" data-id="${destination.id}">
+                                    <i class="fa-solid fa-location-dot"></i> ${destination.destination_name}
+                                 </div>`
+                            );
+                        });
 
-             
-              // Add click event listener for each list item
-              $('.list-group-item').on('click', function () {
-                selectedStateId = $(this).data('id');
-                var selectedValue = $(this).text(); // Get the text of the clicked item
-                $('#searchDestination').val(selectedValue); // Set the value in the input field
-                $('#destinationList').empty(); // Clear the list after selecting an item
-                fetchCities(selectedStateId); // Fetch cities based on selected state
-              });
-
-
-          // city Keyup events
-            $('#searchCity').on('focus', function(){
-
-             console.log(selectedStateId);
-
-            fetchCities(selectedStateId);
+                        // Add click handler for destinations
+                        $('#destinationList .list-group-item').on('click', function () {
+                            var selectedStateId = $(this).data('id');
+                            var selectedValue = $(this).text();
+                            $('#searchDestination').val(selectedValue);
+                            $('#destinationList').hide();
+                            fetchCities(selectedStateId); // Fetch cities based on selected state
+                        });
+                    } else {
+                        $('#destinationList').append('<div class="list-group-item">No results found</div>');
+                    }
+                }
             });
-
-
-            } else {
-              $('#destinationList').append('<div class="list-group-item">No results found</div>');
-            }
-          }
-        });
-      } else {
-        $('#destinationList').empty(); // Clear the results if input is cleared
-      }
+        } else {
+            $('#destinationList').empty(); // Clear the results if input is cleared
+        }
     });
 
     // Fetch cities based on selected state
     function fetchCities(stateId) {
-      $.ajax({
-        url: "{{ route('search.cities') }}", // Laravel route to get cities by state
-        method: 'GET',
-        data: { state_id: stateId },
-        success: function (data) {
-          $('#cityList').empty(); // Clear previous data
-          if (data.length > 0) {
-            // var maxCitiesToShow = 5; // Limit cities to show
-            $.each(data, function (index, city) {
-              $('#cityList').append('<div class="list-group-item"> <i class="fa-solid fa-location-dot"></i> ' + city.city_name + '</div>');
-            });
+        $.ajax({
+            url: "{{ route('search.cities') }}", // Laravel route to get cities by state
+            method: 'GET',
+            data: { state_id: stateId },
+            success: function (data) {
+                $('#cityList').empty(); // Clear previous data
+                if (data.length > 0) {
+                    $.each(data, function (index, city) {
+                        $('#cityList').append(
+                            `<div class="list-group-item">
+                                <i class="fa-solid fa-location-dot"></i> ${city.city_name}
+                             </div>`
+                        );
+                    });
 
-            // Click event for selecting city
-            $('.list-group-item').on('click', function () {
-              var selectedCity = $(this).text();
-              $('#searchCity').val(selectedCity); // Set city in input field
-              $('#cityList').empty(); // Clear city list after selection
-            });
-          } else {
-            // Append the 'No results found' message
-              $('#cityList').append('<div class="list-group-item" id="noResults">No results found</div>');
-
-              // Add a click event listener to hide the 'No results found' message
-              $('#cityList').on('click', '#noResults', function() {
-                  $(this).hide(); // Hide the clicked 'No results found' message
-              });
-           
-          }
-        }
-      });
+                    // Click event for selecting city
+                    $('#cityList .list-group-item').on('click', function () {
+                        var selectedCity = $(this).text();
+                        $('#searchCity').val(selectedCity);
+                        $('#cityList').empty(); // Clear city list after selection
+                    });
+                } else {
+                    $('#cityList').append('<div class="list-group-item">No results found</div>');
+                }
+            }
+        });
     }
 
-    // Show state list when the input is clicked
+    // Show state list when the input is focused
     $('#searchDestination').on('focus', function () {
-      fetchAllStates();
-      $('#destinationList').show();
+        fetchAllStates();
+        $('#destinationList').show();
     });
 
     // Hide state/city list if clicked outside
     $(document).on('click', function (e) {
-      if (!$(e.target).closest('#searchDestination, #destinationList, #searchCity, #cityList').length) {
-        $('#destinationList').hide();
-        //  $('#cityList').hide();
-      }
-    }); 
+        if (!$(e.target).closest('#searchDestination, #destinationList, #searchCity, #cityList').length) {
+            $('#destinationList').hide();
+            $('#cityList').hide();
+        }
+    });
   });
 </script>
+
 @endsection
