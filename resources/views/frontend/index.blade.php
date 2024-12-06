@@ -188,7 +188,7 @@
             <form action="{{ route('searchPackages') }}" method="GET">
               <div class="row">
                 <div class="mb-3 col-md-4 holiday-search">
-                  <div class="date-caption">Searchhhhhh Destination</div>
+                  <div class="date-caption">Search Destination</div>
                   <input type="text" class="form-control rounded-0 py-3" name="searchDestination" id="searchDestination"
                     placeholder="Search Destination" required>
                   <div class="search-icon">
