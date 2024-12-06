@@ -3,302 +3,192 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Responsive Payment Form</title>
+    <style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
 
-    <!-- custom css file link  -->
-    <!-- <link rel="stylesheet" href="./checkout.css"> -->
-<style>
-    * {
-  margin: 0 auto;
-  padding: 0;
-  box-sizing: border-box;
-  outline: none;
-  border: none;
-  text-transform: capitalize;
-  transition: all 0.2s linear;
+.container { 
+    display: flex; justify-content: center; align-items: center; min-height: 100vh; 
+    padding: 20px; background: url("{{ asset('assets/images/bg.webp') }}") no-repeat center/cover; 
 }
 
-.container {
-  display: flex;
-  justify-content: center; /* Center horizontally */
-  align-items: center;    /* Center vertically */
-  padding: 20px;
-  min-height: 100vh;
-  background-image: url("{{ asset('assets/images/bg.webp') }}");
-  background-repeat: no-repeat;
-  background-size: cover;
+form { 
+    padding: 30px; 
+    max-width: 600px; 
+    width: 100%; 
+    background: #fff; 
+    border-radius: 10px; 
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+    position: relative; 
+    z-index: 1; 
 }
 
-.container form {
-  padding: 30px;
-  max-width: 700px;
-  width: 100%;
-  background: #fff;
-  border-radius: 8px;
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+.alert { display: none; padding: 10px; margin-bottom: 10px; background-color: #f8d7da; border: 1px solid #f5c6cb; border-radius: 5px; color: #721c24; font-weight: bold; }
+
+.payment-methods { display: flex; justify-content: center; margin-bottom: 20px; gap: 20px; }
+.payment-methods label { flex: 1; text-align: center; padding: 10px 20px; background: #f4f4f4; border: 1px solid #ccc; border-radius: 5px; cursor: pointer; transition: background 0.3s ease; width: 120px; }
+.payment-methods label:hover { background: #e9ecef; }
+.payment-methods input[type="radio"] { display: none; }
+.payment-methods input[type="radio"]:checked + label { background: #27ae60; color: #fff; border: 1px solid #1e8449; }
+
+.payment-option { display: none; margin-top: 20px; }
+.payment-option.active { display: block; }
+
+.card-option .input-group { margin-bottom: 15px; }
+.card-option .input-group label { display: block; margin-bottom: 5px; font-weight: bold; font-size: 14px; }
+.card-option .input-group input { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 5px; font-size: 14px; }
+
+.upi-option, .qr-option { text-align: center; }
+.upi-option h4, .qr-option h4 { margin-bottom: 10px; }
+.upi-option p, .qr-option p { margin-top: 10px; }
+
+.upi-option img, .qr-option img { display: block; margin: 20px auto; width: 50%; height: auto; border: 3px solid #27ae60; border-radius: 10px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); }
+
+.submit-btn-container { display: flex; justify-content: center; gap: 10px; }
+.submit-btn { padding: 12px; font-size: 17px; background: #27ae60; color: #fff; border-radius: 5px; cursor: pointer; text-align: center; border: none; transition: background 0.3s ease; width: 100px; }
+.submit-btn:hover { background: #2ecc71; }
+
+@media (max-width: 768px) {
+    .payment-methods { flex-direction: column; gap: 10px; }
+    .payment-methods label { width: 100%; }
+    
+    form { max-width: 90%; padding-top: 100px; }  /* Increased padding-top to create space for contact-info */
+    
+    .contact-info { 
+        position: relative;  /* Ensure contact-info is not fixed */
+        margin-top: 20px;  /* Add margin to the top */
+        padding: 8px 15px; 
+        gap: 10px;
+        justify-content: center;
+        flex-direction: column; /* Stack the contact items vertically */
+    }
+    .contact-info a { font-size: 14px; text-align: center; }
+    .contact-info a i { font-size: 18px; }
 }
 
-.container form:hover {
-  transform: scale(1.02); /* Slightly enlarges the form on hover */
-}
-.container form .row {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 15px;
-}
-
-.container form .row .col {
-  flex: 1 1 300px; /* Adjusted for better responsiveness */
-}
-
-.container form .row .col .title {
-  font-size: 20px;
-  color: #333;
-  padding-bottom: 5px;
-  text-transform: uppercase;
+.contact-info { 
+    display: flex; justify-content: center; align-items: center; gap: 20px; 
+    position: fixed; 
+    top: 10px; /* Fixed at the top for larger screens */
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: #fff; 
+    padding: 10px 20px; 
+    border-radius: 5px; 
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1); 
+    z-index: 1000; /* Ensure it stays on top */
 }
 
-.container form .row .col .inputBox {
-  margin: 15px 0;
+.contact-info a { 
+    text-decoration: none; 
+    color: #555; 
+    font-size: 16px; 
+    display: flex; 
+    align-items: center; 
+    gap: 8px; 
+    font-weight: bold; 
 }
 
-.container form .row .col .inputBox span {
-  margin-bottom: 10px;
-  display: block;
+.contact-info a:hover { 
+    color: #27ae60; 
 }
 
-.container form .row .col .inputBox input {
-  width: 100%;
-  border: 1px solid #ccc;
-  padding: 10px 15px;
-  font-size: 15px;
-  text-transform: none;
-}
-.container form .row .col .inputBox input:hover {
-    background-color: rgba(0, 0, 0, 0.1);
-}
-.container form .row .col .inputBox input:focus {
-  border: 1px solid #FF0000; /* Highlights border on focus */
-  background-color: #fff; /* Changes background color on focus */
-}
-
-.container form .row .col .flex {
-  display: flex;
-  gap: 15px;
-}
-
-.container form .row .col .flex .inputBox {
-  margin-top: 5px;
-}
-
-.container form .row .col .inputBox img {
-  height: 34px;
-}
-.submit-btn-container {
-  align-items: center;
-  display: flex;
-  justify-content: center;
-}
-.container form .submit-btn {
-  padding: 12px;
-  font-size: 17px;
-  background: #27ae60;
-  color: #fff;
-  margin-top: 5px;
-  cursor: pointer;
-}
-.payment-methods label {
-    display: block;
-    margin: 10px 0;
-    cursor: pointer;
-}
-.payment-methods img {
-    max-width: 40%;
-    margin-top: 5px;
-}
-.payment-option {
-    display: none;
-}
-
-.payment-option img {
-    max-width: 100%;
-    margin-top: 10px;
-}
-.payment-option:hover {
-    background-color: rgba(0, 0, 0, 0.1);
-}
-
-.container form .submit-btn:hover {
-  background: #2ecc71;
+.contact-info a i { 
+    font-size: 20px; 
 }
 
 </style>
+
+
+     <!-- Add Font Awesome for Icons -->
+     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
 </head>
+
 <body>
     <div class="container">
-        <form action="">
-            <!-- Red Alert for Credit Card Unavailability -->
-            <div id="credit-card-alert" class="alert alert-danger" style="display: none; padding: 10px; background-color: #f8d7da; border: 1px solid #f5c6cb; border-radius: 5px; color: #721c24; font-weight: bold; margin-bottom: 10px;">
-                Credit card payments are temporarily unavailable. Please try again later or choose another payment method. We apologize for the inconvenience.
+        <form>
+            <div id="credit-card-alert" class="alert">
+                Credit card payments are temporarily unavailable. Please try another method.
             </div>
 
-            <!-- Billing Address Section -->
-            <div class="row">
-                <div class="col">
-                    <h3 class="title">Billing Address</h3>
-                    <div class="inputBox">
-                        <span>Full Name:</span>
-                        <input type="text" placeholder="Make My Bharat Yatra" required>
-                    </div>
-                    <div class="inputBox">
-                        <span>Email:</span>
-                        <input type="email" placeholder="example@gmail.com" required>
-                    </div>
-                    <div class="inputBox">
-                        <span>Address:</span>
-                        <input type="text" placeholder="Room - Street - Locality" required>
-                    </div>
-                    <div class="inputBox">
-                        <span>City:</span>
-                        <input type="text" placeholder="Noida" required>
-                    </div>
-                    <div class="flex">
-                        <div class="inputBox">
-                            <span>State:</span>
-                            <input type="text" placeholder="Uttar Pradesh" required>
-                        </div>
-                        <div class="inputBox">
-                            <span>Zip Code:</span>
-                            <input type="text" placeholder="201 301" required>
-                        </div>
+            <h3 style="text-align: center; margin-bottom: 20px;">Select Payment Method</h3>
+            <div class="payment-methods">
+                <input type="radio" id="card" name="payment-method" value="card" checked onclick="togglePaymentOption('card')">
+                <label for="card">Credit Card</label>
+
+                <input type="radio" id="qr" name="payment-method" value="qr" onclick="togglePaymentOption('qr')">
+                <label for="qr">QR Code</label>
+
+                <input type="radio" id="upi" name="payment-method" value="upi" onclick="togglePaymentOption('upi')">
+                <label for="upi">UPI</label>
+            </div>
+
+            <div class="payment-option card-option active" id="card-option">
+                <div class="input-group">
+                    <label>Name on Card:</label>
+                    <input type="text" placeholder="MMBY" required>
+                </div>
+                <div class="input-group">
+                    <label>Credit Card Number:</label>
+                    <input type="text" placeholder="1111-2222-3333-4444" required>
+                </div>
+                <div class="input-group">
+                    <label>Expiration Date:</label>
+                    <div style="display: flex; gap: 10px;">
+                        <input type="text" placeholder="MM" style="flex: 1;" required>
+                        <input type="text" placeholder="YYYY" style="flex: 1;" required>
                     </div>
                 </div>
-
-                <!-- Payment Section -->
-                <div class="col">
-                    <h3 class="title">Payment:</h3>
-                    
-                    <!-- Payment Methods -->
-                    <div class="payment-methods">
-                        <label>
-                            <input type="radio" name="payment-method" value="card"  onclick="showCreditCardAlert()"><b> Credit Card</b>
-                        </label>
-                        <label>
-                            <input type="radio" name="payment-method" value="qr" onclick="hideCreditCardAlert()"> <b>QR Code</b>
-                        </label>
-                        <label>
-                            <input type="radio" name="payment-method" value="upi" onclick="hideCreditCardAlert()"> <b>UPI</b>
-                        </label>
-                    </div>
-
-                    <!-- Card Payment Section -->
-                    <div class="payment-option card-option">
-                        <div class="inputBox">
-                            <span>Name on Card:</span>
-                            <input type="text" placeholder="Make My Bharat Yatra" required>
-                        </div>
-                        <div class="inputBox">
-                            <span>Credit Card Number:</span>
-                            <input type="text" placeholder="1111-2222-3333-4444" required>
-                        </div>
-                        <div class="inputBox">
-                            <span>Exp Month:</span>
-                            <input type="text" placeholder="January" required>
-                        </div>
-                        <div class="flex">
-                            <div class="inputBox">
-                                <span>Exp Year:</span>
-                                <input type="number" placeholder="2024" required>
-                            </div>
-                            <div class="inputBox">
-                                <span>CVV:</span>
-                                <input type="text" placeholder="123" required>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- QR Payment Section -->
-                    <div class="payment-option qr-option" style="display:none;">
-                        <h4>Scan the QR Code</h4>
-                        <div id="qr-code" style="text-align:center;">
-                            <img src="{{ asset('assets/images/qr.jpeg')}}" alt="Scan the QR Code" style="width: 200px; height: 200px;"/>
-                            <p>Use any payment app to scan and pay.</p>
-                        </div>
-                    </div>
-
-                    <!-- UPI Payment Section -->
-                    <div class="payment-option upi-option" style="display:none;">
-                        <h4>Pay via UPI</h4>
-                        <div class="inputBox">
-                            <img src="{{ asset('assets/images/upi.jpeg')}}" alt="Enter UPI ID:" />
-                        </div>
-                        <p>Use your UPI app to make the payment to the provided UPI ID.</p>
-                    </div>
+                <div class="input-group">
+                    <label>CVV:</label>
+                    <input type="text" placeholder="123" required>
                 </div>
+                <div class="submit-btn-container">
+                <button type="submit" class="submit-btn">Checkout</button>
+            </div>
+            
             </div>
 
-            <!-- Submit Button -->
-            <div class="submit-btn-container">
-                <input type="submit" value="Proceed to Checkout" class="submit-btn">
+            <div class="payment-option qr-option" id="qr-option">
+                <h4 style="text-align: center;">Scan the QR Code</h4>
+                <img src="{{ asset('assets/images/qr.jpeg')}}" alt="QR Code">
+                <p style="text-align: center;">Use any payment app to scan and pay.</p>
             </div>
+
+            <div class="payment-option upi-option" id="upi-option">
+                <h4 style="text-align: center;">Pay via UPI</h4>
+                <p style="text-align: center;">Use your UPI app to make the payment.</p>
+                <img src="{{ asset('assets/images/upi.jpeg')}}" alt="UPI ID">
+            </div>
+
         </form>
     </div>
-
+     <!-- Contact Information with Icons -->
+     <div class="contact-info">
+        <a href="mailto:support@example.com">
+            <i class="fas fa-envelope"></i> info@makemybharatyatra.com 
+        </a>
+        <a href="tel:+1234567890">
+            <i class="fas fa-phone-alt"></i> +91 1204223100
+        </a>
+    </div>
     <script>
-        // JavaScript to handle showing and hiding of payment methods based on user selection
-        document.addEventListener("DOMContentLoaded", function () {
-            const paymentMethods = document.querySelectorAll('input[name="payment-method"]');
-            const cardOption = document.querySelector('.card-option');
-            const qrOption = document.querySelector('.qr-option');
-            const upiOption = document.querySelector('.upi-option');
-            
-            // Initially show the card payment option by default
-            showPaymentOption('card');
+       function togglePaymentOption(option) {
+    // Show or hide the credit card alert
+    document.getElementById("credit-card-alert").style.display = option === 'card' ? "block" : "none";
 
-            paymentMethods.forEach(method => {
-                method.addEventListener('change', (event) => {
-                    showPaymentOption(event.target.value);
-                });
-            });
+    // Hide all payment options
+    document.querySelectorAll('.payment-option').forEach((element) => {
+        element.classList.remove('active');
+    });
 
-            function showPaymentOption(method) {
-                // Hide all options first
-                cardOption.style.display = 'none';
-                qrOption.style.display = 'none';
-                upiOption.style.display = 'none';
-
-                // Show the selected payment option
-                if (method === 'card') {
-                    cardOption.style.display = 'block';
-                } else if (method === 'qr') {
-                    qrOption.style.display = 'block';
-                } else if (method === 'upi') {
-                    upiOption.style.display = 'block';
-                }
-            }
-        });
-
-        // Show Credit Card Alert
-        function showCreditCardAlert() {
-            document.getElementById("credit-card-alert").style.display = "block";
-        }
-
-        // Hide Credit Card Alert when other payment methods are selected
-        function hideCreditCardAlert() {
-            document.getElementById("credit-card-alert").style.display = "none";
-        }
-
-        // Disable right-click and certain keyboard shortcuts
-        document.addEventListener("contextmenu", (e) => e.preventDefault()); // Disable right-click
-        document.addEventListener("keydown", (e) => {
-            if (e.ctrlKey && (e.key === 'u' || e.key === 's' || e.key === 'p')) {
-                // Disable Ctrl+U (View Source), Ctrl+S (Save Page), and Ctrl+P (Print)
-                e.preventDefault();
-            }
-        });
+    // Show the selected payment option
+    const selectedOption = document.getElementById(`${option}-option`); // Fixed template literal usage
+    if (selectedOption) {
+        selectedOption.classList.add('active');
+    }
+}
     </script>
 </body>
-
-
 </html>

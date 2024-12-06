@@ -692,7 +692,7 @@ function fetchPackages(selectedPrice, selectedDuration, selectedType) {
                 </div>
             <div class="button-group d-flex flex-column justify-content-between  mt-2">
                     <a href="/holidays/${response.destinations.slug}/${item.slug}" class="text-decoration-none text-dark">
-                        <button class="btn btn-danger mb-2  rounded-0 booknow w-100" data-id="${item.id}">Detailss</button>
+                        <button class="btn btn-danger mb-2  rounded-0 booknow w-100" data-id="${item.id}">Details</button>
                     </a>
                     <button class="btn btn-outline-danger rounded-0 add-to-cart" data-id="${item.id}">Add To Cart</button>
                 </div>
