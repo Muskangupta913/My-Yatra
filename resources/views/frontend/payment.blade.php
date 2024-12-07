@@ -107,7 +107,8 @@ form {
 
 <body>
     <div class="container">
-        <form>
+        <form id="payment-form">
+            <!-- Move the alert inside the form -->
             <div id="credit-card-alert" class="alert">
                 Credit card payments are temporarily unavailable. Please try another method.
             </div>
@@ -127,27 +128,26 @@ form {
             <div class="payment-option card-option active" id="card-option">
                 <div class="input-group">
                     <label>Name on Card:</label>
-                    <input type="text" placeholder="MMBY" required>
+                    <input type="text" id="name-on-card" placeholder="MMBY" required>
                 </div>
                 <div class="input-group">
                     <label>Credit Card Number:</label>
-                    <input type="text" placeholder="1111-2222-3333-4444" required>
+                    <input type="text" id="card-number" placeholder="1111-2222-3333-4444" required>
                 </div>
                 <div class="input-group">
                     <label>Expiration Date:</label>
                     <div style="display: flex; gap: 10px;">
-                        <input type="text" placeholder="MM" style="flex: 1;" required>
-                        <input type="text" placeholder="YYYY" style="flex: 1;" required>
+                        <input type="text" id="exp-month" placeholder="MM" style="flex: 1;" required>
+                        <input type="text" id="exp-year" placeholder="YYYY" style="flex: 1;" required>
                     </div>
                 </div>
                 <div class="input-group">
                     <label>CVV:</label>
-                    <input type="text" placeholder="123" required>
+                    <input type="text" id="cvv" placeholder="123" required>
                 </div>
                 <div class="submit-btn-container">
-                <button type="submit" class="submit-btn">Checkout</button>
-            </div>
-            
+                    <button type="submit" class="submit-btn">Checkout</button>
+                </div>
             </div>
 
             <div class="payment-option qr-option" id="qr-option">
@@ -164,8 +164,8 @@ form {
 
         </form>
     </div>
-     <!-- Contact Information with Icons -->
-     <div class="contact-info">
+    <!-- Contact Information with Icons -->
+    <div class="contact-info">
         <a href="mailto:support@example.com">
             <i class="fas fa-envelope"></i> info@makemybharatyatra.com 
         </a>
@@ -173,22 +173,51 @@ form {
             <i class="fas fa-phone-alt"></i> +91 1204223100
         </a>
     </div>
+
     <script>
-       function togglePaymentOption(option) {
-    // Show or hide the credit card alert
-    document.getElementById("credit-card-alert").style.display = option === 'card' ? "block" : "none";
+        // Function to toggle payment method visibility
+        function togglePaymentOption(option) {
+            document.getElementById("credit-card-alert").style.display = option === 'card' ? "block" : "none";
+            document.querySelectorAll('.payment-option').forEach((element) => {
+                element.classList.remove('active');
+            });
+            const selectedOption = document.getElementById(`${option}-option`);
+            if (selectedOption) {
+                selectedOption.classList.add('active');
+            }
+        }
 
-    // Hide all payment options
-    document.querySelectorAll('.payment-option').forEach((element) => {
-        element.classList.remove('active');
-    });
+        // Handle form submission and validate
+        document.getElementById("payment-form").addEventListener("submit", function(event) {
+            event.preventDefault(); // Prevent default form submission
 
-    // Show the selected payment option
-    const selectedOption = document.getElementById(`${option}-option`); // Fixed template literal usage
-    if (selectedOption) {
-        selectedOption.classList.add('active');
-    }
-}
+            // Collect form field values
+            const nameOnCard = document.getElementById("name-on-card").value.trim();
+            const cardNumber = document.getElementById("card-number").value.trim();
+            const expMonth = document.getElementById("exp-month").value.trim();
+            const expYear = document.getElementById("exp-year").value.trim();
+            const cvv = document.getElementById("cvv").value.trim();
+
+            // Validate fields
+            if (!nameOnCard || !cardNumber || !expMonth || !expYear || !cvv) {
+                alert("Please fill in all the required fields.");
+                return;
+            }
+
+            // Simple card number validation (16 digits with dashes)
+            const cardNumberRegex = /^\d{4}-\d{4}-\d{4}-\d{4}$/;
+            if (!cardNumberRegex.test(cardNumber)) {
+                alert("Please enter a valid 16-digit card number.");
+                return;
+            }
+
+            // If everything is valid, simulate payment result
+            const isPaymentSuccessful = Math.random() > 0.5; // Random success/failure simulation
+
+            // Redirect to payment result page instantly
+            const status = isPaymentSuccessful ? 'success' : 'failure';
+            window.location.href = `/payment-result?status=${status}`;
+        });
     </script>
 </body>
 </html>

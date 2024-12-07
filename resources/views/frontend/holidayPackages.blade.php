@@ -165,13 +165,10 @@
         margin-top: 0px !important;
       }
     }
-
-
     button{
       border-radius: 0px !important;
       border-color: #ddd !important;
     }
-
     .sticker{
       width: auto !important;
     height: auto !important;
@@ -502,8 +499,6 @@
         });
     });
 });
-
-
 
 </script>
 @endsection

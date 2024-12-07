@@ -32,6 +32,10 @@ Route::get('/clear-cache', function() {
   return "All cache has been cleared!";
 });
 
+//payment result
+Route::get('/payment-result', function () {
+  return view('payment-result');
+})->name('payment result');
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
 // Route::get('/home', function(){
