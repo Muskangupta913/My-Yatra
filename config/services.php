@@ -31,4 +31,13 @@ return [
         'region' => env('AWS_DEFAULT_REGION', 'us-east-1'),
     ],
 
+
+   'bus_api' => [
+        'url' => env('BUS_API_URL'),
+        'client_id' => env('BUS_API_CLIENT_ID'),
+        'username' => env('BUS_API_USERNAME'),
+        'password' => env('BUS_API_PASSWORD'),
+    ],
+
+
 ];

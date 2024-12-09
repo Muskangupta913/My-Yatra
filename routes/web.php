@@ -102,14 +102,7 @@ Route::get('/holiday-packages/{slug}', [HomeController::class,  'packageDetails'
 
 
 // Booking Search Engine
-Route::get('/search-destination', [HomeController::class, 'search'])->name('search.destination');
-// web.php (Route file)
-Route::get('/fetch-all-states', [HomeController::class, 'fetchAllStates'])->name('fetch.all.states');
 
-Route::get('/search/cities', [HomeController::class, 'searchCities'])->name('search.cities');
-
-// Searching Packages
-Route::get('/search-packages', [HomeController::class, 'searchPackages'])->name('searchPackages');
 
 
 // packages sidebar filters
@@ -273,8 +266,7 @@ Route::prefix('admin')->middleware(['onlyAuthenticated'])->group(function () {
 
 
 //city
-Route::get('/fetch-all-cities', [CityController::class, 'fetchAllCities'])->name('fetch.all.cities');
-Route::get('/search-cities', [CityController::class, 'searchCities'])->name('search.cities');
+
       
 
 // top destination 
@@ -293,13 +285,26 @@ Route::get('/rishikesh', function () {
 })->name('rishikesh');
 
 // Car Route
+
+
+});
 Route::get('/cars', [CarController::class, 'index'])->name('cars');
 // Bus Route
+
+Route::post('/buses/search', [BusController::class, 'searchBuses'])->name('buses.search'); //route('buses.search)
 Route::get('/bus', [BusController::class, 'index'])->name('bus');
+Route::get('/fetch-all-cities', [CityController::class, 'fetchAllCities'])->name('fetch.all.cities');
+Route::get('/search-cities', [CityController::class, 'searchCities'])->name('search.cities');
 
 // Hotel Route
 // Route::get('/search-hotels', [HotelController::class, 'searchHotels'])->name('searchHotels');
 Route::get('/hotels', [HotelController::class, 'index'])->name('hotels');
 
+Route::get('/search-destination', [HomeController::class, 'search'])->name('search.destination');
+// web.php (Route file)
+Route::get('/fetch-all-states', [HomeController::class, 'fetchAllStates'])->name('fetch.all.states');
 
-});
+// Route::get('/search/cities', [HomeController::class, 'searchCities'])->name('search.cities');
+
+// Searching Packages
+Route::get('/search-packages', [HomeController::class, 'searchPackages'])->name('searchPackages');

@@ -153,7 +153,8 @@
 <div class="tab-pane fade mt-5" id="bus" role="tabpanel" aria-labelledby="bus-tab">
   <h4 class="mb-5" id="bus-title">Book Bus Tickets</h4>
   <hr class="searchline">
-  <form action="{{ route('bus') }}" method="GET">
+  <form action="{{ route('buses.search') }}" method="POST" id="busSearchForm">
+  
     <div class="row">
       <div class="mb-3 col-md-3">
         <div class="date-caption">From</div>
@@ -491,6 +492,19 @@
       '#checkinDatepicker', '#checkoutDatepicker', 
       '#busJourneyDate'
     ];
+    function logFormData() {
+    const fromCity = document.getElementById('busFromCity').value;
+    const toCity = document.getElementById('busToCity').value;
+    const journeyDate = document.getElementById('busJourneyDate').value;
+
+    console.log('Form Data:', {
+        source_city: fromCity,
+        destination_city: toCity,
+        depart_date: journeyDate
+    });
+
+    return true; // Allow form submission
+}
 
     // Initialize flatpickr for each input
     dateInputs.forEach(input => {
@@ -509,7 +523,9 @@
     $.ajaxSetup({
         headers: {
             'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content'),
+            'Accept': 'application/json'
         },
+        
     });
 
     // City Search Similar to Destination Search
@@ -570,12 +586,13 @@
                     $('#busToCityList').hide();
                 });
             } else {
-                const noCitiesHTML = '<div class="list-group-item">No cities found</div>';
+                const noCitiesHTML = `<div class="list-group-item">No cities found</div>`;
                 $('#cityList, #carPickupLocationList, #carDropoffLocationList, #busFromCityList, #busToCityList').append(noCitiesHTML);
             }
         },
         error: function (xhr) {
             console.error("Error fetching cities:", xhr.responseText);
+           
         },
     });
 }
@@ -617,7 +634,7 @@ $(document).on('click', function (e) {
         var query = $(this).val();
         if (query.length > 0) {
             $.ajax({
-                url: "{{ route('search.cities') }}", // Laravel route to search cities
+                url: "{{ route('search.cities') }}", //  route to search cities
                 method: "GET",
                 data: { query: query },
                 success: function (data) {
@@ -638,7 +655,7 @@ $(document).on('click', function (e) {
                             $('#cityList').hide();
                         });
                     } else {
-                        $('#cityList').append('<div class="list-group-item">No results found</div>');
+                        $('#cityList').append(`<div class="list-group-item">No results found</div>`);
                     }
                 }
             });
@@ -647,6 +664,7 @@ $(document).on('click', function (e) {
             fetchAllCities(); // Show all cities if search is cleared
         }
     });
+    
 
     // Fetch states
     function fetchAllStates() {
@@ -675,11 +693,12 @@ $(document).on('click', function (e) {
                         fetchCities(selectedStateId); // Fetch cities for the selected state
                     });
                 } else {
-                    $('#destinationList').append('<div class="list-group-item">No states found</div>');
+                    $('#destinationList').append(`<div class="list-group-item">No states found</div>`);
                 }
             },
             error: function (xhr) {
                 console.error("Error fetching states:", xhr.responseText);
+                
             },
         });
     }
@@ -712,7 +731,7 @@ $(document).on('click', function (e) {
                             fetchCities(selectedStateId); // Fetch cities based on selected state
                         });
                     } else {
-                        $('#destinationList').append('<div class="list-group-item">No results found</div>');
+                        $('#destinationList').append(`<div class="list-group-item">No results found</div>`);
                     }
                 }
             });
@@ -720,6 +739,36 @@ $(document).on('click', function (e) {
             $('#destinationList').empty(); // Clear the results if input is cleared
         }
     });
+
+
+    document.getElementById('busSearchForm').addEventListener('submit', function(event) {
+        event.preventDefault(); // Prevent form submission
+
+        const formData = new FormData(this);
+        const data = {};
+        formData.forEach((value, key) => {
+            data[key] = value;
+        });
+
+        console.log('Search Buses Request Data:', data);
+
+        fetch('{{ route('buses.search') }}', {
+            method: 'POST',
+            headers: {
+                'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(data)
+        })
+        .then(response => response.json())
+        .then(responseData => {
+            console.log('Search Buses Response:', responseData);
+            alert(responseData.message);
+        })
+        .catch(error => console.error('Error:', error));
+    });
+
+    
 
     // Fetch cities based on selected state
     function fetchCities(stateId) {
@@ -745,7 +794,7 @@ $(document).on('click', function (e) {
                         $('#cityList').empty(); // Clear city list after selection
                     });
                 } else {
-                    $('#cityList').append('<div class="list-group-item">No results found</div>');
+                    $('#cityList').append(`<div class="list-group-item">No results found</div>`);
                 }
             }
         });
