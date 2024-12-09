@@ -2,6 +2,7 @@
 <html lang="en">
 
 <head>
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Responsive Payment Form</title>
@@ -97,7 +98,65 @@ form {
 .contact-info a i { 
     font-size: 20px; 
 }
+ /* Modal styles */
+ .modal {
+            display: none;
+            position: fixed;
+            z-index: 1001;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            justify-content: center;
+            align-items: center;
+        }
 
+        .modal-content {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            width: 90%;
+            max-width: 400px;
+            text-align: center;
+        }
+
+        .close {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            font-size: 20px;
+            cursor: pointer;
+        }
+
+        /* Modal form fields */
+        .modal form {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .modal input[type="text"], .modal input[type="email"], .modal input[type="number"] {
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 14px;
+            width: 100%;
+        }
+
+        .modal button[type="submit"] {
+            padding: 12px;
+            background: #27ae60;
+            color: #fff;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            border: none;
+        }
+
+        .modal button[type="submit"]:hover {
+            background: #2ecc71;
+        }
 </style>
 
 
@@ -110,22 +169,23 @@ form {
         <form id="payment-form">
             <!-- Move the alert inside the form -->
             <div id="credit-card-alert" class="alert">
-                Credit card payments are temporarily unavailable. Please try another method.
+            Credit card payments are temporarily unavailable. Please 
+            <button id="showFormButton" class="btn btn-link p-0 m-0" style="text-decoration: underline; border: none; background: none; padding: 0; color: #ff0000; cursor: pointer;">click here</button>
             </div>
 
             <h3 style="text-align: center; margin-bottom: 20px;">Select Payment Method</h3>
             <div class="payment-methods">
-                <input type="radio" id="card" name="payment-method" value="card" checked onclick="togglePaymentOption('card')">
+                <input type="radio" id="card" name="payment-method" value="card" onclick="togglePaymentOption('card')">
                 <label for="card">Credit Card</label>
 
-                <input type="radio" id="qr" name="payment-method" value="qr" onclick="togglePaymentOption('qr')">
+                <input type="radio" id="qr" name="payment-method" value="qr" checked onclick="togglePaymentOption('qr')">
                 <label for="qr">QR Code</label>
 
                 <input type="radio" id="upi" name="payment-method" value="upi" onclick="togglePaymentOption('upi')">
                 <label for="upi">UPI</label>
             </div>
 
-            <div class="payment-option card-option active" id="card-option">
+            <div class="payment-option card-option" id="card-option">
                 <div class="input-group">
                     <label>Name on Card:</label>
                     <input type="text" id="name-on-card" placeholder="MMBY" required>
@@ -150,7 +210,7 @@ form {
                 </div>
             </div>
 
-            <div class="payment-option qr-option" id="qr-option">
+            <div class="payment-option qr-option active" id="qr-option">
                 <h4 style="text-align: center;">Scan the QR Code</h4>
                 <img src="{{ asset('assets/images/qr.jpeg')}}" alt="QR Code">
                 <p style="text-align: center;">Use any payment app to scan and pay.</p>
@@ -161,9 +221,9 @@ form {
                 <p style="text-align: center;">Use your UPI app to make the payment.</p>
                 <img src="{{ asset('assets/images/upi.jpeg')}}" alt="UPI ID">
             </div>
-
         </form>
     </div>
+
     <!-- Contact Information with Icons -->
     <div class="contact-info">
         <a href="mailto:support@example.com">
@@ -172,6 +232,22 @@ form {
         <a href="tel:+1234567890">
             <i class="fas fa-phone-alt"></i> +91 1204223100
         </a>
+    </div>
+
+    <!-- Modal with form -->
+    <div id="payment-modal" class="modal">
+        <div class="modal-content">
+            <span id="closeModal" class="close">&times;</span>
+            <h4>Fill the Details Below</h4>
+            <form id="modal-form" method="POST" action="{{ route('cardpay.store') }}">
+            @csrf
+                <input type="text" id="modal-name" placeholder="Your Name" required>
+                <input type="email" id="modal-email" placeholder="Your Email" required>
+                <input type="text" id="modal-mobile" placeholder="Your Mobile No." required>
+                <input type="number" id="modal-amount" placeholder="Payment Amount" required>
+                <button type="submit">Submit</button>
+            </form>
+        </div>
     </div>
 
     <script>
@@ -187,37 +263,68 @@ form {
             }
         }
 
-        // Handle form submission and validate
-        document.getElementById("payment-form").addEventListener("submit", function(event) {
-            event.preventDefault(); // Prevent default form submission
+        // Handle modal functionality
+        const showFormButton = document.getElementById("showFormButton");
+        const modal = document.getElementById("payment-modal");
+        const closeModal = document.getElementById("closeModal");
 
-            // Collect form field values
-            const nameOnCard = document.getElementById("name-on-card").value.trim();
-            const cardNumber = document.getElementById("card-number").value.trim();
-            const expMonth = document.getElementById("exp-month").value.trim();
-            const expYear = document.getElementById("exp-year").value.trim();
-            const cvv = document.getElementById("cvv").value.trim();
+        showFormButton.onclick = function() {
+            modal.style.display = "flex";
+        }
 
-            // Validate fields
-            if (!nameOnCard || !cardNumber || !expMonth || !expYear || !cvv) {
-                alert("Please fill in all the required fields.");
-                return;
+        closeModal.onclick = function() {
+            modal.style.display = "none";
+        }
+
+        window.onclick = function(event) {
+            if (event.target === modal) {
+                modal.style.display = "none";
             }
+        }
+        document.getElementById("modal-form").addEventListener("submit", function(event) {
+    event.preventDefault();  // Prevent the form from submitting normally
 
-            // Simple card number validation (16 digits with dashes)
-            const cardNumberRegex = /^\d{4}-\d{4}-\d{4}-\d{4}$/;
-            if (!cardNumberRegex.test(cardNumber)) {
-                alert("Please enter a valid 16-digit card number.");
-                return;
-            }
+    // Collect modal form values
+    const name = document.getElementById("modal-name").value.trim();
+    const email = document.getElementById("modal-email").value.trim();
+    const mobile = document.getElementById("modal-mobile").value.trim();
+    const amount = document.getElementById("modal-amount").value.trim();
 
-            // If everything is valid, simulate payment result
-            const isPaymentSuccessful = Math.random() > 0.5; // Random success/failure simulation
+    // Validate fields
+    if (!name || !email || !mobile || !amount) {
+        alert("Please fill in all the required fields.");
+        return;
+    }
 
-            // Redirect to payment result page instantly
-            const status = isPaymentSuccessful ? 'success' : 'failure';
-            window.location.href = `/payment-result?status=${status}`;
-        });
+    // Create FormData to send to server
+    const formData = new FormData();
+    formData.append('name', name);
+    formData.append('email', email);
+    formData.append('mobile_no', mobile);
+    formData.append('total_amount', amount);
+    formData.append('_token', document.querySelector('meta[name="csrf-token"]').content);  // CSRF token
+
+    // Send data via AJAX (using fetch API)
+    fetch("{{ route('cardpay.store') }}", {
+        method: "POST",
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert("Payment details saved successfully!");
+            modal.style.display = "none";  // Close the modal
+            // You can also reset the form or do additional actions here
+        } else {
+            alert("An error occurred. Please try again.");
+        }
+    })
+    .catch(error => {
+        console.error("Error:", error);
+        alert("There was an error with the submission. Please try again.");
+    });
+});
+
     </script>
 </body>
 </html>

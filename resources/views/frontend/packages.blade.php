@@ -64,10 +64,7 @@
     display: block;
   }
 }
-
-
 </style>
-
 <section class="packages-bg-images d-flex justify-content-center align-items-center" style="background:linear-gradient(rgba(0, 0, 0, 0.554), rgba(0, 0, 0, 0.667)), url({{ asset("uploads/destination/$destinations->photo")}}); height:300px; background-position:center center; background-size:cover;">
 <h1 class=" text-white ">{{$destinations->destination_name}}</h1>
 

@@ -206,13 +206,13 @@ public function fetchAllStates()
 }
 
 
-public function searchCities(Request $request)
-{
-    $stateId = $request->input('state_id');
-    $cities = City::where('state_id', $stateId)->get();
+// public function searchCities(Request $request)
+// {
+//     $stateId = $request->input('state_id');
+//     $cities = City::where('state_id', $stateId)->get();
 
-    return response()->json($cities);
-}
+//     return response()->json($cities);
+// }
 
 public function searchPackages(Request $request)
 {
