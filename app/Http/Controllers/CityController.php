@@ -17,19 +17,20 @@ class CityController extends Controller
 
     
     //fetch all cities
+    // Fetch all cities
     public function fetchAllCities()
-{
-    try {
-        $cities = City::all(); // Ensure 'City' model and table are correctly configured
-        return response()->json($cities);
-    } catch (\Exception $e) {
-        return response()->json([
-            'status' => 'error',
-            'message' => 'Failed to fetch cities',
-            'error' => $e->getMessage()
-        ], 500);
+    {
+        try {
+            $cities = City::all();
+            return response()->json($cities);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Failed to fetch cities',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
-}
     //searchcitiesss
     public function searchCities(Request $request)
     {
@@ -62,6 +63,26 @@ class CityController extends Controller
         return response()->json($cities);
     }
 
+    
+
+    public function autocomplete(Request $request)
+    {
+        // Validate the request input
+        $request->validate([
+            'query' => 'required|string|min:2'
+        ]);
+
+        // Get the query from the request
+        $searchQuery = $request->input('query');
+
+        // Query the database for matching cities (customize as needed)
+        $cities = City::where('city_name', 'LIKE', '%' . $searchQuery . '%')
+                    ->limit(10) // Limit the results
+                    ->get(['id', 'city_name', 'code']); // Return only the necessary columns
+
+        // Return the JSON response
+        return response()->json($cities);
+    }
     
 
 

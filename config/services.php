@@ -33,11 +33,13 @@ return [
 
 
    'bus_api' => [
-        'url' => env('BUS_API_URL'),
-        'client_id' => env('BUS_API_CLIENT_ID'),
-        'username' => env('BUS_API_USERNAME'),
-        'password' => env('BUS_API_PASSWORD'),
-    ],
+    'url' => env('BUS_API_URL'),
+    'client_id' => env('BUS_API_CLIENT_ID'),
+    'username' => env('BUS_API_USERNAME'),
+    'password' => env('BUS_API_PASSWORD'),
+    'token' => env('BUS_API_TOKEN'),
+],
+
 
 
 ];

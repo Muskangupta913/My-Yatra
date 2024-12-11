@@ -150,33 +150,45 @@
   </form>
 </div>
  <!-- Bus Booking -->
-<div class="tab-pane fade mt-5" id="bus" role="tabpanel" aria-labelledby="bus-tab">
+ <div class="tab-pane fade mt-5" id="bus" role="tabpanel" aria-labelledby="bus-tab">
   <h4 class="mb-5" id="bus-title">Book Bus Tickets</h4>
   <hr class="searchline">
-  <form action="{{ route('buses.search') }}" method="POST" id="busSearchForm">
   
+  <!-- Add CSRF token -->
+  <form action="{{ route('buses.search') }}" method="POST" id="busSearchForm">
+    @csrf
     <div class="row">
-      <div class="mb-3 col-md-3">
-        <div class="date-caption">From</div>
-        <input type="text" class="form-control rounded-0 py-3" name="fromCity" id="busFromCity" placeholder="Enter Departure City" required>
-        <div id="busFromCityList" class="card" style="position: absolute; width: 95%; max-height: 150px; overflow-y: scroll; display: none;"></div>
-      </div>
-      <div class="mb-3 col-md-3">
-        <div class="date-caption">To</div>
-        <input type="text" class="form-control rounded-0 py-3" name="toCity" id="busToCity" placeholder="Enter Destination City" required>
-        <div id="busToCityList" class="card" style="position: absolute; width: 95%; max-height: 150px; overflow-y: scroll; display: none;"></div>
-      </div>
-      <div class="mb-3 col-md-3">
-        <div class="date-caption">Journey Date</div>
-        <input type="text" id="busJourneyDate" name="journey_date" class="form-control rounded-0 py-3 datepicker" placeholder="Select Journey Date" required>
-      </div>
-      <div class="mb-3 col-md-3">
-        <div class="date-caption" style="visibility: hidden">Search</div>
-        <button type="submit" class="btn btn-warning w-100 rounded-0 py-3 fw-bold">Search Buses</button>
-      </div>
+        <!-- Source City -->
+        <div class="mb-3 col-md-3">
+            <div class="date-caption">From</div>
+            <input type="text" class="form-control rounded-0 py-3" name="source_city" id="busFromCity" placeholder="Enter Departure City" required>
+            <input type="hidden" name="source_code" id="busFromCode">
+            <div id="busFromCityList" class="card" style="position: absolute; width: 95%; max-height: 150px; overflow-y: scroll; display: none;"></div>
+        </div>
+
+        <!-- Destination City -->
+        <div class="mb-3 col-md-3">
+            <div class="date-caption">To</div>
+            <input type="text" class="form-control rounded-0 py-3" name="destination_city" id="busToCity" placeholder="Enter Destination City" required>
+            <input type="hidden" name="destination_code" id="busToCode">
+            <div id="busToCityList" class="card" style="position: absolute; width: 95%; max-height: 150px; overflow-y: scroll; display: none;"></div>
+        </div>
+
+        <!-- Journey Date -->
+        <div class="mb-3 col-md-3">
+            <div class="date-caption">Journey Date</div>
+            <input type="text" id="busJourneyDate" name="depart_date" class="form-control rounded-0 py-3 datepicker" placeholder="Select Journey Date" required>
+        </div>
+
+        <!-- Submit Button -->
+        <div class="mb-3 col-md-3">
+            <div class="date-caption" style="visibility: hidden">Search</div>
+            <button type="submit" class="btn btn-warning w-100 rounded-0 py-3 fw-bold">Search Buses</button>
+        </div>
     </div>
-  </form>
+</form>
 </div>
+
 <!-- holiday booking  -->
           <div class="tab-pane fade mt-5 show active" id="contact" role="tabpanel" aria-labelledby="contact-tab">
             {{-- holiday packages searches --}}
@@ -769,6 +781,71 @@ $(document).on('click', function (e) {
     });
 
     
+    
+
+    $(document).ready(function () {
+    // Fetch cities for autocomplete
+    function fetchCities(input, list) {
+        let city = $(input).val();
+        if (city.length > 2) {
+            $.ajax({
+                url: "{{ route('autocomplete.cities') }}",
+                method: 'GET',
+                data: { query: city },
+                success: function(response) {
+                    $(list).empty().show();
+                    response.forEach(city => {
+                        $(list).append(
+                            `<div class="city-option" data-code="${city.code}">${city.city_name}</div>`
+                        );
+                    });
+                },
+                error: function(xhr) {
+                    console.error("Error fetching cities:", xhr.responseText);
+                }
+            });
+        }
+    }
+
+    // Handle input for source city
+    $('#busFromCity'). on('input', function() {
+        fetchCities(this, '#busFromCityList');
+    });
+
+    // Handle input for destination city
+    $('#busToCity').on('input', function() {
+        fetchCities(this, '#busToCityList');
+    });
+
+    // Select city from the list
+    $(document).on('click', '.city-option', function() {
+        const cityName = $(this).text();
+        const cityCode = $(this).data('code');
+        if ($(this).closest('#busFromCityList').length) {
+            $('#busFromCity').val(cityName);
+            $('#busFromCode').val(cityCode); // Set the hidden input for source city
+            $('#busFromCityList').hide();
+        } else if ($(this).closest('#busToCityList').length) {
+            $('#busToCity').val(cityName);
+            $('#busToCode').val(cityCode); // Set the hidden input for destination city
+            $('#busToCityList').hide();
+        }
+    });
+
+    // Hide dropdowns when clicking outside
+    $(document).on('click', function (e) {
+        if (!$(e.target).closest('#busFromCity, #busFromCityList, #busToCity, #busToCityList').length) {
+            $('#busFromCityList, #busToCityList').hide();
+        }
+    });
+});
+
+
+
+
+
+
+
 
     // Fetch cities based on selected state
     function fetchCities(stateId) {

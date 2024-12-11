@@ -7,10 +7,11 @@ use App\Http\Controllers\HotelController;
 use App\Http\Controllers\BusController;
 use App\Http\Controllers\CarController;
 use App\Http\Controllers\FlightController;
+use App\Http\Controllers\CityController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Artisan;
-use App\Http\Controllers\CityController;
+
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -309,6 +310,6 @@ Route::get('/search-destination', [HomeController::class, 'search'])->name('sear
 Route::get('/fetch-all-states', [HomeController::class, 'fetchAllStates'])->name('fetch.all.states');
 
 // Route::get('/search/cities', [HomeController::class, 'searchCities'])->name('search.cities');
-
+Route::get('/autocomplete', [CityController::class, 'autocomplete'])->name('autocomplete.cities');
 // Searching Packages
 Route::get('/search-packages', [HomeController::class, 'searchPackages'])->name('searchPackages');
