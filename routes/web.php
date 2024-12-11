@@ -11,6 +11,13 @@ use App\Http\Controllers\CityController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Artisan;
+<<<<<<< HEAD
+=======
+use App\Http\Controllers\CityController;
+use App\Http\Controllers\CardpayController;
+
+Route::post('/cardpay', [CardpayController::class, 'store'])->name('cardpay.store');
+>>>>>>> b22dc1aee71e8c427a1c0af8d8317377fb41a0c1
 
 /*
 |--------------------------------------------------------------------------

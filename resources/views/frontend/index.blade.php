@@ -10,7 +10,6 @@
   padding: 8px;
 }
 </style>
-
 <section class="hero">
   <div class="container">
     <div class="row">
@@ -67,16 +66,16 @@
             <div class="date-caption">City</div>
                <input type="text" class="form-control rounded-0 py-3" name="searchCity" id="hotelSearchCity"
                 placeholder="Enter City" required>
-              <div id="hotelCityList" class="card" style="position: absolute; width: 95%; max-height: 150px; overflow-y: scroll; display: none;">
+              <div id="hotelCityList" class="card" style="position: absolute; width: 23%; max-height: 150px; overflow-y: scroll;">
             </div>
           </div>
            <div class="mb-3 col-md-2">
               <div class="date-caption">Check-in Date</div>
-                      <input type="text" id="checkinDatepicker" name="check_in_date" class="form-control rounded-0 py-3" placeholder="Select Check-in Date" required>
+                      <input type="text" id="checkinDatepicker" name="check_in_date" class="form-control rounded-0 py-3 datepicker" placeholder="Select Check-in Date" required>
             </div>
       <div class="mb-3 col-md-2">
         <div class="date-caption">Check-out Date</div>
-        <input type="text" id="checkoutDatepicker" name="check_out_date" class="form-control rounded-0 py-3" placeholder="Select Check-out Date" required>
+        <input type="text" id="checkoutDatepicker" name="check_out_date" class="form-control rounded-0 py-3 datepicker" placeholder="Select Check-out Date" required>
       </div>
 
       <div class="mb-3 col-md-2">
@@ -96,12 +95,12 @@
       <div class="mb-3 col-md-3">
         <div class="date-caption">From</div>
         <input type="text" class="form-control rounded-0 py-3" name="fromCity" id="flightFromCity" placeholder="Enter Departure City" required>
-        <div id="flightFromCityList" class="card" style="position: absolute; width: 95%; max-height: 150px; overflow-y: scroll; display: none;"></div>
+        <div id="flightFromCityList" class="card" style="position: absolute; width: 23%; max-height: 150px; overflow-y: scroll;"></div>
       </div>
       <div class="mb-3 col-md-3">
         <div class="date-caption">To</div>
         <input type="text" class="form-control rounded-0 py-3" name="toCity" id="flightToCity" placeholder="Enter Destination City" required>
-        <div id="flightToCityList" class="card" style="position: absolute; width: 95%; max-height: 150px; overflow-y: scroll; display: none;"></div>
+        <div id="flightToCityList" class="card" style="position: absolute; width: 23%; max-height: 150px; overflow-y: scroll;"></div>
       </div>
       <div class="mb-3 col-md-2">
         <div class="date-caption">Departure Date</div>
@@ -109,7 +108,7 @@
       </div>
       <div class="mb-3 col-md-2">
         <div class="date-caption">Return Date</div>
-        <input type="text" id="flightReturnDate" name="return_date" class="form-control rounded-0 py-3" placeholder="Select Return Date">
+        <input type="text" id="flightReturnDate" name="return_date" class="form-control rounded-0 py-3 datepicker" placeholder="Select Return Date">
       </div>
       <div class="mb-3 col-md-2">
         <div class="date-caption" style="visibility: hidden">Search</div>
@@ -127,20 +126,20 @@
       <div class="mb-3 col-md-3">
         <div class="date-caption">Pickup Location</div>
         <input type="text" class="form-control rounded-0 py-3" name="pickupLocation" id="carPickupLocation" placeholder="Enter Pickup Location" required>
-        <div id="carPickupLocationList" class="card" style="position: absolute; width: 95%; max-height: 150px; overflow-y: scroll;"></div>
+        <div id="carPickupLocationList" class="card" style="position: absolute; width: 23%; max-height: 150px; overflow-y: scroll;"></div>
       </div>
       <div class="mb-3 col-md-3">
         <div class="date-caption">Drop-off Location</div>
         <input type="text" class="form-control rounded-0 py-3" name="dropoffLocation" id="carDropoffLocation" placeholder="Enter Drop-off Location" required>
-        <div id="carDropoffLocationList" class="card" style="position: absolute; width: 95%; max-height: 150px; overflow-y: scroll; display: none;"></div>
+        <div id="carDropoffLocationList" class="card" style="position: absolute; width: 23%; max-height: 150px; overflow-y: scroll;"></div>
       </div>
       <div class="mb-3 col-md-2">
         <div class="date-caption">Pickup Date</div>
-        <input type="text" id="carPickupDate" name="pickup_date" class="form-control rounded-0 py-3 " placeholder="Select Pickup Date" required>
+        <input type="text" id="carPickupDate" name="pickup_date" class="form-control rounded-0 py-3 datepicker" placeholder="Select Pickup Date" required>
       </div>
       <div class="mb-3 col-md-2">
         <div class="date-caption">Drop-off Date</div>
-        <input type="text" id="carDropoffDate" name="dropoff_date" class="form-control rounded-0 py-3" placeholder="Select Drop-off Date" required>
+        <input type="text" id="carDropoffDate" name="dropoff_date" class="form-control rounded-0 py-3 datepicker" placeholder="Select Drop-off Date" required>
       </div>
       <div class="mb-3 col-md-2">
         <div class="date-caption" style="visibility: hidden">Search</div>
@@ -158,6 +157,7 @@
   <form action="{{ route('buses.search') }}" method="POST" id="busSearchForm">
     @csrf
     <div class="row">
+<<<<<<< HEAD
         <!-- Source City -->
         <div class="mb-3 col-md-3">
             <div class="date-caption">From</div>
@@ -185,6 +185,26 @@
             <div class="date-caption" style="visibility: hidden">Search</div>
             <button type="submit" class="btn btn-warning w-100 rounded-0 py-3 fw-bold">Search Buses</button>
         </div>
+=======
+      <div class="mb-3 col-md-3">
+        <div class="date-caption">From</div>
+        <input type="text" class="form-control rounded-0 py-3" name="fromCity" id="busFromCity" placeholder="Enter Departure City" required >
+        <div id="busFromCityList" class="card" style="position: absolute; width: 23%; max-height: 150px; overflow-y: scroll;"></div>
+      </div>
+      <div class="mb-3 col-md-3">
+        <div class="date-caption">To</div>
+        <input type="text" class="form-control rounded-0 py-3" name="toCity" id="busToCity" placeholder="Enter Destination City" required>
+        <div id="busToCityList" class="card" style="position: absolute; width: 23%; max-height: 150px; overflow-y: scroll;"></div>
+      </div>
+      <div class="mb-3 col-md-3">
+        <div class="date-caption">Journey Date</div>
+        <input type="text" id="busJourneyDate" name="journey_date" class="form-control rounded-0 py-3 datepicker" placeholder="Select Journey Date" required>
+      </div>
+      <div class="mb-3 col-md-3">
+        <div class="date-caption" style="visibility: hidden">Search</div>
+        <button type="submit" class="btn btn-warning w-100 rounded-0 py-3 fw-bold">Search Buses</button>
+      </div>
+>>>>>>> b22dc1aee71e8c427a1c0af8d8317377fb41a0c1
     </div>
 </form>
 </div>
@@ -252,8 +272,6 @@
             <div class="input-group mobile_tabs mb-3">
               <input type="text" class="form-control py-3 rounded-start-pill " aria-describedby="button-addon2"
                 placeholder="Search : Delhi, Agra, Jaipur etc">
-
-
               <select class="form-select" id="inputGroupSelect04" aria-label="Example select with button addon">
                 <option selected>No. Of Nights</option>
                 <option value="1">2 Days 1 Nights</option>
@@ -496,36 +514,13 @@
 
 
 <script>
-  document.addEventListener('DOMContentLoaded', function () {
-    // Select all the datepicker inputs
-    const dateInputs = [
-      '#carPickupDate', '#carDropoffDate', 
-      '#flightDepartureDate', '#flightReturnDate', 
-      '#checkinDatepicker', '#checkoutDatepicker', 
-      '#busJourneyDate'
-    ];
-    function logFormData() {
-    const fromCity = document.getElementById('busFromCity').value;
-    const toCity = document.getElementById('busToCity').value;
-    const journeyDate = document.getElementById('busJourneyDate').value;
-
-    console.log('Form Data:', {
-        source_city: fromCity,
-        destination_city: toCity,
-        depart_date: journeyDate
-    });
-
-    return true; // Allow form submission
-}
-
-    // Initialize flatpickr for each input
-    dateInputs.forEach(input => {
-      flatpickr(input, {
-        minDate: 'today', // Prevent selecting past dates
-        dateFormat: 'd-m-Y', // Desired date format
-      });
-    });
-  });
+   // Date Pickers
+   $('.datepicker').datepicker({
+    format: 'd M, yyyy', // Format: 9 Dec, 2024
+    autoclose: true,
+    startDate: 'today'
+  }).datepicker('setDate', new Date()); // Automatically set today's date;
+  
 </script>
 
 
@@ -550,7 +545,7 @@
             console.log("Cities fetched successfully:", data);
 
             // Clear dropdowns for cities
-            $('#cityList, #carPickupLocationList, #carDropoffLocationList, #busFromCityList, #busToCityList').empty();
+            $('#cityList, #carPickupLocationList, #carDropoffLocationList, #busFromCityList, #busToCityList, #flightToCityList ,#flightFromCityList, #hotelCityList').empty();
 
             if (data.length > 0) {
                 $.each(data, function (index, city) {
@@ -565,6 +560,9 @@
                     $('#carDropoffLocationList').append(cityHTML);
                     $('#busFromCityList').append(cityHTML);
                     $('#busToCityList').append(cityHTML);
+                    $('#flightToCityList').append(cityHTML);
+                    $('#flightFromCityList').append(cityHTML);
+                    $('#hotelCityList').append(cityHTML);
                 });
 
                 // Add click handlers for the dynamically created list items
@@ -597,9 +595,24 @@
                     $('#busToCity').val(selectedValue);
                     $('#busToCityList').hide();
                 });
+                $('#flightToCityList').on('click', '.list-group-item', function () {
+                    const selectedValue = $(this).text();
+                    $('#flightToCity').val(selectedValue);
+                    $('#flightToCityList').hide();
+                });
+                $('#flightFromCityList').on('click', '.list-group-item', function () {
+                    const selectedValue = $(this).text();
+                    $('#flightFromCity').val(selectedValue);
+                    $('#flightFromCityList').hide();
+                });
+                $('#hotelCityList').on('click', '.list-group-item', function () {
+                    const selectedValue = $(this).text();
+                    $('#hotelSearchCity').val(selectedValue);
+                    $('#hotelCityList').hide();
+                });
             } else {
                 const noCitiesHTML = `<div class="list-group-item">No cities found</div>`;
-                $('#cityList, #carPickupLocationList, #carDropoffLocationList, #busFromCityList, #busToCityList').append(noCitiesHTML);
+                $('#cityList, #carPickupLocationList, #carDropoffLocationList, #busFromCityList, #busToCityList, #flightToCityList, #flightFromCityList,#hotelCityList').append(noCitiesHTML);
             }
         },
         error: function (xhr) {
@@ -608,7 +621,6 @@
         },
     });
 }
-
 // Show dropdowns and fetch data on input focus
 $('#searchCity').on('focus', function () {
     fetchAllCities();
@@ -634,11 +646,23 @@ $('#busToCity').on('focus', function () {
     fetchAllCities();
     $('#busToCityList').show();
 });
+$('#flightToCity').on('focus', function () {
+    fetchAllCities();
+    $('#flightToCityList').show();
+});
+$('#flightFromCity').on('focus', function () {
+    fetchAllCities();
+    $('#flightFromCityList').show();
+});
+$('#hotelSearchCity').on('focus', function () {
+    fetchAllCities();
+    $('#hotelCityList').show();
+});
 
 // Hide dropdowns when clicking outside
 $(document).on('click', function (e) {
-    if (!$(e.target).closest('#searchCity, #cityList, #carPickupLocation, #carPickupLocationList, #carDropoffLocation, #carDropoffLocationList, #busFromCity, #busFromCityList, #busToCity, #busToCityList').length) {
-        $('#cityList, #carPickupLocationList, #carDropoffLocationList, #busFromCityList, #busToCityList').hide();
+    if (!$(e.target).closest('#searchCity, #cityList, #carPickupLocation, #carPickupLocationList, #carDropoffLocation, #carDropoffLocationList, #busFromCity, #busFromCityList, #busToCity, #busToCityList,#flightToCity,#flightToCityList,#flightFromCity,#flightFromCityList,#hotelSearchCity,#hotelCityList').length) {
+        $('#cityList, #carPickupLocationList, #carDropoffLocationList, #busFromCityList, #busToCityList,#flightToCityList,#flightFromCityList,#hotelCityList').hide();
     }
 });
     // Search functionality when typing in the searchCity input
