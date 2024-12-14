@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::table('users', function (Blueprint $table) {
             $table->string('phone');
             $table->integer('is_admin')->default(0)->comment('0->user, 1 => admin');
+            $table->boolean('is_sales')->default(0)->after('is_admin');
             $table->integer('is_verified')->default(0)->comment('0->unverfied, 1 => verified');
         });
     }
@@ -25,7 +26,7 @@ return new class extends Migration
     {
         Schema::table('users', function (Blueprint $table) {
             //
-            $table->dropColumn(['phone', 'is_admin', 'is_verified']);
+            $table->dropColumn(['phone', 'is_admin','is_sales', 'is_verified']);
         });
     }
 };

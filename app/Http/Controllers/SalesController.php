@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Http\Controllers\admin;
-use App\Http\Controllers\Controller;
+namespace App\Http\Controllers;
+
+// use App\Http\Controllers\Controller;
 use App\Models\PackagePhoto;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
@@ -18,13 +19,14 @@ use App\Models\Contact;
 use App\Models\Passenger;
 use Carbon\Carbon;
 
-class AdminController extends Controller
+class SalesController extends Controller
 {
 
-    public function dashboard(){
+    public function dashboardsales(){
         $packageCount = DB::table('package')->count();
         $destinationCount = DB::table('destination')->count();
         $bookingCount = DB::table('bookings')->count();
+        $cardDetailsCount = DB::table('cardpays')->count();
 
         $bookings = DB::table('bookings')
             ->whereDate('created_at', Carbon::today())
@@ -32,15 +34,26 @@ class AdminController extends Controller
 
         $jobs = DB::table('job_applications')->count();
        
-        return view('admin.dashboard', compact('packageCount', 'destinationCount','bookingCount', 'bookings', 'jobs'));
+        return view('sales.dashboard', compact('packageCount', 'destinationCount','bookingCount', 'bookings', 'cardDetailsCount', 'jobs'));
     }
-
     public function logout()
+    {
+        auth()->logout();
+        return redirect()->route('loginView');
+    }
+    
+    public function cardDetails()
 {
-    Auth::logout();
-    return redirect()->route('home'); // Redirect to the login view or any other page
-}
+    // Retrieve card payment details
+    $cardDetails = DB::table('cardpays')
+        ->select('name', 'email', 'mobile_no', 'total_amount', 'created_at')
+        ->orderBy('created_at', 'desc') // Show latest payments first
+        ->get();
 
+    // Pass data to the view
+    return view('sales.cardDetails', compact('cardDetails'));
+}
+   
     public function getCities($state_id)
 {
     $cities = City::where('state_id', $state_id)->get();
@@ -49,7 +62,7 @@ class AdminController extends Controller
     // tour type section start
     public function tourType(){
        $tourtype = DB::table('tour_type')->get();
-        return  view('admin.tour-type', compact('tourtype'));
+        return  view('sales.tour-type', compact('tourtype'));
     }
 
     public function createTour(Request $request){
@@ -68,14 +81,6 @@ class AdminController extends Controller
         }
     }
 
-    public function editTour($id){
-      
-        
-        $data = DB::table('tour_type')->where('id', $id)->first();
-         dd($data);
-        return view('admin.tour-type-edit', compact('data'));
-    }
-
     public function updateTour(Request $request){
         $request->validate([
             'tour' => 'required',
@@ -87,18 +92,13 @@ class AdminController extends Controller
         return redirect()->back()->with('success', 'Tour Type Updated Successfully');
     }
 
-    public function deleteTour(Request $request){
-        DB::table('tour_type')->where('id', $request->id)->delete();
-        return redirect()->back()->with('success', 'Tour Type Deleted Successfully');
-    }
-
     public function city(){
         $states = State::get();
         $cities = City::with('destination')->get();
        
         // dd($cities);
 
-        return view('admin.city', compact('states', 'cities'));
+        return view('sales.city', compact('states', 'cities'));
     }
 
     public function createCity(Request $request){
@@ -114,12 +114,6 @@ class AdminController extends Controller
     $city->save();
     return redirect()->back()->with('success', 'City Added Successfully');
     
-    }
-
-    public function cityEdit($id){
-        $cityedit = DB::table('cities')->where('id', $id)->first();
-       // dd($cityedit);
-        return view('admin.city-edit', compact('cityedit'));
     }
 
     public function updateCity(Request $request){
@@ -142,13 +136,13 @@ class AdminController extends Controller
     // destination section start
     public function destination(){
         $destinations = Destination::get();
-        return view("admin.destination", compact('destinations'));
+        return view("sales.destination", compact('destinations'));
     }
 
     public function create_destination(){
        
         $states = State::all();
-        return view('admin.destination-create', compact('states'));
+        return view('sales.destination-create', compact('states'));
     }
 
     //add destination
@@ -204,12 +198,6 @@ class AdminController extends Controller
     
         return redirect()->back()->with('success', 'Destination Added Successfully');
     }
-
-    // edit destination
-    public function destinationEdit($id){
-        $destination = Destination::find($id);
-        return view('admin.destination-edit', compact('destination'));
-    }
     
     public function destinationUpdate(Request $request, $id){
     
@@ -264,14 +252,14 @@ class AdminController extends Controller
           
         $packages = Package::with('destination')->get();
 
-        return view('admin.package', compact('packages'));
+        return view('sales.package', compact('packages'));
     }
 
     public function create_package(){
         $states = State::all();
         $tourType = DB::table('tour_type')->get();
         // dd($states);
-        return view('admin.package-create', compact('states', 'tourType'));
+        return view('sales.package-create', compact('states', 'tourType'));
     }
     // add packages
     public function createPackage(Request $request){
@@ -332,20 +320,6 @@ class AdminController extends Controller
         $package->save();
         return redirect()->back()->with('success', 'Package created successfully');
     
-    }
-    // edit package
-    public function EditPackage($id){
-        // $package = Package::find($id);
-        $package = Package::findOrFail($id);
-
-        
-        $states = State::all();
-        $tourType = DB::table('tour_type')->get();
-        $cities = City::where('state_id', $package->destination_id)->get();
-         
-        //  dd($cities[0]->city_name);
-        return view('admin.package-edit', compact('package', 'states', 'tourType', 'cities'));
-
     }
     // updated packages
     public function updatePackage(Request $request, $id){
@@ -420,10 +394,6 @@ protected function getUniqueSlug($slug, $id)
     return $slug;
 }
 
-public function deletePackage(Request $request){
-    DB::table('package')->where('id', $request->id)->delete();
-    return redirect()->back()->with('success', 'The package has been Deleted');
-}
 
 public function packagePhotoDelete(Request $request){
 
@@ -438,13 +408,13 @@ public function packagePhotoDelete(Request $request){
          $photos = PackagePhoto::where('package_id', $id)->get();
 
        //  dd($photos);
-        return view("admin.package-photos", compact('package', 'photos'));
+        return view("sales.package-photos", compact('package', 'photos'));
     }
 
     public function packageVideo($id){
         $package = Package::select('id', 'package_name')->find($id);
         $videos = PackageVideo::where('package_id', $id)->get();
-        return view('admin.package-video', compact('package', 'videos'));
+        return view('sales.package-video', compact('package', 'videos'));
     }
 
 public function packagePhotos(Request $request, $id){
@@ -475,11 +445,11 @@ public function packagePhotos(Request $request, $id){
   
 
     // Manage Booking 
-    public function booking(){
+    public function bookingsales(){
         // i want fetch all records from booking table
         $bookings = Booking::orderBy('created_at', 'desc')->get();
         //dd($bookings);
-        return view('admin.booking', compact('bookings'));
+        return view('sales.booking', compact('bookings'));
     }
 
     public function bookingShow($id){
@@ -487,13 +457,9 @@ public function packagePhotos(Request $request, $id){
         //dd($booking->package);
         $passengers = Passenger::where('booking_id', $id)->get();
       //  dd($passengers);
-        return view('admin.booking-show', compact('booking', 'passengers'));
+        return view('sales.booking-show', compact('booking', 'passengers'));
     }
 
-    public function bookingEdit($id){
-        $booking = Booking::find($id);
-        return view('admin.booking-edit', compact('booking'));
-    }
 
 
     public function bookingUpdate(Request $request, $id){
@@ -580,13 +546,17 @@ public function delete(Request $request)
         'message' => 'Passenger not found.'
     ]);
 }
+
 // Manage Website Data Applied;
 public function jobData(){
     $jobApplications = JobApplication::latest()->get(); 
-    return view('admin.manage-job-data', compact('jobApplications'));
+    return view('sales.manage-job-data', compact('jobApplications'));
 }
 public function contactData(){
     $contactApplication = Contact::latest()->get(); 
-    return view('admin.manage-contact-data', compact('contactApplication'));
+    return view('sales.manage-contact-data', compact('contactApplication'));
 }
+   
 }
+
+

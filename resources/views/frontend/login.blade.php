@@ -1,9 +1,4 @@
 <button class="btn btn-outline-danger rounded-0 add-to-cart" data-id="${item.id}">Add To Cart</button>
-
-
-
-
-
 public function loginshow(){
     return view('auth.login');
 }

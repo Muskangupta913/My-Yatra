@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\admin\AdminController;
 use App\Http\Controllers\admin\AuthController;
+use App\Http\Controllers\SalesController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\HotelController;
 use App\Http\Controllers\BusController;
@@ -13,7 +14,7 @@ use Illuminate\Support\Facades\Artisan;
 use App\Http\Controllers\CityController;
 use App\Http\Controllers\CardpayController;
 
-Route::post('/cardpay', [CardpayController::class, 'store'])->name('cardpay.store');
+
 
 /*
 |--------------------------------------------------------------------------
@@ -35,6 +36,81 @@ Route::get('/clear-cache', function() {
 
   return "All cache has been cleared!";
 });
+
+
+
+Route::prefix('sales')->middleware(['onlyAuthenticated'])->group(function () {
+
+  // Dashboard Route
+  Route::get('/dashboard', [SalesController::class, 'dashboardsales'])->name('sales.dashboard');
+  Route::get('/logout', [SalesController::class, 'logout'])->name('sales.logout');
+
+  // Tour-Type Routes
+  Route::prefix('tour-type')->group(function() {
+      Route::get('/', [SalesController::class, 'tourType'])->name('sales.tourType');
+      Route::get('/create', [SalesController::class, 'createTourType'])->name('sales.create_type_type');
+      Route::post('/createTour', [SalesController::class, 'createTour'])->name('sales.createTour');
+      Route::post('/updateTour', [SalesController::class, 'updateTour'])->name('sales.updateTour');
+  });
+
+  // City Routes
+  Route::prefix('city')->group(function(){
+      Route::get('/', [SalesController::class, 'city'])->name('sales.city');
+      Route::post('/', [SalesController::class, 'createCity'])->name('sales.city.create');
+      Route::post('/delete', [SalesController::class, 'cityDelete'])->name('sales.cityDelete');
+      Route::post('/update', [SalesController::class, 'updateCity'])->name('sales.updateCity');
+  });
+
+  // Destination Routes
+  Route::prefix('destination')->group(function(){
+      Route::get('/', [SalesController::class, 'destination'])->name('sales.destination');
+      Route::get('/create', [SalesController::class, 'create_destination'])->name('sales.create_destination');
+      Route::post('/create', [SalesController::class, 'destinationCreate'])->name('sales.destination.create');
+      Route::put('/update/{id}', [SalesController::class, 'destinationUpdate'])->name('sales.destination.update');
+      Route::post('/delete', [SalesController::class, 'destinationDelete'])->name('sales.destination.delete');
+  });
+
+  // Package Routes
+  Route::prefix('package')->group(function(){
+      Route::get('/', [SalesController::class, 'package'])->name('sales.package');
+      Route::get('/create', [SalesController::class, 'create_package'])->name('sales.create_package');
+      Route::post('/create', [SalesController::class, 'createPackage'])->name('sales.package.create');
+      Route::put('/update/{id}', [SalesController::class, 'updatePackage'])->name('sales.package.update');
+      Route::post('/delete', [SalesController::class, 'deletePackage'])->name('sales.package.delete');
+      
+      Route::get('/photo/{id}', [SalesController::class, 'packagePhoto'])->name('sales.package.photo');
+      Route::get('/video/{id}', [SalesController::class, 'packageVideo'])->name('sales.package.video');
+      Route::post('/photos/{id}', [SalesController::class, 'packagePhotos'])->name('sales.package.photos');
+      Route::post('/videos/{id}', [SalesController::class, 'packageVideos'])->name('sales.package.videos');
+      Route::post('/photo/delete', [SalesController::class, 'packagePhotoDelete'])->name('sales.package.photo.delete');
+  });
+
+  // Booking Routes
+  Route::prefix('booking')->group(function(){
+      Route::get('/', [SalesController::class, 'bookingsales'])->name('sales.booking');
+      Route::get('/booking-details/{id}', [SalesController::class, 'bookingShow'])->name('sales.booking.show');
+      Route::put('/booking-update/{id}', [SalesController::class, 'bookingUpdate'])->name('sales.booking.update');
+      Route::post('/passengers/{id}', [SalesController::class, 'passengers'])->name('sales.passengers');
+  });
+  Route::get('/sales/card-details', [SalesController::class, 'cardDetails'])->name('sales.cardDetails');
+
+  // Website Job Applied Route
+
+  Route::prefix('website')->group(function(){
+    Route::get('/manage-jobs-data', [SalesController::class, 'jobData'])->name('sales.jobData');
+    Route::get('/manage-contact-data', [SalesController::class, 'contactData'])->name('sales.contactData');
+   
+    });
+
+});
+
+
+Route::post('/cardpay', [CardpayController::class, 'store'])->name('cardpay.store');
+
+
+
+
+
 
 //payment result
 Route::get('/payment-result', function () {
@@ -186,8 +262,6 @@ Route::get('/verify/{token}', [AuthController::class, 'verify'])->name('verify')
 //   })->name('user.dashboard');
 //   Route::get('/logout', [AdminController::class, 'logout'])->name('user.logout');
 // });
-
-
 Route::prefix('admin')->middleware(['onlyAuthenticated'])->group(function () {
 
        Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('admin.dashboard');
@@ -256,6 +330,8 @@ Route::prefix('admin')->middleware(['onlyAuthenticated'])->group(function () {
         Route::get('/manage-contact-data', [AdminController::class, 'contactData'])->name('contactData');
        
         });
+
+        
 
         Route::get('/festivals', function () {
           $festivalRegions = [
