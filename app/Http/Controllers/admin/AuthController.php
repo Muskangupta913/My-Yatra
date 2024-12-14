@@ -161,10 +161,17 @@ public function loginView(){
             // Attempt login
             $credentials = $request->only(['email', 'password']);
             if (Auth::attempt($credentials)) {
+                // Check if the user is an admin
                 if (Auth::user()->is_admin == 1) {
-                    return redirect()->route('dashboard');
-                } else {
-                    return redirect()->route('home');
+                    return redirect()->route('admin.dashboard'); // Redirect to admin dashboard
+                }
+                // Check if the user is from sales
+                elseif (Auth::user()->is_sales == 1) {
+                    return redirect()->route('sales.dashboard'); // Redirect to sales dashboard
+                }
+                // If the user does not have admin or sales role
+                else {
+                    return redirect()->route('home')->with('error', 'Unauthorized access!');
                 }
             } else {
                 return back()->with('error', 'Invalid email or password');

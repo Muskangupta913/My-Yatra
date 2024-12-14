@@ -12,7 +12,7 @@ class User extends Authenticatable implements MustVerifyEmail
 
     // Your existing model properties
     protected $fillable = [
-        'name', 'email', 'password', 'phone', 'is_verified', 
+        'name', 'email', 'password', 'phone', 'is_admin', 'is_sales','is_verified', 
     ];
 
     // Other methods, relationships, etc.
