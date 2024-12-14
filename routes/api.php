@@ -14,6 +14,13 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
+Route::fallback(function() {
+    return response()->json([
+        'status' => 'error',
+        'message' => 'Invalid API endpoint. Please check the URL and try again.'
+    ], 404);
+});
+
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });

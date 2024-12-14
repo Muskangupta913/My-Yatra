@@ -18,19 +18,19 @@ class BusController extends Controller
     /**
      * Fetch all cities from the database.
      */
-    public function fetchAllCities()
-    {
-        try {
-            $cities = City::all();
-            return response()->json($cities);
-        } catch (\Exception $e) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Failed to fetch cities',
-                'error' => $e->getMessage()
-            ], 500);
-        }
-    }
+    // public function fetchAllCities()
+    // {
+    //     try {
+    //         $cities = City::all();
+    //         return response()->json($cities);
+    //     } catch (\Exception $e) {
+    //         return response()->json([
+    //             'status' => 'error',
+    //             'message' => 'Failed to fetch cities',
+    //             'error' => $e->getMessage()
+    //         ], 500);
+    //     }
+    // }
 
     /**
      * Autocomplete search for cities.

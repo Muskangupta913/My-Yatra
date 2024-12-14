@@ -43,7 +43,7 @@ h2, h3 {
     <div class="row">
         <!-- First Image and Content -->
         <div class="col-md-6 mb-4">
-            <img src="{{ asset('assets/images/k1.jpg') }}" class="img-fluid rounded shadow w-100 smaller-img" alt="Kashmir Valley">
+            <img src="{{ asset('assets/images/k1.jpg') }}" class="img-fluid rounded shadow w-100 smaller-img" alt="Kashmir Valley"  loading="lazy" >
         </div>
         <div class="col-md-6 mb-4 d-flex align-items-center">
             <div>
@@ -62,7 +62,7 @@ h2, h3 {
     <div class="row">
         <!-- Second Content and Image -->
         <div class="col-md-6 mb-4 order-md-1">
-            <img src="{{ asset('assets/images/k2.jpg') }}" class="img-fluid rounded shadow w-100 smaller-img" alt="Dal Lake">
+            <img src="{{ asset('assets/images/k2.jpg') }}" class="img-fluid rounded shadow w-100 smaller-img" alt="Dal Lake"  loading="lazy" >
         </div>
         <div class="col-md-6 mb-4 d-flex align-items-center order-md-2">
             <div>
@@ -82,7 +82,7 @@ h2, h3 {
     <div class="row">
         <!-- Third Image and Content -->
         <div class="col-md-6 mb-4">
-            <img src="{{ asset('assets/images/k3.jpg') }}" class="img-fluid rounded shadow w-100 smaller-img" alt="Gulmarg">
+            <img src="{{ asset('assets/images/k3.jpg') }}" class="img-fluid rounded shadow w-100 smaller-img" alt="Gulmarg"  loading="lazy" >
         </div>
         <div class="col-md-6 mb-4 d-flex align-items-center">
             <div>
@@ -101,7 +101,7 @@ h2, h3 {
     <div class="row">
      <!-- fourth Content and Image -->
      <div class="col-md-6 mb-4 order-md-1">
-            <img src="{{ asset('assets/images/k4.jpg') }}" class="img-fluid rounded shadow w-100 smaller-img" alt="Dal Lake">
+            <img src="{{ asset('assets/images/k4.jpg') }}" class="img-fluid rounded shadow w-100 smaller-img" alt="Dal Lake" loading="lazy" >
         </div>
      <div class="col-md-6 mb-4 d-flex align-items-center order-md-2">
             <div>

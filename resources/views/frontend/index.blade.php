@@ -157,7 +157,6 @@
   <form action="{{ route('buses.search') }}" method="POST" id="busSearchForm">
     @csrf
     <div class="row">
-<<<<<<< HEAD
         <!-- Source City -->
         <div class="mb-3 col-md-3">
             <div class="date-caption">From</div>
@@ -185,26 +184,6 @@
             <div class="date-caption" style="visibility: hidden">Search</div>
             <button type="submit" class="btn btn-warning w-100 rounded-0 py-3 fw-bold">Search Buses</button>
         </div>
-=======
-      <div class="mb-3 col-md-3">
-        <div class="date-caption">From</div>
-        <input type="text" class="form-control rounded-0 py-3" name="fromCity" id="busFromCity" placeholder="Enter Departure City" required >
-        <div id="busFromCityList" class="card" style="position: absolute; width: 23%; max-height: 150px; overflow-y: scroll;"></div>
-      </div>
-      <div class="mb-3 col-md-3">
-        <div class="date-caption">To</div>
-        <input type="text" class="form-control rounded-0 py-3" name="toCity" id="busToCity" placeholder="Enter Destination City" required>
-        <div id="busToCityList" class="card" style="position: absolute; width: 23%; max-height: 150px; overflow-y: scroll;"></div>
-      </div>
-      <div class="mb-3 col-md-3">
-        <div class="date-caption">Journey Date</div>
-        <input type="text" id="busJourneyDate" name="journey_date" class="form-control rounded-0 py-3 datepicker" placeholder="Select Journey Date" required>
-      </div>
-      <div class="mb-3 col-md-3">
-        <div class="date-caption" style="visibility: hidden">Search</div>
-        <button type="submit" class="btn btn-warning w-100 rounded-0 py-3 fw-bold">Search Buses</button>
-      </div>
->>>>>>> b22dc1aee71e8c427a1c0af8d8317377fb41a0c1
     </div>
 </form>
 </div>
@@ -536,91 +515,41 @@
     });
 
     // City Search Similar to Destination Search
-    function fetchAllCities() {
+    function fetchAllCities() { 
     console.log("Fetching all cities...");
     $.ajax({
-        url: "{{ route('fetch.all.cities') }}", // Laravel route to get all cities
+        url: "/fetch-all-cities", // Change this to URL instead of route()
         method: "GET",
         success: function (data) {
             console.log("Cities fetched successfully:", data);
 
-            // Clear dropdowns for cities
-            $('#cityList, #carPickupLocationList, #carDropoffLocationList, #busFromCityList, #busToCityList, #flightToCityList ,#flightFromCityList, #hotelCityList').empty();
-
-            if (data.length > 0) {
-                $.each(data, function (index, city) {
+            if (data.data && data.data.length > 0) {
+                $('#busFromCityList').empty();
+                $.each(data.data, function (index, city) {
                     const cityHTML = `
                         <div class="list-group-item" style="cursor: pointer;" data-id="${city.id}">
                             <i class="fa-solid fa-location-dot"></i> ${city.city_name}
                         </div>`;
-
-                    // Append cities to all relevant dropdowns
-                    $('#cityList').append(cityHTML);
-                    $('#carPickupLocationList').append(cityHTML);
-                    $('#carDropoffLocationList').append(cityHTML);
                     $('#busFromCityList').append(cityHTML);
-                    $('#busToCityList').append(cityHTML);
-                    $('#flightToCityList').append(cityHTML);
-                    $('#flightFromCityList').append(cityHTML);
-                    $('#hotelCityList').append(cityHTML);
                 });
 
-                // Add click handlers for the dynamically created list items
-                $('#cityList .list-group-item').on('click', function () {
-                    const selectedValue = $(this).text();
-                    $('#searchCity').val(selectedValue);
-                    $('#cityList').hide();
-                });
-
-                $('#carPickupLocationList .list-group-item').on('click', function () {
-                    const selectedValue = $(this).text();
-                    $('#carPickupLocation').val(selectedValue);
-                    $('#carPickupLocationList').hide();
-                });
-
-                $('#carDropoffLocationList .list-group-item').on('click', function () {
-                    const selectedValue = $(this).text();
-                    $('#carDropoffLocation').val(selectedValue);
-                    $('#carDropoffLocationList').hide();
-                });
-
-                $('#busFromCityList').on('click', '.list-group-item', function () {
+                // Click handler for dynamically created list items
+                $('#busFromCityList .list-group-item').on('click', function () {
                     const selectedValue = $(this).text();
                     $('#busFromCity').val(selectedValue);
                     $('#busFromCityList').hide();
                 });
 
-                $('#busToCityList').on('click', '.list-group-item', function () {
-                    const selectedValue = $(this).text();
-                    $('#busToCity').val(selectedValue);
-                    $('#busToCityList').hide();
-                });
-                $('#flightToCityList').on('click', '.list-group-item', function () {
-                    const selectedValue = $(this).text();
-                    $('#flightToCity').val(selectedValue);
-                    $('#flightToCityList').hide();
-                });
-                $('#flightFromCityList').on('click', '.list-group-item', function () {
-                    const selectedValue = $(this).text();
-                    $('#flightFromCity').val(selectedValue);
-                    $('#flightFromCityList').hide();
-                });
-                $('#hotelCityList').on('click', '.list-group-item', function () {
-                    const selectedValue = $(this).text();
-                    $('#hotelSearchCity').val(selectedValue);
-                    $('#hotelCityList').hide();
-                });
             } else {
-                const noCitiesHTML = `<div class="list-group-item">No cities found</div>`;
-                $('#cityList, #carPickupLocationList, #carDropoffLocationList, #busFromCityList, #busToCityList, #flightToCityList, #flightFromCityList,#hotelCityList').append(noCitiesHTML);
+                $('#busFromCityList').html('<div class="list-group-item">No cities found</div>');
             }
         },
         error: function (xhr) {
             console.error("Error fetching cities:", xhr.responseText);
-           
         },
     });
 }
+
 // Show dropdowns and fetch data on input focus
 $('#searchCity').on('focus', function () {
     fetchAllCities();

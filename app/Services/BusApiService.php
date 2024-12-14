@@ -4,79 +4,101 @@ namespace App\Services;
 
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Http\Client\RequestException;
 
 class BusApiService
 {
-    protected $url;
+    protected $baseUrl;
     protected $clientId;
     protected $username;
     protected $password;
+    protected $apiToken;
 
     public function __construct()
     {
-        $this->url = config('services.bus_api.url');
+        // Updated the base URL to use v8
+        $this->baseUrl = config('services.bus_api.url', 'https://bus.srdvtest.com/v5/rest/');
         $this->clientId = config('services.bus_api.client_id');
         $this->username = config('services.bus_api.username');
         $this->password = config('services.bus_api.password');
-    }
-    //ftech cities
-    public function fetchCityList()
-{
-    $response = $this->postRequest('/GetBusCityList', []);
-    return response()->json($response);
-}
-
-//search api
-
-public function searchBuses($sourceCity, $sourceCode, $destinationCity, $destinationCode, $departDate)
-    {
-        $searchParams = [
-            'ClientId' => $this->clientId,
-            'User Name' => $this->username,
-            'Password' => $this->password,
-            'source_city' => $sourceCity,
-            'source_code' => $sourceCode,
-            'destination_city' => $destinationCity,
-            'destination_code' => $destinationCode,
-            'depart_date' => $departDate,
-        ];
-
-        $response = $this->postRequest('/Search', $searchParams);
-        return $response; // Return the raw response for further processing in the controller
+        $this->apiToken = config('services.bus_api.api_token');
     }
 
     /**
-     * Make a POST request to the Bus API.
-     *
-     * @param string $endpoint
-     * @param array $data
-     * @return mixed
+     * Fetch city list from third-party API with retry mechanism
      */
-    public function postRequest($endpoint, $data = [])
+    public function fetchCityList()
     {
-        try {
-            $response = Http::post($this->url . $endpoint, array_merge($data, [
-                'ClientId' => $this->clientId,
-                'UserName' => $this->username,
-                'Password' => $this->password,
-            ]));
+        $maxRetries = 3;
+        $attempt = 1;
 
-            $result = $response->json();
-            
-            if (!$response->successful()) {
-                Log::error("Bus API Error", [
-                    'endpoint' => $endpoint,
-                    'response' => $result,
+        while ($attempt <= $maxRetries) {
+            try {
+                // API request without 'Api-Token' if not required
+                $response = Http::timeout(30)
+                    ->retry(2, 100)
+                    ->withHeaders([
+                        'Content-Type' => 'application/json',
+                        'Accept' => 'application/json'
+                    ])
+                    ->post($this->baseUrl . 'GetBusCityList', [
+                        'ClientId' => $this->clientId,
+                        'UserName' => $this->username,
+                        'Password' => $this->password
+                    ]);
+
+                // Log the request details for debugging
+                Log::info('API Request Details', [
+                    'url' => $this->baseUrl . 'GetBusCityList',
+                    'headers' => [
+                        'Api-Token' => substr($this->apiToken, 0, 5) . '***', // Log partial token for security
+                    ],
+                    'body' => [
+                        'ClientId' => $this->clientId,
+                        'UserName' => $this->username,
+                        'Password' => '***' // Don't log the actual password
+                    ]
                 ]);
-            }
 
-            return $result;
-        } catch (\Exception $e) {
-            Log::error('API Request Failed', [
-                'endpoint' => $endpoint,
-                'message' => $e->getMessage(),
-            ]);
-            return ['ResponseStatus' => 2, 'ErrorMessage' => 'API Request Failed'];
+                // Log the response for debugging
+                Log::info('API Response', [
+                    'status' => $response->status(),
+                    'body' => $response->json()
+                ]);
+
+                if ($response->failed()) {
+                    Log::error('API Request failed', ['response' => $response->json(), 'status' => $response->status()]);
+                    throw new RequestException($response);
+                }
+
+                $data = $response->json();
+
+                // Check if error exists in the response and its error code
+                if (isset($data['Error']['ErrorCode']) && $data['Error']['ErrorCode'] > 0) {
+                    Log::error('City API Error', [
+                        'error_code' => $data['Error']['ErrorCode'],
+                        'error_message' => $data['Error']['ErrorMessage'] ?? 'Unknown error'
+                    ]);
+                    throw new \Exception("API Error: " . ($data['Error']['ErrorMessage'] ?? 'Unknown error'));
+                }
+
+                return $data['Result']['CityList'] ?? [];
+
+            } catch (\Exception $e) {
+                Log::error('City Fetch Attempt ' . $attempt, [
+                    'message' => $e->getMessage(),
+                    'attempt' => $attempt
+                ]);
+
+                if ($attempt == $maxRetries) {
+                    throw $e;
+                }
+
+                $attempt++;
+                sleep(1); // Wait 1 second before retrying
+            }
         }
+
+        return [];
     }
 }
