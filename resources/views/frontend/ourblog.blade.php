@@ -242,7 +242,7 @@
         font-size: 14px;
     }
     .cta-section{
-        background-image: url('./images/cta-banner.jpeg'); 
+        background-image: url('../images/cta-banner.jpeg'); 
         height: 300px !important; 
         background-position: center;
         background-repeat: no-repeat; 
@@ -313,7 +313,7 @@
             </p>  
         </div>
         <div class="col-md-7">
-            <img src="{{ asset('images/travelblog-images.jpg') }}" width="100%" height="100%" alt="">
+            <img src="{{ asset('assets/images/travelblog-images.jpg') }}" width="100%" height="100%" alt="">
         </div>
     </div>
 </div>
@@ -322,12 +322,6 @@
 
 
 <!-- Blog banner end -->
-
-
-
-
-
-
 
 <!-- second container blog start -->
 
