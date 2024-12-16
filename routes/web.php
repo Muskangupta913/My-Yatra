@@ -7,10 +7,10 @@ use App\Http\Controllers\HotelController;
 use App\Http\Controllers\BusController;
 use App\Http\Controllers\CarController;
 use App\Http\Controllers\FlightController;
+use App\Http\Controllers\CityController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Artisan;
-use App\Http\Controllers\CityController;
 use App\Http\Controllers\CardpayController;
 
 
@@ -214,9 +214,7 @@ Route::post('/job-apply', [HomeController::class, 'jobApply'])->name('jobApply')
 Route::get('/payment',[HomeController::class, 'payment'])->name('payment');
 Route::get('/blog',[HomeController::class, 'ourblog'])->name('blog');
 
-Route::fallback(function () {
-  return response()->view('errors.404', [], 404);  // Match the path of your error view
-});
+
 
 
 Route::group(['middleware' => ['isAuthenticated']], function(){
@@ -240,6 +238,7 @@ Route::get('/verify/{token}', [AuthController::class, 'verify'])->name('verify')
 //  Route::get('/addtocart/{id}', [HomeController::class, 'addtocart'])
 //  ->name('addtocart')
 //  ->middleware('auth');  
+  Route::get('/checkout', [HomeController::class, 'checkout'])->name('checkout');
 
 
  Route::middleware(['auth'])->group(function () {
@@ -249,7 +248,6 @@ Route::get('/verify/{token}', [AuthController::class, 'verify'])->name('verify')
   Route::delete('/cart/remove/{id}', [HomeController::class, 'removeFromCart']);
   Route::post('/cart/update/{id}', [HomeController::class, 'updateCartItem']);
   Route::get('/booking/{bookingId}', [HomeController::class, 'book'])->name('booking');
-  Route::get('/checkout', [HomeController::class, 'checkout'])->name('checkout');
 
 });
 
@@ -264,7 +262,6 @@ Route::prefix('admin')->middleware(['onlyAuthenticated'])->group(function () {
 
        Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('admin.dashboard');
        Route::get('/logout', [AdminController::class, 'logout'])->name('logout');
-      
         Route::get('/cities/{state_id}', [AdminController::class, 'getCities']);
       
         Route::prefix('tour-type')->group(function(){
@@ -370,6 +367,9 @@ Route::get('/bus', [BusController::class, 'index'])->name('bus');
 Route::get('/fetch-all-cities', [CityController::class, 'fetchAllCities'])->name('fetch.all.cities');
 Route::get('/search-cities', [CityController::class, 'searchCities'])->name('search.cities');
 
+Route::get('/check-cities', [CityController::class, 'checkCities'])->name('check.cities');
+Route::post('/find-city', [CityController::class, 'findCity']);
+
 // Hotel Route
 // Route::get('/search-hotels', [HotelController::class, 'searchHotels'])->name('searchHotels');
 Route::get('/hotels', [HotelController::class, 'index'])->name('hotels');
@@ -379,7 +379,7 @@ Route::get('/search-destination', [HomeController::class, 'search'])->name('sear
 Route::get('/fetch-all-states', [HomeController::class, 'fetchAllStates'])->name('fetch.all.states');
 
 // Route::get('/search/cities', [HomeController::class, 'searchCities'])->name('search.cities');
-
+Route::get('/autocomplete', [CityController::class, 'autocomplete'])->name('autocomplete.cities');
 // Searching Packages
 Route::get('/search-packages', [HomeController::class, 'searchPackages'])->name('searchPackages');
 Route::get('/kashmir', function () {

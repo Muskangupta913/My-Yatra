@@ -1,100 +1,80 @@
 <?php
 
 namespace App\Http\Controllers;
+
+use App\Models\Newcity;  // Updated to use Newcity model
 use Illuminate\Http\Request;
-use App\Services\BusApiService;
-use App\Models\City;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Cache;
 
 class CityController extends Controller
 {
-   //service provider 
-    protected $busApiService;
-
-    public function __construct(BusApiService $busApiService)
+    // Show the bus page view
+    public function checkCities()
     {
-        $this->busApiService = $busApiService;
+        return view('bus');
     }
 
-    
-    //fetch all cities
+    /**
+     * Fetch all cities with caching implementation
+     */
     public function fetchAllCities()
-{
-    try {
-        $cities = City::all(); // Ensure 'City' model and table are correctly configured
-        return response()->json($cities);
-    } catch (\Exception $e) {
-        return response()->json([
-            'status' => 'error',
-            'message' => 'Failed to fetch cities',
-            'error' => $e->getMessage()
-        ], 500);
-    }
-}
-    //searchcitiesss
-    public function searchCities(Request $request)
     {
-        $request->validate([
-            'state_id' => 'required|integer',
-        ]);
-                 
-    
-        $stateId = $request->input('state_id');
-        $cities = City::where('state_id', $stateId)->get();
-    
-        // If no cities found, call the third-party API
-        if ($cities->isEmpty()) {
-            $apiResponse = $this->busApiService->fetchCityList(); // Call the method from BusApiService
-    
-            // Check if the API response is successful
-            if (isset($apiResponse['Error']) && $apiResponse['Error']['ErrorCode'] === 1) {
-                return response()->json(['message' => 'No cities found'], 404);
+        try {
+            // Try to get cities from cache first
+            $cities = Cache::remember('all_cities', 3600, function () {
+                return Newcity::all();  // Using Newcity model to fetch cities
+            });
+
+            // Check if cities data is empty
+            if ($cities->isEmpty()) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'No cities found',
+                    'data' => [],
+                    'total_cities' => 0
+                ], 404);
             }
-    
-            // Check if the API response structure is as expected
-            if (!isset($apiResponse['Result']['CityList'])) {
-                return response()->json(['message' => 'Unexpected API response structure'], 500);
-            }
-    
-            // Process the API response and return it
-            return response()->json($apiResponse['Result']['CityList']);
+
+            // Return cities data with additional metadata
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Cities fetched successfully',
+                'data' => $cities,
+                'total_cities' => $cities->count()
+            ], 200);
+
+        } catch (\Exception $e) {
+            // Log the error
+            Log::error('City Fetch Error', [
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            // Return error response
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Failed to fetch cities',
+                'error' => $e->getMessage()
+            ], 500);
         }
-    
-        return response()->json($cities);
     }
 
-    
-
-
-
-
-
-    public function delhi()
+    /**
+     * Search cities by name
+     */
+    public function searchCity(Request $request)
     {
-        return view('delhi');
-    }
+        $query = $request->input('query');
 
-    public function goaTour()
-    {
-        return view('goaTour');
-    }
+        // Search for cities by CityName
+        $cities = Newcity::where('CityName', 'like', '%' . $query . '%')->get();
 
-    public function manali()
-    {
-        return view('manali');
-    }
-
-    public function kerala(Request $request)
-    {
-        return view('kerala');
-    }
-
-    public function coimbatore()
-    {
-        return view('coimbatore');
-    }
-
-    public function mussoorie()
-    {
-        return view('mussoorie');
+        return response()->json([
+            'status' => 'success',
+            'data' => $cities,
+        ], 200);
     }
 }
+
+
