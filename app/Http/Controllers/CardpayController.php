@@ -31,7 +31,7 @@ class CardpayController extends Controller
                 'errors' => $e->errors()  // This will return detailed validation errors
             ]);
         } catch (\Exception $e) {
-            \Log::error('Payment save error: ' . $e->getMessage());
+            \Log::error('Payment save error:' . $e->getMessage());
         
             return response()->json([
                 'success' => false,

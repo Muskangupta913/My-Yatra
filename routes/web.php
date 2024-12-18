@@ -1,5 +1,4 @@
 <?php
-
 use App\Http\Controllers\admin\AdminController;
 use App\Http\Controllers\admin\AuthController;
 use App\Http\Controllers\SalesController;
@@ -106,7 +105,6 @@ Route::prefix('sales')->middleware(['onlyAuthenticated'])->group(function () {
 
 
 Route::post('/cardpay', [CardpayController::class, 'store'])->name('cardpay.store');
-
 
 
 
@@ -358,20 +356,12 @@ Route::post('/kerala', [CityController::class, 'kerala'])->name('kerala');
 Route::get('/coimbatore', [CityController::class, 'coimbatore'])->name('coimbatore');
 Route::get('/mussoorie', [CityController::class, 'mussoorie'])->name('mussoorie');
 
-Route::get('/kashmir', function () {
-  return view('kashmir'); // Replace 'kashmir' with the actual Blade file name without the .blade.php extension.
-})->name('kashmir');
-Route::get('/rishikesh', function () {
-  return view('rishikesh'); // Replace 'rishikesh' with the actual Blade file name without the .blade.php extension.
-})->name('rishikesh');
 
 // Car Route
-
 
 });
 Route::get('/cars', [CarController::class, 'index'])->name('cars');
 // Bus Route
-
 Route::post('/buses/search', [BusController::class, 'searchBuses'])->name('buses.search'); //route('buses.search)
 Route::get('/bus', [BusController::class, 'index'])->name('bus');
 Route::get('/fetch-all-cities', [CityController::class, 'fetchAllCities'])->name('fetch.all.cities');
@@ -392,3 +382,9 @@ Route::get('/fetch-all-states', [HomeController::class, 'fetchAllStates'])->name
 Route::get('/autocomplete', [CityController::class, 'autocomplete'])->name('autocomplete.cities');
 // Searching Packages
 Route::get('/search-packages', [HomeController::class, 'searchPackages'])->name('searchPackages');
+Route::get('/kashmir', function () {
+  return view('kashmir'); // Replace 'kashmir' with the actual Blade file name without the .blade.php extension.
+})->name('kashmir');
+Route::get('/rishikesh', function () {
+  return view('rishikesh'); // Replace 'rishikesh' with the actual Blade file name without the .blade.php extension.
+})->name('rishikesh');

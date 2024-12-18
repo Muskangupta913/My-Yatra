@@ -169,16 +169,18 @@ public function loginView(){
                 elseif (Auth::user()->is_sales == 1) {
                     return redirect()->route('sales.dashboard'); // Redirect to sales dashboard
                 }
-                // If the user does not have admin or sales role
-                else {
-                    return redirect()->route('home')->with('error', 'Unauthorized access!');
-                }
-            } else {
-                return back()->with('error', 'Invalid email or password');
+                // Handle normal users
+            else {
+                return redirect()->route('user.dashboard')->with('success', 'Login successful!');
             }
-        } catch (\Exception $e) {
-            return back()->with('msg', $e->getMessage());
+        } else {
+            // Login failed
+            return back()->with('error', 'Invalid email or password.');
         }
+    } catch (\Exception $e) {
+        // Handle unexpected errors
+        return back()->with('msg', 'Something went wrong: ' . $e->getMessage());
+    }
     }
     
 
