@@ -23,6 +23,8 @@ class SalesController extends Controller
 {
 
     public function dashboardsales(){
+         // Fetch all states and their related cities
+         $states = State::with('cities')->get();
         $packageCount = DB::table('package')->count();
         $destinationCount = DB::table('destination')->count();
         $bookingCount = DB::table('bookings')->count();
@@ -33,8 +35,10 @@ class SalesController extends Controller
             ->count();
 
         $jobs = DB::table('job_applications')->count();
+         // Fetch tour types from the database
+    $tourTypes = DB::table('tour_type')->get();
        
-        return view('sales.dashboard', compact('packageCount', 'destinationCount','bookingCount', 'bookings', 'cardDetailsCount', 'jobs'));
+        return view('sales.dashboard', compact('states','tourTypes','packageCount', 'destinationCount','bookingCount', 'bookings', 'cardDetailsCount', 'jobs'));
     }
     public function logout()
     {
