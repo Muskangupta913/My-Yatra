@@ -2,9 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\City;
 use App\Services\BusApiService;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class BusController extends Controller
 {
@@ -16,74 +17,55 @@ class BusController extends Controller
     }
 
     /**
-     * Fetch all cities from the database.
-     */
-    // public function fetchAllCities()
-    // {
-    //     try {
-    //         $cities = City::all();
-    //         return response()->json($cities);
-    //     } catch (\Exception $e) {
-    //         return response()->json([
-    //             'status' => 'error',
-    //             'message' => 'Failed to fetch cities',
-    //             'error' => $e->getMessage()
-    //         ], 500);
-    //     }
-    // }
-
-    /**
-     * Autocomplete search for cities.
-     */
-    public function autocomplete(Request $request)
-    {
-        $request->validate([
-            'query' => 'required|string|min:2'
-        ]);
-
-        $searchQuery = $request->input('query');
-        $cities = City::where('city_name', 'LIKE', '%' . $searchQuery . '%')
-                    ->limit(10)
-                    ->get(['id', 'city_name', 'code']); // Fetch city name and city code
-
-        return response()->json($cities);
-    }
-
-    /**
      * Bus search using source and destination city names and codes.
      */
     public function searchBuses(Request $request)
     {
-        $validatedData = $request->validate([
+        // Step 1: Validate incoming request
+        $request->validate([
             'source_city' => 'required|string',
-            'source_code' => 'required|integer', // Add validation for source code
+            'source_code' => 'required|integer',
             'destination_city' => 'required|string',
-            'destination_code' => 'required|integer', // Add validation for destination code
-            'depart_date' => 'required|date',
+            'destination_code' => 'required|integer',
+            'depart_date' => 'required|date_format:Y-m-d',
         ]);
 
-        $response = $this->busApiService->searchBuses(
-            $validatedData['source_city'], 
-            $validatedData['source_code'], 
-            $validatedData['destination_city'], 
-            $validatedData['destination_code'], 
-            $validatedData['depart_date']
-        );
+        // Step 2: Prepare the request payload
+        $params = [
+            'ClientId' => '180133',
+            'UserName' => 'MakeMy91',
+            'Password' => 'MakeMy@910',
+            'source_city' => trim($request->source_city), // Remove extra spaces
+            'source_code' => intval($request->source_code), // Ensure it's an integer
+            'destination_city' => trim($request->destination_city),
+            'destination_code' => intval($request->destination_code),
+            'depart_date' => date('Y-m-d', strtotime($request->depart_date)), // Ensure date is formatted correctly
+        ];
 
-        // Check for API errors
-        if (isset($response['Error']) && $response['Error']['ErrorCode'] != 0) {
-            return back()->withErrors([
-                'error' => $response['Error']['ErrorMessage'] ?? 'An unknown error occurred'
-            ]);
+        Log::info('Sending API request with payload:', $params); // Log the request payload
+
+        try {
+            // Send the request to the bus API using the Http facade
+            $response = Http::withHeaders([
+                'Content-Type' => 'application/json',
+            ])->post('https://bus.srdvtest.com/v5dte56/rest/Search', $params);
+
+            Log::info('API response status: ' . $response->status());
+            Log::info('API response body: ', $response->json()); // Log the response body
+
+            // Step 4: Parse the API response
+            $data = $response->json();
+
+            // Check if the response contains the expected 'BusResults'
+            if (!empty($data['Result']['BusResults'])) {
+                return view('bus', ['data' => $data['Result']['BusResults']]);
+            } else {
+                return view('bus', ['data' => []])->with('message', 'No buses available.');
+            }
+
+        } catch (\Exception $e) {
+            Log::error('API Request Failed', ['error' => $e->getMessage()]);
+            return back()->with('error', 'An error occurred while searching for buses.');
         }
-
-        // Check if bus results exist
-        if (!isset($response['Result']['BusResults']) || empty($response['Result']['BusResults'])) {
-            return back()->with('message', 'No buses found for the selected route and date.');
-        }
-
-        return view('bus', ['buses' => $response['Result']['BusResults']]);
     }
 }
-
-
