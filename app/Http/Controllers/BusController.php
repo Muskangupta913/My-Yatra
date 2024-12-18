@@ -16,56 +16,74 @@ class BusController extends Controller
         $this->busApiService = $busApiService;
     }
 
-    /**
-     * Bus search using source and destination city names and codes.
-     */
     public function searchBuses(Request $request)
     {
         // Step 1: Validate incoming request
         $request->validate([
             'source_city' => 'required|string',
-            'source_code' => 'required|integer',
+            'source_code' => 'required|string',
             'destination_city' => 'required|string',
-            'destination_code' => 'required|integer',
+            'destination_code' => 'required|string',
             'depart_date' => 'required|date_format:Y-m-d',
         ]);
 
-        // Step 2: Prepare the request payload
-        $params = [
-            'ClientId' => '180133',
-            'UserName' => 'MakeMy91',
-            'Password' => 'MakeMy@910',
-            'source_city' => trim($request->source_city), // Remove extra spaces
-            'source_code' => intval($request->source_code), // Ensure it's an integer
+        // Step 2: Create the exact payload structure as per API documentation
+        $payload = json_encode([
+            "ClientId" => "180133",
+            "UserName" => "MakeMy91",
+            "Password" => "MakeMy@910",
+            'source_city' => trim($request->source_city),
+            'source_code' => intval($request->source_code),
             'destination_city' => trim($request->destination_city),
             'destination_code' => intval($request->destination_code),
-            'depart_date' => date('Y-m-d', strtotime($request->depart_date)), // Ensure date is formatted correctly
-        ];
-
-        Log::info('Sending API request with payload:', $params); // Log the request payload
+            'depart_date' => date('Y-m-d', strtotime($request->depart_date)),
+        ], JSON_UNESCAPED_SLASHES);
 
         try {
-            // Send the request to the bus API using the Http facade
+            // Step 3: Make the API request with exact headers
             $response = Http::withHeaders([
-                'Content-Type' => 'application/json',
-            ])->post('https://bus.srdvtest.com/v5dte56/rest/Search', $params);
+                'Content-Type' => 'application/json'
+            ])->withBody($payload, 'application/json')
+              ->post('https://bus.srdvtest.com/v5/rest/Search');
 
-            Log::info('API response status: ' . $response->status());
-            Log::info('API response body: ', $response->json()); // Log the response body
+            // Log for debugging
+            Log::info('Bus Search Request Payload', ['payload' => json_decode($payload, true)]);
+            Log::info('Bus Search Response', ['response' => $response->json()]);
 
-            // Step 4: Parse the API response
             $data = $response->json();
 
-            // Check if the response contains the expected 'BusResults'
-            if (!empty($data['Result']['BusResults'])) {
-                return view('bus', ['data' => $data['Result']['BusResults']]);
-            } else {
-                return view('bus', ['data' => []])->with('message', 'No buses available.');
+            // Check for API-level errors first
+            if (isset($data['Error']) && $data['Error']['ErrorCode'] !== 0) {
+                return response()->json([
+                    'status' => false,
+                    'message' => $data['Error']['ErrorMessage']
+                ]);
             }
 
+            // Check for bus results
+            if (!empty($data['Result']['BusResults'])) {
+                return response()->json([
+                    'status' => true,
+                    'data' => $data['Result']['BusResults']
+                ]);
+            }
+
+            // No buses found
+            return response()->json([
+                'status' => false,
+                'message' => 'No buses found for the selected route and date.'
+            ]);
+
         } catch (\Exception $e) {
-            Log::error('API Request Failed', ['error' => $e->getMessage()]);
-            return back()->with('error', 'An error occurred while searching for buses.');
+            Log::error('Bus Search Error', [
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            return response()->json([
+                'status' => false,
+                'message' => 'An error occurred while searching for buses.'
+            ], 500);
         }
     }
 }
