@@ -132,6 +132,9 @@ public function register(Request $request)
     $user->password = Hash::make($request->password);
     $user->is_verified = 1; // Mark the user as verified by default
     $user->save();
+    $user->verification_token = Str::random(60);
+    $user->token_expires_at = Carbon::now()->addHour();
+    $user->save();
 
     return redirect()->route('loginView')->with('success', 'Registration successful! Please login to continue.');
 }
