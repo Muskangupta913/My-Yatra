@@ -53,8 +53,8 @@ class AuthController extends Controller
         $user->email = $request->email;
         $user->phone = $request->phone;
         $user->password = Hash::make($request->password);
-        // $user->verification_token = Str::random(60); // Commented out email verification logic
-        // $user->token_expires_at = Carbon::now()->addHour(); // Commented out email verification logic
+        $user->verification_token = Str::random(60); // Commented out email verification logic
+        $user->token_expires_at = Carbon::now()->addHour(); // Commented out email verification logic
         $user->is_verified = 1; // Automatically mark as verified (bypassing email verification)
         $user->save();
 
@@ -91,12 +91,20 @@ class AuthController extends Controller
     //         $msg = 'Verification token has been expired. Please request a new Verification email.';
     //         return view('auth.verification-message', compact('msg'));
 
-    //     }
-    //     $user->is_verified = 1;
-    //     $user->email_verified_at = Carbon::now();
-    //     $user->verification_token = null;
-    //     $user->token_expires_at = null;
-    //     $user->save();
+//         }
+//         $user->is_verified = 1;
+//         $user->email_verified_at = Carbon::now();
+//         $user->verification_token = null;
+//         $user->token_expires_at = null;
+//         $user->save();
+
+//         $msg  = "Email Verified Successfully!";
+//         return view('auth.verification-message', compact('msg'));
+//      }
+
+
+
+
 
     //     $msg  = "Email Verified Successfully!";
     //     return view('auth.verification-message', compact('msg'));

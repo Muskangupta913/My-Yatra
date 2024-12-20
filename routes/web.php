@@ -361,9 +361,25 @@ Route::get('/mussoorie', [CityController::class, 'mussoorie'])->name('mussoorie'
 
 });
 Route::get('/cars', [CarController::class, 'index'])->name('cars');
+
+
+
+
+
 // Bus Route
 Route::post('/buses/search', [BusController::class, 'searchBuses'])->name('buses.search'); //route('buses.search)
 Route::get('/bus', [BusController::class, 'index'])->name('bus');
+Route::post('/getSeatLayout', [BusController::class, 'getSeatLayout'])->name('getSeatLayout');
+Route::get('/seat-layout', [BusController::class, 'showSeatLayout'])->name('bus.seatLayout');
+
+
+
+
+
+
+
+
+
 Route::get('/fetch-all-cities', [CityController::class, 'fetchAllCities'])->name('fetch.all.cities');
 Route::get('/search-cities', [CityController::class, 'searchCities'])->name('search.cities');
 

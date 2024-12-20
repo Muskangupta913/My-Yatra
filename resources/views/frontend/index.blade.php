@@ -650,8 +650,8 @@
         }
     });
 
-    // Hide dropdowns when pressing 'Esc' key
-    $(document).on('keydown', function (e) {
+   // Hide dropdowns when pressing 'Esc' key
+   $(document).on('keydown', function (e) {
         if (e.key === "Escape") {
             $('#busFromCityList, #busToCityList').hide();
         }
@@ -661,7 +661,9 @@
     $('.datepicker').datepicker({
         format: 'yyyy-mm-dd', // Format: 2024-12-17
         autoclose: true,
-        startDate: 'today'
+        startDate: 'today',
+    todayHighlight: true  // Highlights today's date
+
     }).datepicker('setDate', new Date()); // Automatically set today's date
 
     // Ensure the date is in the correct format before submitting the form
@@ -669,41 +671,49 @@
         event.preventDefault(); // Prevents default form submission
 
         // Ensure the date is in 'yyyy-mm-dd' format
-        const journeyDate = $('#busJourneyDate').val();
-        const formattedDate = new Date(journeyDate);
-        const formattedDateString = formattedDate.toISOString().split('T')[0]; // Get 'yyyy-mm-dd'
-
-        // Update the input field with the formatted date
-        $('#busJourneyDate').val(formattedDateString);
-
+        let formattedDate = $('#busJourneyDate').val();
+    const dateParts = formattedDate.split('/'); // Handles MM/DD/YYYY if that's returned
+    if (dateParts.length === 3) {
+        formattedDate = `${dateParts[2]}-${dateParts[0].padStart(2, '0')}-${dateParts[1].padStart(2, '0')}`;
+    }
         // Collect form data
         const data = {
             source_city: $('#busFromCity').val(),
             source_code: $('#busFromCode').val(),
             destination_city: $('#busToCity').val(),
             destination_code: $('#busToCode').val(),
-            depart_date: formattedDateString // Use the formatted date
+            depart_date: formattedDate // Use the formatted date
         };
 
         console.log('Search Buses Request Data:', data);
 
         // Send the AJAX request
         fetch('{{ route('buses.search') }}', {
-            method: 'POST',
-            headers: {
-                'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(data)
-        })
-        .then(response => response.json())
-        .then(responseData => {
-            console.log('Search Buses Response:', responseData);
-            alert(responseData.message);
-        })
-        .catch(error => console.error('Error:', error));
+    method: 'POST',
+    headers: {
+        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+        'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(data)
+})
+.then(response => response.json())
+.then(responseData => {
+    console.log('API Response:', responseData); // <-- Add this line
+    if (responseData.status) {
+        sessionStorage.setItem('busSearchResults', JSON.stringify({
+            buses: responseData.data,
+            searchParams: data,
+            traceId: responseData.traceId
+        }));
+        window.location.href = "{{ route('bus') }}";
+    } else {
+        alert(responseData.message);
+    }
+})
+.catch(error => console.error('Error:', error));
     });
-});
+  });
+
 </script>
 
 @endsection

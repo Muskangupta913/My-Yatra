@@ -1,11 +1,13 @@
 <?php
 
+
 namespace App\Http\Controllers;
 
 use App\Services\BusApiService;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use Carbon\Carbon;
 
 class BusController extends Controller
 {
@@ -16,9 +18,18 @@ class BusController extends Controller
         $this->busApiService = $busApiService;
     }
 
+    public function index()
+    {
+        return view('bus');
+    }
+
+    public function showSeatLayout(Request $request)
+    {
+        return view('seat-layout');
+    }
+
     public function searchBuses(Request $request)
     {
-        // Step 1: Validate incoming request
         $request->validate([
             'source_city' => 'required|string',
             'source_code' => 'required|string',
@@ -27,62 +38,96 @@ class BusController extends Controller
             'depart_date' => 'required|date_format:Y-m-d',
         ]);
 
-        // Step 2: Create the exact payload structure as per API documentation
         $payload = json_encode([
             "ClientId" => "180133",
             "UserName" => "MakeMy91",
             "Password" => "MakeMy@910",
             'source_city' => trim($request->source_city),
-            'source_code' => intval($request->source_code),
+            'source_code' => (int) trim($request->source_code),
             'destination_city' => trim($request->destination_city),
-            'destination_code' => intval($request->destination_code),
-            'depart_date' => date('Y-m-d', strtotime($request->depart_date)),
+            'destination_code' => (int) trim($request->destination_code),
+            'depart_date' => Carbon::createFromFormat('Y-m-d', $request->depart_date)->format('Y-m-d'),
         ], JSON_UNESCAPED_SLASHES);
 
         try {
-            // Step 3: Make the API request with exact headers
             $response = Http::withHeaders([
-                'Content-Type' => 'application/json'
+                'Content-Type' => 'application/json',
+                'Api-Token' => 'MakeMy@910@23',
             ])->withBody($payload, 'application/json')
               ->post('https://bus.srdvtest.com/v5/rest/Search');
 
-            // Log for debugging
-            Log::info('Bus Search Request Payload', ['payload' => json_decode($payload, true)]);
-            Log::info('Bus Search Response', ['response' => $response->json()]);
-
             $data = $response->json();
 
-            // Check for API-level errors first
             if (isset($data['Error']) && $data['Error']['ErrorCode'] !== 0) {
                 return response()->json([
                     'status' => false,
-                    'message' => $data['Error']['ErrorMessage']
+                    'message' => $data['Error']['ErrorMessage'] ?? 'An unknown error occurred'
                 ]);
             }
 
-            // Check for bus results
+            $traceId = $data['Result']['TraceId'] ?? $data['TraceId'] ?? null;
+
             if (!empty($data['Result']['BusResults'])) {
                 return response()->json([
                     'status' => true,
-                    'data' => $data['Result']['BusResults']
+                    'traceId' => $traceId,
+                    'data' => $data['Result']['BusResults'],
                 ]);
             }
 
-            // No buses found
             return response()->json([
                 'status' => false,
                 'message' => 'No buses found for the selected route and date.'
             ]);
 
         } catch (\Exception $e) {
-            Log::error('Bus Search Error', [
-                'message' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
-            ]);
-
             return response()->json([
                 'status' => false,
                 'message' => 'An error occurred while searching for buses.'
+            ], 500);
+        }
+    }
+
+    public function getSeatLayout(Request $request)
+    {
+        $request->validate([
+            'TraceId' => 'required|string',
+            'ResultIndex' => 'required|string',
+        ]);
+
+        $payload = json_encode([
+            "ClientId" => "180133",
+            "UserName" => "MakeMy91",
+            "Password" => "MakeMy@910",
+            "TraceId" => $request->TraceId,
+            "ResultIndex" => $request->ResultIndex,
+        ], JSON_UNESCAPED_SLASHES);
+
+        try {
+            $response = Http::withHeaders([
+                'Content-Type' => 'application/json',
+                'Api-Token' => 'MakeMy@910@23',
+            ])->withBody($payload, 'application/json')
+              ->post('https://bus.srdvtest.com/v5/rest/GetSeatLayOut');
+
+            $data = $response->json();
+
+            if (isset($data['Error']) && $data['Error']['ErrorCode'] !== 0) {
+                return response()->json([
+                    'status' => false,
+                    'message' => $data['Error']['ErrorMessage'] ?? 'Error fetching seat layout',
+                ]);
+            }
+
+            return response()->json([
+                'status' => true,
+                'data' => $data['Result'],
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => false,
+                'message' => 'An error occurred while fetching seat layout.',
             ], 500);
         }
     }
