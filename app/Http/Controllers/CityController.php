@@ -60,6 +60,23 @@ class CityController extends Controller
         }
     }
 
+
+    public function autocomplete(Request $request)
+    {
+        $query = $request->input('query'); // Get the user's input
+        if ($query) {
+            // Query to fetch cities where the name starts with the input letter(s)
+            $cities = Newcity::where('CityName', 'LIKE', $query . '%')
+                        ->select('CityId', 'CityName')
+                        ->limit(10) // Limit the number of results
+                        ->get();
+                        
+            return response()->json($cities);
+        } else {
+            return response()->json([], 400); // Return an empty array if no query is provided
+        }
+    }
+
     /**
      * Search cities by name
      */

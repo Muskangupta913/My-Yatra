@@ -153,7 +153,7 @@
   <h4 class="mb-5" id="bus-title">Book Bus Tickets</h4>
   <hr class="searchline">
   
-  <!-- Add CSRF token -->
+  <!-- Bus Search Form -->
   <form action="{{ route('buses.search') }}" method="POST" id="busSearchForm">
     @csrf
     <div class="row">
@@ -161,7 +161,7 @@
         <div class="mb-3 col-md-3">
             <div class="date-caption">From</div>
             <input type="text" class="form-control rounded-0 py-3" name="source_city" id="busFromCity" placeholder="Enter Departure City" required>
-            <input type="hidden" name="source_code" id="busFromCode">
+            <input type="hidden" name="source_code" id="busFromCode"> <!-- Hidden field to store source city code -->
             <div id="busFromCityList" class="card" style="position: absolute; width: 95%; max-height: 150px; overflow-y: scroll; display: none;"></div>
         </div>
 
@@ -169,7 +169,7 @@
         <div class="mb-3 col-md-3">
             <div class="date-caption">To</div>
             <input type="text" class="form-control rounded-0 py-3" name="destination_city" id="busToCity" placeholder="Enter Destination City" required>
-            <input type="hidden" name="destination_code" id="busToCode">
+            <input type="hidden" name="destination_code" id="busToCode"> <!-- Hidden field to store destination city code -->
             <div id="busToCityList" class="card" style="position: absolute; width: 95%; max-height: 150px; overflow-y: scroll; display: none;"></div>
         </div>
 
@@ -185,8 +185,10 @@
             <button type="submit" class="btn btn-warning w-100 rounded-0 py-3 fw-bold">Search Buses</button>
         </div>
     </div>
-</form>
+  </form>
 </div>
+
+
 
 <!-- holiday booking  -->
           <div class="tab-pane fade mt-5 show active" id="contact" role="tabpanel" aria-labelledby="contact-tab">
@@ -492,18 +494,20 @@
 @section('scripts')
 
 
-<script>
-   // Date Pickers
-   $('.datepicker').datepicker({
-    format: 'd M, yyyy', // Format: 9 Dec, 2024
+
+
+<!-- <script>
+  // Date Pickers
+  $('.datepicker').datepicker({
+    format: 'yyyy-mm-dd', // Format: 2024-12-17
     autoclose: true,
     startDate: 'today'
-  }).datepicker('setDate', new Date()); // Automatically set today's date;
-  
-</script>
+  }).datepicker('setDate', new Date()); // Automatically set today's date
+  </script>
+   -->
 
 
-<script>
+   <script>
   $(document).ready(function () {
     // CSRF Token setup for AJAX
     $.ajaxSetup({
@@ -511,276 +515,130 @@
             'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content'),
             'Accept': 'application/json'
         },
-        
     });
 
-    // City Search Similar to Destination Search
-    function fetchAllCities() { 
-    console.log("Fetching all cities...");
-    $.ajax({
-        url: "/fetch-all-cities", // Change this to URL instead of route()
-        method: "GET",
-        success: function (data) {
-            console.log("Cities fetched successfully:", data);
-
-            if (data.data && data.data.length > 0) {
-                $('#busFromCityList').empty();
-                $.each(data.data, function (index, city) {
-                    const cityHTML = `
-                        <div class="list-group-item" style="cursor: pointer;" data-id="${city.id}">
-                            <i class="fa-solid fa-location-dot"></i> ${city.city_name}
-                        </div>`;
-                    $('#busFromCityList').append(cityHTML);
-                });
-
-                // Click handler for dynamically created list items
-                $('#busFromCityList .list-group-item').on('click', function () {
-                    const selectedValue = $(this).text();
-                    $('#busFromCity').val(selectedValue);
-                    $('#busFromCityList').hide();
-                });
-
-            } else {
-                $('#busFromCityList').html('<div class="list-group-item">No cities found</div>');
-            }
-        },
-        error: function (xhr) {
-            console.error("Error fetching cities:", xhr.responseText);
-        },
-    });
-}
-
-// Show dropdowns and fetch data on input focus
-$('#searchCity').on('focus', function () {
-    fetchAllCities();
-    $('#cityList').show();
-});
-
-$('#carPickupLocation').on('focus', function () {
-    fetchAllCities();
-    $('#carPickupLocationList').show();
-});
-
-$('#carDropoffLocation').on('focus', function () {
-    fetchAllCities();
-    $('#carDropoffLocationList').show();
-});
-
-$('#busFromCity').on('focus', function () {
-    fetchAllCities();
-    $('#busFromCityList').show();
-});
-
-$('#busToCity').on('focus', function () {
-    fetchAllCities();
-    $('#busToCityList').show();
-});
-$('#flightToCity').on('focus', function () {
-    fetchAllCities();
-    $('#flightToCityList').show();
-});
-$('#flightFromCity').on('focus', function () {
-    fetchAllCities();
-    $('#flightFromCityList').show();
-});
-$('#hotelSearchCity').on('focus', function () {
-    fetchAllCities();
-    $('#hotelCityList').show();
-});
-
-// Hide dropdowns when clicking outside
-$(document).on('click', function (e) {
-    if (!$(e.target).closest('#searchCity, #cityList, #carPickupLocation, #carPickupLocationList, #carDropoffLocation, #carDropoffLocationList, #busFromCity, #busFromCityList, #busToCity, #busToCityList,#flightToCity,#flightToCityList,#flightFromCity,#flightFromCityList,#hotelSearchCity,#hotelCityList').length) {
-        $('#cityList, #carPickupLocationList, #carDropoffLocationList, #busFromCityList, #busToCityList,#flightToCityList,#flightFromCityList,#hotelCityList').hide();
-    }
-});
-    // Search functionality when typing in the searchCity input
-    $('#searchCity').on('keyup', function () {
-        var query = $(this).val();
-        if (query.length > 0) {
-            $.ajax({
-                url: "{{ route('search.cities') }}", //  route to search cities
-                method: "GET",
-                data: { query: query },
-                success: function (data) {
-                    $('#cityList').empty();
-                    if (data.length > 0) {
-                        $.each(data, function (index, city) {
-                            $('#cityList').append(
-                                `<div class="list-group-item" style="cursor: pointer;" data-id="${city.id}">
-                                    <i class="fa-solid fa-location-dot"></i> ${city.city_name}
-                                 </div>`
-                            );
-                        });
-
-                        // Add click handler for cities
-                        $('#cityList .list-group-item').on('click', function () {
-                            var selectedValue = $(this).text();
-                            $('#searchCity').val(selectedValue);
-                            $('#cityList').hide();
-                        });
-                    } else {
-                        $('#cityList').append(`<div class="list-group-item">No results found</div>`);
-                    }
-                }
-            });
-        } else {
-            $('#cityList').empty();
-            fetchAllCities(); // Show all cities if search is cleared
-        }
-    });
-    
-
-    // Fetch states
-    function fetchAllStates() {
-        console.log("Fetching all states...");
+    // Function to fetch all cities for autocomplete
+    function fetchAllCities(inputField) {
+        console.log("Fetching all cities...");
         $.ajax({
-            url: "{{ route('fetch.all.states') }}", // Laravel route to get all states
+            url: "{{ route('fetch.all.cities') }}",
             method: "GET",
-            success: function (data) {
-                console.log("States fetched successfully:", data);
-                $('#destinationList').empty(); // Clear previous data
-                if (data.length > 0) {
-                    $.each(data, function (index, state) {
-                        $('#destinationList').append(
-                            `<div class="list-group-item" style="cursor: pointer;" data-id="${state.id}">
-                                <i class="fa-solid fa-location-dot"></i> ${state.destination_name}
-                             </div>`
-                        );
+            success: function (response) {
+                console.log("Cities fetched successfully:", response);
+                const citiesList = $(inputField + 'List');
+                citiesList.empty();
+
+                if (response.status === 'success' && response.data && response.data.length > 0) {
+                    response.data.forEach(city => {
+                        const cityHTML = `
+                            <div class="list-group-item" style="cursor: pointer;" 
+                                 data-id="${city.CityId}">
+                                <i class="fa-solid fa-location-dot"></i> 
+                                ${city.CityName}
+                            </div>`;
+                        citiesList.append(cityHTML);
                     });
 
-                    // Add click handler for states
-                    $('#destinationList .list-group-item').on('click', function () {
-                        var selectedStateId = $(this).data('id');
-                        var selectedValue = $(this).text();
-                        $('#searchDestination').val(selectedValue); // Set selected state
-                        $('#destinationList').hide(); // Hide list after selection
-                        fetchCities(selectedStateId); // Fetch cities for the selected state
+                    // Event handler for city selection
+                    citiesList.find('.list-group-item').on('click', function () {
+                        const selectedId = $(this).data('id'); // Get CityId from data-id attribute
+                        const selectedValue = $(this).text().trim(); // Get City Name
+
+                        // Update the input field with the selected city name
+                        $(inputField).val(selectedValue).data('city-id', selectedId);
+
+                        // Set the source_code or destination_code hidden field
+                        if (inputField === '#busFromCity') {
+                            $('#busFromCode').val(selectedId); // Store CityId as source_code
+                        } else if (inputField === '#busToCity') {
+                            $('#busToCode').val(selectedId); // Store CityId as destination_code
+                        }
+
+                        citiesList.hide(); // Hide the dropdown list
                     });
                 } else {
-                    $('#destinationList').append(`<div class="list-group-item">No states found</div>`);
+                    citiesList.html('<div class="list-group-item">No cities found</div>');
                 }
             },
             error: function (xhr) {
-                console.error("Error fetching states:", xhr.responseText);
-                
-            },
+                console.error("Error fetching cities:", xhr.responseText);
+                $(inputField + 'List').html(
+                    '<div class="list-group-item text-danger">Failed to load cities</div>'
+                );
+            }
         });
     }
 
-    // Search functionality for destination input (state)
-    $('#searchDestination').on('keyup', function () {
-        var query = $(this).val();
-        if (query.length > 0) {
-            $.ajax({
-                url: "{{ route('search.destination') }}", // Laravel route to search destinations
-                method: 'GET',
-                data: { query: query },
-                success: function (data) {
-                    $('#destinationList').empty();
-                    if (data.length > 0) {
-                        $.each(data, function (index, destination) {
-                            $('#destinationList').append(
-                                `<div class="list-group-item" style="cursor: pointer;" data-id="${destination.id}">
-                                    <i class="fa-solid fa-location-dot"></i> ${destination.destination_name}
-                                 </div>`
-                            );
-                        });
+    // Input field focus event handlers
+    const cityInputs = ['#busFromCity', '#busToCity'];
 
-                        // Add click handler for destinations
-                        $('#destinationList .list-group-item').on('click', function () {
-                            var selectedStateId = $(this).data('id');
-                            var selectedValue = $(this).text();
-                            $('#searchDestination').val(selectedValue);
-                            $('#destinationList').hide();
-                            fetchCities(selectedStateId); // Fetch cities based on selected state
-                        });
-                    } else {
-                        $('#destinationList').append(`<div class="list-group-item">No results found</div>`);
-                    }
-                }
+    cityInputs.forEach(input => {
+        $(input).on('focus', function () {
+            fetchAllCities(input);
+            $(input + 'List').show();
+        });
+    });
+
+    // Hide dropdowns when clicking outside
+    $(document).on('click', function (e) {
+        const cityElements = cityInputs.map(input => `${input}, ${input}List`).join(', ');
+        if (!$(e.target).closest(cityElements).length) {
+            cityInputs.forEach(input => {
+                $(input + 'List').hide();
             });
-        } else {
-            $('#destinationList').empty(); // Clear the results if input is cleared
         }
     });
 
-
-    document.getElementById('busSearchForm').addEventListener('submit', function(event) {
-        event.preventDefault(); // Prevent form submission
-
-        const formData = new FormData(this);
-        const data = {};
-        formData.forEach((value, key) => {
-            data[key] = value;
-        });
-
-        console.log('Search Buses Request Data:', data);
-
-        fetch('{{ route('buses.search') }}', {
-            method: 'POST',
-            headers: {
-                'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(data)
-        })
-        .then(response => response.json())
-        .then(responseData => {
-            console.log('Search Buses Response:', responseData);
-            alert(responseData.message);
-        })
-        .catch(error => console.error('Error:', error));
-    });
-
-    
-    
-
-    $(document).ready(function () {
-    // Fetch cities for autocomplete
+    // Autocomplete functionality when typing in source and destination city inputs
     function fetchCities(input, list) {
         let city = $(input).val();
-        if (city.length > 2) {
+        if (city.length > 0) { 
             $.ajax({
                 url: "{{ route('autocomplete.cities') }}",
                 method: 'GET',
                 data: { query: city },
-                success: function(response) {
+                success: function (response) {
                     $(list).empty().show();
-                    response.forEach(city => {
-                        $(list).append(
-                            `<div class="city-option" data-code="${city.code}">${city.city_name}</div>`
-                        );
-                    });
+                    if (response.length > 0) {
+                        response.forEach(city => {
+                            $(list).append(
+                                `<div class="city-option" data-cityid="${city.CityId}">${city.CityName}</div>`
+                            );
+                        });
+                    } else {
+                        $(list).append(`<div class="no-results">No cities found</div>`);
+                    }
                 },
-                error: function(xhr) {
+                error: function (xhr) {
                     console.error("Error fetching cities:", xhr.responseText);
                 }
             });
+        } else {
+            $(list).hide();
         }
     }
 
     // Handle input for source city
-    $('#busFromCity'). on('input', function() {
+    $('#busFromCity').on('input', function () {
         fetchCities(this, '#busFromCityList');
     });
 
     // Handle input for destination city
-    $('#busToCity').on('input', function() {
+    $('#busToCity').on('input', function () {
         fetchCities(this, '#busToCityList');
     });
 
     // Select city from the list
-    $(document).on('click', '.city-option', function() {
+    $(document).on('click', '.city-option', function () {
         const cityName = $(this).text();
-        const cityCode = $(this).data('code');
+        const cityId = $(this).data('cityid'); 
         if ($(this).closest('#busFromCityList').length) {
             $('#busFromCity').val(cityName);
-            $('#busFromCode').val(cityCode); // Set the hidden input for source city
+            $('#busFromCode').val(cityId); 
             $('#busFromCityList').hide();
         } else if ($(this).closest('#busToCityList').length) {
-            $('#busToCity').val(cityName);
-            $('#busToCode').val(cityCode); // Set the hidden input for destination city
+            $('#busToCity').val(cityName);  // Corrected here to use 'cityName'
+            $('#busToCode').val(cityId); 
             $('#busToCityList').hide();
         }
     });
@@ -791,59 +649,71 @@ $(document).on('click', function (e) {
             $('#busFromCityList, #busToCityList').hide();
         }
     });
-});
 
-
-
-
-
-
-
-
-    // Fetch cities based on selected state
-    function fetchCities(stateId) {
-        $.ajax({
-            url: "{{ route('search.cities') }}", // Laravel route to get cities by state
-            method: 'GET',
-            data: { state_id: stateId },
-            success: function (data) {
-                $('#cityList').empty(); // Clear previous data
-                if (data.length > 0) {
-                    $.each(data, function (index, city) {
-                        $('#cityList').append(
-                            `<div class="list-group-item">
-                                <i class="fa-solid fa-location-dot"></i> ${city.city_name}
-                             </div>`
-                        );
-                    });
-
-                    // Click event for selecting city
-                    $('#cityList .list-group-item').on('click', function () {
-                        var selectedCity = $(this).text();
-                        $('#searchCity').val(selectedCity);
-                        $('#cityList').empty(); // Clear city list after selection
-                    });
-                } else {
-                    $('#cityList').append(`<div class="list-group-item">No results found</div>`);
-                }
-            }
-        });
-    }
-
-    // Show state list when the input is focused
-    $('#searchDestination').on('focus', function () {
-        fetchAllStates();
-        $('#destinationList').show();
-    });
-
-    // Hide state/city list if clicked outside
-    $(document).on('click', function (e) {
-        if (!$(e.target).closest('#searchDestination, #destinationList, #searchCity, #cityList').length) {
-            $('#destinationList').hide();
-            $('#cityList').hide();
+   // Hide dropdowns when pressing 'Esc' key
+   $(document).on('keydown', function (e) {
+        if (e.key === "Escape") {
+            $('#busFromCityList, #busToCityList').hide();
         }
     });
+
+    // Form submission without page refresh
+    $('.datepicker').datepicker({
+        format: 'yyyy-mm-dd', // Format: 2024-12-17
+        autoclose: true,
+        startDate: 'today',
+    todayHighlight: true  // Highlights today's date
+
+    }).datepicker('setDate', new Date()); // Automatically set today's date
+
+    // Ensure the date is in the correct format before submitting the form
+    $('#busSearchForm').on('submit', function (event) {
+        event.preventDefault(); // Prevents default form submission
+
+        // Ensure the date is in 'yyyy-mm-dd' format
+        let formattedDate = $('#busJourneyDate').val();
+    const dateParts = formattedDate.split('/'); // Handles MM/DD/YYYY if that's returned
+    if (dateParts.length === 3) {
+        formattedDate = `${dateParts[2]}-${dateParts[0].padStart(2, '0')}-${dateParts[1].padStart(2, '0')}`;
+    }
+        // Collect form data
+        const data = {
+            source_city: $('#busFromCity').val(),
+            source_code: $('#busFromCode').val(),
+            destination_city: $('#busToCity').val(),
+            destination_code: $('#busToCode').val(),
+            depart_date: formattedDate // Use the formatted date
+        };
+
+        console.log('Search Buses Request Data:', data);
+
+        // Send the AJAX request
+        fetch('{{ route('buses.search') }}', {
+    method: 'POST',
+    headers: {
+        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+        'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(data)
+})
+.then(response => response.json())
+.then(responseData => {
+    console.log('API Response:', responseData); // <-- Add this line
+    if (responseData.status) {
+        sessionStorage.setItem('busSearchResults', JSON.stringify({
+            buses: responseData.data,
+            searchParams: data,
+            traceId: responseData.traceId
+        }));
+        window.location.href = "{{ route('bus') }}";
+    } else {
+        alert(responseData.message);
+    }
+})
+.catch(error => console.error('Error:', error));
+    });
   });
+
 </script>
 
 @endsection

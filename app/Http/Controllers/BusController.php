@@ -1,10 +1,13 @@
 <?php
 
+
 namespace App\Http\Controllers;
 
-use App\Models\City;
 use App\Services\BusApiService;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
+use Carbon\Carbon;
 
 class BusController extends Controller
 {
@@ -15,75 +18,117 @@ class BusController extends Controller
         $this->busApiService = $busApiService;
     }
 
-    /**
-     * Fetch all cities from the database.
-     */
-    // public function fetchAllCities()
-    // {
-    //     try {
-    //         $cities = City::all();
-    //         return response()->json($cities);
-    //     } catch (\Exception $e) {
-    //         return response()->json([
-    //             'status' => 'error',
-    //             'message' => 'Failed to fetch cities',
-    //             'error' => $e->getMessage()
-    //         ], 500);
-    //     }
-    // }
-
-    /**
-     * Autocomplete search for cities.
-     */
-    public function autocomplete(Request $request)
+    public function index()
     {
-        $request->validate([
-            'query' => 'required|string|min:2'
-        ]);
-
-        $searchQuery = $request->input('query');
-        $cities = City::where('city_name', 'LIKE', '%' . $searchQuery . '%')
-                    ->limit(10)
-                    ->get(['id', 'city_name', 'code']); // Fetch city name and city code
-
-        return response()->json($cities);
+        return view('bus');
     }
 
-    /**
-     * Bus search using source and destination city names and codes.
-     */
+    public function showSeatLayout(Request $request)
+    {
+        return view('seat-layout');
+    }
+
     public function searchBuses(Request $request)
     {
-        $validatedData = $request->validate([
+        $request->validate([
             'source_city' => 'required|string',
-            'source_code' => 'required|integer', // Add validation for source code
+            'source_code' => 'required|string',
             'destination_city' => 'required|string',
-            'destination_code' => 'required|integer', // Add validation for destination code
-            'depart_date' => 'required|date',
+            'destination_code' => 'required|string',
+            'depart_date' => 'required|date_format:Y-m-d',
         ]);
 
-        $response = $this->busApiService->searchBuses(
-            $validatedData['source_city'], 
-            $validatedData['source_code'], 
-            $validatedData['destination_city'], 
-            $validatedData['destination_code'], 
-            $validatedData['depart_date']
-        );
+        $payload = json_encode([
+            "ClientId" => "180133",
+            "UserName" => "MakeMy91",
+            "Password" => "MakeMy@910",
+            'source_city' => trim($request->source_city),
+            'source_code' => (int) trim($request->source_code),
+            'destination_city' => trim($request->destination_city),
+            'destination_code' => (int) trim($request->destination_code),
+            'depart_date' => Carbon::createFromFormat('Y-m-d', $request->depart_date)->format('Y-m-d'),
+        ], JSON_UNESCAPED_SLASHES);
 
-        // Check for API errors
-        if (isset($response['Error']) && $response['Error']['ErrorCode'] != 0) {
-            return back()->withErrors([
-                'error' => $response['Error']['ErrorMessage'] ?? 'An unknown error occurred'
+        try {
+            $response = Http::withHeaders([
+                'Content-Type' => 'application/json',
+                'Api-Token' => 'MakeMy@910@23',
+            ])->withBody($payload, 'application/json')
+              ->post('https://bus.srdvtest.com/v5/rest/Search');
+
+            $data = $response->json();
+
+            if (isset($data['Error']) && $data['Error']['ErrorCode'] !== 0) {
+                return response()->json([
+                    'status' => false,
+                    'message' => $data['Error']['ErrorMessage'] ?? 'An unknown error occurred'
+                ]);
+            }
+
+            $traceId = $data['Result']['TraceId'] ?? $data['TraceId'] ?? null;
+
+            if (!empty($data['Result']['BusResults'])) {
+                return response()->json([
+                    'status' => true,
+                    'traceId' => $traceId,
+                    'data' => $data['Result']['BusResults'],
+                ]);
+            }
+
+            return response()->json([
+                'status' => false,
+                'message' => 'No buses found for the selected route and date.'
             ]);
-        }
 
-        // Check if bus results exist
-        if (!isset($response['Result']['BusResults']) || empty($response['Result']['BusResults'])) {
-            return back()->with('message', 'No buses found for the selected route and date.');
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => false,
+                'message' => 'An error occurred while searching for buses.'
+            ], 500);
         }
+    }
 
-        return view('bus', ['buses' => $response['Result']['BusResults']]);
+    public function getSeatLayout(Request $request)
+    {
+        $request->validate([
+            'TraceId' => 'required|string',
+            'ResultIndex' => 'required|string',
+        ]);
+
+        $payload = json_encode([
+            "ClientId" => "180133",
+            "UserName" => "MakeMy91",
+            "Password" => "MakeMy@910",
+            "TraceId" => $request->TraceId,
+            "ResultIndex" => $request->ResultIndex,
+        ], JSON_UNESCAPED_SLASHES);
+
+        try {
+            $response = Http::withHeaders([
+                'Content-Type' => 'application/json',
+                'Api-Token' => 'MakeMy@910@23',
+            ])->withBody($payload, 'application/json')
+              ->post('https://bus.srdvtest.com/v5/rest/GetSeatLayOut');
+
+            $data = $response->json();
+
+            if (isset($data['Error']) && $data['Error']['ErrorCode'] !== 0) {
+                return response()->json([
+                    'status' => false,
+                    'message' => $data['Error']['ErrorMessage'] ?? 'Error fetching seat layout',
+                ]);
+            }
+
+            return response()->json([
+                'status' => true,
+                'data' => $data['Result'],
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => false,
+                'message' => 'An error occurred while fetching seat layout.',
+            ], 500);
+        }
     }
 }
-
-
