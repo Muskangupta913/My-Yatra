@@ -197,6 +197,7 @@ document.addEventListener('DOMContentLoaded', function () {
     // Update the displayed price range value
     document.getElementById('priceRange').addEventListener('input', function (e) {
         document.getElementById('priceRangeValue').textContent = `₹0 - ₹${e.target.value}`;
+
     });
 
     // Populate the filters based on the bus data

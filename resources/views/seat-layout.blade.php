@@ -501,7 +501,7 @@ document.getElementById('payNowButton').addEventListener('click', function() {
             const bookingDetails = data.data;
             const bookingPageUrl = `/booking?TraceId=${bookingDetails.TraceId}&BusBookingStatus=${encodeURIComponent(bookingDetails.BusBookingStatus)}&InvoiceAmount=${bookingDetails.InvoiceAmount}&BusId=${bookingDetails.BusId}&TicketNo=${bookingDetails.TicketNo}&TravelOperatorPNR=${bookingDetails.TravelOperatorPNR}`;
 
-            // Redirect to the booking page
+            // Redirect to the booking page:
             window.location.href = bookingPageUrl;
             // You can redirect to payment or booking confirmation
         } else {
