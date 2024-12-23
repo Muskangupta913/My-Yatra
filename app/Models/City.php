@@ -46,6 +46,10 @@ class City extends Model
     /**
      * Fetch city list from API and store new cities in the local database
      */
+    public function destination()
+    {
+        return $this->belongsTo(State::class, 'state_id', 'id');
+    }
     public static function fetchAndSaveCitiesFromApi(): Collection
     {
         try {

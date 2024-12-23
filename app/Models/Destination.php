@@ -33,10 +33,10 @@ class Destination extends Model
         'status'
     ];
 
-    public function cities()
-{
-    return $this->hasMany(City::class);
-}
+//     public function cities()
+// {
+//     return $this->hasMany(City::class);
+// }
 
 
    

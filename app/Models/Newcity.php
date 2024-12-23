@@ -17,3 +17,4 @@ class Newcity extends Model
     // If you don't need timestamps (created_at, updated_at), set this to false
     public $timestamps = true;
 }
+
