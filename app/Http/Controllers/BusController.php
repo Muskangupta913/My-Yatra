@@ -23,6 +23,10 @@ class BusController extends Controller
         return view('bus');
     }
 
+
+    public function bookpage (){
+        return view('bookSeats');
+    }
     public function showSeatLayout(Request $request)
     {
         return view('seat-layout');
@@ -131,4 +135,200 @@ class BusController extends Controller
             ], 500);
         }
     }
+
+
+
+    public function getBoardingPoints(Request $request)
+{
+    // Validate incoming request
+    $request->validate([
+        'TraceId' => 'required|string',
+        'ResultIndex' => 'required|string'
+    ]);
+
+    // Full payload with all required parameters
+    $payload = [
+        'EndUserIp' => '1.1.1.1',
+        'ClientId' => '180133',
+        'UserName' => 'MakeMy91',
+        'Password' => 'MakeMy@910',
+        'TraceId' => $request->TraceId,
+        'ResultIndex' => $request->ResultIndex
+    ];
+
+    try {
+        // Log the request payload
+        Log::info('Boarding Points API Request:', ['payload' => $payload]);
+
+        // Make the API call
+        $response = Http::withHeaders([
+            'Content-Type' => 'application/json',
+            'Api-Token' => 'MakeMy@910@23'
+        ])->post('https://bus.srdvtest.com/v5/rest/GetBoardingPointDetails', $payload);
+
+        $data = $response->json();
+
+        // Log the response
+        Log::info('Boarding Points API Response:', ['response' => $data]);
+
+        // Check for API-specific errors
+        if (isset($data['Error']) && $data['Error']['ErrorCode'] !== "0") {
+            return response()->json([
+                'status' => 'error',
+                'message' => $data['Error']['ErrorMessage']
+            ], 400);
+        }
+
+        // If successful, return the formatted response
+        return response()->json([
+            'status' => 'success',
+            'GetBusRouteDetailResult' => $data
+        ]);
+
+    } catch (\Exception $e) {
+        Log::error('Error in getBoardingPoints:', [
+            'message' => $e->getMessage(),
+            'trace' => $e->getTraceAsString()
+        ]);
+
+        return response()->json([
+            'status' => 'error',
+            'message' => 'An error occurred while fetching boarding points',
+            'error' => $e->getMessage()
+        ], 500);
+    }
+}
+
+
+public function blockSeats(Request $request)
+{
+    $request->validate([
+        'ResultIndex' => 'required|string',
+        'TraceId' => 'required|string',
+        'BoardingPointId' => 'required',
+        'DroppingPointId' => 'required',
+        'RefID' => 'required',
+        'Passenger' => 'required|array',
+        'Passenger.*.FirstName' => 'required|string',
+        'Passenger.*.LastName' => 'required|string',
+        'Passenger.*.Email' => 'required|email',
+        'Passenger.*.Phoneno' => 'required',
+        'Passenger.*.Gender' => 'required',
+        'Passenger.*.Age' => 'required',
+        'Passenger.*.Title' => 'required|string',
+        'Passenger.*.Address' => 'required|string',
+       'Passenger.*.Seat' => 'required|array',
+'Passenger.*.Seat.SeatName' => 'required|string',
+
+'Passenger.*.Seat.ColumnNo' => 'nullable|integer',
+'Passenger.*.Seat.RowNo' => 'nullable|integer',
+'Passenger.*.Seat.Price' => 'required|array',
+    ]);
+
+    $payload = array_merge([
+        'ClientId' => '180133',
+        'UserName' => 'MakeMy91',
+        'Password' => 'MakeMy@910',
+    ], $request->all());
+
+    try {
+        Log::info('Block Seats Request Payload:', ['payload' => $payload]);
+
+        $response = Http::withHeaders([
+            'Content-Type' => 'application/json',
+            'Api-Token' => 'MakeMy@910@23',
+        ])->post('https://bus.srdvtest.com/v5/rest/Block', $payload);
+
+        $data = $response->json();
+        Log::info('Block Seats API Response:', ['response' => $data]);
+
+        if (isset($data['Error']) && $data['Error']['ErrorCode'] !== 0) {
+            return response()->json([
+                'status' => 'error',
+                'message' => $data['Error']['ErrorMessage'] ?? 'Error blocking seats'
+            ], 400);
+        }
+
+        return response()->json([
+            'status' => 'success',
+            'data' => $data['Result']
+        ]);
+
+    } catch (\Exception $e) {
+        Log::error('Error in blockSeats:', [
+            'message' => $e->getMessage(),
+            'trace' => $e->getTraceAsString()
+        ]);
+
+        return response()->json([
+            'status' => 'error',
+            'message' => 'An error occurred while blocking seats',
+            'error' => $e->getMessage()
+        ], 500);
+    }
+}
+
+public function bookBus(Request $request)
+    {
+        $request->validate([
+            'ResultIndex' => 'required|string',
+            'TraceId' => 'required|string',
+            'BoardingPointId' => 'required|integer|min:1', 
+            'DroppingPointId' => 'required|integer|min:1', 
+            'RefID' => 'required',
+            'Passenger' => 'required|array',
+            'Passenger.*.LeadPassenger' => 'required|boolean',
+            'Passenger.*.Title' => 'required|string',
+            'Passenger.*.FirstName' => 'required|string',
+            'Passenger.*.LastName' => 'required|string',
+            'Passenger.*.Email' => 'required|email',
+            'Passenger.*.Phoneno' => 'required',
+            'Passenger.*.Gender' => 'required',
+            'Passenger.*.Age' => 'required',
+            'Passenger.*.Address' => 'required|string',
+            'Passenger.*.Seat' => 'required|array'
+        ]);
+
+        $payload = array_merge([
+            'ClientId' => '180133',
+            'UserName' => 'MakeMy91',
+            'Password' => 'MakeMy@910',
+        ], $request->all());
+
+        try {
+            $response = Http::withHeaders([
+                'Content-Type' => 'application/json',
+                'Api-Token' => 'MakeMy@910@23',
+            ])->post('https://bus.srdvtest.com/v5/rest/Book', $payload);
+
+            $data = $response->json();
+            Log::info('Book API Response:', ['response' => $data]);
+
+            if (isset($data['Error']) && $data['Error']['ErrorCode'] !== 0) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => $data['Error']['ErrorMessage'] ?? 'Error booking bus'
+                ], 400);
+            }
+
+            return response()->json([
+                'status' => 'success',
+                'data' => $data['Result']
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('Error in bookBus:', [
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            return response()->json([
+                'status' => 'error',
+                'message' => 'An error occurred while booking the bus',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+
 }

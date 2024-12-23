@@ -701,7 +701,7 @@
     console.log('API Response:', responseData); // <-- Add this line
     if (responseData.status) {
         sessionStorage.setItem('busSearchResults', JSON.stringify({
-            buses: responseData.data,
+            buses: responseData.data, 
             searchParams: data,
             traceId: responseData.traceId
         }));

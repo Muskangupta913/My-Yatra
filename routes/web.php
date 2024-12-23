@@ -371,6 +371,11 @@ Route::post('/buses/search', [BusController::class, 'searchBuses'])->name('buses
 Route::get('/bus', [BusController::class, 'index'])->name('bus');
 Route::post('/getSeatLayout', [BusController::class, 'getSeatLayout'])->name('getSeatLayout');
 Route::get('/seat-layout', [BusController::class, 'showSeatLayout'])->name('bus.seatLayout');
+Route::post('/boarding-points', [BusController::class, 'getBoardingPoints']);
+Route::post('/block-seats', [BusController::class, 'blockSeats']);
+Route::post('/bookSeats', [BusController::class, 'bookBus']);
+Route::get('/booking', [BusController::class, 'bookpage']);  // Define a page to show booking success
+
 
 
 
