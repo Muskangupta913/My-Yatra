@@ -375,6 +375,22 @@ Route::post('/boarding-points', [BusController::class, 'getBoardingPoints']);
 Route::post('/block-seats', [BusController::class, 'blockSeats']);
 Route::post('/bookSeats', [BusController::class, 'bookBus']);
 Route::get('/booking', [BusController::class, 'bookpage']);  // Define a page to show booking success
+Route::post('/cancelBus', [BusController::class, 'cancelBus']);
+Route::get('/balance', [BusController::class, 'fetchBalance']);
+Route::post('/handlebalance', [BusController::class, 'handlePayment']);
+
+
+
+
+
+
+//Hotel Routes
+
+
+Route::post('/search-hotel', [HotelController::class, 'search']);
+Route::get('/search-result', [HotelController::class, 'showSearchResults']);
+Route::post('/hotel-details', [HotelController::class, 'hoteldetails']);
+
 
 
 

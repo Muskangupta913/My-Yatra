@@ -515,7 +515,7 @@ document.getElementById('payNowButton').addEventListener('click', function() {
 
 </script>
 <style>
-.container { max-width: 800px; }
+container { max-width: 800px; }
 .step-navigation { display: block; }
 .step { flex: 1; text-align: center; padding: 10px; border: 1px solid #007bff; border-radius: 5px; cursor: pointer; }
 .step.active { background-color: #007bff; color: white; }
