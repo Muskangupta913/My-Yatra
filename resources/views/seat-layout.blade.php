@@ -26,7 +26,7 @@
 
   <!-- Pickup and Dropping Points Section -->
   <div class="section-container mb-4" id="pickupDroppingContainer">
-    <h3 class="text-center"> Seclect Pickup and Dropping Points</h3>
+    <h3 class="text-center"> Select Pickup and Dropping Points</h3>
     <div class="pickup-dropping-container">
       <div id="pickupPointSection" class="pickup-point">
         <h5>Pickup Points</h5>
@@ -198,13 +198,10 @@ function fetchSeatLayout() {
         showError(error.message);
     });
 }
-<<<<<<< HEAD
  // Pass the correct image URLs from Laravel to JavaScript
  const availableSeatImage = "{{ asset('assets/seat.png') }}";
     const bookedSeatImage = "{{ asset('assets/seat.png') }}";
-=======
 
->>>>>>> 878619d40941005aca4d1b3bcd0232564d7c9a63
 function renderSeatLayout(seatDetails) {
     const seatLayoutContainer = document.getElementById('seatLayout');
     if (!seatDetails || !Array.isArray(seatDetails) || seatDetails.length === 0) {
@@ -213,50 +210,9 @@ function renderSeatLayout(seatDetails) {
     }
 
     let layoutHTML = '<div class="bus-seats">';
-    
-    // Add a visual representation of the bus front
-    layoutHTML += `
-        <div class="bus-front mb-4">
-            <div class="text-center p-2 bg-secondary text-white rounded">
-                <small>Bus Front</small>
-            </div>
-        </div>
-    `;
-
-<<<<<<< HEAD
-        row.forEach(seat => {
-            const seatClass = seat.SeatStatus ? 'seat-available' : 'seat-booked';
-            const seatName = seat.SeatName || 'N/A';
-            const seatPrice = seat.Price?.PublishedPrice || 0;
-            const seatStatusText = seat.SeatStatus ? 'Available' : 'Booked';
-            const seatImage = seat.SeatStatus ? availableSeatImage : bookedSeatImage; // Replace with your actual image URLs
-
-            layoutHTML += `
-                <div class="seat-container">
-                    <div 
-                        class="seat ${seatClass}" 
-                        onclick='selectSeat(this, ${JSON.stringify(seat)})'
-                        data-seat='${JSON.stringify(seat)}'>
-                          <div class="seat-image-container">
-                <span class="seat-number">${seatName}</span>  <!-- Seat Number -->
-                <img src="${seatImage}" alt="Seat Image" class="seat-image">  <!-- Seat Image -->
-            </div>
-                    </div>
-
-                    <!-- Seat status and price -->
-                    <div class="seat-info">
-                        <small class="seat-status">${seatStatusText}</small>
-                        <small class="seat-price">₹${seatPrice}</small>
-                    </div>
-                </div>
-            `;
-        });
-
-        layoutHTML += '</div>'; // Close row
-=======
     seatDetails.forEach((row, rowIndex) => {
         if (Array.isArray(row)) {
-            layoutHTML += '<div class="row">';
+            layoutHTML += '<div class="row">'; 
             
             row.forEach(seat => {
                 if (seat && typeof seat === 'object') {
@@ -264,6 +220,7 @@ function renderSeatLayout(seatDetails) {
                     const seatName = seat.SeatName || 'N/A';
                     const seatPrice = seat.Price?.PublishedPriceRoundedOff || 0;
                     const seatStatusText = seat.SeatStatus ? 'Available' : 'Booked';
+                    const seatImage = seat.SeatStatus ? availableSeatImage : bookedSeatImage; // Replace with your actual image URLs
                     const ladiesSeatClass = seat.IsLadiesSeat ? 'ladies-seat' : '';
                     
                     layoutHTML += `
@@ -272,18 +229,23 @@ function renderSeatLayout(seatDetails) {
                                 class="seat ${seatClass} ${ladiesSeatClass}"
                                 data-seat-index="${seat.SeatIndex}"
                                 onclick="handleSeatClick(this, ${JSON.stringify(seat).replace(/"/g, '&quot;')})">
-                                <span class="seat-number">${seatName}</span>
-                            </div>
-                            <small class="seat-status">${seatStatusText}</small>
-                            <small class="seat-price">₹${seatPrice}</small>
-                        </div>
+                                <div class="seat-image-container">
+                <span class="seat-number">${seatName}</span>  <!-- Seat Number -->
+                <img src="${seatImage}" alt="Seat Image" class="seat-image">  <!-- Seat Image -->
+            </div>
+                    </div>
+                            <!-- Seat status and price -->
+                    <div class="seat-info">
+                        <small class="seat-status">${seatStatusText}</small>
+                        <small class="seat-price">₹${seatPrice}</small>
+                    </div>
+                </div>
                     `;
                 }
             });
 
             layoutHTML += '</div>';
         }
->>>>>>> 878619d40941005aca4d1b3bcd0232564d7c9a63
     });
 
     layoutHTML += '</div>';
@@ -400,49 +362,6 @@ function renderPickupPoints(points) {
         return;
     }
 
-<<<<<<< HEAD
-    // Render each pickup point as a separate div
-    pickupPoints.forEach(point => {
-      const formattedDate = formatDate(point.CityPointTime);
-      const formattedTime = formatTime(point.CityPointTime);  // Format the time
-        container.innerHTML += `
-             <div class="pickup-point-item p-3 mb-2 d-flex flex-column" data-point-id="${point.CityPointIndex}" style="position: relative;">
-             <!-- Time in the top right corner -->
-        <p class="pickup-time" style="position: absolute; top: 5px; right: 10px; font-size: 12px; color: black; margin-top: 5px;">&#x1F552; ${formatTime(point.CityPointTime)}</p> <!-- Time 🕒 with margin-top for space -->
-        <h6 style="margin-top: 20px;margin-bottom: 10px;">${point.CityPointName}</h6> <!-- Added margin-bottom to create space -->
-        <!-- Pickup details in a flex layout -->
-        <div class="d-flex justify-content-between align-items-start" style="flex-wrap: wrap;">
-            <p><strong>&#x1F4CD;Location:</strong> ${point.CityPointLocation}</p> <!-- Location 📍 -->
-            <p><strong>&#x1F3E0;Address:</strong> ${point.CityPointAddress}</p> <!-- Address 🏠 -->
-            <p><strong>&#x1F3DB;Landmark:</strong> ${point.CityPointLandmark}</p> <!-- Landmark 🏛️ -->
-            <p><strong>&#x1F4DE;Contact:</strong> ${point.CityPointContactNumber || 'N/A'}</p> <!-- Contact 📞 -->
-            <!-- Select Button -->
-            <button class="btn btn-success btn-sm mt-2" 
-                onclick="selectPickupPoint(${point.CityPointIndex}, '${point.CityPointName}')">
-                ✅ Select
-            </button>
-        </div>
-    </div>`;
-    });
-}
-
-function renderDroppingPoints(droppingPoints) {
-    const container = document.getElementById('droppingPointsContainer');
-    // Clear the container to avoid nesting issues
-    container.innerHTML = '';
-
-    // Render each dropping point as a separate div
-    droppingPoints.forEach(point => {
-      const formattedTime = formatTime(point.CityPointTime);  // Format the time
-        container.innerHTML += `
-            <div class="dropping-point-item p-3 mb-2" data-point-id="${point.CityPointIndex}">
-                <h6>${point.CityPointName}</h6>
-                <p>🕒 Time: ${formattedTime}</p> <!-- Show the formatted time -->
-                <p>📍 Location: ${point.CityPointLocation}</p>
-                <button class="btn btn-success btn-sm" 
-                    onclick="selectDroppingPoint(${point.CityPointIndex}, '${point.CityPointName}')">
-                    ✅ Select
-=======
     container.innerHTML = points.map((point, index) => `
         <div class="pickup-point-item" data-point-id="${index}">
             <div class="position-relative p-3">
@@ -466,7 +385,6 @@ function renderDroppingPoints(droppingPoints) {
                 <button class="btn btn-outline-success btn-sm mt-3 select-btn" 
                     onclick="selectPickupPoint(${index}, '${point.name.replace(/'/g, "\\'")}')">
                     <i class="fas fa-check-circle"></i> Select Point
->>>>>>> 878619d40941005aca4d1b3bcd0232564d7c9a63
                 </button>
             </div>
         </div>

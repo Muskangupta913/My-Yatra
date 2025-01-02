@@ -793,10 +793,7 @@
             searchParams: data,
             traceId: responseData.traceId
         }));
-        window.location.href = "{{ route('bus') }}?source_city=" + encodeURIComponent(data.source_city) +
-    "&destination_city=" + encodeURIComponent(data.destination_city) +
-    "&depart_date=" + data.depart_date +
-    "&trace_id=" + responseData.traceId;
+        window.location.href = "{{ route('bus') }}";
     } else {
         alert(responseData.message);
     }
