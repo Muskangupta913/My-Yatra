@@ -35,10 +35,49 @@
         </div>
       </div>
 
+<<<<<<< HEAD
       <div id="droppingPointSection" class="dropping-point">
         <h5>Dropping Points</h5>
         <div id="droppingPointsContainer" class="dropping-points">
           <p>Loading dropping points...</p>
+=======
+    <!-- Right Section: Pickup and Dropping Points -->
+    <div class="col-12 col-md-4" id="pickupDroppingContainer">
+    <div class="section-container">
+        <h5>Select Pickup & Dropping Point</h5>
+        <div class="d-flex flex-column flex-sm-row justify-content-between">
+            <!-- Pickup Points -->
+            <div id="pickupPointSection" class="pickup-point mb-3 mb-sm-0">
+                <h6>Pickup Point</h6>
+                <div id="pickupPointsContainer" class="pickup-points text-center">
+                    <p>Loading pickup points...</p>
+                </div>
+            </div>
+
+            <!-- Dropping Points -->
+            <div id="droppingPointSection" class="dropping-point">
+                <h6>Dropping Point</h6>
+                <div id="droppingPointsContainer" class="dropping-points text-center">
+                    <p>Loading dropping points...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+            <!-- Selected Seat Info Section -->
+            <div id="selectedSeatInfo" class="mt-2 d-none">
+                <h4>Selected Seat</h4>
+                <p id="selectedSeatDetails"></p>
+            </div>
+
+            <!-- Continue Button Section -->
+            <div class="mt-2">
+                <button class="btn btn-success w-100" id="continueButton">Continue</button>
+                <a href="#" class="btn btn-success w-100 mt-2 d-none" id="review">Review Details</a>
+            </div>
+>>>>>>> 1c99ad61eb87dcf5411defc42de8cb3109d2797c
         </div>
       </div>
     </div>
@@ -109,7 +148,8 @@
             <label for="address">Address</label>
             <textarea class="form-control" id="address" name="Address" rows="3" required></textarea>
           </div>
-          <button type="submit" class="btn btn-success w-100 mt-4">Block Seat</button>
+          <button type="submit" id="blockSeatButton" class="btn btn-success w-100 mt-4">Block Seat</button>
+
         </form>
       </div>
     </div>
@@ -379,8 +419,14 @@ function selectSeat(element, seatData) {
     selectedSeatDetails = seatData;
     selectedSeat = seatData.SeatName;
 
+<<<<<<< HEAD
     document.getElementById('selectedSeatInfo').classList.remove('d-none');
     document.getElementById('selectedSeatDetails').innerText = 
+=======
+    const selectedSeatInfo = document.getElementById('selectedSeatInfo');
+    selectedSeatInfo.classList.remove('d-none');
+    selectedSeatInfo.querySelector('#selectedSeatDetails').innerText = 
+>>>>>>> 1c99ad61eb87dcf5411defc42de8cb3109d2797c
         `Seat: ${seatData.SeatName}, Price: ₹${seatData.Price.PublishedPrice}`;
 
     // Show the Continue button
@@ -548,81 +594,54 @@ document.getElementById('passengerDetailsForm').addEventListener('submit', funct
 
 
 
+
+
+// Function to handle the selection of pickup point
 let selectedBoardingPointName = ''; // Store selected boarding point name
 let selectedDroppingPointName = ''; // Store selected dropping point name
 
 // Function to handle the selection of pickup point
 function selectPickupPoint(pointId, pointName) {
-    // Remove previous selection
-    document.querySelectorAll('.pickup-point-item').forEach(item => {
-        item.classList.remove('selected');
-    });
-    
-    // Add selection to current point
-    const selectedPoint = document.querySelector(`.pickup-point-item[data-point-id="${pointId}"]`);
-    if (selectedPoint) {
-        selectedPoint.classList.add('selected');
-    }
-    
-    selectedBoardingPointId = pointId;
-    selectedBoardingPointName = pointName;
-    
-    // Show success toast instead of alert
-    showToast(`Pickup point selected: ${pointName}`, 'success');
+    selectedBoardingPointId = pointId; // Store the selected boarding point ID globally
+    selectedBoardingPointName = pointName; // Store the selected boarding point name globally
+
+    alert(`Pickup Point Selected: ${pointName}`);
+    console.log(`Selected Pickup: ID=${pointId}, Name=${pointName}`);
+
+    // Optional: Highlight the selected pickup point
+    document.querySelectorAll('.pickup-point').forEach(point => point.classList.remove('selected'));
+    document.querySelector(`.pickup-point[data-point-id="${pointId}"]`).classList.add('selected');
 }
 
+// Function to handle the selection of dropping point
 function selectDroppingPoint(pointId, pointName) {
-    // Remove previous selection
-    document.querySelectorAll('.dropping-point-item').forEach(item => {
-        item.classList.remove('selected');
-    });
-    
-    // Add selection to current point
-    const selectedPoint = document.querySelector(`.dropping-point-item[data-point-id="${pointId}"]`);
-    if (selectedPoint) {
-        selectedPoint.classList.add('selected');
-    }
-    
-    selectedDroppingPointId = pointId;
-    selectedDroppingPointName = pointName;
-    
-    // Show success toast instead of alert
-    showToast(`Dropping point selected: ${pointName}`, 'success');
+    selectedDroppingPointId = pointId; // Store the selected dropping point ID globally
+    selectedDroppingPointName = pointName; // Store the selected dropping point name globally
+
+    alert(`Dropping Point Selected: ${pointName}`);
+    console.log(`Selected Dropping: ID=${pointId}, Name=${pointName}`);
+
+    // Optional: Highlight the selected dropping point
+    document.querySelectorAll('.dropping-point').forEach(point => point.classList.remove('selected'));
+    document.querySelector(`.dropping-point[data-point-id="${pointId}"]`).classList.add('selected');
 }
 
-function showToast(message, type = 'info') {
-    // You can use any toast library here, or create a simple one
-    // Example using Bootstrap toast
-    const toastHTML = `
-        <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 11">
-            <div class="toast align-items-center text-white bg-${type}" role="alert" aria-live="assertive" aria-atomic="true">
-                <div class="d-flex">
-                    <div class="toast-body">
-                        ${message}
-                    </div>
-                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
-                </div>
-            </div>
-        </div>
-    `;
-    
-    document.body.insertAdjacentHTML('beforeend', toastHTML);
-    const toastElement = document.querySelector('.toast:last-child');
-    const toast = new bootstrap.Toast(toastElement);
-    toast.show();
-    
-    // Remove toast element after it's hidden
-    toastElement.addEventListener('hidden.bs.toast', () => {
-        toastElement.remove();
-    });
-}
+
+
+
+
 
 //block seat api
 function blockSeat(passengerData) {
-    if (!selectedBoardingPointId || !selectedDroppingPointId) {
+  console.log("Boarding Point ID:", selectedBoardingPointId);
+ console.log("Dropping Point ID:", selectedDroppingPointId);
+
+
+    if (selectedBoardingPointId === undefined || selectedDroppingPointId === undefined) {
         alert('Please select both boarding and dropping points before proceeding.');
         return;
     }
+
 
     const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
     const urlParams = new URLSearchParams(window.location.search);
@@ -676,7 +695,6 @@ function blockSeat(passengerData) {
         DroppingPointId: selectedDroppingPointId,
         BoardingPointName: selectedBoardingPointName, // Include selected boarding point name in the payload
         DroppingPointName: selectedDroppingPointName, // Include selected dropping point name in the payload
-       
         RefID: "1",
         Passenger: [passengerData]
     };
