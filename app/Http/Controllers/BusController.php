@@ -12,10 +12,17 @@ use Carbon\Carbon;
 class BusController extends Controller
 {
     protected $busApiService;
+    protected $ClientId;
+    protected $UserName;
+    protected $Password;
+    protected $ApiToken;
 
     public function __construct(BusApiService $busApiService)
     {
-        $this->busApiService = $busApiService;
+         $this->ClientId = env('BUS_API_CLIENT_ID');
+        $this->UserName = env('BUS_API_USERNAME');
+        $this->Password = env('BUS_API_PASSWORD');
+        $this->ApiToken = env('BUS_API_TOKEN');
     }
 
     public function index()
@@ -31,9 +38,10 @@ class BusController extends Controller
     {
         return view('seat-layout');
     }
-
+    
     public function searchBuses(Request $request)
     {
+        // Validate the input
         $request->validate([
             'source_city' => 'required|string',
             'source_code' => 'required|string',
@@ -41,56 +49,71 @@ class BusController extends Controller
             'destination_code' => 'required|string',
             'depart_date' => 'required|date_format:Y-m-d',
         ]);
-
+    
+        // Create the payload
         $payload = json_encode([
-            "ClientId" => "180133",
-            "UserName" => "MakeMy91",
-            "Password" => "MakeMy@910",
+            'ClientId' => $this->ClientId,
+            'UserName' => $this->UserName,
+            'Password' => $this->Password,
             'source_city' => trim($request->source_city),
             'source_code' => (int) trim($request->source_code),
             'destination_city' => trim($request->destination_city),
             'destination_code' => (int) trim($request->destination_code),
             'depart_date' => Carbon::createFromFormat('Y-m-d', $request->depart_date)->format('Y-m-d'),
         ], JSON_UNESCAPED_SLASHES);
-
+    
         try {
+            // Log the payload
+            Log::info('Payload Sent:', json_decode($payload, true));
+    
+            // Make the API request
             $response = Http::withHeaders([
                 'Content-Type' => 'application/json',
-                'Api-Token' => 'MakeMy@910@23',
+                'Api-Token' => $this->ApiToken, // Use the class property
             ])->withBody($payload, 'application/json')
-              ->post('https://bus.srdvtest.com/v5/rest/Search');
-
+                ->post('https://bus.srdvapi.com/v8/rest/Search');
+    
+            // Decode the JSON response
             $data = $response->json();
-
+    
+            // Log the response for debugging
+            Log::info('API Response:', $data);
+    
+            // Check for errors in the response
             if (isset($data['Error']) && $data['Error']['ErrorCode'] !== 0) {
                 return response()->json([
                     'status' => false,
-                    'message' => $data['Error']['ErrorMessage'] ?? 'An unknown error occurred'
+                    'message' => $data['Error']['ErrorMessage'] ?? 'An unknown error occurred',
                 ]);
             }
-
-            $traceId = $data['Result']['TraceId'] ?? $data['TraceId'] ?? null;
-
-            if (!empty($data['Result']['BusResults'])) {
+    
+            // Check if there are bus results
+            if (!isset($data['Result']) || empty($data['Result'])) {
+                Log::warning('No Result Found Response:', $data);
                 return response()->json([
-                    'status' => true,
-                    'traceId' => $traceId,
-                    'data' => $data['Result']['BusResults'],
+                    'status' => false,
+                    'message' => 'No buses found for the selected route and date.',
                 ]);
             }
-
+    
+            // Return the results
             return response()->json([
-                'status' => false,
-                'message' => 'No buses found for the selected route and date.'
+                'status' => true,
+                'traceId' => $data['TraceId'] ?? null,
+                'data' => $data['Result'],
             ]);
-
+    
         } catch (\Exception $e) {
+            // Log the exception
+            Log::error('Exception in Search Buses:', ['error' => $e->getMessage()]);
+    
             return response()->json([
                 'status' => false,
-                'message' => 'An error occurred while searching for buses.'
+                'message' => 'An error occurred while searching for buses: ' . $e->getMessage(),
             ], 500);
         }
     }
+    
 
     public function getSeatLayout(Request $request)
     {
@@ -100,9 +123,9 @@ class BusController extends Controller
         ]);
 
         $payload = json_encode([
-            "ClientId" => "180133",
-            "UserName" => "MakeMy91",
-            "Password" => "MakeMy@910",
+            'ClientId' => $this->ClientId,
+            'UserName' => $this->UserName,
+            'Password' => $this->Password,
             "TraceId" => $request->TraceId,
             "ResultIndex" => $request->ResultIndex,
         ], JSON_UNESCAPED_SLASHES);
@@ -110,9 +133,9 @@ class BusController extends Controller
         try {
             $response = Http::withHeaders([
                 'Content-Type' => 'application/json',
-                'Api-Token' => 'MakeMy@910@23',
+                'Api-Token' => $this->ApiToken,  // Use the class property
             ])->withBody($payload, 'application/json')
-              ->post('https://bus.srdvtest.com/v5/rest/GetSeatLayOut');
+              ->post('https://bus.srdvapi.com/v8/rest/GetSeatLayOut');
 
             $data = $response->json();
 
@@ -139,66 +162,93 @@ class BusController extends Controller
 
 
     public function getBoardingPoints(Request $request)
-{
-    // Validate incoming request
-    $request->validate([
-        'TraceId' => 'required|string',
-        'ResultIndex' => 'required|string'
-    ]);
-
-    // Full payload with all required parameters
-    $payload = [
-        'EndUserIp' => '1.1.1.1',
-        'ClientId' => '180133',
-        'UserName' => 'MakeMy91',
-        'Password' => 'MakeMy@910',
-        'TraceId' => $request->TraceId,
-        'ResultIndex' => $request->ResultIndex
-    ];
-
-    try {
-        // Log the request payload
-        Log::info('Boarding Points API Request:', ['payload' => $payload]);
-
-        // Make the API call
-        $response = Http::withHeaders([
-            'Content-Type' => 'application/json',
-            'Api-Token' => 'MakeMy@910@23'
-        ])->post('https://bus.srdvtest.com/v5/rest/GetBoardingPointDetails', $payload);
-
-        $data = $response->json();
-
-        // Log the response
-        Log::info('Boarding Points API Response:', ['response' => $data]);
-
-        // Check for API-specific errors
-        if (isset($data['Error']) && $data['Error']['ErrorCode'] !== "0") {
+    {
+        // Validate incoming request
+        $request->validate([
+            'TraceId' => 'required|string',
+            'ResultIndex' => 'required|string'
+        ]);
+    
+        // Full payload with all required parameters
+        $payload = [
+            'EndUserIp' => '1.1.1.1',
+            'ClientId' => $this->ClientId,
+            'UserName' => $this->UserName,
+            'Password' => $this->Password,
+            'TraceId' => $request->TraceId,
+            'ResultIndex' => $request->ResultIndex
+        ];
+    
+        try {
+            // Log the request payload
+            Log::info('Boarding Points API Request:', ['payload' => $payload]);
+    
+            // Make the API call
+            $response = Http::withHeaders([
+                'Content-Type' => 'application/json',
+                'Api-Token' => $this->ApiToken,  // Use the class property
+            ])->post('https://bus.srdvapi.com/v8/rest/GetBoardingPointDetails', $payload);
+    
+            $data = $response->json();
+    
+            // Log the response
+            Log::info('Boarding Points API Response:', ['response' => $data]);
+    
+            // Check for API-specific errors
+            if (isset($data['Error']) && $data['Error']['ErrorCode'] !== 0) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => $data['Error']['ErrorMessage'] ?? 'Unknown error occurred.'
+                ], 400);
+            }
+    
+            // Format Boarding and Dropping Points
+            $boardingPoints = $data['BoardingPoints'] ?? [];
+            $droppingPoints = $data['DroppingPoints'] ?? [];
+    
+            $formattedBoardingPoints = array_map(function ($point) {
+                return [
+                    'name' => $point['CityPointName'] ?? 'N/A',
+                    'address' => $point['CityPointAddress'] ?? 'N/A',
+                    'landmark' => $point['CityPointLandmark'] ?? 'N/A',
+                    'contact_number' => $point['CityPointContactNumber'] ?? 'N/A',
+                    'location' => $point['CityPointLocation'] ?? 'N/A',
+                    'time' => $point['CityPointTime'] ?? 'N/A',
+                ];
+            }, $boardingPoints);
+    
+            $formattedDroppingPoints = array_map(function ($point) {
+                return [
+                    'name' => $point['CityPointName'] ?? 'N/A',
+                    'location' => $point['CityPointLocation'] ?? 'N/A',
+                    'time' => $point['CityPointTime'] ?? 'N/A',
+                ];
+            }, $droppingPoints);
+    
+            // Return the formatted response
+            return response()->json([
+                'status' => 'success',
+                'data' => [
+                    'boarding_points' => $formattedBoardingPoints,
+                    'dropping_points' => $formattedDroppingPoints,
+                ]
+            ]);
+    
+        } catch (\Exception $e) {
+            // Log the exception
+            Log::error('Error in getBoardingPoints:', [
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+    
             return response()->json([
                 'status' => 'error',
-                'message' => $data['Error']['ErrorMessage']
-            ], 400);
+                'message' => 'An error occurred while fetching boarding points',
+                'error' => $e->getMessage()
+            ], 500);
         }
-
-        // If successful, return the formatted response
-        return response()->json([
-            'status' => 'success',
-            'GetBusRouteDetailResult' => $data
-        ]);
-
-    } catch (\Exception $e) {
-        Log::error('Error in getBoardingPoints:', [
-            'message' => $e->getMessage(),
-            'trace' => $e->getTraceAsString()
-        ]);
-
-        return response()->json([
-            'status' => 'error',
-            'message' => 'An error occurred while fetching boarding points',
-            'error' => $e->getMessage()
-        ], 500);
     }
-}
-
+    
 
 public function blockSeats(Request $request)
 {
@@ -226,9 +276,9 @@ public function blockSeats(Request $request)
     ]);
 
     $payload = array_merge([
-        'ClientId' => '180133',
-        'UserName' => 'MakeMy91',
-        'Password' => 'MakeMy@910',
+        'ClientId' => $this->ClientId,
+        'UserName' => $this->UserName,
+        'Password' => $this->Password,
     ], $request->all());
 
     try {
@@ -236,8 +286,8 @@ public function blockSeats(Request $request)
 
         $response = Http::withHeaders([
             'Content-Type' => 'application/json',
-            'Api-Token' => 'MakeMy@910@23',
-        ])->post('https://bus.srdvtest.com/v5/rest/Block', $payload);
+            'Api-Token' => $this->ApiToken,  // Use the class property
+        ])->post('https://bus.srdvapi.com/v8/rest/Block', $payload);
 
         $data = $response->json();
         Log::info('Block Seats API Response:', ['response' => $data]);
@@ -290,16 +340,16 @@ public function bookBus(Request $request)
         ]);
 
         $payload = array_merge([
-            'ClientId' => '180133',
-            'UserName' => 'MakeMy91',
-            'Password' => 'MakeMy@910',
+            'ClientId' => $this->ClientId,
+            'UserName' => $this->UserName,
+            'Password' => $this->Password,
         ], $request->all());
 
         try {
             $response = Http::withHeaders([
                 'Content-Type' => 'application/json',
-                'Api-Token' => 'MakeMy@910@23',
-            ])->post('https://bus.srdvtest.com/v5/rest/Book', $payload);
+                'Api-Token' => $this->ApiToken,  // Use the class property
+            ])->post('https://bus.srdvapi.com/v8/rest/Book', $payload);
 
             $data = $response->json();
             Log::info('Book API Response:', ['response' => $data]);
@@ -330,5 +380,232 @@ public function bookBus(Request $request)
         }
     }
 
+    public function showBookingConfirmation(Request $request)
+    {
+        // Get query parameters from the URL
+        $traceId = $request->query('TraceId');
+        $busBookingStatus = $request->query('BusBookingStatus');
+        $invoiceAmount = $request->query('InvoiceAmount');
+        $busId = $request->query('BusId');
+        $ticketNo = $request->query('TicketNo');
+        $travelOperatorPNR = $request->query('TravelOperatorPNR');
+        
+        // Pass all relevant data to the view
+        return view('frontend.payment', compact('traceId', 'busBookingStatus', 'invoiceAmount', 'busId', 'ticketNo', 'travelOperatorPNR'));
+    }
+    
 
+
+
+    
+    public function cancelBus(Request $request)
+    {
+        // Validate the incoming request
+        $request->validate([
+            'EndUserIp' => 'required|string',
+            'ClientId' => 'required|string',
+            'UserName' => 'required|string',
+            'Password' => 'required|string',
+            'BusId' => 'required|string',
+            'SeatId' => 'required|string',
+            'Remarks' => 'nullable|string'
+        ]);
+
+        // Prepare the payload for the API request
+        $payload = [
+            'EndUserIp' => '1.1.1.1',
+            'ClientId' => $this->ClientId,
+            'UserName' => $this->UserName,
+            'Password' => $this->Password,
+            'BusId' => $request->BusId,
+            'SeatId' => $request->SeatId,
+            'Remarks' => $request->Remarks ?? 'User  requested cancellation'
+        ];
+
+        try {
+            // Make the API request to cancel the bus booking
+            $response = Http::withHeaders([
+                'Content-Type' => 'application/json',
+                 'Api-Token' => $this->ApiToken,  // Use the class property
+            ])->post('https://bus.srdvtest.com/v5/rest/cancelbusbooking', $payload);
+
+            $data = $response->json();
+            Log::info('Cancel Bus Booking API Response:', ['response' => $data]);
+
+            // Check for errors in the response
+            if (isset($data['Error']) && $data['Error']['ErrorCode'] !== 0) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => $data['Error']['ErrorMessage'] ?? 'Error canceling bus booking'
+                ], 400);
+            }
+
+            // Return success response
+            return response()->json([
+                'status' => 'success',
+                'data' => $data['Result']
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('Error in cancelBus:', [
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            return response()->json([
+                'status' => 'error',
+                'message' => 'An error occurred while canceling the bus booking',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+
+
+    public function fetchBalance()
+    {
+        $payload = [
+            'EndUser Ip' => '1.1.1.1',
+            'ClientId' => $this->ClientId,
+            'UserName' => $this->UserName,
+            'Password' => $this->Password
+        ];
+
+        $response = Http::withHeaders([
+            'Content-Type' => 'application/json',
+             'Api-Token' => $this->ApiToken,  // Use the class property
+        ])->post('https://bus.srdvtest.com/v5/rest/Balance', $payload);
+
+        if ($response->successful()) {
+            $data = $response->json();
+
+            if ($data['Error']['ErrorCode'] == '0') {
+                return response()->json([
+                    'balance' => $data['Balance'],
+                    'creditLimit' => $data['CreditLimit']
+                ]);
+            }
+
+            return response()->json(['error' => $data['Error']['ErrorMessage']], 400);
+        }
+
+        return response()->json(['error' => 'Failed to fetch balance'], 500);
+    }
+
+
+   public function handlePayment(Request $request)
+{
+    $traceId = $request->input('TraceId');
+   $invoiceAmount = $request->input('Amount'); // Change 'InvoiceAmount' to 'amount'
+   $passengerData = $request->input('PassengerData');
+
+
+    // Step 1: Fetch balance from third-party API
+    $balanceResponse = $this->fetchBalance();
+    $balanceData = $balanceResponse->getData(); // Assuming fetchBalance() returns JSON as Laravel Response
+    
+    if (isset($balanceData->error)) {
+        return response()->json([
+            'Error' => [
+                'ErrorCode' => '1',
+                'ErrorMessage' => $balanceData->error
+            ]
+        ]);
+    }
+
+    $balance = $balanceData->balance ?? 0;
+
+    // Step 2: Check if balance is sufficient
+    if ($balance >= $invoiceAmount) {
+        return response()->json([
+            'success' => true,
+            'navigateToPayment' => true,
+            'url' => "/payment?TraceId={$traceId}&amount={$invoiceAmount}"
+        ]);
+    }
+
+    // Step 3: Insufficient balance
+    return response()->json([
+        'success' => false,
+        'errorMessage' => 'Your wallet balance is insufficient. You cannot proceed with payment.'
+    ]);
+}
+
+
+
+
+
+public function balanceLog(Request $request)
+{
+    $traceId = $request->query('TraceId');
+    $amount = $request->query('amount');
+
+    // Balance Log API request data
+    $requestData = [
+        'EndUserIp' => '1.1.1.1',
+        'ClientId' => $this->ClientId,
+        'UserName' => $this->UserName,
+        'Password' => $this->Password
+    ];
+
+    // Make API call
+    $response = Http::withHeaders([
+        'Content-Type' => 'application/json',
+        'Api-Token' => $this->ApiToken,
+    ])->post('https://bus.srdvtest.com/v5/rest/BalanceLog', $requestData);
+
+    // Parse the API response
+    $data = $response->json();
+
+    // Log the full API response for debugging
+    \Log::info('Balance API Response:', $data);
+
+    // Check for successful response and ensure Result key exists
+    if (isset($data['Error']) && $data['Error']['ErrorCode'] === '0' && isset($data['Result'])) {
+        $results = $data['Result']; // `Result` is an array of records
+        $processedLogs = [];
+
+        // Iterate through the Result array to process balance logs
+        foreach ($results as $result) {
+            $currentBalance = $result['Balance'];
+            $debitAmount = $amount;
+
+            // Debugging log: Check values before calculating
+            \Log::info("Processing Log: Current Balance: {$currentBalance}, Debit Amount: {$debitAmount}");
+
+            // Calculate new balance
+            $updatedBalance = $currentBalance - $debitAmount;
+
+            // Debugging log: Check values after calculating
+            \Log::info("Updated Balance: {$updatedBalance}");
+
+            // Build the processed log entry
+            $processedLogs[] = [
+                'ID' => $result['ID'],
+                'Date' => $result['Date'],
+                'ClientID' => $result['ClientID'],
+                'ClientName' => $result['ClientName'],
+                'Detail' => $result['Detail'],
+                'Debit' => $debitAmount,
+                'Credit' => $result['Credit'],
+                'Balance' => $updatedBalance, // Ensure the balance is updated
+                'Module' => $result['Module'],
+                'TraceID' => $traceId,
+                'RefID' => $result['RefID'],
+                'UpdatedBy' => $result['UpdatedBy']
+            ];
+        }
+
+        return response()->json([
+            'success' => true,
+            'balanceLogs' => $processedLogs, // Return processed logs as an array
+        ]);
+    }
+
+    // Handle error or missing Result key
+    return response()->json([
+        'success' => false,
+        'errorMessage' => $data['Error']['ErrorMessage'] ?? 'Unknown error occurred.',
+    ]);
+}
 }

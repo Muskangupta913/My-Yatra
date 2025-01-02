@@ -165,7 +165,15 @@ function fetchSeatLayout() {
         return;
     }
 
-    document.getElementById('seatLayout').innerHTML = '<div class="alert alert-info">Loading seat layout...</div>';
+    const loadingHtml = `
+        <div class="alert alert-info">
+            <div class="spinner-border spinner-border-sm me-2" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+            Loading seat layout...
+        </div>
+    `;
+    document.getElementById('seatLayout').innerHTML = loadingHtml;
 
     fetch('/getSeatLayout', {
         method: 'POST',
@@ -180,8 +188,8 @@ function fetchSeatLayout() {
     })
     .then(response => response.json())
     .then(data => {
-        if (data.status === true) {
-            renderSeatLayout(data.data.SeatLayout.SeatLayoutDetails.Layout.seatDetails);
+        if (data.status === true && Array.isArray(data.data)) {
+            renderSeatLayout(data.data);
         } else {
             throw new Error(data.message || 'Failed to load seat layout');
         }
@@ -190,20 +198,32 @@ function fetchSeatLayout() {
         showError(error.message);
     });
 }
+<<<<<<< HEAD
  // Pass the correct image URLs from Laravel to JavaScript
  const availableSeatImage = "{{ asset('assets/seat.png') }}";
     const bookedSeatImage = "{{ asset('assets/seat.png') }}";
+=======
+
+>>>>>>> 878619d40941005aca4d1b3bcd0232564d7c9a63
 function renderSeatLayout(seatDetails) {
     const seatLayoutContainer = document.getElementById('seatLayout');
-    if (!seatDetails || seatDetails.length === 0) {
-        showError('Seat layout data is missing or unavailable.');
+    if (!seatDetails || !Array.isArray(seatDetails) || seatDetails.length === 0) {
+        showError('No seat layout data available.');
         return;
     }
 
     let layoutHTML = '<div class="bus-seats">';
-    seatDetails.forEach((row) => {
-        layoutHTML += '<div class="row">'; // Start a new row
+    
+    // Add a visual representation of the bus front
+    layoutHTML += `
+        <div class="bus-front mb-4">
+            <div class="text-center p-2 bg-secondary text-white rounded">
+                <small>Bus Front</small>
+            </div>
+        </div>
+    `;
 
+<<<<<<< HEAD
         row.forEach(seat => {
             const seatClass = seat.SeatStatus ? 'seat-available' : 'seat-booked';
             const seatName = seat.SeatName || 'N/A';
@@ -233,33 +253,90 @@ function renderSeatLayout(seatDetails) {
         });
 
         layoutHTML += '</div>'; // Close row
+=======
+    seatDetails.forEach((row, rowIndex) => {
+        if (Array.isArray(row)) {
+            layoutHTML += '<div class="row">';
+            
+            row.forEach(seat => {
+                if (seat && typeof seat === 'object') {
+                    const seatClass = seat.SeatStatus ? 'seat-available' : 'seat-booked';
+                    const seatName = seat.SeatName || 'N/A';
+                    const seatPrice = seat.Price?.PublishedPriceRoundedOff || 0;
+                    const seatStatusText = seat.SeatStatus ? 'Available' : 'Booked';
+                    const ladiesSeatClass = seat.IsLadiesSeat ? 'ladies-seat' : '';
+                    
+                    layoutHTML += `
+                        <div class="seat-container">
+                            <div 
+                                class="seat ${seatClass} ${ladiesSeatClass}"
+                                data-seat-index="${seat.SeatIndex}"
+                                onclick="handleSeatClick(this, ${JSON.stringify(seat).replace(/"/g, '&quot;')})">
+                                <span class="seat-number">${seatName}</span>
+                            </div>
+                            <small class="seat-status">${seatStatusText}</small>
+                            <small class="seat-price">₹${seatPrice}</small>
+                        </div>
+                    `;
+                }
+            });
+
+            layoutHTML += '</div>';
+        }
+>>>>>>> 878619d40941005aca4d1b3bcd0232564d7c9a63
     });
-    layoutHTML += '</div>'; // Close bus-seats container
+
+    layoutHTML += '</div>';
     seatLayoutContainer.innerHTML = layoutHTML;
 }
-function selectSeat(element, seatData) {
-    if (element.classList.contains('seat-booked')) return;
 
-    document.querySelectorAll('.seat-selected').forEach(seat => seat.classList.remove('seat-selected'));
+function handleSeatClick(element, seatData) {
+    // Don't allow selecting booked seats
+    if (!seatData.SeatStatus) {
+        return;
+    }
+
+    // Remove previous selection
+    const previousSelected = document.querySelector('.seat-selected');
+    if (previousSelected) {
+        previousSelected.classList.remove('seat-selected');
+    }
+
+    // Add selection to clicked seat
     element.classList.add('seat-selected');
 
-    selectedSeatDetails = seatData;
+    // Update selected seat details
     selectedSeat = seatData.SeatName;
+    selectedSeatDetails = seatData;
 
-    document.getElementById('selectedSeatInfo').classList.remove('d-none');
-    document.getElementById('selectedSeatDetails').innerText = 
-        `Seat: ${seatData.SeatName}, Price: ₹${seatData.Price.PublishedPrice}`;
+    // Show selected seat information
+    const selectedSeatInfo = document.getElementById('selectedSeatInfo');
+    const selectedSeatDetails = document.getElementById('selectedSeatDetails');
+    const continueButton = document.getElementById('continueButton');
 
-    // Show the Continue button
-    document.getElementById('continueButton').classList.remove('d-none');
+    selectedSeatInfo.classList.remove('d-none');
+    selectedSeatDetails.innerHTML = `
+        <div class="mb-2">
+            <strong>Seat Number:</strong> ${seatData.SeatName}
+        </div>
+        <div class="mb-2">
+            <strong>Price:</strong> ₹${seatData.Price.PublishedPriceRoundedOff}
+        </div>
+        <div class="mb-2">
+            <strong>Type:</strong> ${seatData.IsLadiesSeat ? 'Ladies Seat' : 'General Seat'}
+        </div>
+    `;
+    continueButton.classList.remove('d-none');
 }
 
-// Trigger the modal when the Continue button is clicked
-document.getElementById('continueButton').addEventListener('click', function() {
-    // Trigger the modal to show passenger details
-    const modalTriggerButton = document.getElementById('openPassengerDetailsModal');
-    modalTriggerButton.click();
-    
+
+document.getElementById('continueButton')?.addEventListener('click', function() {
+    if (selectedSeatDetails) {
+        // Trigger the passenger details modal
+        document.getElementById('openPassengerDetailsModal').click();
+    } else {
+        showError('Please select a seat first.');
+    }
 });
 
 
@@ -280,14 +357,19 @@ function fetchBoardingDetails() {
         return;
     }
 
-    document.getElementById('pickupPointsContainer').innerHTML = 
-        '<div class="alert alert-info">Loading pickup points...</div>';
-    document.getElementById('droppingPointsContainer').innerHTML = 
-        '<div class="alert alert-info">Loading dropping points...</div>';
+    const loadingHTML = `
+        <div class="d-flex justify-content-center align-items-center p-4">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+        </div>`;
+
+    document.getElementById('pickupPointsContainer').innerHTML = loadingHTML;
+    document.getElementById('droppingPointsContainer').innerHTML = loadingHTML;
 
     fetch('/boarding-points', {
         method: 'POST',
-        headers: { 
+        headers: {
             'Content-Type': 'application/json',
             'X-CSRF-TOKEN': csrfToken
         },
@@ -299,21 +381,8 @@ function fetchBoardingDetails() {
     .then(response => response.json())
     .then(data => {
         if (data.status === 'success') {
-            const result = data.GetBusRouteDetailResult.GetBusRouteDetailResult;
-
-            if (result && result.BoardingPointsDetails && result.BoardingPointsDetails.length > 0) {
-                renderPickupPoints(result.BoardingPointsDetails);
-            } else {
-                document.getElementById('pickupPointsContainer').innerHTML = 
-                    '<div class="alert alert-warning">No pickup points available</div>';
-            }
-
-            if (result && result.DroppingPointsDetails && result.DroppingPointsDetails.length > 0) {
-                renderDroppingPoints(result.DroppingPointsDetails);
-            } else {
-                document.getElementById('droppingPointsContainer').innerHTML = 
-                    '<div class="alert alert-warning">No dropping points available</div>';
-            }
+            renderPickupPoints(data.data.boarding_points);
+            renderDroppingPoints(data.data.dropping_points);
         } else {
             throw new Error(data.message || 'Failed to load boarding details');
         }
@@ -323,11 +392,15 @@ function fetchBoardingDetails() {
     });
 }
 
-function renderPickupPoints(pickupPoints) {
+function renderPickupPoints(points) {
     const container = document.getElementById('pickupPointsContainer');
-    // Clear the container to avoid nesting issues
-    container.innerHTML = '';
+    
+    if (!points || points.length === 0) {
+        container.innerHTML = '<div class="alert alert-warning">No pickup points available</div>';
+        return;
+    }
 
+<<<<<<< HEAD
     // Render each pickup point as a separate div
     pickupPoints.forEach(point => {
       const formattedDate = formatDate(point.CityPointTime);
@@ -369,10 +442,68 @@ function renderDroppingPoints(droppingPoints) {
                 <button class="btn btn-success btn-sm" 
                     onclick="selectDroppingPoint(${point.CityPointIndex}, '${point.CityPointName}')">
                     ✅ Select
+=======
+    container.innerHTML = points.map((point, index) => `
+        <div class="pickup-point-item" data-point-id="${index}">
+            <div class="position-relative p-3">
+                <!-- Time Badge -->
+                <span class="pickup-time position-absolute top-0 end-0 m-2">
+                    🕒 ${formatTime(point.time)}
+                </span>
+                
+                <!-- Point Name -->
+                <h6 class="mb-3">${point.name}</h6>
+                
+                <!-- Details Grid -->
+                <div class="point-details">
+                    <p><i class="fas fa-map-marker-alt"></i> ${point.location}</p>
+                    <p><i class="fas fa-building"></i> ${point.address}</p>
+                    <p><i class="fas fa-landmark"></i> ${point.landmark}</p>
+                    <p><i class="fas fa-phone"></i> ${point.contact_number}</p>
+                </div>
+                
+                <!-- Select Button -->
+                <button class="btn btn-outline-success btn-sm mt-3 select-btn" 
+                    onclick="selectPickupPoint(${index}, '${point.name.replace(/'/g, "\\'")}')">
+                    <i class="fas fa-check-circle"></i> Select Point
+>>>>>>> 878619d40941005aca4d1b3bcd0232564d7c9a63
                 </button>
-            </div>`;
-    });
+            </div>
+        </div>
+    `).join('');
 }
+
+function renderDroppingPoints(points) {
+    const container = document.getElementById('droppingPointsContainer');
+    
+    if (!points || points.length === 0) {
+        container.innerHTML = '<div class="alert alert-warning">No dropping points available</div>';
+        return;
+    }
+
+    container.innerHTML = points.map((point, index) => `
+        <div class="dropping-point-item" data-point-id="${index}">
+            <div class="position-relative p-3">
+                <!-- Time Badge -->
+                <span class="pickup-time position-absolute top-0 end-0 m-2">
+                    🕒 ${formatTime(point.time)}
+                </span>
+                
+                <!-- Point Name and Location -->
+                <h6 class="mb-3">${point.name}</h6>
+                <p><i class="fas fa-map-marker-alt"></i> ${point.location}</p>
+                
+                <!-- Select Button -->
+                <button class="btn btn-outline-success btn-sm mt-2 select-btn" 
+                    onclick="selectDroppingPoint(${index}, '${point.name.replace(/'/g, "\\'")}')">
+                    <i class="fas fa-check-circle"></i> Select Point
+                </button>
+            </div>
+        </div>
+    `).join('');
+}
+
+
 document.getElementById('passengerDetailsForm').addEventListener('submit', function(e) {
     e.preventDefault();
 
@@ -404,25 +535,71 @@ let selectedDroppingPointName = ''; // Store selected dropping point name
 
 // Function to handle the selection of pickup point
 function selectPickupPoint(pointId, pointName) {
-    selectedBoardingPointId = pointId; // Store the selected boarding point ID globally
-    selectedBoardingPointName = pointName; // Store the selected boarding point name globally
-    alert(`Pickup Point Selected: ${pointName}`);
+    // Remove previous selection
+    document.querySelectorAll('.pickup-point-item').forEach(item => {
+        item.classList.remove('selected');
+    });
     
-    // Optional: Highlight the selected pickup point
-    document.querySelectorAll('.pickup-point').forEach(point => point.classList.remove('selected'));
-    document.querySelector(`.pickup-point[data-point-id="${pointId}"]`).classList.add('selected');
+    // Add selection to current point
+    const selectedPoint = document.querySelector(`.pickup-point-item[data-point-id="${pointId}"]`);
+    if (selectedPoint) {
+        selectedPoint.classList.add('selected');
+    }
+    
+    selectedBoardingPointId = pointId;
+    selectedBoardingPointName = pointName;
+    
+    // Show success toast instead of alert
+    showToast(`Pickup point selected: ${pointName}`, 'success');
 }
 
-// Function to handle the selection of dropping point
 function selectDroppingPoint(pointId, pointName) {
-    selectedDroppingPointId = pointId; // Store the selected dropping point ID globally
-    selectedDroppingPointName = pointName; // Store the selected dropping point name globally
-    alert(`Dropping Point Selected: ${pointName}`);
+    // Remove previous selection
+    document.querySelectorAll('.dropping-point-item').forEach(item => {
+        item.classList.remove('selected');
+    });
     
-    // Optional: Highlight the selected dropping point
-    document.querySelectorAll('.dropping-point').forEach(point => point.classList.remove('selected'));
-    document.querySelector(`.dropping-point[data-point-id="${pointId}"]`).classList.add('selected');
+    // Add selection to current point
+    const selectedPoint = document.querySelector(`.dropping-point-item[data-point-id="${pointId}"]`);
+    if (selectedPoint) {
+        selectedPoint.classList.add('selected');
+    }
+    
+    selectedDroppingPointId = pointId;
+    selectedDroppingPointName = pointName;
+    
+    // Show success toast instead of alert
+    showToast(`Dropping point selected: ${pointName}`, 'success');
 }
+
+function showToast(message, type = 'info') {
+    // You can use any toast library here, or create a simple one
+    // Example using Bootstrap toast
+    const toastHTML = `
+        <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 11">
+            <div class="toast align-items-center text-white bg-${type}" role="alert" aria-live="assertive" aria-atomic="true">
+                <div class="d-flex">
+                    <div class="toast-body">
+                        ${message}
+                    </div>
+                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    document.body.insertAdjacentHTML('beforeend', toastHTML);
+    const toastElement = document.querySelector('.toast:last-child');
+    const toast = new bootstrap.Toast(toastElement);
+    toast.show();
+    
+    // Remove toast element after it's hidden
+    toastElement.addEventListener('hidden.bs.toast', () => {
+        toastElement.remove();
+    });
+}
+
+//block seat api
 function blockSeat(passengerData) {
     if (!selectedBoardingPointId || !selectedDroppingPointId) {
         alert('Please select both boarding and dropping points before proceeding.');
@@ -508,7 +685,8 @@ function blockSeat(passengerData) {
              const passengerDetailsModal = bootstrap.Modal.getInstance(document.getElementById('passengerDetailsModal'));
             passengerDetailsModal.hide();  // Close the modal
             const bookingDetails = data.data;
-            const bookingPageUrl = `/booking?TraceId=${bookingDetails.TraceId}&BusBookingStatus=${encodeURIComponent(bookingDetails.BusBookingStatus)}&InvoiceAmount=${bookingDetails.InvoiceAmount}&BusId=${bookingDetails.BusId}&TicketNo=${bookingDetails.TicketNo}&TravelOperatorPNR=${bookingDetails.TravelOperatorPNR}&PassengerData=${encodeURIComponent(JSON.stringify(passengerData))}&BoardingPointName=${encodeURIComponent(selectedBoardingPointName)}&DroppingPointName=${encodeURIComponent(selectedDroppingPointName)}`;
+
+            const bookingPageUrl = `/booking?TraceId=${traceId}&PassengerData=${encodeURIComponent(JSON.stringify(passengerData))}&BoardingPointName=${encodeURIComponent(selectedBoardingPointName)}&DroppingPointName=${encodeURIComponent(selectedDroppingPointName)}&SeatNumber=${encodeURIComponent(selectedSeatDetails.SeatName)}&Price=${encodeURIComponent(selectedSeatDetails.Price.PublishedPrice)}&ResultIndex=${encodeURIComponent(resultIndex)}`;
          // Set the href attribute to the booking page URL
             document.getElementById('review').setAttribute('href', bookingPageUrl);
             document.getElementById('review').classList.remove('d-none');
@@ -525,60 +703,7 @@ function blockSeat(passengerData) {
         alert(`Error: ${error.message}`);
     });
 }
-// document.getElementById('payNowButton').addEventListener('click', function() {
-//     const passengerData = {
-//         Title: document.getElementById('title').value,
-//         FirstName: document.getElementById('firstName').value,
-//         LastName: document.getElementById('lastName').value,
-//         Email: document.getElementById('email').value,
-//         Phoneno: document.getElementById('phoneNumber').value,
-//         Gender: parseInt(document.getElementById('gender').value, 10),
-//         Age: parseInt(document.getElementById('age').value, 10),
-//         Address: document.getElementById('address').value,
-//         Seat: {
-//             SeatName: selectedSeatDetails.SeatName,
-//             ColumnNo: parseInt(selectedSeatDetails.ColumnNo, 10),
-//             RowNo: parseInt(selectedSeatDetails.RowNo, 10),
-//         },
-//         LeadPassenger: true // Assuming this is the first passenger and should be marked as lead
-//     };
 
-//     const payload = {
-//         ResultIndex: new URLSearchParams(window.location.search).get('ResultIndex'),
-//         TraceId: new URLSearchParams(window.location.search).get('TraceId'),
-//         BoardingPointId: selectedBoardingPointId,
-//         DroppingPointId: selectedDroppingPointId,
-//         BoardingPointName: selectedBoardingPointName, // Include selected boarding point name in the payload
-//         DroppingPointName: selectedDroppingPointName, // Include selected dropping point name in the payload
-//         RefID: '1', // Replace with your reference id
-//         Passenger: [passengerData]
-//     };
-
-//     fetch('/bookSeats', {
-//         method: 'POST',
-//         headers: {
-//             'Content-Type': 'application/json',
-//             'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-//         },
-//         body: JSON.stringify(payload)
-//     })
-//     .then(response => response.json())
-//     .then(data => {
-//         if (data.status === 'success') {
-//             alert('Bus booked successfully!');
-//             const bookingDetails = data.data;
-//             const bookingPageUrl = `/booking?TraceId=${bookingDetails.TraceId}&BusBookingStatus=${encodeURIComponent(bookingDetails.BusBookingStatus)}&InvoiceAmount=${bookingDetails.InvoiceAmount}&BusId=${bookingDetails.BusId}&TicketNo=${bookingDetails.TicketNo}&TravelOperatorPNR=${bookingDetails.TravelOperatorPNR}&PassengerData=${encodeURIComponent(JSON.stringify(passengerData))}&BoardingPointName=${encodeURIComponent(selectedBoardingPointName)}&DroppingPointName=${encodeURIComponent(selectedDroppingPointName)}`;
-
-//             // Redirect to the booking page:
-//             window.location.href = bookingPageUrl;
-//         } else {
-//             alert('Booking failed: ' + data.message);
-//         }
-//     })
-//     .catch(error => {
-//         alert('Error: ' + error.message);
-//     });
-// });
 </script>
 <style>
   .seat-image {

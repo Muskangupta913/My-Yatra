@@ -57,33 +57,107 @@
             <p>Comming Soon!</p>
           </div>
           <!-- // hotel booking -->
-          <div class="tab-pane fade mt-5" id="profile" role="tabpanel" aria-labelledby="profile-tab">
-               <h4 class="mb-5" id="hotel-title">Book Hotels in India</h4>
-                <hr class="searchline">
-                <form action="{{ route('hotels') }}" method="GET">
-                <div class="row">
-         <div class="mb-3 col-md-3 hotel-search">
-            <div class="date-caption">City</div>
-               <input type="text" class="form-control rounded-0 py-3" name="searchCity" id="hotelSearchCity"
-                placeholder="Enter City" required>
-              <div id="hotelCityList" class="card" style="position: absolute; width: 23%; max-height: 150px; overflow-y: scroll;">
-            </div>
-          </div>
-           <div class="mb-3 col-md-2">
-              <div class="date-caption">Check-in Date</div>
-                      <input type="text" id="checkinDatepicker" name="check_in_date" class="form-control rounded-0 py-3 datepicker" placeholder="Select Check-in Date" required>
-            </div>
-      <div class="mb-3 col-md-2">
-        <div class="date-caption">Check-out Date</div>
-        <input type="text" id="checkoutDatepicker" name="check_out_date" class="form-control rounded-0 py-3 datepicker" placeholder="Select Check-out Date" required>
-      </div>
+          <div class="tab-content" id="myTabContent">
+  <div class="tab-pane fade" id="home" role="tabpanel" aria-labelledby="home-tab">
+    <p>Coming Soon!</p>
+  </div>
 
-      <div class="mb-3 col-md-2">
-        <div class="date-caption" style="visibility: hidden">Search</div>
-        <button type="submit" class="btn btn-warning w-100 rounded-0 py-3 fw-bold hotelbuttonsearch">Search</button>
-      </div>
-    </div>
-  </form>
+
+
+
+  <!-- Hotel Booking -->
+  <div class="tab-pane fade mt-5" id="profile" role="tabpanel" aria-labelledby="profile-tab">
+    <h4 class="mb-5" id="hotel-title">Book Hotels in India</h4>
+    <hr class="searchline">
+    <form id="hotelSearchForm">
+        <div class="row">
+            <!-- City Input -->
+            <div class="mb-3 col-md-3 hotel-search">
+                <div class="date-caption">City</div>
+                <input type="text" class="form-control rounded-0 py-3" name="CityName" id="hotelSearchCity" placeholder="Enter City Name" required autocomplete="off">
+                <input type="hidden" name="CityId" id="cityIdInput" value="">
+                <div id="hotelSearchCityList" class="city-suggestions"></div>
+            </div>
+
+            <!-- Check-in Date -->
+            <div class="mb-3 col-md-2">
+    <div class="date-caption">Check-in Date</div>
+    <input type="text" id="checkinDatepicker" name="CheckInDate" class="form-control rounded-0 py-3 datepicker" placeholder="Select Check-in Date" required>
+</div>
+
+            <!-- Number of Nights -->
+            <div class="mb-3 col-md-2">
+                <div class="date-caption">No. of Nights</div>
+                <input type="number" name="NoOfNights" class="form-control rounded-0 py-3" placeholder="Enter No. of Nights" required>
+            </div>
+
+            <!-- Room & Guests -->
+            <div class="mb-3 col-md-3">
+                <div class="date-caption">Room & Guests</div>
+                <div class="dropdown">
+                    <button class="btn btn-outline-secondary dropdown-toggle w-100 rounded-0 py-3" type="button" id="roomGuestsDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                        1 Room, 2 Adults, 0 Children
+                    </button>
+                    <ul class="dropdown-menu p-3" aria-labelledby="roomGuestsDropdown" style="width: 100%; max-width: 300px;">
+                        <li class="mb-3">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <label for="noOfRooms" class="form-label mb-0">Rooms</label>
+                                <select id="noOfRooms" name="NoOfRooms" class="form-select w-auto">
+                                    <option value="1" selected>1</option>
+                                    <option value="2">2</option>
+                                    <option value="3">3</option>
+                                    <option value="4">4</option>
+                                </select>
+                            </div>
+                        </li>
+                        <li class="mb-3">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <label for="noOfAdults" class="form-label mb-0">Adults</label>
+                                <select id="noOfAdults" name="RoomGuests[0][NoOfAdults]" class="form-select w-auto">
+                                    <option value="1">1</option>
+                                    <option value="2" selected>2</option>
+                                    <option value="3">3</option>
+                                    <option value="4">4</option>
+                                </select>
+                            </div>
+                        </li>
+                        <li>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <label for="noOfChildren" class="form-label mb-0">Children</label>
+                                <select id="noOfChildren" name="RoomGuests[0][NoOfChild]" class="form-select w-auto" onchange="toggleChildAgeDropdown(this.value)">
+                                    <option value="0" selected>0</option>
+                                    <option value="1">1</option>
+                                    <option value="2">2</option>
+                                    <option value="3">3</option>
+                                </select>
+                            </div>
+                        </li> 
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Guest Nationality -->
+            <div class="mb-3 col-md-2">
+                <div class="date-caption">Nationality</div>
+                <select id="nationalitySelect" class="form-control rounded-0 py-3">
+                    <option value="" selected>Select Nationality</option>
+                    <option value="IN" data-nationality="Indian">IN</option>
+                    <option value="US" data-nationality="American">American</option>
+                    <option value="GB" data-nationality="British">British</option>
+                    <option value="CA" data-nationality="Canadian">Canadian</option>
+                </select>
+            </div>
+
+            <input type="hidden" name="CountryCode" id="countryCodeInput" value="">
+            <input type="hidden" name="SelectedNationality" id="hiddenNationality" value="">
+
+            <!-- Search Button -->
+            <div class="mb-3 col-md-2">
+                <div class="date-caption" style="visibility: hidden">Search</div>
+                <button type="button" class="btn btn-warning w-100 rounded-0 py-3 fw-bold hotelbuttonsearch" id="searchButton">Search</button>
+            </div>
+        </div>
+    </form>
 </div>
 
 <!-- // flight booking -->
@@ -152,7 +226,6 @@
  <div class="tab-pane fade mt-5" id="bus" role="tabpanel" aria-labelledby="bus-tab">
   <h4 class="mb-5" id="bus-title">Book Bus Tickets</h4>
   <hr class="searchline">
-  
   <!-- Bus Search Form -->
   <form action="{{ route('buses.search') }}" method="POST" id="busSearchForm">
     @csrf
@@ -546,8 +619,9 @@
 
                         // Update the input field with the selected city name
                         $(inputField).val(selectedValue).data('city-id', selectedId);
+                        $('#cityIdInput').val(selectedId); // Store the CityId in the hidden input field
 
-                        // Set the source_code or destination_code hidden field
+                        // Set the source_code or destination_code hidden field for bus
                         if (inputField === '#busFromCity') {
                             $('#busFromCode').val(selectedId); // Store CityId as source_code
                         } else if (inputField === '#busToCity') {
@@ -569,10 +643,20 @@
         });
     }
 
-    // Input field focus event handlers
-    const cityInputs = ['#busFromCity', '#busToCity'];
+    // Input field focus event handlers for bus city
+    const cityInputsForBus = ['#busFromCity', '#busToCity'];
 
-    cityInputs.forEach(input => {
+    cityInputsForBus.forEach(input => {
+        $(input).on('focus', function () {
+            fetchAllCities(input);
+            $(input + 'List').show();
+        });
+    });
+
+    // Input field focus event handlers for hotel city
+    const cityInputsForHotel = ['#hotelSearchCity'];
+
+    cityInputsForHotel.forEach(input => {
         $(input).on('focus', function () {
             fetchAllCities(input);
             $(input + 'List').show();
@@ -581,9 +665,13 @@
 
     // Hide dropdowns when clicking outside
     $(document).on('click', function (e) {
-        const cityElements = cityInputs.map(input => `${input}, ${input}List`).join(', ');
+        // Combine the city inputs for both bus and hotel
+        const cityElements = [...cityInputsForBus, ...cityInputsForHotel].map(input => `${input}, ${input}List`).join(', ');
+
+        // Check if the clicked target is outside of the city input fields and lists
         if (!$(e.target).closest(cityElements).length) {
-            cityInputs.forEach(input => {
+            // Hide the city suggestion lists for both bus and hotel
+            [...cityInputsForBus, ...cityInputsForHotel].forEach(input => {
                 $(input + 'List').hide();
             });
         }
@@ -717,6 +805,98 @@
     });
   });
 
+
+
+ // hotel search
+ document.addEventListener('DOMContentLoaded', function () {
+    // Initialize datepicker with desired format
+    $('.datepicker').datepicker({
+        format: 'dd/mm/yyyy',
+        autoclose: true,
+        startDate: 'today',
+        todayHighlight: true
+    }).datepicker('setDate', new Date());
+
+    // Nationality selection logic
+    const nationalitySelect = document.getElementById("nationalitySelect");
+    if (nationalitySelect) {
+        nationalitySelect.addEventListener('change', function () {
+            var selectedOption = nationalitySelect.options[nationalitySelect.selectedIndex];
+            var countryCode = selectedOption.value;
+            document.getElementById("countryCodeInput").value = countryCode || '';
+            document.getElementById("hiddenNationality").value = countryCode || '';
+        });
+    }
+
+    // Handle search form submission
+    const searchButton = document.getElementById('searchButton');
+    if (searchButton) {
+        searchButton.addEventListener('click', function (event) {
+            event.preventDefault();
+
+            const formData = new FormData(document.getElementById('hotelSearchForm'));
+            const data = Object.fromEntries(formData.entries());
+
+            // Prepare payload exactly matching the API example
+            const payload = {
+                ClientId: "180133",
+                UserName: "MakeMy91",
+                Password: "MakeMy@910",
+                EndUserIp: "1.1.1.1",
+                BookingMode: "5",
+                CheckInDate: data.CheckInDate,
+                NoOfNights: String(data.NoOfNights),
+                CityId: data.CityId || "130443",
+                CountryCode: data.CountryCode || 'IN',
+                GuestNationality: document.getElementById("nationalitySelect").value || 'IN',
+                PreferredCurrency: "INR",
+                NoOfRooms: String(data.NoOfRooms),
+                RoomGuests: [
+                    {
+                        NoOfAdults: String(data["RoomGuests[0][NoOfAdults]"] || "1"),
+                        NoOfChild: String(data["RoomGuests[0][NoOfChild]"] || "0"),
+                        ChildAge: [] // Assuming no child ages are provided
+                    }
+                ],
+                
+            };
+
+           
+
+            // Proceed with the fetch request
+            fetch('/search-hotel', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                },
+                body: JSON.stringify(payload),
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    console.log('Search results:', data.results);
+
+                    sessionStorage.setItem('searchResults', JSON.stringify(data.results));
+                sessionStorage.setItem('traceId', data.traceId);
+                sessionStorage.setItem('searchParams', JSON.stringify(payload));
+
+                // Redirect to another page
+                window.location.href = '/search-result';
+                } else {
+                    console.error('API Error:', data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        });
+    }
+});
+
+   
+
 </script>
 
-@endsection
+
+@endsection 

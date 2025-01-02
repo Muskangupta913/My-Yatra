@@ -14,18 +14,6 @@ use Illuminate\Support\Facades\Artisan;
 use App\Http\Controllers\CardpayController;
 
 
-
-/*
-|--------------------------------------------------------------------------
-| Web Routes
-|--------------------------------------------------------------------------
-|
-| Here is where you can register web routes for your application. These
-| routes are loaded by the RouteServiceProvider and all of them will
-| be assigned to the "web" middleware group. Make something great!
-|
-*/
-
 Route::get('/clear-cache', function() {
   Artisan::call('cache:clear');
   Artisan::call('config:clear');
@@ -373,8 +361,26 @@ Route::post('/getSeatLayout', [BusController::class, 'getSeatLayout'])->name('ge
 Route::get('/seat-layout', [BusController::class, 'showSeatLayout'])->name('bus.seatLayout');
 Route::post('/boarding-points', [BusController::class, 'getBoardingPoints']);
 Route::post('/block-seats', [BusController::class, 'blockSeats']);
-Route::post('/bookSeats', [BusController::class, 'bookBus']);
+Route::post('/bookbus', [BusController::class, 'bookBus']);
 Route::get('/booking', [BusController::class, 'bookpage']);  // Define a page to show booking success
+Route::post('/cancelBus', [BusController::class, 'cancelBus']);
+Route::get('/balance', [BusController::class, 'fetchBalance']);
+Route::post('/handlepayment', [BusController::class, 'handlePayment']);
+Route::get('/balance-log', [BusController::class, 'balanceLog'])->name('balance.log');
+
+
+
+
+
+
+
+//Hotel Routes
+
+
+Route::post('/search-hotel', [HotelController::class, 'search']);
+Route::get('/search-result', [HotelController::class, 'showSearchResults']);
+Route::post('/hotel-details', [HotelController::class, 'hoteldetails']);
+
 
 
 
