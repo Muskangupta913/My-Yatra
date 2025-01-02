@@ -1,57 +1,58 @@
 @extends('frontend.layouts.master')
 @section('title', 'Bus Booking')
 @section('content')
-
+<div id="loadingSpinner" style="
+    display: none; 
+    position: fixed; 
+    top: 0; 
+    left: 0; 
+    width: 100%; 
+    height: 100%; 
+    background-color: rgba(255, 255, 255, 0.8); 
+    z-index: 9999; 
+    display: flex; 
+    align-items: center; 
+    justify-content: center;">
+    <img src="{{ asset('assets/loading.gif') }}" alt="Loading..." style="width: 10vw; height: 10vw; max-width: 150px; max-height: 150px;" />
+</div>
 <!-- Add the CSRF meta tag in the header -->
 <meta name="csrf-token" content="{{ csrf_token() }}">
-
 <div class="container mt-4" id="busBookingContainer">
+  <!-- Seat Layout Section -->
+  <div class="section-container mb-4" id="seatLayoutContainer">
+    <h3 class="text-center">Select Seats</h3>
+    <div id="seatLayout" class="bus-seats" data-trace-id="" data-result-index=""></div>
+  </div>
 
-<div class="d-flex flex-wrap">
-    <!-- Left Section: Seat Layout -->
-    <div class="col-12 col-md-8" id="seatLayoutContainer">
-        <div class="section-container">
-            <h5>Select Seats</h5>
-            <div id="seatLayout" data-trace-id="" data-result-index=""></div>
+  <!-- Pickup and Dropping Points Section -->
+  <div class="section-container mb-4" id="pickupDroppingContainer">
+    <h3 class="text-center"> Seclect Pickup and Dropping Points</h3>
+    <div class="pickup-dropping-container">
+      <div id="pickupPointSection" class="pickup-point">
+        <h5>Pickup Points</h5>
+        <div id="pickupPointsContainer" class="pickup-points">
+          <p>Loading pickup points...</p>
         </div>
-    </div>
+      </div>
 
-    <!-- Right Section: Pickup and Dropping Points -->
-    <div class="col-12 col-md-4" id="pickupDroppingContainer">
-        <div class="section-container">
-            <h5>Select Pickup & Dropping Point</h5>
-            <div class="d-flex flex-column flex-sm-row justify-content-between">
-                <!-- Pickup Points -->
-                <div id="pickupPointSection" class="pickup-point mb-3 mb-sm-0">
-                    <h6>Pickup Point</h6>
-                    <div id="pickupPointsContainer" class="pickup-points text-center">
-                        <p>Loading pickup points...</p>
-                    </div>
-                </div>
-
-                <!-- Dropping Points -->
-                <div id="droppingPointSection" class="dropping-point">
-                    <h6>Dropping Point</h6>
-                    <div id="droppingPointsContainer" class="dropping-points text-center">
-                        <p>Loading dropping points...</p>
-                    </div>
-                </div>
-            </div> 
-
-            <!-- Selected Seat Info Section -->
-            <div id="selectedSeatInfo" class="mt-2 d-none">
-                <h4>Selected Seat</h4>
-                <p id="selectedSeatDetails"></p>
-            </div>
-
-            <!-- Continue Button Section -->
-            <div class="mt-2">
-                <button class="btn btn-success w-100" id="continueButton">Continue</button>
-                <a href="#" class="btn btn-success w-100 mt-2 d-none" id="review">Review Details</a>
-            </div>
+      <div id="droppingPointSection" class="dropping-point">
+        <h5>Dropping Points</h5>
+        <div id="droppingPointsContainer" class="dropping-points">
+          <p>Loading dropping points...</p>
         </div>
+      </div>
     </div>
-</div>
+  </div>
+ <!-- Selected Seat Info Section -->
+ <div id="selectedSeatInfo" class="section-container mb-4">
+    <h5 class="text-center">Selected Seat</h5>
+    <p id="selectedSeatDetails" class="text-center">No seat selected yet.</p>
+  </div>
+  <!-- Continue Button Section -->
+  <div id="continueButtonContainer" class="section-container text-center">
+    <button class="btn btn-success" id="continueButton">Continue</button>
+    <a href="#" class="btn btn-success mt-2 d-none" id="review">Review Details</a>
+  </div>
 </div>
         <!-- Passenger Information Section -->
         <!-- Trigger Modal Button (Hidden Initially) -->
@@ -116,16 +117,27 @@
 </div>
 
 <script>
+  document.getElementById('loadingSpinner').classList.remove('d-none');
+
+  document.addEventListener('DOMContentLoaded', () => {
+    showLoadingSpinner();
+    setTimeout(() => {
+        hideLoadingSpinner();
+    }, 4000); // Spinner should hide after 4 seconds
+});
+// Helper to show the spinner
+function showLoadingSpinner() {
+    document.getElementById('loadingSpinner').classList.remove('d-none');
+}
+
+// Helper to hide the spinner
+function hideLoadingSpinner() {
+    document.getElementById('loadingSpinner').classList.add('d-none');
+}
   // Helper function to format date into a readable format (Date)
 function formatDate(dateTimeString) {
     const date = new Date(dateTimeString);
     return date.toLocaleDateString();  // This will format it based on the locale, e.g. "MM/DD/YYYY"
-}
-
-// Helper function to format time into a readable format (Time)
-function formatTime(dateTimeString) {
-    const date = new Date(dateTimeString);
-    return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true });
 }
   // Helper function to format time into a readable format
 function formatTime(dateTimeString) {
@@ -178,6 +190,9 @@ function fetchSeatLayout() {
         showError(error.message);
     });
 }
+ // Pass the correct image URLs from Laravel to JavaScript
+ const availableSeatImage = "{{ asset('assets/seat.png') }}";
+    const bookedSeatImage = "{{ asset('assets/seat.png') }}";
 function renderSeatLayout(seatDetails) {
     const seatLayoutContainer = document.getElementById('seatLayout');
     if (!seatDetails || seatDetails.length === 0) {
@@ -194,6 +209,7 @@ function renderSeatLayout(seatDetails) {
             const seatName = seat.SeatName || 'N/A';
             const seatPrice = seat.Price?.PublishedPrice || 0;
             const seatStatusText = seat.SeatStatus ? 'Available' : 'Booked';
+            const seatImage = seat.SeatStatus ? availableSeatImage : bookedSeatImage; // Replace with your actual image URLs
 
             layoutHTML += `
                 <div class="seat-container">
@@ -201,10 +217,17 @@ function renderSeatLayout(seatDetails) {
                         class="seat ${seatClass}" 
                         onclick='selectSeat(this, ${JSON.stringify(seat)})'
                         data-seat='${JSON.stringify(seat)}'>
-                        <span class="seat-number">${seatName}</span>
+                          <div class="seat-image-container">
+                <span class="seat-number">${seatName}</span>  <!-- Seat Number -->
+                <img src="${seatImage}" alt="Seat Image" class="seat-image">  <!-- Seat Image -->
+            </div>
                     </div>
-                    <small class="seat-status">${seatStatusText}</small>
-                    <small class="seat-price">₹${seatPrice}</small>
+
+                    <!-- Seat status and price -->
+                    <div class="seat-info">
+                        <small class="seat-status">${seatStatusText}</small>
+                        <small class="seat-price">₹${seatPrice}</small>
+                    </div>
                 </div>
             `;
         });
@@ -316,10 +339,10 @@ function renderPickupPoints(pickupPoints) {
         <h6 style="margin-top: 20px;margin-bottom: 10px;">${point.CityPointName}</h6> <!-- Added margin-bottom to create space -->
         <!-- Pickup details in a flex layout -->
         <div class="d-flex justify-content-between align-items-start" style="flex-wrap: wrap;">
-            <p><strong>&#x1F4CD;</strong> ${point.CityPointLocation}</p> <!-- Location 📍 -->
-            <p><strong>&#x1F3E0;</strong> ${point.CityPointAddress}</p> <!-- Address 🏠 -->
-            <p><strong>&#x1F3DB;</strong> ${point.CityPointLandmark}</p> <!-- Landmark 🏛️ -->
-            <p><strong>&#x1F4DE;</strong> ${point.CityPointContactNumber || 'N/A'}</p> <!-- Contact 📞 -->
+            <p><strong>&#x1F4CD;Location:</strong> ${point.CityPointLocation}</p> <!-- Location 📍 -->
+            <p><strong>&#x1F3E0;Address:</strong> ${point.CityPointAddress}</p> <!-- Address 🏠 -->
+            <p><strong>&#x1F3DB;Landmark:</strong> ${point.CityPointLandmark}</p> <!-- Landmark 🏛️ -->
+            <p><strong>&#x1F4DE;Contact:</strong> ${point.CityPointContactNumber || 'N/A'}</p> <!-- Contact 📞 -->
             <!-- Select Button -->
             <button class="btn btn-success btn-sm mt-2" 
                 onclick="selectPickupPoint(${point.CityPointIndex}, '${point.CityPointName}')">
@@ -558,15 +581,16 @@ function blockSeat(passengerData) {
 // });
 </script>
 <style>
+  .seat-image {
+    width: 50px; /* Adjust as per your requirements */
+    height: auto;
+    display: block;
+    margin: 0 auto; /* Center the image */
+}
 /* Main Container for Bus Booking */
 #busBookingContainer {
-  display: flex;
-  justify-content: space-between;
-  gap: 20px;
   padding: 20px;
-  flex-wrap: wrap; /* Enables wrapping for smaller screens */
 }
-
 /* Container for Pickup and Dropping Points */
 .pickup-dropping-container {
   display: flex;
@@ -610,28 +634,67 @@ function blockSeat(passengerData) {
   color: #555;
 }
 
-/* Seat Available and Booked Status */
+
+/* Seat Image Styling */
+.seat {
+    width: 60px; /* Adjust size as necessary */
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 5px;
+    position: relative;
+    background-size: cover;
+    background-position: center;
+    transition: background-color 0.3s ease;
+}
+
+/* Seat Status Classes (will be applied dynamically) */
 .seat-available {
-    background-color: #28a745; /* Green */
-    cursor: pointer;
+    background-color: transparent;
 }
 
 .seat-booked {
-    background-color: #dc3545; /* Red */
-    cursor: not-allowed;
+    background-color: #6c757d;
 }
 
-/* Buttons Styling */
-button.btn-success {
-  font-size: 14px;
-  padding: 8px 15px;
-  width: 100%; /* Full width for better usability */
-  border-radius: 5px;
+.seat-selected {
+    background-color: #28a745; /* Green for selected */
 }
 
-button.btn-success:hover {
-  background-color: #218838;
-  color: #fff;
+/* Seat Info (Status and Price) */
+.seat-info {
+    text-align: center;
+    font-size: 0.8rem;
+    color: #6c757d;
+    margin-top: 4px;
+}
+
+/* Seat Selection Layout */
+.bus-seats {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
+}
+.seat-number {
+    position: absolute;
+    top: 10px;  /* Position the seat name above the image */
+    left: 50%;
+    transform: translateX(-50%);  /* Center horizontally */
+    font-size: 16px;  /* Adjust font size */
+    color: black;  /* Make the seat name text black */
+    font-weight: bold;  /* Optional: Make it bold */
+    z-index: 1;  /* Ensure the seat name appears above the image */
+}
+.seat-image-container {
+    position: relative;  /* Allow absolute positioning for the seat name */
+    text-align: center;  /* Center the content */
+}
+.seat-container {
+    display: flex;
+    flex-direction: column;  /* Stack elements vertically */
+    align-items: center;     /* Center content horizontally */
 }
 
 .seat-status {
@@ -641,48 +704,43 @@ button.btn-success:hover {
     margin-top: 4px;
 }
 
-/* Seat Selection */
-.bus-seats {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 10px;
+#seatLayoutContainer {
+  text-align: center;
 }
 
-.seat {
-  width: 45px;
-  height: 45px;
-  background-color: #007bff;
-  color: white;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 5px;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
-}
-
-.seat-available { background-color: #007bff; }
-.seat-booked { background-color: #6c757d; cursor: not-allowed; }
-.seat-selected { background-color: #28a745; }
-
-.seat:hover {
-  background-color: #0056b3; /* Darker blue on hover */
-}
-
-/* Selected Seat Info */
+/* Selected Seat Info Section */
 #selectedSeatInfo {
   margin-top: 10px;
   margin-bottom: 10px;
   padding: 15px;
   background-color: #f8f9fa;
   border-radius: 5px;
+  text-align: center; /* Center the text */
 }
 
 #selectedSeatDetails {
   font-weight: bold;
 }
-
+#continueButtonContainer {
+  margin-top: 20px;
+  text-align: center; /* Center the button horizontally */
+}
+#continueButton {
+  background-color: #28a745;
+  border-radius: 30px; /* Rounded corners */
+  padding: 20px 40px; /* Increased padding for larger button */
+  font-size: 24px; /* Larger text size */
+  font-weight: bold; /* Bold text */
+  color: white;
+  border: none;
+  width: 80%; /* Increased width to make it larger */
+  max-width: 400px; /* Limit the maximum width for very large screens */
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+#continueButton:hover {
+  background-color: #218838; /* Darker green on hover */
+}
 /* Book Now Button */
 #payNowButton {
   display: block;
@@ -737,7 +795,6 @@ button.btn-success:hover {
   .pickup-point-item p, .dropping-point-item p {
     font-size: 12px;
   }
-
   button.btn-success {
     font-size: 12px;
     padding: 8px;
@@ -772,23 +829,6 @@ button.btn-success:hover {
   #payNowButton {
     font-size: 14px;
     padding: 10px;
-  }
-
-  #continueButton {
-    background-color: #28a745; /* Green background color */
-    border-radius: 30px; /* Big rounded corners */
-    padding: 15px; /* Increase the size of the button */
-    font-size: 18px; /* Larger text */
-    font-weight: bold; /* Bold text */
-    border: none; /* Remove default border */
-    color: white; /* White text */
-    transition: background-color 0.3s; /* Smooth transition for hover effect */
-  }
-
-  /* Hover effect for better visual feedback */
-  #continueButton:hover {
-    background-color: #218838; /* Darker green on hover */
-    color: white; /* Keep the text white on hover */
   }
 }
 </style>
