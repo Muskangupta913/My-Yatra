@@ -159,7 +159,13 @@ form {
         }
 </style>
 
-
+<script>
+    const apiConfig = {!! json_encode([
+        'client_id' => config('api.client_id'),
+        'username' => config('api.username'),
+        'password' => config('api.password'),
+    ]) !!};
+</script>
      <!-- Add Font Awesome for Icons -->
      <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
 </head>
@@ -206,8 +212,11 @@ form {
                     <input type="text" id="cvv" placeholder="123" required>
                 </div>
                 <div class="submit-btn-container">
-                    <button type="submit" class="submit-btn">Checkout</button>
+                <a href="#" id="payNowButton" class="submit-btn">Pay Now</a>
                 </div>
+                <div class="submit-btn-container">
+    <button type="button" id="cancelBookingButton" class="submit-btn">Cancel Booking</button>
+</div>
             </div>
 
             <div class="payment-option qr-option active" id="qr-option">
@@ -284,6 +293,8 @@ form {
         document.getElementById("modal-form").addEventListener("submit", function(event) {
     event.preventDefault();  // Prevent the form from submitting normally
 
+    
+
     // Collect modal form values
     const name = document.getElementById("modal-name").value.trim();
     const email = document.getElementById("modal-email").value.trim();
@@ -325,6 +336,184 @@ form {
     });
 });
 
+
+document.getElementById("payNowButton").addEventListener("click", function (event) {
+    event.preventDefault();
+
+    // Extract URL parameters
+    const urlParams = new URLSearchParams(window.location.search);
+    const traceId = urlParams.get('TraceId');
+    const amount = urlParams.get("amount");
+    const passengerDataStr = urlParams.get('PassengerData');
+    const resultIndex = urlParams.get('ResultIndex');
+    
+    if (!traceId || !amount || !passengerDataStr) {
+        alert("Missing required parameters!");
+        return;
+    }
+
+    // Parse the passenger data
+    let passengerData;
+    try {
+        passengerData = JSON.parse(decodeURIComponent(passengerDataStr));
+    } catch (e) {
+        console.error("Error parsing passenger data:", e);
+        alert("Invalid passenger data format");
+        return;
+    }
+
+    // First call the balance log API
+    fetch(`/balance-log?TraceId=${traceId}&amount=${amount}`, {
+        method: "GET",
+        headers: {
+            "Content-Type": "application/json",
+        },
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            const balanceLog = data.balanceLogs[0];
+            
+            if (balanceLog) {
+                // After successful balance log, prepare booking request
+                const bookingData = {
+                    ResultIndex: resultIndex, // Replace with actual value
+                    TraceId: traceId,
+                    BoardingPointId: 1, // Replace with actual value
+                    DroppingPointId: 1, // Replace with actual value
+                    RefID: "1",
+                    Passenger: [{
+                        LeadPassenger: true,
+                        PassengerId: 0,
+                        Title: passengerData.Title,
+                        FirstName: passengerData.FirstName,
+                        LastName: passengerData.LastName,
+                        Email: passengerData.Email,
+                        Phoneno: passengerData.Phoneno,
+                        Gender: passengerData.Gender,
+                        IdType: null,
+                        IdNumber: null,
+                        Address: passengerData.Address,
+                        Age: passengerData.Age,
+                        Seat: passengerData.SeatDetails || passengerData.Seat
+                    }]
+                };
+
+                // Get CSRF token
+                const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
+
+                // Make the booking API call
+                return fetch('/bookbus', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': csrfToken
+                    },
+                    body: JSON.stringify(bookingData)
+                });
+            } else {
+                throw new Error("No balance log found");
+            }
+        } else {
+            throw new Error(data.errorMessage || "Balance log failed");
+        }
+    })
+    .then(response => response.json())
+    .then(bookingResult => {
+        if (bookingResult.status === 'success') {
+            alert(`Booking Successful!\nTicket Number: ${bookingResult.data.TicketNo}\nStatus: ${bookingResult.data.BusBookingStatus}`);
+        } else {
+            alert(`Booking Failed: ${bookingResult.message}`);
+        }
+    })
+    .catch(error => {
+        console.error("Error:", error);
+        alert("An error occurred: " + error.message);
+    });
+});
+
+  
+    // Replace the existing cancel booking event listener with this
+document.getElementById("cancelBookingButton").addEventListener("click", function (event) {
+    event.preventDefault();
+
+    // Get TraceId and passenger data from URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const passengerDataStr = urlParams.get('PassengerData');
+    
+    if (!passengerDataStr) {
+        alert("Missing passenger data!");
+        return;
+    }
+
+    // Parse the passenger data
+    let passengerData;
+    try {
+        passengerData = JSON.parse(decodeURIComponent(passengerDataStr));
+    } catch (e) {
+        console.error("Error parsing passenger data:", e);
+        alert("Invalid passenger data format");
+        return;
+    }
+
+    // Extract BusId and SeatId from passenger data
+    const busId = String(passengerData.Seat?.SeatIndex || passengerData.SeatDetails?.SeatIndex);
+    const seatId = passengerData.Seat?.SeatName || passengerData.SeatDetails?.SeatName;
+    console.log(typeof busId, busId);
+
+    if (!busId || !seatId) {
+        alert("Required booking information not found!");
+        return;
+    }
+
+    // Show confirmation dialog
+    if (!confirm("Are you sure you want to cancel this booking?")) {
+        return;
+    }
+
+    // Prepare payload for cancel API
+    const payload = {
+        "EndUserIp": "1.1.1.1", // You might want to get actual IP
+        ClientId: apiConfig.client_id, // Use embedded config values
+    UserName: apiConfig.username,
+    Password: apiConfig.password,
+        'BusId': "11836",
+        'SeatId': seatId,
+        'Remarks': "User requested cancellation"
+    };
+
+    // Get CSRF token
+    const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
+
+    // Make the cancel API call
+    fetch("/cancelBus", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "X-CSRF-TOKEN": csrfToken
+        },
+        body: JSON.stringify(payload)
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        return response.json();
+    })
+    .then(data => {
+        if (data.status === 'success') {
+            alert("Booking cancelled successfully!");
+            // Optionally redirect to a different page
+            // window.location.href = '/booking-history';
+        } else {
+            alert("Failed to cancel booking: " + (data.message || "Unknown error"));
+        }
+    })
+    .catch(error => {
+        console.error("Error:", error);
+        alert("An error occurred while canceling the booking. Please try again later.");
+    });
+});
     </script>
 </body>
 </html>

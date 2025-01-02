@@ -208,7 +208,7 @@ document.addEventListener('DOMContentLoaded', function () {
         let busListingsHTML = '';
 
         buses.forEach(bus => {
-            const price = bus.Price; // Assuming Price is part of each bus object
+            const price = bus.Price; // Assuming Price is part of each bus objectzz
             busListingsHTML += `
                 <div class="card shadow-lg mb-4 w-100 rounded-lg bus-card">
                     <div class="card-body position-relative">
