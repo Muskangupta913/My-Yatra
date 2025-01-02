@@ -153,15 +153,7 @@ function fetchSeatLayout() {
         return;
     }
 
-    const loadingHtml = `
-        <div class="alert alert-info">
-            <div class="spinner-border spinner-border-sm me-2" role="status">
-                <span class="visually-hidden">Loading...</span>
-            </div>
-            Loading seat layout...
-        </div>
-    `;
-    document.getElementById('seatLayout').innerHTML = loadingHtml;
+    document.getElementById('seatLayout').innerHTML = '<div class="alert alert-info">Loading seat layout...</div>';
 
     fetch('/getSeatLayout', {
         method: 'POST',
@@ -174,18 +166,21 @@ function fetchSeatLayout() {
             ResultIndex: resultIndex
         })
     })
-    .then(response => response.json())
-    .then(data => {
-        if (data.status === true && Array.isArray(data.data)) {
-            renderSeatLayout(data.data);
-        } else {
-            throw new Error(data.message || 'Failed to load seat layout');
-        }
-    })
-    .catch(error => {
-        showError(error.message);
-    });
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === true && Array.isArray(data.data)) {
+                renderSeatLayout(data.data);
+            } else {
+                throw new Error(data.message || 'Failed to load seat layout');
+            }
+        })
+        .catch(error => {
+            showError(error.message);
+        });
 }
+
+const availableSeatImage = "{{ asset('assets/seat.png') }}";
+const bookedSeatImage = "{{ asset('assets/seat.png') }}";
 
 function renderSeatLayout(seatDetails) {
     const seatLayoutContainer = document.getElementById('seatLayout');
@@ -195,20 +190,9 @@ function renderSeatLayout(seatDetails) {
     }
 
     let layoutHTML = '<div class="bus-seats">';
-    
-    // Add a visual representation of the bus front
-    layoutHTML += `
-        <div class="bus-front mb-4">
-            <div class="text-center p-2 bg-secondary text-white rounded">
-                <small>Bus Front</small>
-            </div>
-        </div>
-    `;
-
-    seatDetails.forEach((row, rowIndex) => {
+    seatDetails.forEach(row => {
         if (Array.isArray(row)) {
             layoutHTML += '<div class="row">';
-            
             row.forEach(seat => {
                 if (seat && typeof seat === 'object') {
                     const seatClass = seat.SeatStatus ? 'seat-available' : 'seat-booked';
@@ -216,13 +200,13 @@ function renderSeatLayout(seatDetails) {
                     const seatPrice = seat.Price?.PublishedPriceRoundedOff || 0;
                     const seatStatusText = seat.SeatStatus ? 'Available' : 'Booked';
                     const ladiesSeatClass = seat.IsLadiesSeat ? 'ladies-seat' : '';
-                    
+
                     layoutHTML += `
                         <div class="seat-container">
                             <div 
                                 class="seat ${seatClass} ${ladiesSeatClass}"
                                 data-seat-index="${seat.SeatIndex}"
-                                onclick="handleSeatClick(this, ${JSON.stringify(seat).replace(/"/g, '&quot;')})">
+                                onclick="selectSeat(this, ${JSON.stringify(seat).replace(/"/g, '&quot;')})">
                                 <span class="seat-number">${seatName}</span>
                             </div>
                             <small class="seat-status">${seatStatusText}</small>
@@ -231,62 +215,29 @@ function renderSeatLayout(seatDetails) {
                     `;
                 }
             });
-
             layoutHTML += '</div>';
         }
     });
-
     layoutHTML += '</div>';
     seatLayoutContainer.innerHTML = layoutHTML;
 }
 
-function handleSeatClick(element, seatData) {
-    // Don't allow selecting booked seats
-    if (!seatData.SeatStatus) {
-        return;
-    }
+function selectSeat(element, seatData) {
+    if (element.classList.contains('seat-booked')) return;
 
-    // Remove previous selection
-    const previousSelected = document.querySelector('.seat-selected');
-    if (previousSelected) {
-        previousSelected.classList.remove('seat-selected');
-    }
-
-    // Add selection to clicked seat
+    document.querySelectorAll('.seat-selected').forEach(seat => seat.classList.remove('seat-selected'));
     element.classList.add('seat-selected');
 
-    // Update selected seat details
-    selectedSeat = seatData.SeatName;
-    selectedSeatDetails = seatData;
-
-    // Show selected seat information
     const selectedSeatInfo = document.getElementById('selectedSeatInfo');
-    const selectedSeatDetails = document.getElementById('selectedSeatDetails');
-    const continueButton = document.getElementById('continueButton');
-
     selectedSeatInfo.classList.remove('d-none');
-    selectedSeatDetails.innerHTML = `
-        <div class="mb-2">
-            <strong>Seat Number:</strong> ${seatData.SeatName}
-        </div>
-        <div class="mb-2">
-            <strong>Price:</strong> ₹${seatData.Price.PublishedPriceRoundedOff}
-        </div>
-        <div class="mb-2">
-            <strong>Type:</strong> ${seatData.IsLadiesSeat ? 'Ladies Seat' : 'General Seat'}
-        </div>
-    `;
-    continueButton.classList.remove('d-none');
+    selectedSeatInfo.querySelector('#selectedSeatDetails').innerText = 
+        `Seat: ${seatData.SeatName}, Price: ₹${seatData.Price.PublishedPrice}`;
+
+    document.getElementById('continueButton').classList.remove('d-none');
 }
 
-
-document.getElementById('continueButton')?.addEventListener('click', function() {
-    if (selectedSeatDetails) {
-        // Trigger the passenger details modal
-        document.getElementById('openPassengerDetailsModal').click();
-    } else {
-        showError('Please select a seat first.');
-    }
+document.getElementById('continueButton').addEventListener('click', function () {
+    document.getElementById('openPassengerDetailsModal').click();
 });
 
 
