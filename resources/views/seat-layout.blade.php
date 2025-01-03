@@ -396,14 +396,14 @@ function fetchBoardingDetails() {
 
 function renderPickupPoints(points) {
     const container = document.getElementById('pickupPointsContainer');
-    
+
     if (!points || points.length === 0) {
         container.innerHTML = '<div class="alert alert-warning">No pickup points available</div>';
         return;
     }
 
-    container.innerHTML = points.map((point, index) => `
-        <div class="pickup-point-item" data-point-id="${index}">
+    container.innerHTML = points.map(point => `
+        <div class="pickup-point-item" data-point-index="${point.index}">
             <div class="position-relative p-3">
                 <!-- Time Badge -->
                 <span class="pickup-time position-absolute top-0 end-0 m-2">
@@ -421,11 +421,11 @@ function renderPickupPoints(points) {
                     <p><i class="fas fa-phone"></i> ${point.contact_number}</p>
                 </div>
                 
-               <!-- Select Button -->
-<button class="btn btn-success btn-sm mt-3 select-btn" 
-    onclick="selectPickupPoint(${index}, '${point.name.replace(/'/g, "\\'")}')">
-    <i class="fas fa-check-circle"></i> Select Point
-</button>
+                <!-- Select Button -->
+                <button class="btn btn-outline-success btn-sm mt-3 select-btn" 
+                    onclick="selectPickupPoint(${point.index}, '${point.name.replace(/'/g, "\\'")}')">
+                    <i class="fas fa-check-circle"></i> Select Point
+                </button>
             </div>
         </div>
     `).join('');
@@ -433,14 +433,14 @@ function renderPickupPoints(points) {
 
 function renderDroppingPoints(points) {
     const container = document.getElementById('droppingPointsContainer');
-    
+
     if (!points || points.length === 0) {
         container.innerHTML = '<div class="alert alert-warning">No dropping points available</div>';
         return;
     }
 
-    container.innerHTML = points.map((point, index) => `
-        <div class="dropping-point-item" data-point-id="${index}">
+    container.innerHTML = points.map(point => `
+        <div class="dropping-point-item" data-point-index="${point.index}">
             <div class="position-relative p-3">
                 <!-- Time Badge -->
                 <span class="pickup-time position-absolute top-0 end-0 m-2">
@@ -450,16 +450,16 @@ function renderDroppingPoints(points) {
                 <!-- Point Name and Location -->
                 <h6 class="mb-3">${point.name}</h6>
                 <p><i class="fas fa-map-marker-alt"></i> ${point.location}</p>
-               <!-- Select Button -->
-<button class="btn btn-success btn-sm mt-3 select-btn" 
-    onclick="selectPickupPoint(${index}, '${point.name.replace(/'/g, "\\'")}')">
-    <i class="fas fa-check-circle"></i> Select Point
-</button>
+                
+                <!-- Select Button -->
+                <button class="btn btn-outline-success btn-sm mt-2 select-btn" 
+                    onclick="selectDroppingPoint(${point.index}, '${point.name.replace(/'/g, "\\'")}')">
+                    <i class="fas fa-check-circle"></i> Select Point
+                </button>
             </div>
         </div>
     `).join('');
 }
-
 
 document.getElementById('passengerDetailsForm').addEventListener('submit', function(e) {
     e.preventDefault();
@@ -489,21 +489,22 @@ document.getElementById('passengerDetailsForm').addEventListener('submit', funct
 });
 
 // Pickup and Dropping point functions remain the same
-function selectPickupPoint(pointId, pointName) {
-    selectedBoardingPointId = pointId;
-    selectedBoardingPointName = pointName;
+function selectPickupPoint(index, name) {
+    selectedBoardingPointId = index;
+    selectedBoardingPointName = name;
 
-    document.querySelectorAll('.pickup-point').forEach(point => point.classList.remove('selected'));
-    document.querySelector(`.pickup-point[data-point-id="${pointId}"]`).classList.add('selected');
+    document.querySelectorAll('.pickup-point-item').forEach(point => point.classList.remove('selected'));
+    document.querySelector(`.pickup-point-item[data-point-index="${index}"]`).classList.add('selected');
 }
 
-function selectDroppingPoint(pointId, pointName) {
-    selectedDroppingPointId = pointId;
-    selectedDroppingPointName = pointName;
+function selectDroppingPoint(index, name) {
+    selectedDroppingPointId = index;
+    selectedDroppingPointName = name;
 
-    document.querySelectorAll('.dropping-point').forEach(point => point.classList.remove('selected'));
-    document.querySelector(`.dropping-point[data-point-id="${pointId}"]`).classList.add('selected');
+    document.querySelectorAll('.dropping-point-item').forEach(point => point.classList.remove('selected'));
+    document.querySelector(`.dropping-point-item[data-point-index="${index}"]`).classList.add('selected');
 }
+
 
 function blockSeat(passengerData) {
     if (selectedBoardingPointId === undefined || selectedDroppingPointId === undefined) {
@@ -524,6 +525,8 @@ function blockSeat(passengerData) {
         ResultIndex: resultIndex,
         BoardingPointId: selectedBoardingPointId,
         DroppingPointId: selectedDroppingPointId,
+        BoardingPointName: selectedBoardingPointName, // Include selected boarding point name in the payload
+        DroppingPointName: selectedDroppingPointName, // Include selected dropping point name in the payload
         RefID: "1",
         Passenger: [passengerData] // Send passenger data as an array
     };
@@ -555,8 +558,14 @@ function blockSeat(passengerData) {
                 TraceId: traceId,
                 ResultIndex: resultIndex,
                 PassengerData: JSON.stringify(data.data.Passengers[0]),
-                BoardingPoint: JSON.stringify(data.data.BoardingPointdetails),
-                DroppingPoint: JSON.stringify(data.data.DroppingPointsDetails),
+                BoardingPoint: JSON.stringify({
+                        Id: data.data.BoardingPointdetails.Id,
+                        Name: selectedBoardingPointName // Use the selected name
+                    }),
+                    DroppingPoint: JSON.stringify({
+                        Id: data.data.DroppingPointsDetails.Id,
+                        Name: selectedDroppingPointName // Use the selected name
+                    }),
                 BusDetails: JSON.stringify({
                     DepartureTime: data.data.DepartureTime,
                     ArrivalTime: data.data.ArrivalTime,

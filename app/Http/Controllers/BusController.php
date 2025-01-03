@@ -208,6 +208,7 @@ class BusController extends Controller
     
             $formattedBoardingPoints = array_map(function ($point) {
                 return [
+                    'index' => $point['CityPointIndex'] ?? 'N/A',
                     'name' => $point['CityPointName'] ?? 'N/A',
                     'address' => $point['CityPointAddress'] ?? 'N/A',
                     'landmark' => $point['CityPointLandmark'] ?? 'N/A',
@@ -216,9 +217,10 @@ class BusController extends Controller
                     'time' => $point['CityPointTime'] ?? 'N/A',
                 ];
             }, $boardingPoints);
-    
+
             $formattedDroppingPoints = array_map(function ($point) {
                 return [
+                    'index' => $point['CityPointIndex'] ?? 'N/A',
                     'name' => $point['CityPointName'] ?? 'N/A',
                     'location' => $point['CityPointLocation'] ?? 'N/A',
                     'time' => $point['CityPointTime'] ?? 'N/A',
@@ -504,7 +506,7 @@ public function bookBus(Request $request)
         $response = Http::withHeaders([
             'Content-Type' => 'application/json',
              'Api-Token' => $this->ApiToken,  // Use the class property
-        ])->post('https://bus.srdvtest.com/v5/rest/Balance', $payload);
+        ])->post('https://bus.srdvapi.com/v8/rest/Balance', $payload);
 
         if ($response->successful()) {
             $data = $response->json();
@@ -523,7 +525,7 @@ public function bookBus(Request $request)
     }
 
 
-   public function handlePayment(Request $request)
+   public function balance(Request $request)
 {
     $traceId = $request->input('TraceId');
    $invoiceAmount = $request->input('Amount'); // Change 'InvoiceAmount' to 'amount'
