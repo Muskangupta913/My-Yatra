@@ -18,10 +18,9 @@
 <!-- Add the CSRF meta tag in the header -->
 <meta name="csrf-token" content="{{ csrf_token() }}">
 <div class="container mt-4" id="busBookingContainer">
- <!-- Seat Layout Section -->
- <h3 class="text-center">Select Seats</h3>
 <div class="section-container mb-4" id="seatLayoutContainer">
-    <div id="seatLayout" class="bus-seats" data-trace-id="" data-result-index=""></div>
+    <h3 class="text-center">Select Seats</h3>
+    <div id="seatLayout" class="bus-seats"></div>
 </div>
 
 <!-- Right Section: Pickup and Dropping Points -->
@@ -266,32 +265,31 @@ function renderSeatLayout(seatDetails) {
         if (Array.isArray(row)) {
             layoutHTML += '<div class="row">';
 
-            // Special handling for Row 3 (middle gap)
-            if (rowIndex === 2) {
+            // Special handling for rows with a middle gap (e.g., Row 3)
+            if (rowIndex === 2) {  // Row 3 (or any row you want to customize)
                 layoutHTML += '<div class="row middle-gap-row">';
 
-                // Left Side Seats (Seats 1 and 2)
+                // Left side seats (Seats 1, 2 for example)
+                layoutHTML += '<div class="left-seats">';
                 row.slice(0, 2).forEach(seat => {
                     if (seat && typeof seat === 'object') {
                         layoutHTML += renderSeat(seat);
                     }
                 });
+                layoutHTML += '</div>';
 
-                // Right Side Seats (Seats 3 to 12)
-                row.slice(2, 12).forEach(seat => {
+                // Right side seats (Seats 3 onwards)
+                layoutHTML += '<div class="right-seats">';
+                row.slice(2).forEach(seat => {
                     if (seat && typeof seat === 'object') {
                         layoutHTML += renderSeat(seat);
                     }
                 });
+                layoutHTML += '</div>';
 
-                // Only display 1 seat for the last column (13th seat)
-                if (row[12]) {
-                    layoutHTML += renderSeat(row[12]);
-                }
-
-                layoutHTML += '</div>'; // End of middle gap row
+                layoutHTML += '</div>'; // End of middle-gap row
             } else {
-                // For Rows 1, 2, 4, and 5: Display seats normally
+                // For other rows, render seats normally
                 row.forEach(seat => {
                     if (seat && typeof seat === 'object') {
                         layoutHTML += renderSeat(seat);
@@ -306,7 +304,6 @@ function renderSeatLayout(seatDetails) {
     layoutHTML += '</div>'; // End of bus seats
     seatLayoutContainer.innerHTML = layoutHTML; // Render directly into the seat layout container
 }
-
 
 // Rest of the code remains the same
 function selectSeat(element, seatData) {
@@ -665,8 +662,8 @@ function blockSeat(passengerData) {
   color: #555;
 }
 .seat {
-  width: 50px; /* Adjust size as necessary */
-  height: 50px;
+  width: 40px; /* Adjust size as necessary */
+  height: 40px;
   background-color: transparent;
   border-radius: 5px;
   display: flex;
