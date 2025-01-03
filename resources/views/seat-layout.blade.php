@@ -403,125 +403,61 @@ document.getElementById('passengerDetailsForm').addEventListener('submit', funct
 
     const passengerData = {
         LeadPassenger: true,
+        PassengerId: 0,
         Title: document.getElementById('title').value,
         FirstName: document.getElementById('firstName').value,
         LastName: document.getElementById('lastName').value,
         Email: document.getElementById('email').value,
-        Phoneno: document.getElementById('phoneNumber').value,
-        Gender: parseInt(document.getElementById('gender').value, 10),
-        Age: parseInt(document.getElementById('age').value, 10),
+        Mobile: document.getElementById('phoneNumber').value, // Changed from Phoneno to Mobile
+        Gender: document.getElementById('gender').value,
+        IdType: null,
+        IdNumber: null,
+        Age: document.getElementById('age').value,
         Address: document.getElementById('address').value,
-        SeatDetails: selectedSeatDetails
+        SeatIndex: selectedSeatDetails.SeatIndex // Changed to just send SeatIndex
     };
 
     blockSeat(passengerData);
 });
 
-
-
-
-
-// Function to handle the selection of pickup point
-let selectedBoardingPointName = ''; // Store selected boarding point name
-let selectedDroppingPointName = ''; // Store selected dropping point name
-
-// Function to handle the selection of pickup point
+// Pickup and Dropping point functions remain the same
 function selectPickupPoint(pointId, pointName) {
-    selectedBoardingPointId = pointId; // Store the selected boarding point ID globally
-    selectedBoardingPointName = pointName; // Store the selected boarding point name globally
+    selectedBoardingPointId = pointId;
+    selectedBoardingPointName = pointName;
 
-    alert(`Pickup Point Selected: ${pointName}`);
-    console.log(`Selected Pickup: ID=${pointId}, Name=${pointName}`);
-
-    // Optional: Highlight the selected pickup point
     document.querySelectorAll('.pickup-point').forEach(point => point.classList.remove('selected'));
     document.querySelector(`.pickup-point[data-point-id="${pointId}"]`).classList.add('selected');
 }
 
-// Function to handle the selection of dropping point
 function selectDroppingPoint(pointId, pointName) {
-    selectedDroppingPointId = pointId; // Store the selected dropping point ID globally
-    selectedDroppingPointName = pointName; // Store the selected dropping point name globally
+    selectedDroppingPointId = pointId;
+    selectedDroppingPointName = pointName;
 
-    alert(`Dropping Point Selected: ${pointName}`);
-    console.log(`Selected Dropping: ID=${pointId}, Name=${pointName}`);
-
-    // Optional: Highlight the selected dropping point
     document.querySelectorAll('.dropping-point').forEach(point => point.classList.remove('selected'));
     document.querySelector(`.dropping-point[data-point-id="${pointId}"]`).classList.add('selected');
 }
 
-
-
-
-
-
-//block seat api
 function blockSeat(passengerData) {
-  console.log("Boarding Point ID:", selectedBoardingPointId);
- console.log("Dropping Point ID:", selectedDroppingPointId);
-
-
     if (selectedBoardingPointId === undefined || selectedDroppingPointId === undefined) {
         alert('Please select both boarding and dropping points before proceeding.');
         return;
     }
-
 
     const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
     const urlParams = new URLSearchParams(window.location.search);
     const traceId = urlParams.get('TraceId');
     const resultIndex = urlParams.get('ResultIndex');
 
-    // Ensure the Seat object is populated correctly
-    passengerData.Seat = {
-        SeatName: selectedSeatDetails.SeatName,
-        ColumnNo: parseInt(selectedSeatDetails.ColumnNo, 10), // Convert to integer
-        RowNo: parseInt(selectedSeatDetails.RowNo, 10), // Convert to integer
-        Height: 1, // Assuming a default value, adjust as necessary
-        IsLadiesSeat: false, // Assuming a default value, adjust as necessary
-        IsMalesSeat: false, // Assuming a default value, adjust as necessary
-        IsUpper: false, // Assuming a default value, adjust as necessary
-        SeatFare: selectedSeatDetails.Price.PublishedPrice, // Assuming this is the fare
-        SeatIndex: selectedSeatDetails.SeatIndex, // Assuming this is available
-        SeatType: 1, // Assuming a default value, adjust as necessary
-        Width: 1, // Assuming a default value, adjust as necessary
-        Price: {
-            CurrencyCode: "INR", // Assuming a default value, adjust as necessary
-            BasePrice: selectedSeatDetails.Price.BasePrice,
-            Tax: selectedSeatDetails.Price.Tax || 0,
-            OtherCharges: selectedSeatDetails.Price.OtherCharges || 0,
-            Discount: selectedSeatDetails.Price.Discount || 0,
-            PublishedPrice: selectedSeatDetails.Price.PublishedPrice,
-            PublishedPriceRoundedOff: selectedSeatDetails.Price.PublishedPriceRoundedOff || selectedSeatDetails.Price.PublishedPrice,
-            OfferedPrice: selectedSeatDetails.Price.OfferedPrice || selectedSeatDetails.Price.PublishedPrice,
-            OfferedPriceRoundedOff: selectedSeatDetails.Price.OfferedPriceRoundedOff || selectedSeatDetails.Price.PublishedPrice,
-            AgentCommission: selectedSeatDetails.Price.AgentCommission || 0,
-            AgentMarkUp: selectedSeatDetails.Price.AgentMarkUp || 0,
-            TDS: selectedSeatDetails.Price.TDS || 0,
-            GST: {
-                CGSTAmount: 0,
-                CGSTRate: 0,
-                CessAmount: 0,
-                CessRate: 0,
-                IGSTAmount: 0,
-                IGSTRate: 18,
-                SGSTAmount: 0,
-                SGSTRate: 0,
-                TaxableAmount: 0
-            }
-        }
-    };
-
     const payload = {
-        ResultIndex: resultIndex,
+        ClientId: "180189", // These should match your controller values
+        UserName: "MakeMy91",
+        Password: "MakeMy@910",
         TraceId: traceId,
+        ResultIndex: resultIndex,
         BoardingPointId: selectedBoardingPointId,
         DroppingPointId: selectedDroppingPointId,
-        BoardingPointName: selectedBoardingPointName, // Include selected boarding point name in the payload
-        DroppingPointName: selectedDroppingPointName, // Include selected dropping point name in the payload
         RefID: "1",
-        Passenger: [passengerData]
+        Passenger: [passengerData] // Send passenger data as an array
     };
 
     fetch('/block-seats', {
@@ -534,29 +470,44 @@ function blockSeat(passengerData) {
     })
     .then(response => {
         if (!response.ok) {
-            throw new Error('Network response was not ok ' + response.statusText);
+            return response.json().then(err => {
+                throw new Error(err.message || 'Failed to block seat');
+            });
         }
         return response.json();
     })
     .then(data => {
-        console.log(data);
-        if (data.status === 'success') {
-            alert('Seat successfully blocked!');
-             // Close the modal after seat is blocked
-             const passengerDetailsModal = bootstrap.Modal.getInstance(document.getElementById('passengerDetailsModal'));
-            passengerDetailsModal.hide();  // Close the modal
-            const bookingDetails = data.data;
+        if (data.status === true) { // Changed from 'success' to true
+            // Close the modal
+            const passengerDetailsModal = bootstrap.Modal.getInstance(document.getElementById('passengerDetailsModal'));
+            passengerDetailsModal.hide();
 
-            const bookingPageUrl = `/booking?TraceId=${traceId}&PassengerData=${encodeURIComponent(JSON.stringify(passengerData))}&BoardingPointName=${encodeURIComponent(selectedBoardingPointName)}&DroppingPointName=${encodeURIComponent(selectedDroppingPointName)}&SeatNumber=${encodeURIComponent(selectedSeatDetails.SeatName)}&Price=${encodeURIComponent(selectedSeatDetails.Price.PublishedPrice)}&ResultIndex=${encodeURIComponent(resultIndex)}`;
-         // Set the href attribute to the booking page URL
+            // Create booking page URL with necessary data
+            const bookingPageUrl = `/booking?` + new URLSearchParams({
+                TraceId: traceId,
+                ResultIndex: resultIndex,
+                PassengerData: JSON.stringify(data.data.Passengers[0]),
+                BoardingPoint: JSON.stringify(data.data.BoardingPointdetails),
+                DroppingPoint: JSON.stringify(data.data.DroppingPointsDetails),
+                BusDetails: JSON.stringify({
+                    DepartureTime: data.data.DepartureTime,
+                    ArrivalTime: data.data.ArrivalTime,
+                    BusType: data.data.BusType,
+                    ServiceName: data.data.ServiceName,
+                    TravelName: data.data.TravelName
+                }),
+                Price: JSON.stringify(data.data.Price),
+                CancellationPolicy: JSON.stringify(data.data.CancellationPolicy)
+            }).toString();
+
+            // Update UI elements
             document.getElementById('review').setAttribute('href', bookingPageUrl);
+            document.getElementById('continueButton').classList.add('d-none');
             document.getElementById('review').classList.remove('d-none');
-             // Hide the Continue button and show the Review Details button in its place
-             document.getElementById('continueButton').classList.add('d-none');
-            document.getElementById('review').classList.remove('d-none');
+
+            alert('Seat successfully blocked!');
         } else {
             throw new Error(data.message || 'Failed to block seat');
-            
         }
     })
     .catch(error => {
@@ -564,7 +515,6 @@ function blockSeat(passengerData) {
         alert(`Error: ${error.message}`);
     });
 }
-
 </script>
 <style>
 /* Main Container for Bus Booking */
