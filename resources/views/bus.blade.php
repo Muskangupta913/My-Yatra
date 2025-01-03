@@ -2,7 +2,21 @@
 @section('title', 'Available Bus')
 @section('content')
 <div class="container mt-4" id="busResultsContainer">
-    <h2 class="text-center mb-4">🚌 Bus Search Results 🚌</h2>
+    <h4 class="text-center mb-4" style="font-size: 2rem; font-weight: bold; color: #2c3e50; text-transform: uppercase; letter-spacing: 1px; padding: 20px; background-color:rgb(196, 198, 218); border-radius: 10px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);">
+    Buses from 
+    <span style="color: #2980b9; font-size: 1.8rem; font-weight: bold;">
+        {{ request('source_city') }}
+    </span> 
+    to 
+    <span style="color: #e74c3c; font-size: 1.8rem; font-weight: bold;">
+        {{ request('destination_city') }}
+    </span>
+</h4>
+    <p><strong>Departure Date:</strong> {{ request('depart_date') }}</p>
+
+    <!-- Rest of the content (filters and bus listings) -->
+</div>
+
 
     <!-- Filter Sidebar -->
     <div class="row">
@@ -19,10 +33,10 @@
                     </div>
 
                     <!-- Departure Time Filter -->
-                    <div class="mb-3">
+                    <!-- <div class="mb-3">
                         <label for="departureTime" class="form-label">Departure Time</label>
                         <input type="datetime-local" id="departureTime" class="form-control form-control-lg">
-                    </div>
+                    </div> -->
 
                     <!-- Travel Name Filter -->
                    <div class="mb-3">
@@ -94,7 +108,7 @@ document.addEventListener('DOMContentLoaded', function () {
        // Apply Filters to Bus Data
     function applyFilters() {
         const busType = document.getElementById('busType').value;
-        const departureTime = document.getElementById('departureTime').value;
+        // const departureTime = document.getElementById('departureTime').value;
         const travelName = document.getElementById('travelName').value;
         const boardingPoint = document.getElementById('boardingPoint').value;
         const droppingPoint = document.getElementById('droppingPoint').value;
@@ -109,9 +123,9 @@ document.addEventListener('DOMContentLoaded', function () {
             }
 
             // Filter by Departure Time (if selected)
-            if (departureTime && new Date(bus.DepartureTime) > new Date(departureTime)) {
-                isValid = false;
-            }
+            // if (departureTime && new Date(bus.DepartureTime) > new Date(departureTime)) {
+            //     isValid = false;
+            // }
 
             // Filter by Travel Name
             if (travelName && bus.TravelName !== travelName) {
@@ -142,7 +156,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Event listeners for filter inputs
     document.getElementById('busType').addEventListener('change', applyFilters);
-    document.getElementById('departureTime').addEventListener('change', applyFilters);
+    // document.getElementById('departureTime').addEventListener('change', applyFilters);
     document.getElementById('travelName').addEventListener('change', applyFilters);
     document.getElementById('boardingPoint').addEventListener('change', applyFilters);
     document.getElementById('droppingPoint').addEventListener('change', applyFilters);
@@ -226,7 +240,11 @@ document.addEventListener('DOMContentLoaded', function () {
                        <div class="d-flex justify-content-between align-items-center mb-3">
                            <h5 class="card-title text-primary font-weight-bold" style="font-size: 1.5rem;">${bus.TravelName}</h5>
                        </div>
-                           <p class="badge badge-pill" style="background-color: #007bff; color: white; font-size: 1.1rem; padding: 0.5rem 1rem;">${bus.BusType}</p>
+                          <p class="badge badge-pill bus-type-badge" style="background-color: #007bff; color: white; font-size: 1.1rem; padding: 0.5rem 1rem;">
+    ${bus.BusType}
+</p>
+
+
 
                          <!-- Icons in Left Corner -->
                            <div style="position: absolute; bottom: 10px; left: 10px; display: flex; gap: 10px; align-items: center;">
@@ -446,6 +464,14 @@ select:focus, input[type="datetime-local"]:focus, input[type="text"]:focus {
     font-size: 1rem;
     color: #333;
     font-weight: 600;
+}
+.badge {
+    max-width: 100%; /* Ensures the badge stays within the parent container */
+    white-space: nowrap; /* Prevents text from wrapping to a new line */
+    overflow: hidden; /* Hides overflowed text */
+    text-overflow: ellipsis; /* Adds ellipsis to overflowed text */
+    display: inline-block;
+    vertical-align: middle;
 }
 </style>
 
