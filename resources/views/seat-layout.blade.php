@@ -19,8 +19,8 @@
 <meta name="csrf-token" content="{{ csrf_token() }}">
 <div class="container mt-4" id="busBookingContainer">
  <!-- Seat Layout Section -->
+ <h3 class="text-center">Select Seats</h3>
 <div class="section-container mb-4" id="seatLayoutContainer">
-    <h3 class="text-center">Select Seats</h3>
     <div id="seatLayout" class="bus-seats" data-trace-id="" data-result-index=""></div>
 </div>
 
@@ -186,200 +186,129 @@ function fetchSeatLayout() {
             ResultIndex: resultIndex
         })
     })
-    .then(response => response.json())
-    .then(data => {
-        if (data.status === true && Array.isArray(data.data)) {
-            renderSeatLayout(data.data);
-        } else {
-            throw new Error(data.message || 'Failed to load seat layout');
-        }
-    })
-    .catch(error => {
-        showError(error.message);
-    });
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === true) {
+                // Convert both formats to a consistent array format
+                const normalizedData = normalizeLayoutData(data.data);
+                renderSeatLayout(normalizedData);
+            } else {
+                throw new Error(data.message || 'Failed to load seat layout');
+            }
+        })
+        .catch(error => {
+            showError(error.message);
+        });
 }
  // Pass the correct image URLs from Laravel to JavaScript
  const availableSeatImage = "{{ asset('assets/seat.png') }}";
  const bookedSeatImage = "{{ asset('assets/seat.png') }}";
 
- function renderSeatLayout(seatDetails) {
+function normalizeLayoutData(data) {
+    // If data is already an array, it's in the second format
+    if (Array.isArray(data)) {
+        return data;
+    }
+    
+    // If data is an object, convert it to array format
+    const rows = [];
+    Object.keys(data).forEach(rowKey => {
+        const rowData = [];
+        Object.keys(data[rowKey]).forEach(seatKey => {
+            rowData.push(data[rowKey][seatKey]);
+        });
+        if (rowData.length > 0) {
+            rows.push(rowData);
+        }
+    });
+    return rows;
+}
+
+function renderSeatLayout(seatDetails) {
     const seatLayoutContainer = document.getElementById('seatLayout');
+    
     if (!seatDetails || !Array.isArray(seatDetails) || seatDetails.length === 0) {
         showError('No seat layout data available.');
         return;
     }
 
-    let layoutHTML = '';  // Removed the bus-seats-container wrapper
+    let layoutHTML = '<div class="bus-seats">';
 
+    // Helper function to render individual seats
+    function renderSeat(seat) {
+        const seatClass = seat.SeatStatus ? 'seat-available' : 'seat-booked';
+        const seatName = seat.SeatName || 'N/A';
+        const seatPrice = seat.Price?.PublishedPriceRoundedOff || 0;
+        const seatStatusText = seat.SeatStatus ? 'Available' : 'Booked';
+        const seatImage = seat.SeatStatus ? availableSeatImage : bookedSeatImage;
+
+        return `
+            <div class="seat-container">
+                <div 
+                    class="seat ${seatClass}" 
+                    onclick='selectSeat(this, ${JSON.stringify(seat)})'
+                    data-seat='${JSON.stringify(seat)}'>
+                    <div class="seat-image-container">
+                        <span class="seat-number">${seatName}</span>
+                        <img src="${seatImage}" alt="Seat Image" class="seat-image">
+                    </div>
+                </div>
+                <div class="seat-info">
+                    <small class="seat-status">${seatStatusText}</small>
+                    <small class="seat-price">₹${seatPrice}</small>
+                </div>
+            </div>
+        `;
+    }
+
+    // Iterate over each row
     seatDetails.forEach((row, rowIndex) => {
         if (Array.isArray(row)) {
+            layoutHTML += '<div class="row">';
+
+            // Special handling for Row 3 (middle gap)
             if (rowIndex === 2) {
-                // Row 3 (Middle gap with 5 seats: 2 on the left, 2 on the right, 1 in the middle)
                 layoutHTML += '<div class="row middle-gap-row">';
 
-                // Left Side Seats
+                // Left Side Seats (Seats 1 and 2)
                 row.slice(0, 2).forEach(seat => {
                     if (seat && typeof seat === 'object') {
-                        const seatClass = seat.SeatStatus ? 'seat-available' : 'seat-booked';
-                        const seatName = seat.SeatName || 'N/A';
-                        const seatPrice = seat.Price?.PublishedPriceRoundedOff || 0;
-                        const seatStatusText = seat.SeatStatus ? 'Available' : 'Booked';
-                        const seatImage = seat.SeatStatus ? availableSeatImage : bookedSeatImage;
-
-                        layoutHTML += `
-                            <div class="seat-container">
-                                <div 
-                                    class="seat ${seatClass}" 
-                                    onclick='selectSeat(this, ${JSON.stringify(seat)})'
-                                    data-seat='${JSON.stringify(seat)}'>
-                                    <div class="seat-image-container">
-                                        <span class="seat-number">${seatName}</span>
-                                        <img src="${seatImage}" alt="Seat Image" class="seat-image">
-                                    </div>
-                                </div>
-                                <div class="seat-info">
-                                    <small class="seat-status">${seatStatusText}</small>
-                                    <small class="seat-price">₹${seatPrice}</small>
-                                </div>
-                            </div>
-                        `;
+                        layoutHTML += renderSeat(seat);
                     }
                 });
 
-                // Right Side Seats
-                row.slice(2, 4).forEach(seat => {
+                // Right Side Seats (Seats 3 to 12)
+                row.slice(2, 12).forEach(seat => {
                     if (seat && typeof seat === 'object') {
-                        const seatClass = seat.SeatStatus ? 'seat-available' : 'seat-booked';
-                        const seatName = seat.SeatName || 'N/A';
-                        const seatPrice = seat.Price?.PublishedPriceRoundedOff || 0;
-                        const seatStatusText = seat.SeatStatus ? 'Available' : 'Booked';
-                        const seatImage = seat.SeatStatus ? availableSeatImage : bookedSeatImage;
-
-                        layoutHTML += `
-                            <div class="seat-container">
-                                <div 
-                                    class="seat ${seatClass}" 
-                                    onclick='selectSeat(this, ${JSON.stringify(seat)})'
-                                    data-seat='${JSON.stringify(seat)}'>
-                                    <div class="seat-image-container">
-                                        <span class="seat-number">${seatName}</span>
-                                        <img src="${seatImage}" alt="Seat Image" class="seat-image">
-                                    </div>
-                                </div>
-                                <div class="seat-info">
-                                    <small class="seat-status">${seatStatusText}</small>
-                                    <small class="seat-price">₹${seatPrice}</small>
-                                </div>
-                            </div>
-                        `;
+                        layoutHTML += renderSeat(seat);
                     }
                 });
 
-                // Single Seat in the middle (last position)
-                row.slice(4, 5).forEach(seat => {
-                    if (seat && typeof seat === 'object') {
-                        const seatClass = seat.SeatStatus ? 'seat-available' : 'seat-booked';
-                        const seatName = seat.SeatName || 'N/A';
-                        const seatPrice = seat.Price?.PublishedPriceRoundedOff || 0;
-                        const seatStatusText = seat.SeatStatus ? 'Available' : 'Booked';
-                        const seatImage = seat.SeatStatus ? availableSeatImage : bookedSeatImage;
-
-                        layoutHTML += `
-                            <div class="seat-container middle-seat">
-                                <div 
-                                    class="seat ${seatClass}" 
-                                    onclick='selectSeat(this, ${JSON.stringify(seat)})'
-                                    data-seat='${JSON.stringify(seat)}'>
-                                    <div class="seat-image-container">
-                                        <span class="seat-number">${seatName}</span>
-                                        <img src="${seatImage}" alt="Seat Image" class="seat-image">
-                                    </div>
-                                </div>
-                                <div class="seat-info">
-                                    <small class="seat-status">${seatStatusText}</small>
-                                    <small class="seat-price">₹${seatPrice}</small>
-                                </div>
-                            </div>
-                        `;
-                    }
-                });
+                // Only display 1 seat for the last column (13th seat)
+                if (row[12]) {
+                    layoutHTML += renderSeat(row[12]);
+                }
 
                 layoutHTML += '</div>'; // End of middle gap row
-            } else if (rowIndex === 0 || rowIndex === 1) {
-                // Row 1 and 2 (Left side seats)
-                layoutHTML += '<div class="row compact-row">';  // Compact row without big gaps
-
+            } else {
+                // For Rows 1, 2, 4, and 5: Display seats normally
                 row.forEach(seat => {
                     if (seat && typeof seat === 'object') {
-                        const seatClass = seat.SeatStatus ? 'seat-available' : 'seat-booked';
-                        const seatName = seat.SeatName || 'N/A';
-                        const seatPrice = seat.Price?.PublishedPriceRoundedOff || 0;
-                        const seatStatusText = seat.SeatStatus ? 'Available' : 'Booked';
-                        const seatImage = seat.SeatStatus ? availableSeatImage : bookedSeatImage;
-
-                        layoutHTML += `
-                            <div class="seat-container">
-                                <div 
-                                    class="seat ${seatClass}" 
-                                    onclick='selectSeat(this, ${JSON.stringify(seat)})'
-                                    data-seat='${JSON.stringify(seat)}'>
-                                    <div class="seat-image-container">
-                                        <span class="seat-number">${seatName}</span>
-                                        <img src="${seatImage}" alt="Seat Image" class="seat-image">
-                                    </div>
-                                </div>
-                                <div class="seat-info">
-                                    <small class="seat-status">${seatStatusText}</small>
-                                    <small class="seat-price">₹${seatPrice}</small>
-                                </div>
-                            </div>
-                        `;
+                        layoutHTML += renderSeat(seat);
                     }
                 });
-
-                layoutHTML += '</div>'; // End of compact row
-            } else if (rowIndex === 3 || rowIndex === 4) {
-                // Row 4 and 5 (Right side seats)
-                layoutHTML += '<div class="row compact-row">';  // Compact row without big gaps
-
-                row.forEach(seat => {
-                    if (seat && typeof seat === 'object') {
-                        const seatClass = seat.SeatStatus ? 'seat-available' : 'seat-booked';
-                        const seatName = seat.SeatName || 'N/A';
-                        const seatPrice = seat.Price?.PublishedPriceRoundedOff || 0;
-                        const seatStatusText = seat.SeatStatus ? 'Available' : 'Booked';
-                        const seatImage = seat.SeatStatus ? availableSeatImage : bookedSeatImage;
-
-                        layoutHTML += `
-                            <div class="seat-container">
-                                <div 
-                                    class="seat ${seatClass}" 
-                                    onclick='selectSeat(this, ${JSON.stringify(seat)})'
-                                    data-seat='${JSON.stringify(seat)}'>
-                                    <div class="seat-image-container">
-                                        <span class="seat-number">${seatName}</span>
-                                        <img src="${seatImage}" alt="Seat Image" class="seat-image">
-                                    </div>
-                                </div>
-                                <div class="seat-info">
-                                    <small class="seat-status">${seatStatusText}</small>
-                                    <small class="seat-price">₹${seatPrice}</small>
-                                </div>
-                            </div>
-                        `;
-                    }
-                });
-
-                layoutHTML += '</div>'; // End of compact row
             }
+
+            layoutHTML += '</div>'; // End of row
         }
     });
 
-    seatLayoutContainer.innerHTML = layoutHTML;  // Render directly into the seat layout container
+    layoutHTML += '</div>'; // End of bus seats
+    seatLayoutContainer.innerHTML = layoutHTML; // Render directly into the seat layout container
 }
 
 
-
+// Rest of the code remains the same
 function selectSeat(element, seatData) {
     if (element.classList.contains('seat-booked')) return;
 
@@ -706,21 +635,6 @@ function blockSeat(passengerData) {
 
 </script>
 <style>
-#busBookingContainer {
-  padding: 20px;
-  overflow: hidden; /* Prevent any overflow from going outside the container */
-}
-.pickup-dropping-container {
-  display: flex;
-  flex-wrap: wrap; /* Allow sections to stack on smaller screens */
-  gap: 10px; /* Reduced spacing between sections */
-  margin-top: 15px;
-}
-#pickupDroppingContainer {
-  width: 100%;
-  margin-top: 20px;
-  padding: 10px;
-}
 #pickupPointSection, #droppingPointSection {
   width: 48%; /* Each section takes 48% of the width */
   padding: 12px;
@@ -762,8 +676,6 @@ function blockSeat(passengerData) {
   background-position: center;
   transition: background-color 0.3s ease;
 }
-
-/* Seat Status Classes (will be applied dynamically) */
 .seat-available {
     background-color: transparent;
 }
@@ -781,34 +693,6 @@ function blockSeat(passengerData) {
     color: #28a745;
     font-weight: bold;
 }
-.seat-info {
-    text-align: center;
-    font-size: 0.8rem;
-    color: #6c757d;
-    margin-top: 4px;
-}
-
-.middle-seat {
-    display: block;
-    justify-content: center;
-    text-align: center;
-}
-.middle-gap-row {
-  display: flex;
-  justify-content: center; /* Center the middle seat in the gap row */
-  gap: 10px; /* Space between seats */
-}
-
-.row {
-    display: flex; /* Seats arranged horizontally */
-    justify-content: center;
-    gap: 10px; /* Space between seats */
-    flex-wrap: nowrap; /* No wrapping within rows */
-}
-.middle-gap {
-    width: 20px;
-}
-
 .bus-seats {
     display: flex;
     flex-direction: row; /* Arrange rows horizontally */
@@ -818,40 +702,10 @@ function blockSeat(passengerData) {
     width: 100%;
     overflow: hidden; /* Prevent seats from overflowing */
 }
-
-/* Individual Seat Rows */
-.bus-seats .row {
-  display: flex; /* Arrange seats in a row horizontally */
-  justify-content: space-between; /* Space out the seats in each row */
-  gap: 10px; /* Space between individual seats in the row */
-  width: 100%; /* Allow rows to span full width */
-}
-
-/* Seat Container (for each seat) */
-.seat-container {
-    display: flex;
-    flex-direction: column; /* Stack seat image and info vertically */
-    align-items: center; /* Center seat contents */
-
-    width: 60px; /* Control the width of the seat container */
-}
-
 .seat-image-container {
     position: relative; /* Seat image is positioned relative */
     text-align: center; /* Center the seat number */
 }
-
-.seat-number {
-  position: absolute;
-  top: 50%; /* Vertically center the seat number */
-  left: 50%; /* Horizontally center the seat number */
-  transform: translate(-50%, -50%); /* Adjust to perfectly center the seat number */
-  font-size: 12px; /* Reduced font size to fit inside the seat */
-  font-weight: bold;
-  color: white; /* Make the seat number color stand out on the seat */
-  text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5); /* Optional: Add a shadow to make the number more readable */
-}
-
 .seat-image {
     width: 40px; /* Adjust size as necessary */
     height: auto;
@@ -859,26 +713,12 @@ function blockSeat(passengerData) {
     margin: 0 auto; /* Center the image */
     transform: rotate(90deg);
 }
-
-.middle-gap {
-    width: 20px; /* Adjust as per the middle gap requirement */
-}
-
-.middle-gap-row {
-    justify-content: center;
-    margin-top: 15px;
-}
-
-.left-side-row, .right-side-row {
+.seat-container {
     display: flex;
-    justify-content: space-between; /* Seats side by side */
+    flex-direction: column; /* Stack seat image and info vertically */
+    align-items: center; /* Center seat contents */
+    width: 60px; /* Control the width of the seat container */
 }
-
-.seat-status {
-    font-size: 0.8rem;
-    color: #6c757d;
-}
-
 #seatLayoutContainer {
     width: 100%;  /* Make sure seat layout takes up the full width */
     max-width: 100%; /* Ensure it spans the entire container */
@@ -889,8 +729,22 @@ function blockSeat(passengerData) {
     background-color: #f9f9f9; /* Optional: Light background color */
     overflow: hidden; /* Prevent overflow of seats outside the container */
 }
-
-/* Selected Seat Info Section */
+.seat-number {
+  position: absolute;
+  top: 50%; /* Vertically center the seat number */
+  left: 50%; /* Horizontally center the seat number */
+  transform: translate(-50%, -50%); /* Adjust to perfectly center the seat number */
+  font-size: 12px; /* Reduced font size to fit inside the seat */
+  font-weight: bold;
+  color: white; /* Make the seat number color stand out on the seat */
+  text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5); /* Optional: Add a shadow to make the number more readable */
+}
+.seat-info {
+    text-align: center;
+    font-size: 0.8rem;
+    color: #6c757d;
+    margin-top: 4px;
+}
 #selectedSeatInfo {
   margin-top: 10px;
   margin-bottom: 10px;
@@ -899,11 +753,6 @@ function blockSeat(passengerData) {
   border-radius: 5px;
   text-align: center;
 }
-
-#selectedSeatDetails {
-  font-weight: bold;
-}
-
 #continueButtonContainer {
   margin-top: 20px;
   text-align: center; /* Center the button horizontally */
@@ -924,116 +773,6 @@ function blockSeat(passengerData) {
 
 #continueButton:hover {
   background-color: #218838; /* Darker green on hover */
-}
-
-/* Book Now Button */
-#payNowButton {
-  display: block;
-  width: 100%;
-  padding: 10px;
-  margin-top: 20px;
-  background-color: #28a745;
-  color: white;
-  border: none;
-  border-radius: 5px;
-  font-size: 16px;
-  cursor: pointer;
-}
-
-#payNowButton:hover {
-  background-color: #218838;
-}
-
-/* Responsive Design */
-
-/* Tablet (Medium Screens) */
-@media (max-width: 768px) {
-    #busBookingContainer {
-    flex-direction: column;
-    gap: 20px;
-    padding: 10px;
-  }
-  #seatLayoutContainer {
-    width: 100%; /* Ensure it fills up the screen width */
-    padding: 10px;
-  }
-  #filterSection {
-    width: 100%;
-    margin-bottom: 20px;
-  }
-  #pickupDroppingContainer {
-    flex-direction: column;
-    gap: 20px;
-  }
-
-  #pickupPointSection, #droppingPointSection {
-    width: 100%;
-  }
-  .pickup-point-item, .dropping-point-item {
-    padding: 8px;
-  }
-
-  .pickup-point-item h5, .dropping-point-item h5 {
-    font-size: 14px;
-  }
-
-  .pickup-point-item p, .dropping-point-item p {
-    font-size: 12px;
-  }
-  button.btn-success {
-    font-size: 12px;
-    padding: 8px;
-  }
-}
-
-/* Mobile (Small Screens) */
-@media (max-width: 480px) {
-  #busBookingContainer {
-    padding: 5px;
-  }
-  #seatLayoutContainer {
-    width: 100%;
-  }
-
-  .seat {
-    width: 40px;
-    height: 40px;
-    font-size: 12px;
-  }
-  .pickup-point-item h5, .dropping-point-item h5 {
-    font-size: 16px;
-  }
-
-  .pickup-point-item p, .dropping-point-item p {
-    font-size: 12px;
-  }
-
-  button.btn-success {
-    font-size: 12px;
-    padding: 8px;
-  }
-
-  .seat {
-    width: 40px;
-    height: 40px;
-    font-size: 12px;
-  }
-
-  #payNowButton {
-    font-size: 14px;
-    padding: 10px;
-  }
-}
-
-/* Seat Layout Container with Green Border */
-.bus-seats-container {
-  width: 100%;
-  max-width: 600px;  /* Adjust as needed */
-  margin: 0 auto;
-  padding: 10px;
-  border: 2px solid green; /* Green border around the container */
-  border-radius: 10px;  /* Optional: Rounded corners */
-  background-color: #f9f9f9; /* Optional: Light background color */
 }
 </style>
 @endsection

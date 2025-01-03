@@ -82,6 +82,12 @@
 </div>
 
 <script>
+
+function setSessionData(traceId, resultIndex) {
+    sessionStorage.setItem('TraceId', traceId);
+    sessionStorage.setItem('ResultIndex', resultIndex);
+}
+
 document.addEventListener('DOMContentLoaded', function () {
     const searchData = sessionStorage.getItem('busSearchResults'); 
 
@@ -228,7 +234,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     <div class="card-body position-relative">
                         <!-- Prices in Top Right Corner -->
                         <div class="position-absolute top-0 end-0 m-3 text-right">
-                            <span style="font-size: 1rem; color: #999; text-decoration: line-through;">₹${price.BasePrice}</span>
+                            <span style="font-size: 1rem; color: #999; text-decoration: line-through;">₹${price.PublishedPrice}</span>
                             <span style="font-size: 1.5rem; font-weight: bold; color:rgb(7, 9, 10);margin-left: 10px;">₹${price.OfferedPrice}</span>
                         </div>
                        <div class="d-flex justify-content-between align-items-center mb-3">
@@ -323,11 +329,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
     renderBusListings(busResults);
 
-    // Set session data for seat selection
-    function setSessionData(traceId, resultIndex) {
-        sessionStorage.setItem('TraceId', traceId);
-        sessionStorage.setItem('ResultIndex', resultIndex);
-    }
 
     document.addEventListener('click', function (e) {
     // Check if the clicked element is related to a dropdown (either Pick-Up/Drop or Policies)
