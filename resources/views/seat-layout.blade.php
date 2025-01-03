@@ -172,8 +172,10 @@ function fetchSeatLayout() {
     })
         .then(response => response.json())
         .then(data => {
-            if (data.status === true && Array.isArray(data.data)) {
-                renderSeatLayout(data.data);
+            if (data.status === true) {
+                // Convert both formats to a consistent array format
+                const normalizedData = normalizeLayoutData(data.data);
+                renderSeatLayout(normalizedData);
             } else {
                 throw new Error(data.message || 'Failed to load seat layout');
             }
@@ -183,8 +185,25 @@ function fetchSeatLayout() {
         });
 }
 
-const availableSeatImage = "{{ asset('assets/seat.png') }}";
-const bookedSeatImage = "{{ asset('assets/seat.png') }}";
+function normalizeLayoutData(data) {
+    // If data is already an array, it's in the second format
+    if (Array.isArray(data)) {
+        return data;
+    }
+    
+    // If data is an object, convert it to array format
+    const rows = [];
+    Object.keys(data).forEach(rowKey => {
+        const rowData = [];
+        Object.keys(data[rowKey]).forEach(seatKey => {
+            rowData.push(data[rowKey][seatKey]);
+        });
+        if (rowData.length > 0) {
+            rows.push(rowData);
+        }
+    });
+    return rows;
+}
 
 function renderSeatLayout(seatDetails) {
     const seatLayoutContainer = document.getElementById('seatLayout');
@@ -194,10 +213,15 @@ function renderSeatLayout(seatDetails) {
     }
 
     let layoutHTML = '<div class="bus-seats">';
+    
+    // Sort rows by RowNo to ensure correct ordering
     seatDetails.forEach(row => {
         if (Array.isArray(row)) {
+            // Sort seats in row by ColumnNo
+            const sortedRow = [...row].sort((a, b) => a.ColumnNo - b.ColumnNo);
+            
             layoutHTML += '<div class="row">';
-            row.forEach(seat => {
+            sortedRow.forEach(seat => {
                 if (seat && typeof seat === 'object') {
                     const seatClass = seat.SeatStatus ? 'seat-available' : 'seat-booked';
                     const seatName = seat.SeatName || 'N/A';
@@ -226,6 +250,7 @@ function renderSeatLayout(seatDetails) {
     seatLayoutContainer.innerHTML = layoutHTML;
 }
 
+// Rest of the code remains the same
 function selectSeat(element, seatData) {
     if (element.classList.contains('seat-booked')) return;
 
