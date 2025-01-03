@@ -365,7 +365,7 @@ Route::post('/bookbus', [BusController::class, 'bookBus']);
 Route::get('/booking', [BusController::class, 'bookpage']);  // Define a page to show booking success
 Route::post('/cancelBus', [BusController::class, 'cancelBus']);
 Route::get('/balance', [BusController::class, 'fetchBalance']);
-Route::post('/handlepayment', [BusController::class, 'handlePayment']);
+Route::post('/busbalance', [BusController::class, 'balance']);
 Route::get('/balance-log', [BusController::class, 'balanceLog'])->name('balance.log');
 
 

@@ -208,6 +208,7 @@ class BusController extends Controller
     
             $formattedBoardingPoints = array_map(function ($point) {
                 return [
+                    'index' => $point['CityPointIndex'] ?? 'N/A',
                     'name' => $point['CityPointName'] ?? 'N/A',
                     'address' => $point['CityPointAddress'] ?? 'N/A',
                     'landmark' => $point['CityPointLandmark'] ?? 'N/A',
@@ -216,9 +217,10 @@ class BusController extends Controller
                     'time' => $point['CityPointTime'] ?? 'N/A',
                 ];
             }, $boardingPoints);
-    
+
             $formattedDroppingPoints = array_map(function ($point) {
                 return [
+                    'index' => $point['CityPointIndex'] ?? 'N/A',
                     'name' => $point['CityPointName'] ?? 'N/A',
                     'location' => $point['CityPointLocation'] ?? 'N/A',
                     'time' => $point['CityPointTime'] ?? 'N/A',
@@ -249,74 +251,104 @@ class BusController extends Controller
         }
     }
     
-
-public function blockSeats(Request $request)
-{
-    $request->validate([
-        'ResultIndex' => 'required|string',
-        'TraceId' => 'required|string',
-        'BoardingPointId' => 'required',
-        'DroppingPointId' => 'required',
-        'RefID' => 'required',
-        'Passenger' => 'required|array',
-        'Passenger.*.FirstName' => 'required|string',
-        'Passenger.*.LastName' => 'required|string',
-        'Passenger.*.Email' => 'required|email',
-        'Passenger.*.Phoneno' => 'required',
-        'Passenger.*.Gender' => 'required',
-        'Passenger.*.Age' => 'required',
-        'Passenger.*.Title' => 'required|string',
-        'Passenger.*.Address' => 'required|string',
-       'Passenger.*.Seat' => 'required|array',
-'Passenger.*.Seat.SeatName' => 'required|string',
-
-'Passenger.*.Seat.ColumnNo' => 'nullable|integer',
-'Passenger.*.Seat.RowNo' => 'nullable|integer',
-'Passenger.*.Seat.Price' => 'required|array',
-    ]);
-
-    $payload = array_merge([
-        'ClientId' => $this->ClientId,
-        'UserName' => $this->UserName,
-        'Password' => $this->Password,
-    ], $request->all());
-
-    try {
-        Log::info('Block Seats Request Payload:', ['payload' => $payload]);
-
-        $response = Http::withHeaders([
-            'Content-Type' => 'application/json',
-            'Api-Token' => $this->ApiToken,  // Use the class property
-        ])->post('https://bus.srdvapi.com/v8/rest/Block', $payload);
-
-        $data = $response->json();
-        Log::info('Block Seats API Response:', ['response' => $data]);
-
-        if (isset($data['Error']) && $data['Error']['ErrorCode'] !== 0) {
+    public function blockSeats(Request $request)
+    {
+        // Validate basic required fields
+        $request->validate([
+            'ResultIndex' => 'required|string',
+            'TraceId' => 'required|string',
+            'BoardingPointId' => 'required',
+            'DroppingPointId' => 'required',
+            'RefID' => 'required',
+            'Passenger' => 'required|array',
+            'Passenger.*.LeadPassenger' => 'required|boolean',
+            'Passenger.*.Title' => 'required|string',
+            'Passenger.*.FirstName' => 'required|string',
+            'Passenger.*.LastName' => 'required|string',
+            'Passenger.*.Email' => 'required|email',
+            'Passenger.*.Mobile' => 'required|string',
+            'Passenger.*.Gender' => 'required',
+            'Passenger.*.Age' => 'required',
+            'Passenger.*.Address' => 'required|string',
+            'Passenger.*.SeatIndex' => 'required|string',
+            // Optional fields
+            'Passenger.*.IdType' => 'nullable|string',
+            'Passenger.*.IdNumber' => 'nullable|string',
+            'Passenger.*.PassengerId' => 'nullable|integer'
+        ]);
+    
+        // Prepare payload with credentials
+        $payload = array_merge([
+            'ClientId' => $this->ClientId,
+            'UserName' => $this->UserName,
+            'Password' => $this->Password,
+        ], $request->all());
+    
+        try {
+            // Log request payload for debugging
+            Log::info('Block Seats Request Payload:', ['payload' => $payload]);
+    
+            // Make API request
+            $response = Http::withHeaders([
+                'Content-Type' => 'application/json',
+                'Api-Token' => $this->ApiToken,
+            ])->post('https://bus.srdvapi.com/v8/rest/Block', $payload);
+    
+            $data = $response->json();
+            Log::info('Block Seats API Response:', ['response' => $data]);
+    
+            // Check for API errors
+            if (isset($data['Error']) && $data['Error']['ErrorCode'] !== 0) {
+                return response()->json([
+                    'status' => false,
+                    'message' => $data['Error']['ErrorMessage'] ?? 'Error blocking seats'
+                ], 400);
+            }
+    
+            // Format successful response
             return response()->json([
-                'status' => 'error',
-                'message' => $data['Error']['ErrorMessage'] ?? 'Error blocking seats'
-            ], 400);
+                'status' => true,
+                'data' => [
+                    'TraceId' => $data['TraceId'] ?? null,
+                    'DepartureTime' => $data['DepartureTime'] ?? null,
+                    'ArrivalTime' => $data['ArrivalTime'] ?? null,
+                    'BusType' => $data['BusType'] ?? null,
+                    'ServiceName' => $data['ServiceName'] ?? null,
+                    'TravelName' => $data['TravelName'] ?? null,
+                    'Price' => $data['Price'] ?? null,
+                    'BoardingPointdetails' => $data['BoardingPointdetails'] ?? null,
+                    'DroppingPointsDetails' => $data['DroppingPointsDetails'] ?? null,
+                    'CancellationPolicy' => $data['CancellationPolicy'] ?? [],
+                    'Passengers' => array_map(function($passenger) {
+                        return [
+                            'LeadPassenger' => $passenger['LeadPassenger'] ?? false,
+                            'Title' => $passenger['Title'] ?? '',
+                            'Address' => $passenger['Address'] ?? '',
+                            'Age' => $passenger['Age'] ?? null,
+                            'FirstName' => $passenger['FirstName'] ?? '',
+                            'Gender' => $passenger['Gender'] ?? null,
+                            'IdNumber' => $passenger['IdNumber'] ?? null,
+                            'IdType' => $passenger['IdType'] ?? null,
+                            'Phoneno' => $passenger['Phoneno'] ?? '',
+                            'Seat' => $passenger['Seat'] ?? null
+                        ];
+                    }, $data['Passengers'] ?? [])
+                ]
+            ]);
+    
+        } catch (\Exception $e) {
+            Log::error('Error in blockSeats:', [
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+    
+            return response()->json([
+                'status' => false,
+                'message' => 'An error occurred while blocking seats',
+                'error' => $e->getMessage()
+            ], 500);
         }
-
-        return response()->json([
-            'status' => 'success',
-            'data' => $data['Result']
-        ]);
-
-    } catch (\Exception $e) {
-        Log::error('Error in blockSeats:', [
-            'message' => $e->getMessage(),
-            'trace' => $e->getTraceAsString()
-        ]);
-
-        return response()->json([
-            'status' => 'error',
-            'message' => 'An error occurred while blocking seats',
-            'error' => $e->getMessage()
-        ], 500);
     }
-}
 
 public function bookBus(Request $request)
     {
@@ -474,7 +506,7 @@ public function bookBus(Request $request)
         $response = Http::withHeaders([
             'Content-Type' => 'application/json',
              'Api-Token' => $this->ApiToken,  // Use the class property
-        ])->post('https://bus.srdvtest.com/v5/rest/Balance', $payload);
+        ])->post('https://bus.srdvapi.com/v8/rest/Balance', $payload);
 
         if ($response->successful()) {
             $data = $response->json();
@@ -493,7 +525,7 @@ public function bookBus(Request $request)
     }
 
 
-   public function handlePayment(Request $request)
+   public function balance(Request $request)
 {
     $traceId = $request->input('TraceId');
    $invoiceAmount = $request->input('Amount'); // Change 'InvoiceAmount' to 'amount'
