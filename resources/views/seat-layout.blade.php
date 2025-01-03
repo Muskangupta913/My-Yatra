@@ -18,53 +18,33 @@
 <!-- Add the CSRF meta tag in the header -->
 <meta name="csrf-token" content="{{ csrf_token() }}">
 <div class="container mt-4" id="busBookingContainer">
-  <!-- Seat Layout Section -->
-  <div class="section-container mb-4" id="seatLayoutContainer">
+ <!-- Seat Layout Section -->
+<div class="section-container mb-4" id="seatLayoutContainer">
     <h3 class="text-center">Select Seats</h3>
     <div id="seatLayout" class="bus-seats" data-trace-id="" data-result-index=""></div>
-  </div>
+</div>
 
-  <!-- Pickup and Dropping Points Section -->
-  <div class="section-container mb-4" id="pickupDroppingContainer">
-    <h3 class="text-center"> Select Pickup and Dropping Points</h3>
-    <div class="pickup-dropping-container">
-      <div id="pickupPointSection" class="pickup-point">
-        <h5>Pickup Points</h5>
-        <div id="pickupPointsContainer" class="pickup-points">
-          <p>Loading pickup points...</p>
-        </div>
-      </div>
-
-<<<<<<< HEAD
-      <div id="droppingPointSection" class="dropping-point">
-        <h5>Dropping Points</h5>
-        <div id="droppingPointsContainer" class="dropping-points">
-          <p>Loading dropping points...</p>
-=======
-    <!-- Right Section: Pickup and Dropping Points -->
-    <div class="col-12 col-md-4" id="pickupDroppingContainer">
-    <div class="section-container">
-        <h5>Select Pickup & Dropping Point</h5>
-        <div class="d-flex flex-column flex-sm-row justify-content-between">
-            <!-- Pickup Points -->
-            <div id="pickupPointSection" class="pickup-point mb-3 mb-sm-0">
-                <h6>Pickup Point</h6>
-                <div id="pickupPointsContainer" class="pickup-points text-center">
-                    <p>Loading pickup points...</p>
-                </div>
+<!-- Right Section: Pickup and Dropping Points -->
+<div class="section-container" id="pickupDroppingContainer">
+    <h5 class="text-center">Select Pickup & Dropping Points</h5>
+    <div class="d-flex justify-content-between flex-wrap">
+        <!-- Pickup Points -->
+        <div id="pickupPointSection" class="pickup-point">
+            <h6 class="text-center">Pickup Point</h6>
+            <div id="pickupPointsContainer" class="pickup-points text-center">
+                <p>Loading pickup points...</p>
             </div>
+        </div>
 
-            <!-- Dropping Points -->
-            <div id="droppingPointSection" class="dropping-point">
-                <h6>Dropping Point</h6>
-                <div id="droppingPointsContainer" class="dropping-points text-center">
-                    <p>Loading dropping points...</p>
-                </div>
+        <!-- Dropping Points -->
+        <div id="droppingPointSection" class="dropping-point">
+            <h6 class="text-center">Dropping Point</h6>
+            <div id="droppingPointsContainer" class="dropping-points text-center">
+                <p>Loading dropping points...</p>
             </div>
         </div>
     </div>
 </div>
-
 
             <!-- Selected Seat Info Section -->
             <div id="selectedSeatInfo" class="mt-2 d-none">
@@ -72,27 +52,16 @@
                 <p id="selectedSeatDetails"></p>
             </div>
 
-            <!-- Continue Button Section -->
-            <div class="mt-2">
-                <button class="btn btn-success w-100" id="continueButton">Continue</button>
-                <a href="#" class="btn btn-success w-100 mt-2 d-none" id="review">Review Details</a>
-            </div>
->>>>>>> 1c99ad61eb87dcf5411defc42de8cb3109d2797c
+           <!-- Continue Button Section -->
+<div class="mt-2 text-center" id="continueButtonContainer">
+  <button class="btn btn-success" id="continueButton">Continue</button>
+  <a href="#" class="btn btn-success mt-2 d-none" id="review">Review Details</a>
+</div>
         </div>
       </div>
     </div>
   </div>
- <!-- Selected Seat Info Section -->
- <div id="selectedSeatInfo" class="section-container mb-4">
-    <h5 class="text-center">Selected Seat</h5>
-    <p id="selectedSeatDetails" class="text-center">No seat selected yet.</p>
-  </div>
-  <!-- Continue Button Section -->
-  <div id="continueButtonContainer" class="section-container text-center">
-    <button class="btn btn-success" id="continueButton">Continue</button>
-    <a href="#" class="btn btn-success mt-2 d-none" id="review">Review Details</a>
-  </div>
-</div>
+ 
         <!-- Passenger Information Section -->
         <!-- Trigger Modal Button (Hidden Initially) -->
 <button type="button" id="openPassengerDetailsModal" class="btn btn-primary d-none" data-bs-toggle="modal" data-bs-target="#passengerDetailsModal"></button>
@@ -240,14 +209,14 @@ function fetchSeatLayout() {
         return;
     }
 
-    let layoutHTML = '<div class="bus-seats">';
+    let layoutHTML = '';  // Removed the bus-seats-container wrapper
 
     seatDetails.forEach((row, rowIndex) => {
         if (Array.isArray(row)) {
             if (rowIndex === 2) {
                 // Row 3 (Middle gap with 5 seats: 2 on the left, 2 on the right, 1 in the middle)
                 layoutHTML += '<div class="row middle-gap-row">';
-                
+
                 // Left Side Seats
                 row.slice(0, 2).forEach(seat => {
                     if (seat && typeof seat === 'object') {
@@ -338,8 +307,8 @@ function fetchSeatLayout() {
                 layoutHTML += '</div>'; // End of middle gap row
             } else if (rowIndex === 0 || rowIndex === 1) {
                 // Row 1 and 2 (Left side seats)
-                layoutHTML += '<div class="row left-side-row">';
-                
+                layoutHTML += '<div class="row compact-row">';  // Compact row without big gaps
+
                 row.forEach(seat => {
                     if (seat && typeof seat === 'object') {
                         const seatClass = seat.SeatStatus ? 'seat-available' : 'seat-booked';
@@ -368,11 +337,11 @@ function fetchSeatLayout() {
                     }
                 });
 
-                layoutHTML += '</div>'; // End of left side row
+                layoutHTML += '</div>'; // End of compact row
             } else if (rowIndex === 3 || rowIndex === 4) {
                 // Row 4 and 5 (Right side seats)
-                layoutHTML += '<div class="row right-side-row">';
-                
+                layoutHTML += '<div class="row compact-row">';  // Compact row without big gaps
+
                 row.forEach(seat => {
                     if (seat && typeof seat === 'object') {
                         const seatClass = seat.SeatStatus ? 'seat-available' : 'seat-booked';
@@ -401,14 +370,15 @@ function fetchSeatLayout() {
                     }
                 });
 
-                layoutHTML += '</div>'; // End of right side row
+                layoutHTML += '</div>'; // End of compact row
             }
         }
     });
 
-    layoutHTML += '</div>'; // End of bus-seats container
-    seatLayoutContainer.innerHTML = layoutHTML;
+    seatLayoutContainer.innerHTML = layoutHTML;  // Render directly into the seat layout container
 }
+
+
 
 function selectSeat(element, seatData) {
     if (element.classList.contains('seat-booked')) return;
@@ -419,14 +389,9 @@ function selectSeat(element, seatData) {
     selectedSeatDetails = seatData;
     selectedSeat = seatData.SeatName;
 
-<<<<<<< HEAD
-    document.getElementById('selectedSeatInfo').classList.remove('d-none');
-    document.getElementById('selectedSeatDetails').innerText = 
-=======
     const selectedSeatInfo = document.getElementById('selectedSeatInfo');
     selectedSeatInfo.classList.remove('d-none');
     selectedSeatInfo.querySelector('#selectedSeatDetails').innerText = 
->>>>>>> 1c99ad61eb87dcf5411defc42de8cb3109d2797c
         `Seat: ${seatData.SeatName}, Price: ₹${seatData.Price.PublishedPrice}`;
 
     // Show the Continue button
@@ -527,11 +492,11 @@ function renderPickupPoints(points) {
                     <p><i class="fas fa-phone"></i> ${point.contact_number}</p>
                 </div>
                 
-                <!-- Select Button -->
-                <button class="btn btn-outline-success btn-sm mt-3 select-btn" 
-                    onclick="selectPickupPoint(${index}, '${point.name.replace(/'/g, "\\'")}')">
-                    <i class="fas fa-check-circle"></i> Select Point
-                </button>
+               <!-- Select Button -->
+<button class="btn btn-success btn-sm mt-3 select-btn" 
+    onclick="selectPickupPoint(${index}, '${point.name.replace(/'/g, "\\'")}')">
+    <i class="fas fa-check-circle"></i> Select Point
+</button>
             </div>
         </div>
     `).join('');
@@ -556,12 +521,11 @@ function renderDroppingPoints(points) {
                 <!-- Point Name and Location -->
                 <h6 class="mb-3">${point.name}</h6>
                 <p><i class="fas fa-map-marker-alt"></i> ${point.location}</p>
-                
-                <!-- Select Button -->
-                <button class="btn btn-outline-success btn-sm mt-2 select-btn" 
-                    onclick="selectDroppingPoint(${index}, '${point.name.replace(/'/g, "\\'")}')">
-                    <i class="fas fa-check-circle"></i> Select Point
-                </button>
+               <!-- Select Button -->
+<button class="btn btn-success btn-sm mt-3 select-btn" 
+    onclick="selectPickupPoint(${index}, '${point.name.replace(/'/g, "\\'")}')">
+    <i class="fas fa-check-circle"></i> Select Point
+</button>
             </div>
         </div>
     `).join('');
@@ -744,16 +708,19 @@ function blockSeat(passengerData) {
 <style>
 #busBookingContainer {
   padding: 20px;
+  overflow: hidden; /* Prevent any overflow from going outside the container */
 }
-/* Container for Pickup and Dropping Points */
 .pickup-dropping-container {
   display: flex;
   flex-wrap: wrap; /* Allow sections to stack on smaller screens */
   gap: 10px; /* Reduced spacing between sections */
   margin-top: 15px;
 }
-
-/* Pickup and Dropping Sections */
+#pickupDroppingContainer {
+  width: 100%;
+  margin-top: 20px;
+  padding: 10px;
+}
 #pickupPointSection, #droppingPointSection {
   width: 48%; /* Each section takes 48% of the width */
   padding: 12px;
@@ -762,8 +729,6 @@ function blockSeat(passengerData) {
   border-radius: 5px;
   margin-bottom: 15px; /* Adjusted bottom margin */
 }
-
-/* Individual Pickup and Dropping Point Items */
 .pickup-point-item, .dropping-point-item {
   margin-bottom: 10px; /* Reduced margin */
   padding: 12px;
@@ -774,23 +739,17 @@ function blockSeat(passengerData) {
   text-align: left;
   font-size: 14px; /* Slightly smaller font for readability */
 }
-
-/* Styling for Headers and Details */
 .pickup-point-item h5, .dropping-point-item h5 {
   margin: 0 0 8px;
   font-size: 16px;
   color: #333;
 }
-
 .pickup-point-item p, .dropping-point-item p {
   text-transform: none;
   margin: 3px 0; /* Reduced spacing between text */
   font-size: 12px; /* Reduced font size */
   color: #555;
 }
-
-
-/* Seat Image Styling */
 .seat {
   width: 50px; /* Adjust size as necessary */
   height: 50px;
@@ -816,18 +775,19 @@ function blockSeat(passengerData) {
 .seat-selected {
     background-color: #28a745; /* Green for selected */
 }
+
 .seat-price {
     font-size: 0.8rem;
     color: #28a745;
     font-weight: bold;
 }
-/* Seat Info (Status and Price) */
 .seat-info {
     text-align: center;
     font-size: 0.8rem;
     color: #6c757d;
     margin-top: 4px;
 }
+
 .middle-seat {
     display: block;
     justify-content: center;
@@ -838,6 +798,7 @@ function blockSeat(passengerData) {
   justify-content: center; /* Center the middle seat in the gap row */
   gap: 10px; /* Space between seats */
 }
+
 .row {
     display: flex; /* Seats arranged horizontally */
     justify-content: center;
@@ -847,14 +808,17 @@ function blockSeat(passengerData) {
 .middle-gap {
     width: 20px;
 }
-/* Seat Layout Section */
+
 .bus-seats {
     display: flex;
     flex-direction: row; /* Arrange rows horizontally */
-    gap: 20px; /* Space between each row */
+    gap: 10px; /* Space between each row */
     justify-content: center; /* Center the rows horizontally */
     flex-wrap: wrap; /* Allow rows to wrap if necessary */
+    width: 100%;
+    overflow: hidden; /* Prevent seats from overflowing */
 }
+
 /* Individual Seat Rows */
 .bus-seats .row {
   display: flex; /* Arrange seats in a row horizontally */
@@ -871,10 +835,12 @@ function blockSeat(passengerData) {
 
     width: 60px; /* Control the width of the seat container */
 }
+
 .seat-image-container {
     position: relative; /* Seat image is positioned relative */
     text-align: center; /* Center the seat number */
 }
+
 .seat-number {
   position: absolute;
   top: 50%; /* Vertically center the seat number */
@@ -885,6 +851,7 @@ function blockSeat(passengerData) {
   color: white; /* Make the seat number color stand out on the seat */
   text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5); /* Optional: Add a shadow to make the number more readable */
 }
+
 .seat-image {
     width: 40px; /* Adjust size as necessary */
     height: auto;
@@ -892,23 +859,35 @@ function blockSeat(passengerData) {
     margin: 0 auto; /* Center the image */
     transform: rotate(90deg);
 }
+
 .middle-gap {
     width: 20px; /* Adjust as per the middle gap requirement */
 }
+
 .middle-gap-row {
     justify-content: center;
     margin-top: 15px;
 }
+
 .left-side-row, .right-side-row {
     display: flex;
     justify-content: space-between; /* Seats side by side */
 }
+
 .seat-status {
     font-size: 0.8rem;
     color: #6c757d;
 }
+
 #seatLayoutContainer {
-  text-align: center;
+    width: 100%;  /* Make sure seat layout takes up the full width */
+    max-width: 100%; /* Ensure it spans the entire container */
+    margin: 0 auto;
+    padding: 10px;
+    border: 2px solid green; /* Green border around the container */
+    border-radius: 10px;  /* Optional: Rounded corners */
+    background-color: #f9f9f9; /* Optional: Light background color */
+    overflow: hidden; /* Prevent overflow of seats outside the container */
 }
 
 /* Selected Seat Info Section */
@@ -924,10 +903,12 @@ function blockSeat(passengerData) {
 #selectedSeatDetails {
   font-weight: bold;
 }
+
 #continueButtonContainer {
   margin-top: 20px;
   text-align: center; /* Center the button horizontally */
 }
+
 #continueButton {
   background-color: #28a745;
   border-radius: 30px;
@@ -940,9 +921,11 @@ function blockSeat(passengerData) {
   max-width: 400px;
   cursor: pointer;
 }
+
 #continueButton:hover {
   background-color: #218838; /* Darker green on hover */
 }
+
 /* Book Now Button */
 #payNowButton {
   display: block;
@@ -965,27 +948,27 @@ function blockSeat(passengerData) {
 
 /* Tablet (Medium Screens) */
 @media (max-width: 768px) {
-  #busBookingContainer {
+    #busBookingContainer {
     flex-direction: column;
     gap: 20px;
     padding: 10px;
   }
-
+  #seatLayoutContainer {
+    width: 100%; /* Ensure it fills up the screen width */
+    padding: 10px;
+  }
   #filterSection {
     width: 100%;
     margin-bottom: 20px;
   }
-
-  .pickup-dropping-container {
+  #pickupDroppingContainer {
     flex-direction: column;
-    gap: 15px;
+    gap: 20px;
   }
 
   #pickupPointSection, #droppingPointSection {
     width: 100%;
   }
-
-  /* Compacting pickup and dropping point items on smaller screens */
   .pickup-point-item, .dropping-point-item {
     padding: 8px;
   }
@@ -1008,7 +991,15 @@ function blockSeat(passengerData) {
   #busBookingContainer {
     padding: 5px;
   }
+  #seatLayoutContainer {
+    width: 100%;
+  }
 
+  .seat {
+    width: 40px;
+    height: 40px;
+    font-size: 12px;
+  }
   .pickup-point-item h5, .dropping-point-item h5 {
     font-size: 16px;
   }
@@ -1032,6 +1023,17 @@ function blockSeat(passengerData) {
     font-size: 14px;
     padding: 10px;
   }
+}
+
+/* Seat Layout Container with Green Border */
+.bus-seats-container {
+  width: 100%;
+  max-width: 600px;  /* Adjust as needed */
+  margin: 0 auto;
+  padding: 10px;
+  border: 2px solid green; /* Green border around the container */
+  border-radius: 10px;  /* Optional: Rounded corners */
+  background-color: #f9f9f9; /* Optional: Light background color */
 }
 </style>
 @endsection
