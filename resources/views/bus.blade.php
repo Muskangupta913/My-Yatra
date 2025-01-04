@@ -310,7 +310,8 @@ document.addEventListener('DOMContentLoaded', function () {
                             class="btn btn-primary btn-block py-2 rounded" 
                             onclick="setSessionData('${traceId}', '${bus.ResultIndex}')">
                             Select Seats
-                        </a>
+
+                            </a>
                     </div>
                 </div>
             </div>
