@@ -146,6 +146,8 @@ class BusController extends Controller
                 ]);
             }
 
+             $result = isset($data['Result']['data']) ? $data['Result']['data'] : $data['Result'];
+
             return response()->json([
                 'status' => true,
                 'data' => $data['Result'],
