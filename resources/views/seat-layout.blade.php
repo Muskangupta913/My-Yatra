@@ -25,7 +25,7 @@
 
 <!-- Right Section: Pickup and Dropping Points -->
 <div class="section-container" id="pickupDroppingContainer">
-    <h5 class="text-center">Select Pickup & Dropping Points</h5>
+    <h3 class="text-center">Select Pickup & Dropping Points</h3>
     <div class="d-flex justify-content-between flex-wrap">
         <!-- Pickup Points -->
         <div id="pickupPointSection" class="pickup-point">
@@ -51,7 +51,8 @@
                 <p id="selectedSeatDetails"></p>
             </div>
 
-           <!-- Continue Button Section -->
+           
+<!-- Continue Button Section -->
 <div class="mt-2 text-center" id="continueButtonContainer">
   <button class="btn btn-success" id="continueButton">Continue</button>
   <a href="#" class="btn btn-success mt-2 d-none" id="review">Review Details</a>
@@ -123,6 +124,10 @@
     </div>
   </div>
 </div>
+@endsection
+@section('scripts')
+<!-- Include Toastr JS -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/js/toastr.min.js"></script>
 
 <script>
   document.getElementById('loadingSpinner').classList.remove('d-none');
@@ -408,21 +413,20 @@ function renderPickupPoints(points) {
                 </span>
                 
                 <!-- Point Name -->
-                <h6 class="mb-3">${point.name}</h6>
+               <h5>  ${point.location}</h5>
                 
                 <!-- Details Grid -->
                 <div class="point-details">
-                    <p><i class="fas fa-map-marker-alt"></i> ${point.location}</p>
                     <p><i class="fas fa-building"></i> ${point.address}</p>
                     <p><i class="fas fa-landmark"></i> ${point.landmark}</p>
                     <p><i class="fas fa-phone"></i> ${point.contact_number}</p>
                 </div>
                 
                 <!-- Select Button -->
-                <button class="btn btn-outline-success btn-sm mt-3 select-btn" 
-                    onclick="selectPickupPoint(${point.index}, '${point.name.replace(/'/g, "\\'")}')">
-                    <i class="fas fa-check-circle"></i> Select Point
-                </button>
+             <button class="btn btn-outline-success btn-sm mt-3 select-btn" 
+    onclick="selectPickupPoint(${point.index}, '${point.name.replace(/'/g, "\\'")}')">
+    <i class="fas fa-check-circle"></i> Select Point
+</button>
             </div>
         </div>
     `).join('');
@@ -445,14 +449,14 @@ function renderDroppingPoints(points) {
                 </span>
                 
                 <!-- Point Name and Location -->
-                <h6 class="mb-3">${point.name}</h6>
+                <h5 class="mb-3">${point.name}</h5>
                 <p><i class="fas fa-map-marker-alt"></i> ${point.location}</p>
                 
                 <!-- Select Button -->
-                <button class="btn btn-outline-success btn-sm mt-2 select-btn" 
-                    onclick="selectDroppingPoint(${point.index}, '${point.name.replace(/'/g, "\\'")}')">
-                    <i class="fas fa-check-circle"></i> Select Point
-                </button>
+               <button class="btn btn-outline-success btn-sm mt-3 select-btn" 
+    onclick="selectDroppingPoint(${point.index}, '${point.name.replace(/'/g, "\\'")}')">
+    <i class="fas fa-check-circle"></i> Select Point
+</button>
             </div>
         </div>
     `).join('');
@@ -490,6 +494,18 @@ function selectPickupPoint(index, name) {
     selectedBoardingPointId = index;
     selectedBoardingPointName = name;
 
+    // Remove 'selected' class from all pickup point buttons first
+    document.querySelectorAll('.pickup-point-item .select-btn').forEach(button => {
+        button.classList.remove('btn-success');
+        button.classList.add('btn-outline-success');
+    });
+
+    // Add 'selected' class to the selected pickup point button
+    const selectedButton = document.querySelector(`.pickup-point-item[data-point-index="${index}"] .select-btn`);
+    selectedButton.classList.add('btn-success');
+    selectedButton.classList.remove('btn-outline-success');
+
+    // Add 'selected' class to the pickup point item
     document.querySelectorAll('.pickup-point-item').forEach(point => point.classList.remove('selected'));
     document.querySelector(`.pickup-point-item[data-point-index="${index}"]`).classList.add('selected');
 }
@@ -498,9 +514,22 @@ function selectDroppingPoint(index, name) {
     selectedDroppingPointId = index;
     selectedDroppingPointName = name;
 
+    // Remove 'selected' class from all dropping point buttons first
+    document.querySelectorAll('.dropping-point-item .select-btn').forEach(button => {
+        button.classList.remove('btn-success');
+        button.classList.add('btn-outline-success');
+    });
+
+    // Add 'selected' class to the selected dropping point button
+    const selectedButton = document.querySelector(`.dropping-point-item[data-point-index="${index}"] .select-btn`);
+    selectedButton.classList.add('btn-success');
+    selectedButton.classList.remove('btn-outline-success');
+
+    // Add 'selected' class to the dropping point item
     document.querySelectorAll('.dropping-point-item').forEach(point => point.classList.remove('selected'));
     document.querySelector(`.dropping-point-item[data-point-index="${index}"]`).classList.add('selected');
 }
+
 
 
 function blockSeat(passengerData) {
@@ -576,21 +605,27 @@ function blockSeat(passengerData) {
 
             // Update UI elements
             document.getElementById('review').setAttribute('href', bookingPageUrl);
-            document.getElementById('continueButton').classList.add('d-none');
-            document.getElementById('review').classList.remove('d-none');
+            document.getElementById('continueButton').classList.add('d-none'); // Hide continue button
+            document.getElementById('review').classList.remove('d-none'); // Show review button
 
-            alert('Seat successfully blocked!');
+
+            toastr.success('Seat successfully blocked!', 'Success');
         } else {
             throw new Error(data.message || 'Failed to block seat');
         }
     })
     .catch(error => {
         console.error('Error:', error);
-        alert(`Error: ${error.message}`);
+        toastr.error(`Error: ${error.message}`, 'Error');
     });
 }
+
 </script>
-<style>
+@endsection
+@section('styles')
+<!-- Include Toastr CSS -->
+<link href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/css/toastr.min.css" rel="stylesheet">
+<style>  
 #pickupPointSection, #droppingPointSection {
   width: 48%; /* Each section takes 48% of the width */
   padding: 12px;

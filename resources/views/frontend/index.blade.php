@@ -235,7 +235,7 @@
             <div class="date-caption">From</div>
             <input type="text" class="form-control rounded-0 py-3" name="source_city" id="busFromCity" placeholder="Enter Departure City" required>
             <input type="hidden" name="source_code" id="busFromCode"> <!-- Hidden field to store source city code -->
-            <div id="busFromCityList" class="card" style="position: absolute; width: 95%; max-height: 150px; overflow-y: scroll; display: none;"></div>
+            <div id="busFromCityList" class="card" style="position: absolute; width: 23%; max-height: 150px; overflow-y: scroll;"></div>
         </div>
 
         <!-- Destination City -->
@@ -243,7 +243,7 @@
             <div class="date-caption">To</div>
             <input type="text" class="form-control rounded-0 py-3" name="destination_city" id="busToCity" placeholder="Enter Destination City" required>
             <input type="hidden" name="destination_code" id="busToCode"> <!-- Hidden field to store destination city code -->
-            <div id="busToCityList" class="card" style="position: absolute; width: 95%; max-height: 150px; overflow-y: scroll; display: none;"></div>
+            <div id="busToCityList" class="card" style="position: absolute; width: 23%; max-height: 150px; overflow-y: scroll;"></div>
         </div>
 
         <!-- Journey Date -->
@@ -793,7 +793,10 @@
             searchParams: data,
             traceId: responseData.traceId
         }));
-        window.location.href = "{{ route('bus') }}";
+        window.location.href = "{{ route('bus') }}?source_city=" + encodeURIComponent(data.source_city) +
+    "&destination_city=" + encodeURIComponent(data.destination_city) +
+    "&depart_date=" + data.depart_date +
+    "&trace_id=" + responseData.traceId;
     } else {
         alert(responseData.message);
     }

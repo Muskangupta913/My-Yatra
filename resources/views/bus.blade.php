@@ -16,9 +16,6 @@
 
     <!-- Rest of the content (filters and bus listings) -->
 </div>
-
-
-    <!-- Filter Sidebar -->
     <div class="row">
         <div class="col-md-3">
             <div class="filter-sidebar p-4 rounded shadow-lg">
@@ -80,9 +77,9 @@
         </div>
     </div>
 </div>
-
+@endsection
+@section('scripts')
 <script>
-
 function setSessionData(traceId, resultIndex) {
     sessionStorage.setItem('TraceId', traceId);
     sessionStorage.setItem('ResultIndex', resultIndex);
@@ -240,12 +237,7 @@ document.addEventListener('DOMContentLoaded', function () {
                        <div class="d-flex justify-content-between align-items-center mb-3">
                            <h5 class="card-title text-primary font-weight-bold" style="font-size: 1.5rem;">${bus.TravelName}</h5>
                        </div>
-                          <p class="badge badge-pill bus-type-badge" style="background-color: #007bff; color: white; font-size: 1.1rem; padding: 0.5rem 1rem;">
-    ${bus.BusType}
-</p>
-
-
-
+                          <p class="badge badge-pill bus-type-badge" style="background-color: #007bff; color: white; font-size: 1.1rem; padding: 0.5rem 1rem;"> ${bus.BusType}</p>
                          <!-- Icons in Left Corner -->
                            <div style="position: absolute; bottom: 10px; left: 10px; display: flex; gap: 10px; align-items: center;">
                              <i class="fas fa-video" style="font-size: 16px; color: rgba(0, 0, 0, 0.5); cursor: pointer; transition: color 0.3s ease-in-out;" title="CCTV" onmouseover="this.style.color='rgba(0, 0, 0, 0.8)'" onmouseout="this.style.color='rgba(0, 0, 0, 0.5)'"></i> <!-- CCTV Icon -->
@@ -349,13 +341,34 @@ document.addEventListener('DOMContentLoaded', function () {
 
 });
 </script>
-
+</script>
+@endsection
+@section('styles')
 <style>
+/* Global Reset */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html, body {
+    width: 100%;
+    overflow-x: hidden; /* Prevent horizontal scrolling */
+}
+
+/* Container Padding */
+.container {
+    padding-left: 15px;
+    padding-right: 15px;
+    margin-left: auto;
+    margin-right: auto;
+}
 
 /* Add a light blue border around each card */
 .bus-card {
     border: 2px solid transparent;
-    transition: border-color 0.3s, background-color 0.3s, transform 0.3s ease-in-out; /* Add transition for transform */
+    transition: border-color 0.3s, background-color 0.3s, transform 0.3s ease-in-out;
 }
 
 .bus-card:hover {
@@ -363,9 +376,11 @@ document.addEventListener('DOMContentLoaded', function () {
     background-color: #e0f7fa; /* Light blue background color on hover */
     transform: scale(1.05); /* Zoom in slightly on hover */
 }
+
 .bus-card:hover .card-title {
     color: #007bff; /* Change card title color on hover */
 }
+
 .card-title {
     font-size: 1.25rem;
     font-weight: 600;
@@ -381,28 +396,32 @@ label {
     font-size: 1.1rem;
     font-weight: 500;
     color: #333;
+    margin-bottom: 0.5rem;
+    display: block; /* Ensure proper alignment with inputs */
 }
 
 input, select {
     font-size: 1rem;
     padding: 0.75rem;
     border-radius: 8px;
-}
-
-select, input[type="range"] {
-    background-color: #f8f9fa;
     border: 1px solid #ced4da;
+    width: 100%; /* Ensure inputs and selects align properly */
+    margin-bottom: 15px;
 }
 
 input[type="number"], input[type="time"] {
     background-color: #f8f9fa;
-    border: 1px solid #ced4da;
 }
 
 button {
     background-color: #007bff;
     color: white;
     font-size: 1.1rem;
+    padding: 0.5rem 1rem;
+    border-radius: 5px;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
 }
 
 button:hover {
@@ -413,23 +432,21 @@ button:hover {
     color: #007bff;
     font-weight: 600;
 }
+
 /* Add attractive styling for filter sidebar */
 .filter-sidebar {
     background-color: #f0f8ff;
     border-radius: 15px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    margin-bottom: 20px; /* Add spacing below the sidebar */
 }
 
 .filter-sidebar h4 {
     font-size: 1.5rem;
     font-weight: bold;
     color: #007bff;
-}
-
-label {
-    font-size: 1.1rem;
-    font-weight: 500;
-    color: #333;
+    margin-bottom: 15px;
 }
 
 select, input[type="datetime-local"], input[type="text"], input[type="range"] {
@@ -448,6 +465,7 @@ input[type="range"] {
 select:focus, input[type="datetime-local"]:focus, input[type="text"]:focus {
     outline: none;
     border-color: #00bfff;
+    box-shadow: 0 0 5px rgba(0, 191, 255, 0.5);
 }
 
 .form-label {
@@ -465,6 +483,8 @@ select:focus, input[type="datetime-local"]:focus, input[type="text"]:focus {
     color: #333;
     font-weight: 600;
 }
+
+/* Badge Styling */
 .badge {
     max-width: 100%; /* Ensures the badge stays within the parent container */
     white-space: nowrap; /* Prevents text from wrapping to a new line */
@@ -473,6 +493,40 @@ select:focus, input[type="datetime-local"]:focus, input[type="text"]:focus {
     display: inline-block;
     vertical-align: middle;
 }
-</style>
 
+/* Fixing Margin and Alignment */
+.row {
+    margin-right: 0;
+    margin-left: 0;
+}
+
+.col-md-6 {
+    padding-right: 15px;
+    padding-left: 15px;
+}
+
+.card {
+    margin-bottom: 20px; /* Space between cards */
+}
+
+#busListings {
+    margin-top: 20px;
+}
+
+.fixed-seat-btn {
+    padding-right: 10px;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+    .bus-card {
+        margin-bottom: 15px;
+    }
+
+    .filter-sidebar {
+        margin-bottom: 15px;
+    }
+}
+
+</style>
 @endsection
