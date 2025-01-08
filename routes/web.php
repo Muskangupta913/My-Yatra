@@ -367,6 +367,7 @@ Route::post('/cancelBus', [BusController::class, 'cancelBus']);
 Route::get('/balance', [BusController::class, 'fetchBalance']);
 Route::post('/busbalance', [BusController::class, 'balance']);
 Route::get('/balance-log', [BusController::class, 'balanceLog'])->name('balance.log');
+Route::get('/autocomplete', [CityController::class, 'autocomplete'])->name('autocomplete.cities');
 
 
 
@@ -375,11 +376,11 @@ Route::get('/balance-log', [BusController::class, 'balanceLog'])->name('balance.
 
 
 //Hotel Routes
-
-
 Route::post('/search-hotel', [HotelController::class, 'search']);
 Route::get('/search-result', [HotelController::class, 'showSearchResults']);
+Route::get('/hotel-info', [HotelController::class, 'hotelinfo']);
 Route::post('/hotel-details', [HotelController::class, 'hoteldetails']);
+Route::post('/hotel-room-details', [HotelController::class, 'hotelRoomDetails']);
 
 
 
@@ -406,7 +407,7 @@ Route::get('/search-destination', [HomeController::class, 'search'])->name('sear
 Route::get('/fetch-all-states', [HomeController::class, 'fetchAllStates'])->name('fetch.all.states');
 
 // Route::get('/search/cities', [HomeController::class, 'searchCities'])->name('search.cities');
-Route::get('/autocomplete', [CityController::class, 'autocomplete'])->name('autocomplete.cities');
+
 // Searching Packages
 Route::get('/search-packages', [HomeController::class, 'searchPackages'])->name('searchPackages');
 Route::get('/kashmir', function () {

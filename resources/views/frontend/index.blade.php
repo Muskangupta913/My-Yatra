@@ -654,14 +654,14 @@
     });
 
     // Input field focus event handlers for hotel city
-    const cityInputsForHotel = ['#hotelSearchCity'];
+    // const cityInputsForHotel = ['#hotelSearchCity'];
 
-    cityInputsForHotel.forEach(input => {
-        $(input).on('focus', function () {
-            fetchAllCities(input);
-            $(input + 'List').show();
-        });
-    });
+    // cityInputsForHotel.forEach(input => {
+    //     $(input).on('focus', function () {
+    //         fetchAllCities(input);
+    //         $(input + 'List').show();
+    //     });
+    // });
 
     // Hide dropdowns when clicking outside
     $(document).on('click', function (e) {
@@ -809,24 +809,13 @@
 
  // hotel search
  document.addEventListener('DOMContentLoaded', function () {
-    // Initialize datepicker with desired format
+    // Initialize datepicker with API-compatible format
     $('.datepicker').datepicker({
-        format: 'dd/mm/yyyy',
+        format: 'dd/mm/yyyy', // User-friendly format
         autoclose: true,
         startDate: 'today',
-        todayHighlight: true
+        todayHighlight: true,
     }).datepicker('setDate', new Date());
-
-    // Nationality selection logic
-    const nationalitySelect = document.getElementById("nationalitySelect");
-    if (nationalitySelect) {
-        nationalitySelect.addEventListener('change', function () {
-            var selectedOption = nationalitySelect.options[nationalitySelect.selectedIndex];
-            var countryCode = selectedOption.value;
-            document.getElementById("countryCodeInput").value = countryCode || '';
-            document.getElementById("hiddenNationality").value = countryCode || '';
-        });
-    }
 
     // Handle search form submission
     const searchButton = document.getElementById('searchButton');
@@ -837,17 +826,20 @@
             const formData = new FormData(document.getElementById('hotelSearchForm'));
             const data = Object.fromEntries(formData.entries());
 
-            // Prepare payload exactly matching the API example
+            // Convert CheckInDate to yyyy-mm-dd for API
+            const [day, month, year] = data.CheckInDate.split('/');
+            const formattedCheckInDate = `${year}-${month}-${day}`;
+
             const payload = {
                 ClientId: "180133",
                 UserName: "MakeMy91",
                 Password: "MakeMy@910",
                 EndUserIp: "1.1.1.1",
                 BookingMode: "5",
-                CheckInDate: data.CheckInDate,
+                CheckInDate: formattedCheckInDate,
                 NoOfNights: String(data.NoOfNights),
-                CityId: data.CityId || "130443",
-                CountryCode: data.CountryCode || 'IN',
+                CityId: data.CityId || "699261",
+                CountryCode: data.CountryCode || '',
                 GuestNationality: document.getElementById("nationalitySelect").value || 'IN',
                 PreferredCurrency: "INR",
                 NoOfRooms: String(data.NoOfRooms),
@@ -855,41 +847,47 @@
                     {
                         NoOfAdults: String(data["RoomGuests[0][NoOfAdults]"] || "1"),
                         NoOfChild: String(data["RoomGuests[0][NoOfChild]"] || "0"),
-                        ChildAge: [] // Assuming no child ages are provided
-                    }
+                        ChildAge: [],
+                    },
                 ],
-                
             };
 
-           
-
-            // Proceed with the fetch request
             fetch('/search-hotel', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-                },
-                body: JSON.stringify(payload),
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.status === 'success') {
-                    console.log('Search results:', data.results);
+    method: 'POST',
+    headers: {
+        'Content-Type': 'application/json',
+        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+    },
+    body: JSON.stringify(payload),
+})
+.then(response => {
+    if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    return response.json();
+})
+.then(data => {
+    if (data.status === 'success') {
+      console.log('Search results:', data.results);
+      console.log('TraceId:', data.traceId); // Debug log
+        sessionStorage.setItem('searchResults', JSON.stringify(data.results));
+        sessionStorage.setItem('traceId', data.traceId);
+        sessionStorage.setItem('searchParams', JSON.stringify(payload));
+        const hotelCodes = data.results.map(result => result.HotelCode);
+            console.log('Hotel Codes:', hotelCodes);
 
-                    sessionStorage.setItem('searchResults', JSON.stringify(data.results));
-                sessionStorage.setItem('traceId', data.traceId);
-                sessionStorage.setItem('searchParams', JSON.stringify(payload));
-
-                // Redirect to another page
-                window.location.href = '/search-result';
-                } else {
-                    console.error('API Error:', data.message);
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-            });
+            // Optional: Store HotelCodes as a separate sessionStorage item
+            sessionStorage.setItem('hotelCodes', JSON.stringify(hotelCodes));
+        window.location.href = '/search-result';
+    } else {
+        console.error('API Error:', data.message);
+        alert(data.message || 'No results found. Please try different search criteria.');
+    }
+})
+.catch(error => {
+    console.error('Error:', error);
+    alert('An error occurred while searching. Please try again later.');
+});
         });
     }
 });

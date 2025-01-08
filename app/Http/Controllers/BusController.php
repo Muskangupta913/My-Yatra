@@ -11,13 +11,13 @@ use Carbon\Carbon;
 
 class BusController extends Controller
 {
-    protected $busApiService;
+    
     protected $ClientId;
     protected $UserName;
     protected $Password;
     protected $ApiToken;
 
-    public function __construct(BusApiService $busApiService)
+    public function __construct()
     {
          $this->ClientId = env('BUS_API_CLIENT_ID');
         $this->UserName = env('BUS_API_USERNAME');
@@ -121,7 +121,7 @@ class BusController extends Controller
             'TraceId' => 'required|string',
             'ResultIndex' => 'required|string',
         ]);
-
+    
         $payload = json_encode([
             'ClientId' => $this->ClientId,
             'UserName' => $this->UserName,
@@ -129,37 +129,44 @@ class BusController extends Controller
             "TraceId" => $request->TraceId,
             "ResultIndex" => $request->ResultIndex,
         ], JSON_UNESCAPED_SLASHES);
-
+    
         try {
             $response = Http::withHeaders([
                 'Content-Type' => 'application/json',
-                'Api-Token' => $this->ApiToken,  // Use the class property
+                'Api-Token' => $this->ApiToken,
             ])->withBody($payload, 'application/json')
               ->post('https://bus.srdvapi.com/v8/rest/GetSeatLayOut');
-
+    
             $data = $response->json();
-
+    
             if (isset($data['Error']) && $data['Error']['ErrorCode'] !== 0) {
                 return response()->json([
                     'status' => false,
                     'message' => $data['Error']['ErrorMessage'] ?? 'Error fetching seat layout',
                 ]);
             }
-
-             $result = isset($data['Result']['data']) ? $data['Result']['data'] : $data['Result'];
-
+    
+            // Add bus type detection
+            $busType = isset($data['ResultUpperSeat']) ? 'sleeper' : 'seater';
+    
             return response()->json([
                 'status' => true,
-                'data' => $data['Result'],
+                'busType' => $busType,
+                'data' => [
+                    'lower' => $data['Result'] ?? [],
+                    'upper' => $data['ResultUpperSeat'] ?? [],
+                    'availableSeats' => $data['AvailableSeats'] ?? 0
+                ]
             ]);
-
+    
         } catch (\Exception $e) {
             return response()->json([
                 'status' => false,
                 'message' => 'An error occurred while fetching seat layout.',
             ], 500);
-        }
+        } 
     }
+
 
 
 

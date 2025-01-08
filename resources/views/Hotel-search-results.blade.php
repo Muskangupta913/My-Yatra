@@ -74,74 +74,70 @@
         }
     </style>
     <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            const searchResults = JSON.parse(sessionStorage.getItem('searchResults')) || [];
-            const resultsContainer = document.getElementById('results-container');
+       document.addEventListener('DOMContentLoaded', function () {
+    const searchResults = JSON.parse(sessionStorage.getItem('searchResults')) || [];
+    const resultsContainer = document.getElementById('results-container');
+    
+    // Get traceId from sessionStorage at the top level
+    const traceId = sessionStorage.getItem('traceId');
+    console.log('TraceId from sessionStorage:', traceId);
 
-            if (searchResults.length === 0) {
-                resultsContainer.innerHTML = '<p>No results found. Please try again.</p>';
-                return;
-            }
-
-            searchResults.forEach(result => {
-                const hotelElement = document.createElement('div');
-                hotelElement.classList.add('hotel');
-
-                hotelElement.innerHTML = `
-                    <img src="${result.HotelPicture || 'https://via.placeholder.com/150'}" alt="${result.HotelName}">
-                    <div class="hotel-details">
-                        <div class="hotel-name">${result.HotelName || 'Unnamed Hotel'} (${result.StarRating} Stars)</div>
-                        <div class="hotel-description">${result.HotelAddress || 'No description available.'}</div>
-                        <div class="hotel-price">Price: ₹${result.Price.PublishedPrice || 'N/A'}</div>
-                        <a href="#" class="btn-book" onclick="bookHotel(${result.ResultIndex})">view details</a>
-                    </div>
-                `;
-                resultsContainer.appendChild(hotelElement);
-            });
-        });
-
-        function viewHotelDetails(resultIndex) {
-        // Prepare the API payload
-        const payload = {
-            ClientId: '180133',
-            UserName: 'MakeMy91',
-            Password: 'MakeMy@910',
-            EndUserIp: '1.1.1.1',
-            SrdvIndex: 15,         // Static value as per the API documentation
-            SrdvType: 'MixAPI',    // Static value as per the API documentation
-            ResultIndex: resultIndex,
-            TraceId: 12207,         // This might need to be dynamically generated based on your needs
-            HotelCode: hotelCode // Hotel code is usually same as resultIndex
-        };
-
-        // Make the API call to fetch hotel details
-        fetch('/hotel-details', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': 'MakeMy@910@23', // Avoid exposing sensitive information in client-side code
-            },
-            body: JSON.stringify(payload)
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.status === 'success' && data.hotelDetails) {
-                // Assuming the data includes 'hotelDetails' when successful
-                alert('Hotel Details: ' + JSON.stringify(data.hotelDetails));
-            } else {
-                alert('Hotel details could not be fetched.');
-            }
-        })
-        .catch(error => {
-            console.error('Error fetching hotel details:', error);
-            alert('An error occurred while fetching hotel details.');
-        });
+    if (searchResults.length === 0) {
+        resultsContainer.innerHTML = '<p>No results found. Please try again.</p>';
+        return;
     }
+
+    searchResults.forEach(result => {
+        const hotelElement = document.createElement('div');
+        hotelElement.classList.add('hotel');
+        
+        // Fixed template literal syntax and added traceId to the href
+        hotelElement.innerHTML = `
+            <img src="${result.HotelPicture || 'https://via.placeholder.com/150'}" alt="${result.HotelName}">
+            <div class="hotel-details">
+                <div class="hotel-name">${result.HotelName || 'Unnamed Hotel'} (${result.StarRating} Stars)</div>
+                <div class="hotel-description">${result.HotelAddress || 'No description available.'}</div>
+                <div class="hotel-price">Price: ₹${result.Price?.PublishedPrice || 'N/A'}</div>
+               <a href="/hotel-info?traceId=${traceId}&resultIndex=${result.ResultIndex}&hotelCode=${result.HotelCode}" 
+                   onclick="viewHotelDetails('${result.ResultIndex}', '${result.HotelCode}')" 
+                   class="view-details-btn">
+                    View Details
+                </a>
+            </div>
+        `;
+        
+        resultsContainer.appendChild(hotelElement);
+    });
+});
+
+function viewHotelDetails(resultIndex) {
+    console.log('Setting session storage:');
+    console.log('ResultIndex:', resultIndex);
+    console.log('HotelCode:', hotelCode);
+    
+    // Get traceId from sessionStorage
+    const traceId = sessionStorage.getItem('traceId');
+    console.log('TraceId from sessionStorage:', traceId);
+
+    if (!traceId) {
+        console.error('TraceId is not found in sessionStorage');
+        return;
+    }
+
+    sessionStorage.setItem('selectedHotelResultIndex', resultIndex);
+    sessionStorage.setItem('selectedHotelTraceId', traceId);
+    sessionStorage.setItem('selectedHotelCode', hotelCode);
+    
+    
+    // Use template literals for the URL
+    window.location.href = `/hotel-info?traceId=${traceId}&resultIndex=${resultIndex}&hotelCode=${hotelCode}`;
+}
     </script>
 </head>
 <body>
     <div class="container">
         <h1>Search Results</h1>
+        <!-- Missing container added here -->
         <div id="results-container"></div>
     </div>
 </body>

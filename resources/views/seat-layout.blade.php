@@ -194,8 +194,11 @@ function fetchSeatLayout() {
         .then(data => {
             if (data.status === true) {
                 // Convert both formats to a consistent array format
-                const normalizedData = normalizeLayoutData(data.data);
-                renderSeatLayout(normalizedData);
+                const seatData = {
+            lower: data.data.lower,
+            upper: data.data.upper
+        };
+        renderSeatLayout(seatData);
             } else {
                 throw new Error(data.message || 'Failed to load seat layout');
             }
@@ -208,106 +211,136 @@ function fetchSeatLayout() {
  const availableSeatImage = "{{ asset('assets/seat.png') }}";
  const bookedSeatImage = "{{ asset('assets/seat.png') }}";
 
-function normalizeLayoutData(data) {
-    // If data is already an array, it's in the second format
-    if (Array.isArray(data)) {
-        return data;
+ function normalizeLayoutData(data) {
+    const result = { Upper: [], Lower: [] };
+
+    if (data.Upper) {
+        result.Upper = Array.isArray(data.Upper) ? data.Upper : normalizeLayoutRows(data.Upper);
     }
-    
-    // If data is an object, convert it to array format
-    const rows = [];
-    Object.keys(data).forEach(rowKey => {
-        const rowData = [];
-        Object.keys(data[rowKey]).forEach(seatKey => {
-            rowData.push(data[rowKey][seatKey]);
-        });
-        if (rowData.length > 0) {
-            rows.push(rowData);
+
+    if (data.Lower) {
+        result.Lower = Array.isArray(data.Lower) ? data.Lower : normalizeLayoutRows(data.Lower);
+    }
+
+    return result;
+}
+function normalizeLayoutData(data) {
+    const normalized = {
+        lower: [],
+        upper: []
+    };
+
+    // Handle lower deck seats
+    if (data.lower) {
+        // Check if it's an array (seater bus) or object (sleeper bus)
+        if (Array.isArray(data.lower)) {
+            normalized.lower = data.lower;
+        } else {
+            // Convert object format to array format
+            Object.keys(data.lower).forEach(rowKey => {
+                const rowData = [];
+                Object.keys(data.lower[rowKey]).forEach(seatKey => {
+                    rowData.push(data.lower[rowKey][seatKey]);
+                });
+                if (rowData.length > 0) {
+                    normalized.lower.push(rowData);
+                }
+            });
         }
-    });
-    return rows;
+    }
+
+    // Handle upper deck seats
+    if (data.upper) {
+        Object.keys(data.upper).forEach(rowKey => {
+            const rowData = [];
+            Object.keys(data.upper[rowKey]).forEach(seatKey => {
+                rowData.push(data.upper[rowKey][seatKey]);
+            });
+            if (rowData.length > 0) {
+                normalized.upper.push(rowData);
+            }
+        });
+    }
+
+    return normalized;
 }
 
 function renderSeatLayout(seatDetails) {
     const seatLayoutContainer = document.getElementById('seatLayout');
+    const normalizedData = normalizeLayoutData(seatDetails);
     
-    if (!seatDetails || !Array.isArray(seatDetails) || seatDetails.length === 0) {
-        showError('No seat layout data available.');
-        return;
+    let layoutHTML = '<div class="bus-layout">';
+
+    // Render Lower Deck
+    if (normalizedData.lower.length > 0) {
+        layoutHTML += '<div class="deck lower-deck">';
+        layoutHTML += '<h4>Lower Deck</h4>';
+        layoutHTML += renderDeck(normalizedData.lower, false);
+        layoutHTML += '</div>';
     }
 
-    let layoutHTML = '<div class="bus-seats">';
+    // Render Upper Deck
+    if (normalizedData.upper.length > 0) {
+        layoutHTML += '<div class="deck upper-deck">';
+        layoutHTML += '<h4>Upper Deck</h4>';
+        layoutHTML += renderDeck(normalizedData.upper, true);
+        layoutHTML += '</div>';
+    }
 
-    // Helper function to render individual seats
-    function renderSeat(seat) {
-        const seatClass = seat.SeatStatus ? 'seat-available' : 'seat-booked';
-        const seatName = seat.SeatName || 'N/A';
-        const seatPrice = seat.Price?.PublishedPriceRoundedOff || 0;
-        const seatStatusText = seat.SeatStatus ? 'Available' : 'Booked';
-        const seatImage = seat.SeatStatus ? availableSeatImage : bookedSeatImage;
+    layoutHTML += '</div>';
+    seatLayoutContainer.innerHTML = layoutHTML;
+}
 
-        return `
-            <div class="seat-container">
-                <div 
-                    class="seat ${seatClass}" 
-                    onclick='selectSeat(this, ${JSON.stringify(seat)})'
-                    data-seat='${JSON.stringify(seat)}'>
-                    <div class="seat-image-container">
-                        <span class="seat-number">${seatName}</span>
-                        <img src="${seatImage}" alt="Seat Image" class="seat-image">
+function renderDeck(deckData, isUpper) {
+    let deckHTML = '<div class="deck-seats">';
+    
+    deckData.forEach((row, rowIndex) => {
+        deckHTML += '<div class="seat-row">';
+        
+        row.forEach((seat) => {
+            if (seat && typeof seat === 'object') {
+                const seatClass = getSeatClass(seat);
+                const seatPrice = seat.Price?.PublishedPriceRoundedOff || 0;
+                
+                deckHTML += `
+                    <div class="seat-wrapper ${seat.IsLadiesSeat ? 'ladies-seat' : ''}" 
+                         data-column="${seat.ColumnNo}" 
+                         data-row="${seat.RowNo}">
+                        <div class="${seatClass}"
+                             onclick="selectSeat(this, ${JSON.stringify(seat)})">
+                            <div class="seat-info">
+                                <span class="seat-number">${seat.SeatName}</span>
+                                <span class="seat-price">₹${seatPrice}</span>
+                            </div>
+                        </div>
                     </div>
-                </div>
-                <div class="seat-info">
-                    <small class="seat-status">${seatStatusText}</small>
-                    <small class="seat-price">₹${seatPrice}</small>
-                </div>
-            </div>
-        `;
-    }
-
-    // Iterate over each row
-    seatDetails.forEach((row, rowIndex) => {
-        if (Array.isArray(row)) {
-            layoutHTML += '<div class="row">';
-
-            // Special handling for rows with a middle gap (e.g., Row 3)
-            if (rowIndex === 2) {  // Row 3 (or any row you want to customize)
-                layoutHTML += '<div class="row middle-gap-row">';
-
-                // Left side seats (Seats 1, 2 for example)
-                layoutHTML += '<div class="left-seats">';
-                row.slice(0, 2).forEach(seat => {
-                    if (seat && typeof seat === 'object') {
-                        layoutHTML += renderSeat(seat);
-                    }
-                });
-                layoutHTML += '</div>';
-
-                // Right side seats (Seats 3 onwards)
-                layoutHTML += '<div class="right-seats">';
-                row.slice(2).forEach(seat => {
-                    if (seat && typeof seat === 'object') {
-                        layoutHTML += renderSeat(seat);
-                    }
-                });
-                layoutHTML += '</div>';
-
-                layoutHTML += '</div>'; // End of middle-gap row
-            } else {
-                // For other rows, render seats normally
-                row.forEach(seat => {
-                    if (seat && typeof seat === 'object') {
-                        layoutHTML += renderSeat(seat);
-                    }
-                });
+                `;
             }
-
-            layoutHTML += '</div>'; // End of row
-        }
+        });
+        
+        deckHTML += '</div>';
     });
+    
+    deckHTML += '</div>';
+    return deckHTML;
+}
 
-    layoutHTML += '</div>'; // End of bus seats
-    seatLayoutContainer.innerHTML = layoutHTML; // Render directly into the seat layout container
+function getSeatClass(seat) {
+    const classes = ['seat'];
+    
+    if (seat.SeatStatus) {
+        classes.push('seat-available');
+    } else {
+        classes.push('seat-booked');
+    }
+    
+    if (seat.IsUpper) {
+        classes.push('upper-berth');
+    } else {
+        classes.push('lower-berth');
+    }
+    
+    return classes.join(' ');
 }
 
 // Rest of the code remains the same
@@ -703,6 +736,127 @@ function blockSeat(passengerData) {
     display: block;
     margin: 0 auto; /* Center the image */
     transform: rotate(90deg);
+}
+.bus-layout {
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+    padding: 20px;
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.deck {
+    border: 2px solid #e0e0e0;
+    padding: 20px;
+    border-radius: 10px;
+    background: #fff;
+}
+
+.deck h4 {
+    margin: 0 0 20px 0;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #eee;
+    color: #333;
+    font-size: 16px;
+}
+
+.deck-seats {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.seat-row {
+    display: flex;
+    gap: 15px;
+    justify-content: flex-start;
+    flex-wrap: wrap;
+}
+
+.seat-wrapper {
+    position: relative;
+}
+
+.seat {
+    width: 50px;
+    height: 50px;
+    border: 2px solid #ddd;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    padding: 5px;
+}
+
+.seat-available {
+    background-color: #e8f5e9;
+    border-color: #81c784;
+}
+
+.seat-booked {
+    background-color: #ffebee;
+    border-color: #e57373;
+    cursor: not-allowed;
+}
+
+.upper-berth {
+    background-color: #e3f2fd;
+    border-color: #64b5f6;
+}
+
+.lower-berth {
+    background-color: #f3e5f5;
+    border-color: #ba68c8;
+}
+
+.seat-info {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+}
+
+.seat-number {
+    font-weight: bold;
+    font-size: 12px;
+}
+
+.seat-price {
+    font-size: 10px;
+    color: #666;
+    margin-top: 2px;
+}
+
+.ladies-seat {
+    position: relative;
+}
+
+.ladies-seat::after {
+    content: '♀';
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    background: #ff4081;
+    color: white;
+    border-radius: 50%;
+    width: 16px;
+    height: 16px;
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.seat:hover:not(.seat-booked) {
+    transform: translateY(-2px);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.seat-selected {
+    background-color: #4caf50 !important;
+    border-color: #2e7d32 !important;
+    color: white;
 }
 .seat-container {
     display: flex;
