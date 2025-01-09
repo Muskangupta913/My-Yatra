@@ -212,54 +212,33 @@ function fetchSeatLayout() {
  const bookedSeatImage = "{{ asset('assets/seat.png') }}";
 
  function normalizeLayoutData(data) {
-    const result = { Upper: [], Lower: [] };
-
-    if (data.Upper) {
-        result.Upper = Array.isArray(data.Upper) ? data.Upper : normalizeLayoutRows(data.Upper);
-    }
-
-    if (data.Lower) {
-        result.Lower = Array.isArray(data.Lower) ? data.Lower : normalizeLayoutRows(data.Lower);
-    }
-
-    return result;
-}
-function normalizeLayoutData(data) {
     const normalized = {
         lower: [],
         upper: []
     };
 
-    // Handle lower deck seats
+    // Handle lower deck
     if (data.lower) {
-        // Check if it's an array (seater bus) or object (sleeper bus)
+        // For seater buses (array format)
         if (Array.isArray(data.lower)) {
-            normalized.lower = data.lower;
-        } else {
-            // Convert object format to array format
-            Object.keys(data.lower).forEach(rowKey => {
-                const rowData = [];
-                Object.keys(data.lower[rowKey]).forEach(seatKey => {
-                    rowData.push(data.lower[rowKey][seatKey]);
-                });
-                if (rowData.length > 0) {
-                    normalized.lower.push(rowData);
-                }
+            normalized.lower = data.lower.map(row => {
+                // Ensure each row is an array
+                return Array.isArray(row) ? row : Object.values(row);
             });
+        } 
+        // For sleeper/mixed buses (object format)
+        else {
+            normalized.lower = Object.values(data.lower).map(row => 
+                Array.isArray(row) ? row : Object.values(row)
+            );
         }
     }
 
-    // Handle upper deck seats
+    // Handle upper deck
     if (data.upper) {
-        Object.keys(data.upper).forEach(rowKey => {
-            const rowData = [];
-            Object.keys(data.upper[rowKey]).forEach(seatKey => {
-                rowData.push(data.upper[rowKey][seatKey]);
-            });
-            if (rowData.length > 0) {
-                normalized.upper.push(rowData);
-            }
-        });
+        normalized.upper = Object.values(data.upper).map(row => 
+            Array.isArray(row) ? row : Object.values(row)
+        );
     }
 
     return normalized;
@@ -269,78 +248,114 @@ function renderSeatLayout(seatDetails) {
     const seatLayoutContainer = document.getElementById('seatLayout');
     const normalizedData = normalizeLayoutData(seatDetails);
     
-    let layoutHTML = '<div class="bus-layout">';
+    let layoutHTML = `
+        <div class="bus-layout">
+            <div class="seat-legend">
+                <div class="legend-item">
+                    <div class="seat seat-available"></div>
+                    <span>Available</span>
+                </div>
+                <div class="legend-item">
+                    <div class="seat seat-booked"></div>
+                    <span>Booked</span>
+                </div>
+                <div class="legend-item">
+                    <div class="seat seat-ladies"></div>
+                    <span>Ladies Seat</span>
+                </div>
+            </div>`;
 
     // Render Lower Deck
     if (normalizedData.lower.length > 0) {
-        layoutHTML += '<div class="deck lower-deck">';
-        layoutHTML += '<h4>Lower Deck</h4>';
-        layoutHTML += renderDeck(normalizedData.lower, false);
-        layoutHTML += '</div>';
+        layoutHTML += `
+            <div class="deck lower-deck">
+                <h4>Lower Deck</h4>
+                <div class="deck-seats">
+                    ${renderDeckSeats(normalizedData.lower, false)}
+                </div>
+            </div>`;
     }
 
-    // Render Upper Deck
+    // Render Upper Deck if exists
     if (normalizedData.upper.length > 0) {
-        layoutHTML += '<div class="deck upper-deck">';
-        layoutHTML += '<h4>Upper Deck</h4>';
-        layoutHTML += renderDeck(normalizedData.upper, true);
-        layoutHTML += '</div>';
+        layoutHTML += `
+            <div class="deck upper-deck">
+                <h4>Upper Deck</h4>
+                <div class="deck-seats">
+                    ${renderDeckSeats(normalizedData.upper, true)}
+                </div>
+            </div>`;
     }
 
     layoutHTML += '</div>';
     seatLayoutContainer.innerHTML = layoutHTML;
 }
 
-function renderDeck(deckData, isUpper) {
-    let deckHTML = '<div class="deck-seats">';
+function renderDeckSeats(deckData, isUpper) {
+    let seatsHTML = '';
     
     deckData.forEach((row, rowIndex) => {
-        deckHTML += '<div class="seat-row">';
+        seatsHTML += '<div class="seat-row">';
         
-        row.forEach((seat) => {
+        row.forEach((seat, seatIndex) => {
             if (seat && typeof seat === 'object') {
-                const seatClass = getSeatClass(seat);
-                const seatPrice = seat.Price?.PublishedPriceRoundedOff || 0;
-                
-                deckHTML += `
-                    <div class="seat-wrapper ${seat.IsLadiesSeat ? 'ladies-seat' : ''}" 
-                         data-column="${seat.ColumnNo}" 
-                         data-row="${seat.RowNo}">
-                        <div class="${seatClass}"
+                const seatClasses = [
+                    'seat',
+                    seat.SeatStatus ? 'seat-available' : 'seat-booked',
+                    seat.IsLadiesSeat ? 'ladies-seat' : '',
+                    seat.SeatType === 2 ? 'sleeper' : 'seater',
+                    isUpper || seat.IsUpper ? 'upper-berth' : 'lower-berth'
+                ].filter(Boolean).join(' ');
+
+                const seatPrice = seat.Price?.PublishedPriceRoundedOff || 
+                                seat.Price?.FareRoundedOff || 
+                                seat.FareRoundedOff || 0;
+
+                seatsHTML += `
+                    <div class="seat-wrapper" 
+                         data-row="${seat.RowNo || rowIndex + 1}" 
+                         data-column="${seat.ColumnNo || seatIndex + 1}">
+                        <div class="${seatClasses}"
                              onclick="selectSeat(this, ${JSON.stringify(seat)})">
                             <div class="seat-info">
-                                <span class="seat-number">${seat.SeatName}</span>
+                                <span class="seat-number">${seat.SeatName || seat.SeatNo || `${rowIndex + 1}-${seatIndex + 1}`}</span>
                                 <span class="seat-price">₹${seatPrice}</span>
                             </div>
                         </div>
-                    </div>
-                `;
+                    </div>`;
+            } else {
+                // Add empty space for null/undefined seats
+                seatsHTML += '<div class="seat-wrapper empty"></div>';
             }
         });
         
-        deckHTML += '</div>';
+        seatsHTML += '</div>';
     });
     
-    deckHTML += '</div>';
-    return deckHTML;
+    return seatsHTML;
 }
 
-function getSeatClass(seat) {
-    const classes = ['seat'];
+// Helper function to select seats
+function selectSeat(seatElement, seatData) {
+    if (!seatData.SeatStatus) return; // Don't allow selection of booked seats
     
-    if (seat.SeatStatus) {
-        classes.push('seat-available');
+    const isSelected = seatElement.classList.contains('selected');
+    if (isSelected) {
+        seatElement.classList.remove('selected');
+        // Remove from selected seats array/storage
     } else {
-        classes.push('seat-booked');
+        seatElement.classList.add('selected');
+        // Add to selected seats array/storage
     }
     
-    if (seat.IsUpper) {
-        classes.push('upper-berth');
-    } else {
-        classes.push('lower-berth');
-    }
-    
-    return classes.join(' ');
+    // Trigger event or callback for seat selection
+    updateSelectedSeats();
+}
+
+// Update selected seats info
+function updateSelectedSeats() {
+    const selectedSeats = document.querySelectorAll('.seat.selected');
+    // Update your UI with selected seats info
 }
 
 // Rest of the code remains the same

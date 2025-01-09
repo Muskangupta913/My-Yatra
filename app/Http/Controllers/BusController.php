@@ -115,8 +115,7 @@ class BusController extends Controller
     }
     
 
-    public function getSeatLayout(Request $request)
-    {
+    public function getSeatLayout(Request $request) {
         $request->validate([
             'TraceId' => 'required|string',
             'ResultIndex' => 'required|string',
@@ -146,17 +145,16 @@ class BusController extends Controller
                 ]);
             }
     
-            // Add bus type detection
-            $busType = isset($data['ResultUpperSeat']) ? 'sleeper' : 'seater';
+            // Determine bus type
+            $busType = $this->determineBusType($data);
+    
+            // Normalize the data based on bus type
+            $normalizedData = $this->normalizeLayoutData($data, $busType);
     
             return response()->json([
                 'status' => true,
                 'busType' => $busType,
-                'data' => [
-                    'lower' => $data['Result'] ?? [],
-                    'upper' => $data['ResultUpperSeat'] ?? [],
-                    'availableSeats' => $data['AvailableSeats'] ?? 0
-                ]
+                'data' => $normalizedData
             ]);
     
         } catch (\Exception $e) {
@@ -164,7 +162,78 @@ class BusController extends Controller
                 'status' => false,
                 'message' => 'An error occurred while fetching seat layout.',
             ], 500);
-        } 
+        }
+    }
+    
+    private function determineBusType($data) {
+        $hasSleeperSeats = false;
+        $hasSeaterSeats = false;
+    
+        // Check lower deck
+        if (isset($data['Result'])) {
+            $result = $data['Result'];
+            if (is_array($result)) {
+                // Seater bus format
+                foreach ($result as $row) {
+                    if (is_array($row)) {
+                        foreach ($row as $seat) {
+                            if (isset($seat['SeatType'])) {
+                                if ($seat['SeatType'] == 1) $hasSeaterSeats = true;
+                                if ($seat['SeatType'] == 2) $hasSleeperSeats = true;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    
+        if ($hasSleeperSeats && $hasSeaterSeats) {
+            return 'mixed';
+        } elseif ($hasSleeperSeats) {
+            return 'sleeper';
+        } else {
+            return 'seater';
+        }
+    }
+    
+    private function normalizeLayoutData($data, $busType) {
+        $normalized = [
+            'lower' => [],
+            'upper' => [],
+            'availableSeats' => $data['AvailableSeats'] ?? 0
+        ];
+    
+        // Handle lower deck based on bus type
+        if (isset($data['Result'])) {
+            if ($busType === 'seater') {
+                $normalized['lower'] = $data['Result'];
+            } else {
+                // For sleeper and mixed buses
+                $normalized['lower'] = $this->convertObjectToArray($data['Result']);
+            }
+        }
+    
+        // Handle upper deck if exists
+        if (isset($data['ResultUpperSeat'])) {
+            $normalized['upper'] = $this->convertObjectToArray($data['ResultUpperSeat']);
+        }
+    
+        return $normalized;
+    }
+    
+    private function convertObjectToArray($data) {
+        $result = [];
+        if (is_object($data)) {
+            $data = (array) $data;
+        }
+        foreach ($data as $key => $value) {
+            if (is_object($value) || is_array($value)) {
+                $result[$key] = $this->convertObjectToArray($value);
+            } else {
+                $result[$key] = $value;
+            }
+        }
+        return $result;
     }
 
 
