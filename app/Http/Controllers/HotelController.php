@@ -259,86 +259,81 @@ public function hotelDetails(Request $request)
     }
 
 
-
     public function blockRoom(Request $request)
-    {
-        try {
-            $validator = Validator::make($request->all(), [
-                'ResultIndex' => 'required',
-                'HotelCode' => 'required',
-                'HotelName' => 'required',
-                'GuestNationality' => 'required',
-                'NoOfRooms' => 'required',
-                'HotelRoomsDetails' => 'required|array',
-                'HotelRoomsDetails.*.RoomId' => 'required',
-                'HotelRoomsDetails.*.RoomIndex' => 'required',
-                'HotelRoomsDetails.*.HotelPassenger' => 'required|array',
-                'HotelRoomsDetails.*.HotelPassenger.*.Title' => 'required|in:Mr,Mrs,Ms',
-                'HotelRoomsDetails.*.HotelPassenger.*.FirstName' => 'required',
-                'HotelRoomsDetails.*.HotelPassenger.*.LastName' => 'required',
-                'HotelRoomsDetails.*.HotelPassenger.*.Phoneno' => 'required',
-                'HotelRoomsDetails.*.HotelPassenger.*.Email' => 'required|email',
-            ]);
+{
+    try {
+        // Validate the request input
+        $validated = $request->validate([
+            'HotelName' => 'required|string',
+            'GuestNationality' => 'required|string',
+            'NoOfRooms' => 'required|integer',
+            'HotelRoomsDetails' => 'required|array',
+            'HotelRoomsDetails.*.RoomId' => 'required|string',
+            'HotelRoomsDetails.*.RoomIndex' => 'required|string',
+            'HotelRoomsDetails.*.RoomTypeCode' => 'required|string',
+            'ResultIndex' => 'required|string',
+            'TraceId' => 'required|integer',
+            'HotelCode' => 'required|string',
+        ]);
 
-            if ($validator->fails()) {
-                return response()->json([
-                    'status' => 'error',
-                    'message' => 'Validation failed',
-                    'errors' => $validator->errors()
-                ], 400);
-            }
+        // Prepare the request payload
+        $payload = array_merge($validated, [
+            'IsVoucherBooking' => true,
+            'ClientReferenceNo' => 0,
+            'ClientId' => '180133',
+            'UserName' => 'MakeMy91',
+            'Password' => 'MakeMy@910',
+            'EndUserIp' => '1.1.1.1',
+            'SrdvIndex' => '15',
+            'SrdvType' => 'MixAPI',
+        ]);
 
-            // Merge client credentials with request data
-            $requestBody = array_merge($request->all(), [
-                'ClientId' => $this->clientId,
-                'UserName' => $this->username,
-                'Password' => $this->password,
-                'EndUserIp' => $request->ip()
-            ]);
+        // Make the API call
+        $response = Http::withHeaders([
+            'Content-Type' => 'application/json',
+            'Api-Token' => 'MakeMy@910@23'
+        ])->post('https://hotel.srdvtest.com/v8/rest/BlockRoom', $payload);
 
-            // Call the booking API
-            $response = Http::post($this->baseUrl . 'Book', $requestBody);
+        $responseData = $response->json();
 
-            if ($response->successful()) {
-                $bookResult = $response->json()['BookResult'] ?? null;
+        // Check if the API response is successful
+        if ($response->successful() && isset($responseData['BlockRoomResult'])) {
+            $blockRoomResult = $responseData['BlockRoomResult'];
 
-                if ($bookResult && $bookResult['Status'] === 'Confirmed') {
-                    // Log successful booking
-                    Log::info('Successful Booking', [
-                        'BookingRefNo' => $bookResult['BookingRefNo'],
-                        'ConfirmationNo' => $bookResult['ConfirmationNo']
-                    ]);
-
-                    // You might want to save booking details to your database here
-                    // $this->saveBookingToDatabase($bookResult, $request->all());
-
-                    return response()->json([
-                        'status' => 'success',
-                        'message' => 'Booking confirmed successfully',
-                        'BookResult' => $bookResult
-                    ]);
-                }
+            if (isset($blockRoomResult['Error']['ErrorCode']) && $blockRoomResult['Error']['ErrorCode'] === 0) {
+                // Log successful blocking
+                Log::info('Room blocked successfully', [
+                    'HotelName' => $blockRoomResult['HotelName'] ?? 'Unknown',
+                    'TraceId' => $blockRoomResult['TraceId'] ?? 'Unknown',
+                ]);
 
                 return response()->json([
-                    'status' => 'error',
-                    'message' => 'Booking failed',
-                    'BookResult' => $bookResult
+                    'status' => 'success',
+                    'message' => 'Room blocked successfully',
+                    'data' => $blockRoomResult,
                 ]);
             }
 
             return response()->json([
                 'status' => 'error',
-                'message' => 'Failed to process booking',
-                'error' => $response->json()
-            ], $response->status());
-
-        } catch (\Exception $e) {
-            Log::error('Booking Error: ' . $e->getMessage());
-            return response()->json([
-                'status' => 'error',
-                'message' => 'An error occurred while processing the booking',
-                'error' => $e->getMessage()
-            ], 500);
+                'message' => $blockRoomResult['Error']['ErrorMessage'] ?? 'Failed to block room',
+                'error' => $blockRoomResult['Error'],
+            ], 400);
         }
+
+        return response()->json([
+            'status' => 'error',
+            'message' => 'Failed to process room blocking request',
+            'error' => $responseData,
+        ], $response->status());
+    } catch (\Exception $e) {
+        Log::error('Room Blocking Error: ' . $e->getMessage(), ['exception' => $e]);
+
+        return response()->json([
+            'status' => 'error',
+            'message' => 'An error occurred while processing the room blocking request',
+            'error' => $e->getMessage(),
+        ], 500);
     }
+}
 }

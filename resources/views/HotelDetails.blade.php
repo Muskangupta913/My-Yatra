@@ -394,7 +394,7 @@ button:disabled {
         <div id="room-details" class="loading-state">Loading room details...</div>
     </div>
 
-    <script>
+<script>
         document.addEventListener('DOMContentLoaded', function() {
             fetchHotelInfo();
             fetchRoomDetails();
@@ -496,270 +496,225 @@ button:disabled {
             });
         }
 
-        function fetchRoomDetails() {
-            const urlParams = new URLSearchParams(window.location.search);
-            const traceId = urlParams.get('traceId');
-            const resultIndex = urlParams.get('resultIndex');
-            const hotelCode = urlParams.get('hotelCode');
 
-            if (!resultIndex || !traceId || !hotelCode) {
-                document.getElementById('room-details').innerHTML = 
-                    '<div class="error-state">No room information available</div>';
-                return;
-            }
+        function getRoomDataFromCard(roomId) {
+    const roomCard = document.querySelector(`[data-room-id="${roomId}"]`);
+    if (!roomCard) {
+        console.error('Room card not found');
+        return null;
+    }
 
-            const payload = {
-                resultIndex: resultIndex,
-                srdvIndex: "15",
-                srdvType: "MixAPI",
-                hotelCode: hotelCode,
-                traceId: parseInt(traceId),
-            };
+    return {
+        RoomTypeName: roomCard.getAttribute('data-room-type-name'),
+        RoomTypeCode: roomCard.getAttribute('data-room-type-code'),
+        RatePlan: roomCard.getAttribute('data-rate-plan'),
+        RatePlanCode: roomCard.getAttribute('data-rate-plan-code')
+    };
+}
 
-            fetch('/hotel-room-details', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-            },
-            body: JSON.stringify(payload),
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.status === 'success' && data.data?.hotelRoomsDetails) {
-                let roomDetailsHtml = '';
-                const roomCombinations = data.data.roomCombinations;
-                
-                data.data.hotelRoomsDetails.forEach(category => {
-                    roomDetailsHtml += `
-                        <div class="room-category">
-                            <h2 class="category-name">${category.CategoryName}</h2>
-                            
-                            ${category.Rooms.map(room => `
-                                <div class="room-card">
-                                    <div class="room-header">
-                                        <h3 class="room-name">${room.RoomTypeName}</h3>
-                                        <div class="price-section">
-                                            <div class="price-amount">${room.Price.CurrencyCode} ${room.Price.OfferedPrice}</div>
-                                            ${room.Price.PublishedPrice !== room.Price.OfferedPrice ? 
-                                                `<div class="price-original">${room.Price.CurrencyCode} ${room.Price.PublishedPrice}</div>` : 
-                                                ''}
+function fetchRoomDetails() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const traceId = urlParams.get('traceId');
+    const resultIndex = urlParams.get('resultIndex');
+    const hotelCode = urlParams.get('hotelCode');
+
+    if (!resultIndex || !traceId || !hotelCode) {
+        document.getElementById('room-details').innerHTML = 
+            '<div class="error-state">No room information available</div>';
+        return;
+    }
+
+    const payload = {
+        resultIndex: resultIndex,
+        srdvIndex: "15",
+        srdvType: "MixAPI",
+        hotelCode: hotelCode,
+        traceId: parseInt(traceId),
+    };
+
+    fetch('/hotel-room-details', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+        },
+        body: JSON.stringify(payload),
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.status === 'success' && data.data?.hotelRoomsDetails) {
+            let roomDetailsHtml = '';
+            const roomCombinations = data.data.roomCombinations;
+            
+            data.data.hotelRoomsDetails.forEach(category => {
+                roomDetailsHtml += `
+                    <div class="room-category">
+                        <h2 class="category-name">${category.CategoryName}</h2>
+                        
+                        ${category.Rooms.map(room => `
+                            <div class="room-card"
+                                data-room-id="${room.RoomId}"
+                                data-room-type-name="${room.RoomTypeName}"
+                                data-room-type-code="${room.RoomTypeCode}"
+                                data-rate-plan="${room.RatePlan}"
+                                data-rate-plan-code="${room.RatePlanCode}"
+                                data-room-index="${room.RoomIndex}">
+                                <div class="room-header">
+                                    <h3 class="room-name">${room.RoomTypeName}</h3>
+                                    <div class="price-section">
+                                        <div class="price-amount">${room.Price.CurrencyCode} ${room.Price.OfferedPrice}</div>
+                                        ${room.Price.PublishedPrice !== room.Price.OfferedPrice ? 
+                                            `<div class="price-original">${room.Price.CurrencyCode} ${room.Price.PublishedPrice}</div>` : 
+                                            ''}
+                                    </div>
+                                </div>
+
+                                <div style="position: relative;">
+                                    ${room.RoomImages ? `
+                                        <div class="room-image-gallery">
+                                            ${room.RoomImages.map(img => `
+                                                <img src="${img.Image}" alt="${room.RoomTypeName}" class="room-image">
+                                            `).join('')}
+                                        </div>
+                                    ` : ''}
+                                </div>
+
+                                <div class="room-info-grid">
+                                    <div class="room-details">
+                                        <div class="room-description">
+                                            ${room.Description.map(desc => `<p>${desc}</p>`).join('')}
+                                        </div>
+                                        
+                                        <div class="bed-type-info">
+                                            <i class="fas fa-bed"></i> ${room.BedTypes}
+                                        </div>
+
+                                        <div class="amenities-section">
+                                            ${room.Amenities.map(amenity => `
+                                                <span class="amenity-tag">
+                                                    <i class="fas ${amenity.FontAwesome}"></i>
+                                                    ${amenity.Name}
+                                                </span>
+                                            `).join('')}
                                         </div>
                                     </div>
 
-                                    <div style="position: relative;">
-                                        ${room.RoomImages ? `
-                                            <div class="room-image-gallery">
-                                                ${room.RoomImages.map(img => `
-                                                    <img src="${img.Image}" alt="${room.RoomTypeName}" class="room-image">
+                                    <div class="room-services">
+                                        ${room.ServicesStatus ? `
+                                            <div class="services-status">
+                                                ${room.ServicesStatus.map(service => `
+                                                    <div class="service-item">
+                                                        <i class="fas fa-check-circle"></i>
+                                                        <span>${service.Name}: ${service.Value}</span>
+                                                    </div>
                                                 `).join('')}
                                             </div>
                                         ` : ''}
                                     </div>
-
-                                    <div class="room-info-grid">
-                                        <div class="room-details">
-                                            <div class="room-description">
-                                                ${room.Description.map(desc => `<p>${desc}</p>`).join('')}
-                                            </div>
-                                            
-                                            <div class="bed-type-info">
-                                                <i class="fas fa-bed"></i> ${room.BedTypes}
-                                            </div>
-
-                                            <div class="amenities-section">
-                                                ${room.Amenities.map(amenity => `
-                                                    <span class="amenity-tag">
-                                                        <i class="fas ${amenity.FontAwesome}"></i>
-                                                        ${amenity.Name}
-                                                    </span>
-                                                `).join('')}
-                                            </div>
-                                        </div>
-
-                                        <div class="room-services">
-                                            ${room.ServicesStatus ? `
-                                                <div class="services-status">
-                                                    ${room.ServicesStatus.map(service => `
-                                                        <div class="service-item">
-                                                            <i class="fas fa-check-circle"></i>
-                                                            <span>${service.Name}: ${service.Value}</span>
-                                                        </div>
-                                                    `).join('')}
-                                                </div>
-                                            ` : ''}
-                                        </div>
-                                    </div>
-
-                                    ${room.CancellationPolicies ? `
-                                        <div class="cancellation-policy">
-                                            <h4><i class="fas fa-info-circle"></i> Cancellation Policy</h4>
-                                            ${room.CancellationPolicies.map(policy => `
-                                                <div class="policy-item">
-                                                    <span>${policy.FromDate.split('T')[0]} to ${policy.ToDate.split('T')[0]}</span>
-                                                    <span class="policy-charge">
-                                                        ${policy.Charge > 0 ? 
-                                                            `Cancellation charge: ${policy.Currency} ${policy.Charge}` : 
-                                                            'Free cancellation'}
-                                                    </span>
-                                                </div>
-                                            `).join('')}
-                                        </div>
-                                    ` : ''}
-
-                                    <div class="book-now-section">
-                                        <div class="room-info">
-                                            <div class="room-id">Room ID: ${room.RoomId}</div>
-                                            ${room.IsPANMandatory ? 
-                                                '<div class="pan-notice"><i class="fas fa-exclamation-circle"></i> PAN Card Required</div>' : 
-                                                ''}
-                                        </div>
-                                        <button class="book-now-button" onclick="bookRoom('${room.RoomId}', '${room.RoomIndex}')">
-                                            <i class="fas fa-calendar-check"></i>
-                                            Book Now
-                                        </button>
-                                    </div>
                                 </div>
-                            `).join('')}
-                        </div>
-                    `;
-                });
-                
-                document.getElementById('room-details').innerHTML = roomDetailsHtml;
-            } else {
-                document.getElementById('room-details').innerHTML = 
-                    '<div class="error-state">Failed to load room details</div>';
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            document.getElementById('room-details').innerHTML = 
-                '<div class="error-state">An error occurred while loading room details</div>';
-        });
-    }
 
+                                ${room.CancellationPolicies ? `
+                                    <div class="cancellation-policy">
+                                        <h4><i class="fas fa-info-circle"></i> Cancellation Policy</h4>
+                                        ${room.CancellationPolicies.map(policy => `
+                                            <div class="policy-item">
+                                                <span>${policy.FromDate.split('T')[0]} to ${policy.ToDate.split('T')[0]}</span>
+                                                <span class="policy-charge">
+                                                    ${policy.Charge > 0 ? 
+                                                        `Cancellation charge: ${policy.Currency} ${policy.Charge}` : 
+                                                        'Free cancellation'}
+                                                </span>
+                                            </div>
+                                        `).join('')}
+                                    </div>
+                                ` : ''}
 
-
-
-    function bookRoom(roomId, roomIndex) {
-    // Show modal with passenger form
-    const modal = document.createElement('div');
-    modal.className = 'modal';
-    modal.innerHTML = `
-        <div class="modal-content">
-            <span class="close">&times;</span>
-            <h2>Enter Passenger Details</h2>
-            <form id="passengerForm">
-                <div class="passenger-container" id="passengerContainer">
-                    <div class="passenger-entry">
-                        <h3>Lead Passenger</h3>
-                        <div class="form-group">
-                            <select name="title" required>
-                                <option value="Mr">Mr</option>
-                                <option value="Mrs">Mrs</option>
-                                <option value="Ms">Ms</option>
-                            </select>
-                            <input type="text" name="firstName" placeholder="First Name" required>
-                            <input type="text" name="lastName" placeholder="Last Name" required>
-                            <input type="email" name="email" placeholder="Email" required>
-                            <input type="tel" name="phone" placeholder="Phone Number" required>
-                            <input type="text" name="pan" placeholder="PAN Number (Optional)">
-                        </div>
+                                <div class="book-now-section">
+                                    <div class="room-info">
+                                        <div class="room-id">Room ID: ${room.RoomId}</div>
+                                        ${room.IsPANMandatory ? 
+                                            '<div class="pan-notice"><i class="fas fa-exclamation-circle"></i> PAN Card Required</div>' : 
+                                            ''}
+                                    </div>
+                                    <button class="book-now-button" onclick="blockRoom('${room.RoomId}')">
+                                        <i class="fas fa-calendar-check"></i>
+                                        Book Now
+                                    </button>
+                                </div>
+                            </div>
+                        `).join('')}
                     </div>
-                </div>
-                <button type="button" onclick="addPassenger()">Add Another Passenger</button>
-                <button type="submit">Block Room</button>
-            </form>
-        </div>
-    `;
-
-    document.body.appendChild(modal);
-
-    // Close modal functionality
-    const closeBtn = modal.querySelector('.close');
-    closeBtn.onclick = function() {
-        modal.remove();
-    }
-
-    // Form submission handler
-    const form = modal.querySelector('#passengerForm');
-    form.onsubmit = function(e) {
-        e.preventDefault();
-        blockRoom(roomId, roomIndex, form);
-    }
+                `;
+            });
+            
+            document.getElementById('room-details').innerHTML = roomDetailsHtml;
+        } else {
+            document.getElementById('room-details').innerHTML = 
+                '<div class="error-state">Failed to load room details</div>';
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        document.getElementById('room-details').innerHTML = 
+            '<div class="error-state">An error occurred while loading room details</div>';
+    });
 }
 
-function addPassenger() {
-    const container = document.getElementById('passengerContainer');
-    const passengerEntry = document.createElement('div');
-    passengerEntry.className = 'passenger-entry';
-    passengerEntry.innerHTML = `
-        <h3>Additional Passenger</h3>
-        <div class="form-group">
-            <select name="title" required>
-                <option value="Mr">Mr</option>
-                <option value="Mrs">Mrs</option>
-                <option value="Ms">Ms</option>
-            </select>
-            <input type="text" name="firstName" placeholder="First Name" required>
-            <input type="text" name="lastName" placeholder="Last Name" required>
-            <input type="email" name="email" placeholder="Email" required>
-            <input type="tel" name="phone" placeholder="Phone Number" required>
-            <input type="text" name="pan" placeholder="PAN Number (Optional)">
-        </div>
-        <button type="button" class="remove-passenger" onclick="this.parentElement.remove()">Remove</button>
-    `;
-    container.appendChild(passengerEntry);
-}
+function blockRoom(roomId) {
+    const roomCard = document.querySelector(`[data-room-id="${roomId}"]`);
+    if (!roomCard) {
+        alert('Room information not found');
+        return;
+    }
 
-function blockRoom(roomId, roomIndex, form) {
     const urlParams = new URLSearchParams(window.location.search);
     const traceId = urlParams.get('traceId');
+    const resultIndex = urlParams.get('resultIndex');
     const hotelCode = urlParams.get('hotelCode');
     const hotelName = document.querySelector('.hotel-name').textContent;
 
-    // Collect all passenger entries
-    const passengers = [];
-    const passengerEntries = form.querySelectorAll('.passenger-entry');
-    
-    passengerEntries.forEach((entry, index) => {
-        passengers.push({
-            Title: entry.querySelector('select[name="title"]').value,
-            FirstName: entry.querySelector('input[name="firstName"]').value,
-            MiddleName: null,
-            LastName: entry.querySelector('input[name="lastName"]').value,
-            Phoneno: entry.querySelector('input[name="phone"]').value,
-            Email: entry.querySelector('input[name="email"]').value,
-            PaxType: "1",
-            LeadPassenger: index === 0,
-            PAN: entry.querySelector('input[name="pan"]').value || ""
-        });
-    });
+    // Get room details from the data attributes
+    const roomIndex = roomCard.getAttribute('data-room-index');
+    const roomTypeCode = roomCard.getAttribute('data-room-type-code');
+    const roomTypeName = roomCard.getAttribute('data-room-type-name');
+    const ratePlan = roomCard.getAttribute('data-rate-plan');
+    const ratePlanCode = roomCard.getAttribute('data-rate-plan-code');
+
+    // Show confirmation dialog
+    if (!confirm('Are you sure you want to block this room?')) {
+        return;
+    }
+   
+    // Show loading state
+    const loadingOverlay = document.createElement('div');
+    loadingOverlay.className = 'loading-overlay';
+    loadingOverlay.innerHTML = '<div class="loading-spinner">Blocking room...</div>';
+    document.body.appendChild(loadingOverlay);
 
     const requestBody = {
-        ResultIndex: hotelCode,
+        ResultIndex: resultIndex,
         HotelCode: hotelCode,
         HotelName: hotelName,
         GuestNationality: "IN",
         NoOfRooms: "1",
-        ClientReferenceNo: 0,
-        IsVoucherBooking: true,
         HotelRoomsDetails: [{
             RoomId: roomId,
             RoomIndex: roomIndex,
-            HotelPassenger: passengers
-            // Add other required room details from your existing data
+            RoomTypeCode: roomTypeCode,
+            RoomTypeName: roomTypeName,
+            RatePlan: ratePlan,
+            RatePlanCode: ratePlanCode,
+            ChildCount: 0,
+            RequireAllPaxDetails: false,
+            RoomStatus: "Active",
+            SmokingPreference: "0"
         }],
         SrdvType: "MixAPI",
         SrdvIndex: "15",
         TraceId: parseInt(traceId),
-        EndUserIp: "1.1.1.1"
+        IsVoucherBooking: true,
+        ClientReferenceNo: 0
     };
-
-    // Show loading state
-    const submitButton = form.querySelector('button[type="submit"]');
-    submitButton.disabled = true;
-    submitButton.textContent = 'Blocking Room...';
 
     fetch('/block-room', {
         method: 'POST',
@@ -771,23 +726,35 @@ function blockRoom(roomId, roomIndex, form) {
     })
     .then(response => response.json())
     .then(data => {
-        if (data.BookResult && data.BookResult.Status === 'Confirmed') {
-            alert(`Booking Confirmed!\nBooking Reference: ${data.BookResult.BookingRefNo}`);
-            // Close modal and refresh page or redirect to booking confirmation page
-            form.closest('.modal').remove();
-            // Optionally redirect to booking confirmation page
-            // window.location.href = `/booking-confirmation/${data.BookResult.BookingRefNo}`;
+        if (data.status === 'success' && data.data?.BlockRoomResult) {
+            const blockRoomResult = data.data.BlockRoomResult;
+            const roomDetails = blockRoomResult.HotelRoomsDetails[0];
+            
+            // Show success message with room details
+            const message = `
+                Room blocked successfully!
+                Hotel: ${blockRoomResult.HotelName}
+                Room Type: ${roomDetails.RoomTypeName}
+                Price: ${roomDetails.Price.CurrencyCode} ${roomDetails.Price.OfferedPriceRoundedOff}
+                
+                Do you want to proceed with booking?
+            `;
+            
+            if (confirm(message)) {
+                // Redirect to booking page or handle next steps
+                window.location.href = `/booking?traceId=${traceId}&resultIndex=${resultIndex}`;
+            }
         } else {
-            alert('Booking failed: ' + (data.BookResult?.Error?.ErrorMessage || 'Unknown error'));
+            alert((data.message || 'Unknown error'));
         }
     })
     .catch(error => {
         console.error('Error:', error);
-        alert('An error occurred while processing your booking. Please try again.');
+        alert('An error occurred while blocking the room. Please try again.');
     })
     .finally(() => {
-        submitButton.disabled = false;
-        submitButton.textContent = 'Block Room';
+        // Remove loading overlay
+        document.body.removeChild(loadingOverlay);
     });
 }
     </script>

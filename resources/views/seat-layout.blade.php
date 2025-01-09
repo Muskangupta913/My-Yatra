@@ -299,11 +299,15 @@ function renderDeckSeats(deckData, isUpper) {
         
         row.forEach((seat, seatIndex) => {
             if (seat && typeof seat === 'object') {
+                // Determine if the seat is a sleeper or seater
+                const isSleeper = seat.SeatType === 2;
+                const seatTypeClass = isSleeper ? 'sleeper' : 'seater';
+                
                 const seatClasses = [
                     'seat',
+                    seatTypeClass,
                     seat.SeatStatus ? 'seat-available' : 'seat-booked',
                     seat.IsLadiesSeat ? 'ladies-seat' : '',
-                    seat.SeatType === 2 ? 'sleeper' : 'seater',
                     isUpper || seat.IsUpper ? 'upper-berth' : 'lower-berth'
                 ].filter(Boolean).join(' ');
 
@@ -314,7 +318,8 @@ function renderDeckSeats(deckData, isUpper) {
                 seatsHTML += `
                     <div class="seat-wrapper" 
                          data-row="${seat.RowNo || rowIndex + 1}" 
-                         data-column="${seat.ColumnNo || seatIndex + 1}">
+                         data-column="${seat.ColumnNo || seatIndex + 1}"
+                         data-seat-type="${seatTypeClass}">
                         <div class="${seatClasses}"
                              onclick="selectSeat(this, ${JSON.stringify(seat)})">
                             <div class="seat-info">
@@ -782,27 +787,29 @@ function blockSeat(passengerData) {
     gap: 15px;
 }
 
-.seat-row {
-    display: flex;
-    gap: 15px;
-    justify-content: flex-start;
-    flex-wrap: wrap;
-}
-
-.seat-wrapper {
-    position: relative;
-}
-
+/* Base seat styles */
 .seat {
-    width: 50px;
-    height: 50px;
     border: 2px solid #ddd;
     border-radius: 6px;
     cursor: pointer;
     transition: all 0.3s ease;
     padding: 5px;
+    position: relative;
 }
 
+/* Seater style - square shape */
+.seat.seater {
+    width: 50px;
+    height: 50px;
+}
+
+/* Sleeper style - rectangular shape */
+.seat.sleeper {
+    width: 80px;  /* Wider than seater */
+    height: 50px;
+}
+
+/* Common seat states */
 .seat-available {
     background-color: #e8f5e9;
     border-color: #81c784;
@@ -814,6 +821,13 @@ function blockSeat(passengerData) {
     cursor: not-allowed;
 }
 
+.seat-selected {
+    background-color: #4caf50 !important;
+    border-color: #2e7d32 !important;
+    color: white;
+}
+
+/* Berth styles */
 .upper-berth {
     background-color: #e3f2fd;
     border-color: #64b5f6;
@@ -824,12 +838,14 @@ function blockSeat(passengerData) {
     border-color: #ba68c8;
 }
 
+/* Seat information display */
 .seat-info {
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     height: 100%;
+    width: 100%;
 }
 
 .seat-number {
@@ -843,10 +859,27 @@ function blockSeat(passengerData) {
     margin-top: 2px;
 }
 
-.ladies-seat {
+/* Layout containers */
+.seat-wrapper {
     position: relative;
+    display: inline-block;
 }
 
+.seat-row {
+    display: flex;
+    gap: 15px;
+    justify-content: flex-start;
+    flex-wrap: wrap;
+    margin-bottom: 15px;
+}
+
+/* Hover effects */
+.seat:hover:not(.seat-booked) {
+    transform: translateY(-2px);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+/* Ladies seat indicator */
 .ladies-seat::after {
     content: '♀';
     position: absolute;
@@ -862,6 +895,7 @@ function blockSeat(passengerData) {
     align-items: center;
     justify-content: center;
 }
+
 
 .seat:hover:not(.seat-booked) {
     transform: translateY(-2px);

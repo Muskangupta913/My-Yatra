@@ -381,6 +381,7 @@ Route::get('/search-result', [HotelController::class, 'showSearchResults']);
 Route::get('/hotel-info', [HotelController::class, 'hotelinfo']);
 Route::post('/hotel-details', [HotelController::class, 'hoteldetails']);
 Route::post('/hotel-room-details', [HotelController::class, 'hotelRoomDetails']);
+Route::post('/block-room', [HotelController::class, 'blockRoom']);
 
 
 
