@@ -45,11 +45,13 @@
     </div>
 </div>
 
-            <!-- Selected Seat Info Section -->
-            <div id="selectedSeatInfo" class="mt-2 d-none">
-                <h4>Selected Seat</h4>
-                <p id="selectedSeatDetails"></p>
-            </div>
+<div class="container mt-4">
+    <div class="section-container" id="selectedSeatInfo" class="mt-2 d-none">
+        <h4>Selected Seats</h4>
+        <div id="selectedSeatsContainer"></div>
+        <div id="totalAmount" class="mt-2"></div>
+    </div>
+</div>
 
            
 <!-- Continue Button Section -->
@@ -162,7 +164,9 @@ document.addEventListener('DOMContentLoaded', function () {
     fetchBoardingDetails();
 });
 
-let selectedSeat = null;
+
+let selectedSeats = [];
+const maxSeatsAllowed = 6;
 let selectedSeatDetails = null;
 let selectedBoardingPointId = null;
 let selectedDroppingPointId = null;
@@ -210,7 +214,6 @@ function fetchSeatLayout() {
  // Pass the correct image URLs from Laravel to JavaScript
  const availableSeatImage = "{{ asset('assets/seat.png') }}";
  const bookedSeatImage = "{{ asset('assets/seat.png') }}";
-
  function normalizeLayoutData(data) {
     const normalized = {
         lower: [],
@@ -252,16 +255,15 @@ function renderSeatLayout(seatDetails) {
         <div class="bus-layout">
             <div class="seat-legend">
                 <div class="legend-item">
-                    <div class="seat seat-available"></div>
-                    <span>Available</span>
+                   
                 </div>
                 <div class="legend-item">
-                    <div class="seat seat-booked"></div>
-                    <span>Booked</span>
+                    
                 </div>
                 <div class="legend-item">
-                    <div class="seat seat-ladies"></div>
-                    <span>Ladies Seat</span>
+                </div>
+                <div class="legend-item">
+                   
                 </div>
             </div>`;
 
@@ -286,9 +288,11 @@ function renderSeatLayout(seatDetails) {
                 </div>
             </div>`;
     }
-
     layoutHTML += '</div>';
     seatLayoutContainer.innerHTML = layoutHTML;
+
+    // Add event listener for continue button
+    document.getElementById('continueButton')?.addEventListener('click', handleContinue);
 }
 
 function renderDeckSeats(deckData, isUpper) {
@@ -314,6 +318,7 @@ function renderDeckSeats(deckData, isUpper) {
                 const seatPrice = seat.Price?.PublishedPriceRoundedOff || 
                                 seat.Price?.FareRoundedOff || 
                                 seat.FareRoundedOff || 0;
+                const statusText = seat.SeatStatus ? 'Available' : 'Booked';
 
                 seatsHTML += `
                     <div class="seat-wrapper" 
@@ -321,10 +326,12 @@ function renderDeckSeats(deckData, isUpper) {
                          data-column="${seat.ColumnNo || seatIndex + 1}"
                          data-seat-type="${seatTypeClass}">
                         <div class="${seatClasses}"
-                             onclick="selectSeat(this, ${JSON.stringify(seat)})">
+                             data-seat='${JSON.stringify(seat)}'
+                             onclick="selectSeat(this)">
                             <div class="seat-info">
                                 <span class="seat-number">${seat.SeatName || seat.SeatNo || `${rowIndex + 1}-${seatIndex + 1}`}</span>
                                 <span class="seat-price">₹${seatPrice}</span>
+                                <span class="seat-status">${statusText}</span>
                             </div>
                         </div>
                     </div>`;
@@ -339,69 +346,141 @@ function renderDeckSeats(deckData, isUpper) {
     
     return seatsHTML;
 }
+function selectSeat(element) {
+    try {
+        const seatData = JSON.parse(element.dataset.seat);
+        
+        if (!seatData.SeatStatus) {
+            showError('This seat is already booked.');
+            return;
+        }
 
-// Helper function to select seats
-function selectSeat(seatElement, seatData) {
-    if (!seatData.SeatStatus) return; // Don't allow selection of booked seats
-    
-    const isSelected = seatElement.classList.contains('selected');
-    if (isSelected) {
-        seatElement.classList.remove('selected');
-        // Remove from selected seats array/storage
+        const isSelected = element.classList.contains('seat-selected');
+        
+        if (isSelected) {
+            // Deselect seat
+            element.classList.remove('seat-selected');
+            selectedSeats = selectedSeats.filter(seat => seat.SeatName !== seatData.SeatName);
+            if (selectedSeatDetails?.SeatName === seatData.SeatName) {
+                selectedSeatDetails = null;
+            }
+        } else {
+            // Select new seat
+            if (selectedSeats.length >= maxSeatsAllowed) {
+                showError(`You can only select up to ${maxSeatsAllowed} seats.`);
+                return;
+            }
+            
+            element.classList.add('seat-selected');
+            selectedSeats.push(seatData);
+            selectedSeatDetails = seatData;
+        }
+
+        updateSelectedSeatsDisplay();
+        // Store in session storage
+        sessionStorage.setItem('selectedSeats', JSON.stringify(selectedSeats));
+        sessionStorage.setItem('selectedSeatDetails', JSON.stringify(selectedSeatDetails));
+    } catch (error) {
+        console.error('Error in selectSeat:', error);
+        showError('Error selecting seat. Please try again.');
+    }
+}
+
+function updateSelectedSeatsDisplay() {
+    const selectedSeatInfo = document.getElementById('selectedSeatInfo');
+    const seatsContainer = document.getElementById('selectedSeatsContainer');
+    const totalAmountElement = document.getElementById('totalAmount');
+    const continueButton = document.getElementById('continueButton');
+
+    if (selectedSeats.length > 0) {
+        selectedSeatInfo.classList.remove('d-none');
+        
+        const seatsHTML = selectedSeats.map(seat => {
+            const seatPrice = seat.Price?.PublishedPriceRoundedOff || 
+                            seat.Price?.FareRoundedOff || 
+                            seat.FareRoundedOff || 0;
+            
+            return `
+                <div class="selected-seat-item border p-2 mb-2 d-flex justify-content-between align-items-center">
+                    <span>Seat ${seat.SeatName}</span>
+                    <span>₹${seatPrice}</span>
+                    <button onclick="removeSeat('${seat.SeatName}')" class="btn btn-sm btn-danger">×</button>
+                </div>
+            `;
+        }).join('');
+        
+        seatsContainer.innerHTML = seatsHTML;
+
+        const totalAmount = selectedSeats.reduce((sum, seat) => {
+            return sum + (seat.Price?.PublishedPriceRoundedOff || 
+                         seat.Price?.FareRoundedOff || 
+                         seat.FareRoundedOff || 0);
+        }, 0);
+        
+        totalAmountElement.innerHTML = `<strong>Total Amount: ₹${totalAmount}</strong>`;
+        continueButton.classList.remove('d-none');
     } else {
-        seatElement.classList.add('selected');
-        // Add to selected seats array/storage
+        selectedSeatInfo.classList.add('d-none');
+        seatsContainer.innerHTML = '';
+        totalAmountElement.innerHTML = '';
+        continueButton.classList.add('d-none');
+    }
+}
+
+function removeSeat(seatName) {
+    const seatElement = document.querySelector(`[data-seat*="${seatName}"]`);
+    if (seatElement) {
+        seatElement.classList.remove('seat-selected');
     }
     
-    // Trigger event or callback for seat selection
-    updateSelectedSeats();
+    selectedSeats = selectedSeats.filter(seat => seat.SeatName !== seatName);
+    if (selectedSeatDetails?.SeatName === seatName) {
+        selectedSeatDetails = null;
+    }
+    
+    sessionStorage.setItem('selectedSeats', JSON.stringify(selectedSeats));
+    sessionStorage.setItem('selectedSeatDetails', JSON.stringify(selectedSeatDetails));
+    
+    updateSelectedSeatsDisplay();
 }
 
-// Update selected seats info
-function updateSelectedSeats() {
-    const selectedSeats = document.querySelectorAll('.seat.selected');
-    // Update your UI with selected seats info
-}
+function handleContinue() {
+    if (!selectedSeats.length || !selectedSeatDetails) {
+        showError('Please select at least one seat to continue.');
+        return;
+    }
 
-// Rest of the code remains the same
-function selectSeat(element, seatData) {
-    if (element.classList.contains('seat-booked')) return;
+    if (!selectedBoardingPointId || !selectedDroppingPointId) {
+        showError('Please select both boarding and dropping points before continuing.');
+        return;
+    }
 
-    document.querySelectorAll('.seat-selected').forEach(seat => seat.classList.remove('seat-selected'));
-    element.classList.add('seat-selected');
-
-    selectedSeatDetails = seatData;
-    selectedSeat = seatData.SeatName;
-
-    const selectedSeatInfo = document.getElementById('selectedSeatInfo');
-    selectedSeatInfo.classList.remove('d-none');
-    selectedSeatInfo.querySelector('#selectedSeatDetails').innerText = 
-        `Seat: ${seatData.SeatName}, Price: ₹${seatData.Price.PublishedPrice}`;
-
-    // Show the Continue button
-    document.getElementById('continueButton').classList.remove('d-none');
-}
-// Trigger the modal when the Continue button is clicked
-document.getElementById('continueButton').addEventListener('click', function() {
-    // Trigger the modal to show passenger details
     const modalTriggerButton = document.getElementById('openPassengerDetailsModal');
-    modalTriggerButton.click();
-
-// document.getElementById('continueButton')?.addEventListener('click', function() {
-//     if (selectedSeatDetails) {
-//         // Trigger the passenger details modal
-//         document.getElementById('openPassengerDetailsModal').click();
-//     } else {
-//         showError('Please select a seat first.');
-//     }
-});
-
+    if (modalTriggerButton) {
+        modalTriggerButton.click();
+    }
+}
 
 function showError(message) {
-    const errorMessage = document.getElementById('errorMessage');
-    errorMessage.classList.remove('d-none');
-    errorMessage.innerText = message;
+    // Create or get error element
+    let errorElement = document.getElementById('seatSelectionError');
+    if (!errorElement) {
+        errorElement = document.createElement('div');
+        errorElement.id = 'seatSelectionError';
+        errorElement.className = 'error-message';
+        document.querySelector('.bus-layout').insertAdjacentElement('afterbegin', errorElement);
+    }
+
+    // Show error message
+    errorElement.textContent = message;
+    errorElement.style.display = 'block';
+
+    // Hide after 3 seconds
+    setTimeout(() => {
+        errorElement.style.display = 'none';
+    }, 3000);
 }
+
 
 function fetchBoardingDetails() {
     const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
@@ -502,7 +581,7 @@ function renderDroppingPoints(points) {
                 </span>
                 
                 <!-- Point Name and Location -->
-                <h5 class="mb-3">${point.name}</h5>
+                <h5 class="mb-3">${point.location}</h5>
                 <p><i class="fas fa-map-marker-alt"></i> ${point.location}</p>
                 
                 <!-- Select Button -->
@@ -518,8 +597,16 @@ function renderDroppingPoints(points) {
 document.getElementById('passengerDetailsForm').addEventListener('submit', function(e) {
     e.preventDefault();
 
+    const storedSeatDetails = sessionStorage.getItem('selectedSeatDetails');
+    selectedSeatDetails = storedSeatDetails ? JSON.parse(storedSeatDetails) : null;
+
     if (!selectedSeatDetails) {
-        alert('Please select a seat before submitting passenger details.');
+        showError('Please select a seat before submitting passenger details.');
+        return;
+    }
+
+    if (!selectedBoardingPointId || !selectedDroppingPointId) {
+        showError('Please select both boarding and dropping points.');
         return;
     }
 
@@ -530,18 +617,17 @@ document.getElementById('passengerDetailsForm').addEventListener('submit', funct
         FirstName: document.getElementById('firstName').value,
         LastName: document.getElementById('lastName').value,
         Email: document.getElementById('email').value,
-        Mobile: document.getElementById('phoneNumber').value, // Changed from Phoneno to Mobile
+        Mobile: document.getElementById('phoneNumber').value,
         Gender: document.getElementById('gender').value,
         IdType: null,
         IdNumber: null,
         Age: document.getElementById('age').value,
         Address: document.getElementById('address').value,
-        SeatIndex: selectedSeatDetails.SeatIndex // Changed to just send SeatIndex
+        SeatIndex: selectedSeatDetails.SeatIndex
     };
 
     blockSeat(passengerData);
 });
-
 // Pickup and Dropping point functions remain the same
 function selectPickupPoint(index, name) {
     selectedBoardingPointId = index;
@@ -586,8 +672,8 @@ function selectDroppingPoint(index, name) {
 
 
 function blockSeat(passengerData) {
-    if (selectedBoardingPointId === undefined || selectedDroppingPointId === undefined) {
-        alert('Please select both boarding and dropping points before proceeding.');
+    if (!selectedBoardingPointId || !selectedDroppingPointId) {
+        showError('Please select both boarding and dropping points before proceeding.');
         return;
     }
 
@@ -597,18 +683,20 @@ function blockSeat(passengerData) {
     const resultIndex = urlParams.get('ResultIndex');
 
     const payload = {
-        ClientId: "180189", // These should match your controller values
+        ClientId: "180189",
         UserName: "MakeMy91",
         Password: "MakeMy@910",
         TraceId: traceId,
         ResultIndex: resultIndex,
         BoardingPointId: selectedBoardingPointId,
         DroppingPointId: selectedDroppingPointId,
-        BoardingPointName: selectedBoardingPointName, // Include selected boarding point name in the payload
-        DroppingPointName: selectedDroppingPointName, // Include selected dropping point name in the payload
+        BoardingPointName: selectedBoardingPointName,
+        DroppingPointName: selectedDroppingPointName,
         RefID: "1",
-        Passenger: [passengerData] // Send passenger data as an array
+        Passenger: [passengerData]
     };
+
+    showLoadingSpinner();
 
     fetch('/block-seats', {
         method: 'POST',
@@ -627,24 +715,23 @@ function blockSeat(passengerData) {
         return response.json();
     })
     .then(data => {
-        if (data.status === true) { // Changed from 'success' to true
-            // Close the modal
+        hideLoadingSpinner();
+        if (data.status === true) {
             const passengerDetailsModal = bootstrap.Modal.getInstance(document.getElementById('passengerDetailsModal'));
             passengerDetailsModal.hide();
 
-            // Create booking page URL with necessary data
             const bookingPageUrl = `/booking?` + new URLSearchParams({
                 TraceId: traceId,
                 ResultIndex: resultIndex,
                 PassengerData: JSON.stringify(data.data.Passengers[0]),
                 BoardingPoint: JSON.stringify({
-                        Id: data.data.BoardingPointdetails.Id,
-                        Name: selectedBoardingPointName // Use the selected name
-                    }),
-                    DroppingPoint: JSON.stringify({
-                        Id: data.data.DroppingPointsDetails.Id,
-                        Name: selectedDroppingPointName // Use the selected name
-                    }),
+                    Id: data.data.BoardingPointdetails.Id,
+                    Name: selectedBoardingPointName
+                }),
+                DroppingPoint: JSON.stringify({
+                    Id: data.data.DroppingPointsDetails.Id,
+                    Name: selectedDroppingPointName
+                }),
                 BusDetails: JSON.stringify({
                     DepartureTime: data.data.DepartureTime,
                     ArrivalTime: data.data.ArrivalTime,
@@ -656,11 +743,9 @@ function blockSeat(passengerData) {
                 CancellationPolicy: JSON.stringify(data.data.CancellationPolicy)
             }).toString();
 
-            // Update UI elements
             document.getElementById('review').setAttribute('href', bookingPageUrl);
-            document.getElementById('continueButton').classList.add('d-none'); // Hide continue button
-            document.getElementById('review').classList.remove('d-none'); // Show review button
-
+            document.getElementById('continueButton').classList.add('d-none');
+            document.getElementById('review').classList.remove('d-none');
 
             toastr.success('Seat successfully blocked!', 'Success');
         } else {
@@ -668,6 +753,7 @@ function blockSeat(passengerData) {
         }
     })
     .catch(error => {
+        hideLoadingSpinner();
         console.error('Error:', error);
         toastr.error(`Error: ${error.message}`, 'Error');
     });
@@ -680,83 +766,38 @@ function blockSeat(passengerData) {
 <link href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/css/toastr.min.css" rel="stylesheet">
 <style>  
 #pickupPointSection, #droppingPointSection {
-  width: 48%; /* Each section takes 48% of the width */
+  width: 48%;
   padding: 12px;
   background-color: #f8f9fa;
   border: 1px solid #ccc;
   border-radius: 5px;
-  margin-bottom: 15px; /* Adjusted bottom margin */
+  margin-bottom: 15px;
 }
+
 .pickup-point-item, .dropping-point-item {
-  margin-bottom: 10px; /* Reduced margin */
+  margin-bottom: 10px;
   padding: 12px;
   border: 1px solid #ddd;
   border-radius: 5px;
   background-color: #ffffff;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
   text-align: left;
-  font-size: 14px; /* Slightly smaller font for readability */
+  font-size: 14px;
 }
+
 .pickup-point-item h5, .dropping-point-item h5 {
   margin: 0 0 8px;
   font-size: 16px;
   color: #333;
 }
+
 .pickup-point-item p, .dropping-point-item p {
   text-transform: none;
-  margin: 3px 0; /* Reduced spacing between text */
-  font-size: 12px; /* Reduced font size */
+  margin: 3px 0;
+  font-size: 12px;
   color: #555;
 }
-.seat {
-  width: 40px; /* Adjust size as necessary */
-  height: 40px;
-  background-color: transparent;
-  border-radius: 5px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background-size: cover;
-  background-position: center;
-  transition: background-color 0.3s ease;
-}
-.seat-available {
-    background-color: transparent;
-}
 
-.seat-booked {
-    background-color: #6c757d;
-}
-
-.seat-selected {
-    background-color: #28a745; /* Green for selected */
-}
-
-.seat-price {
-    font-size: 0.8rem;
-    color: #28a745;
-    font-weight: bold;
-}
-.bus-seats {
-    display: flex;
-    flex-direction: row; /* Arrange rows horizontally */
-    gap: 10px; /* Space between each row */
-    justify-content: center; /* Center the rows horizontally */
-    flex-wrap: wrap; /* Allow rows to wrap if necessary */
-    width: 100%;
-    overflow: hidden; /* Prevent seats from overflowing */
-}
-.seat-image-container {
-    position: relative; /* Seat image is positioned relative */
-    text-align: center; /* Center the seat number */
-}
-.seat-image {
-    width: 40px; /* Adjust size as necessary */
-    height: auto;
-    display: block;
-    margin: 0 auto; /* Center the image */
-    transform: rotate(90deg);
-}
 .bus-layout {
     display: flex;
     flex-direction: column;
@@ -786,8 +827,6 @@ function blockSeat(passengerData) {
     flex-direction: column;
     gap: 15px;
 }
-
-/* Base seat styles */
 .seat {
     border: 2px solid #ddd;
     border-radius: 6px;
@@ -795,38 +834,89 @@ function blockSeat(passengerData) {
     transition: all 0.3s ease;
     padding: 5px;
     position: relative;
+    margin-bottom: 25px;
 }
 
-/* Seater style - square shape */
+/* Seat shapes */
 .seat.seater {
     width: 50px;
     height: 50px;
 }
 
-/* Sleeper style - rectangular shape */
 .seat.sleeper {
-    width: 80px;  /* Wider than seater */
-    height: 50px;
+    width: 90px;
+    height: 40px;
 }
 
-/* Common seat states */
-.seat-available {
-    background-color: #e8f5e9;
-    border-color: #81c784;
+/* Seat states with increased specificity */
+.seat.seat-available {
+    background-color: transparent !important;
+    border-color: #81c784 !important;
 }
 
-.seat-booked {
-    background-color: #ffebee;
-    border-color: #e57373;
-    cursor: not-allowed;
+.seat.seat-booked {
+    background-color: #808080 !important;
+    border-color: #666666 !important;
+    cursor: not-allowed !important;
 }
 
-.seat-selected {
+.seat.seat-selected {
     background-color: #4caf50 !important;
     border-color: #2e7d32 !important;
-    color: white;
+    color: white !important;
 }
 
+/* Price display */
+.seat-price {
+    display: block !important;
+    position: absolute;
+    bottom: -30px;
+    left: 50%;
+    transform: translateX(-50%);
+    color: #666;
+    font-size: 12px;
+    white-space: nowrap;
+    pointer-events: none;
+}
+
+/* Seat number */
+.seat-number {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 12px;
+    font-weight: bold;
+    color: black;
+    text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5);
+}
+
+/* Hover effect only for available seats */
+.seat.seat-available:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+/* Status tooltip */
+.seat-status {
+    display: none;
+    position: absolute;
+    background-color: #333;
+    color: #fff;
+    padding: 5px 10px;
+    border-radius: 4px;
+    font-size: 12px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    z-index: 10;
+    white-space: nowrap;
+    bottom: 110%;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+.seat:hover .seat-status {
+    display: block;
+}
 /* Berth styles */
 .upper-berth {
     background-color: #e3f2fd;
@@ -846,18 +936,9 @@ function blockSeat(passengerData) {
     justify-content: center;
     height: 100%;
     width: 100%;
+    position: relative;
 }
 
-.seat-number {
-    font-weight: bold;
-    font-size: 12px;
-}
-
-.seat-price {
-    font-size: 10px;
-    color: #666;
-    margin-top: 2px;
-}
 
 /* Layout containers */
 .seat-wrapper {
@@ -879,33 +960,9 @@ function blockSeat(passengerData) {
     box-shadow: 0 2px 8px rgba(0,0,0,0.1);
 }
 
-/* Ladies seat indicator */
-.ladies-seat::after {
-    content: '♀';
-    position: absolute;
-    top: -8px;
-    right: -8px;
-    background: #ff4081;
-    color: white;
-    border-radius: 50%;
-    width: 16px;
-    height: 16px;
-    font-size: 12px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-
 .seat:hover:not(.seat-booked) {
     transform: translateY(-2px);
     box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-}
-
-.seat-selected {
-    background-color: #4caf50 !important;
-    border-color: #2e7d32 !important;
-    color: white;
 }
 .seat-container {
     display: flex;
@@ -923,29 +980,11 @@ function blockSeat(passengerData) {
     background-color: #f9f9f9; /* Optional: Light background color */
     overflow: hidden; /* Prevent overflow of seats outside the container */
 }
-.seat-number {
-  position: absolute;
-  top: 50%; /* Vertically center the seat number */
-  left: 50%; /* Horizontally center the seat number */
-  transform: translate(-50%, -50%); /* Adjust to perfectly center the seat number */
-  font-size: 12px; /* Reduced font size to fit inside the seat */
-  font-weight: bold;
-  color: white; /* Make the seat number color stand out on the seat */
-  text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5); /* Optional: Add a shadow to make the number more readable */
-}
-.seat-info {
-    text-align: center;
-    font-size: 0.8rem;
-    color: #6c757d;
-    margin-top: 4px;
-}
 #selectedSeatInfo {
-  margin-top: 10px;
-  margin-bottom: 10px;
-  padding: 15px;
-  background-color: #f8f9fa;
-  border-radius: 5px;
-  text-align: center;
+    background-color: #fff;
+    padding: 15px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 #continueButtonContainer {
   margin-top: 20px;
