@@ -1,5 +1,8 @@
 @extends('frontend.layouts.master')
 @section('content')
+@section('styles')
+<!-- Include Toastr CSS -->
+<link href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/css/toastr.min.css" rel="stylesheet">
 <style>
 .flatpickr-calendar {
   font-family: 'Arial', sans-serif;
@@ -10,6 +13,8 @@
   padding: 8px;
 }
 </style>
+@endsection
+
 <section class="hero">
   <div class="container">
     <div class="row">
@@ -61,10 +66,6 @@
   <div class="tab-pane fade" id="home" role="tabpanel" aria-labelledby="home-tab">
     <p>Coming Soon!</p>
   </div>
-
-
-
-
   <!-- Hotel Booking -->
   <div class="tab-pane fade mt-5" id="profile" role="tabpanel" aria-labelledby="profile-tab">
     <h4 class="mb-5" id="hotel-title">Book Hotels in India</h4>
@@ -260,9 +261,6 @@
     </div>
   </form>
 </div>
-
-
-
 <!-- holiday booking  -->
           <div class="tab-pane fade mt-5 show active" id="contact" role="tabpanel" aria-labelledby="contact-tab">
             {{-- holiday packages searches --}}
@@ -567,7 +565,8 @@
 @section('scripts')
 
 
-
+<!-- Include Toastr JS -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/js/toastr.min.js"></script>
 
 <!-- <script>
   // Date Pickers
@@ -798,7 +797,7 @@
     "&depart_date=" + data.depart_date +
     "&trace_id=" + responseData.traceId;
     } else {
-        alert(responseData.message);
+      toastr.error('No buses found in this route', 'Error');
     }
 })
 .catch(error => console.error('Error:', error));
