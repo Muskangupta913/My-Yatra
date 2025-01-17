@@ -766,7 +766,6 @@ function renderSleeperLayout(deckData) {
 function selectSeat(element) {
     try {
         const seatData = JSON.parse(element.dataset.seat);
-        
         if (!seatData.SeatStatus) {
             showError('This seat is already booked.');
             return;
@@ -776,11 +775,7 @@ function selectSeat(element) {
         
         if (isSelected) {
             // Deselect seat
-            element.classList.remove('seat-selected');
-            selectedSeats = selectedSeats.filter(seat => seat.SeatName !== seatData.SeatName);
-            if (selectedSeatDetails?.SeatName === seatData.SeatName) {
-                selectedSeatDetails = null;
-            }
+            removeSeat(seatData.SeatName);
         } else {
             // Select new seat
             if (selectedSeats.length >= maxSeatsAllowed) {
@@ -791,12 +786,13 @@ function selectSeat(element) {
             element.classList.add('seat-selected');
             selectedSeats.push(seatData);
             selectedSeatDetails = seatData;
+            
+            // Update storage
+            sessionStorage.setItem('selectedSeats', JSON.stringify(selectedSeats));
+            sessionStorage.setItem('selectedSeatDetails', JSON.stringify(selectedSeatDetails));
+            
+            updateSelectedSeatsDisplay();
         }
-
-        updateSelectedSeatsDisplay();
-        // Store in session storage
-        sessionStorage.setItem('selectedSeats', JSON.stringify(selectedSeats));
-        sessionStorage.setItem('selectedSeatDetails', JSON.stringify(selectedSeatDetails));
     } catch (error) {
         console.error('Error in selectSeat:', error);
         showError('Error selecting seat. Please try again.');
@@ -845,9 +841,18 @@ function updateSelectedSeatsDisplay() {
 }
 
 function removeSeat(seatName) {
-    const seatElement = document.querySelector(`[data-seat*="${seatName}"]`);
-    if (seatElement) {
-        seatElement.classList.remove('seat-selected');
+    const allSeats = document.querySelectorAll('.seat');
+    for (const seatElement of allSeats) {
+        try {
+            const seatData = JSON.parse(seatElement.dataset.seat);
+            if (seatData.SeatName === seatName) {
+                // Remove the selected class
+                seatElement.classList.remove('seat-selected');
+                break;
+            }
+        } catch (error) {
+            console.error('Error parsing seat data:', error);
+        }
     }
     
     selectedSeats = selectedSeats.filter(seat => seat.SeatName !== seatName);
