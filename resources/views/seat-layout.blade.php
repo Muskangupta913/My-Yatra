@@ -504,14 +504,9 @@ function formatTime(dateTimeString) {
     return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true });
 }
 
-<<<<<<< HEAD
-// Initialize variables
-let selectedSeat = null;
-=======
 
 let selectedSeats = [];
 const maxSeatsAllowed = 6;
->>>>>>> 0e40248d1a68966c952c70d2d6744049579e38d2
 let selectedSeatDetails = null;
 let selectedBoardingPointId = null;
 let selectedDroppingPointId = null;
@@ -548,26 +543,6 @@ function fetchSeatLayout() {
             ResultIndex: resultIndex
         })
     })
-<<<<<<< HEAD
-    .then(response => response.json())
-    .then(data => {
-        if (data.status === true) {
-            const seatData = {
-                lower: data.data.lower,
-                upper: data.data.upper
-            };
-            renderSeatLayout(seatData);
-        } else {
-            throw new Error(data.message || 'Failed to load seat layout');
-        }
-    })
-    .catch(error => {
-        showError(error.message);
-    });
-}
-
-function normalizeLayoutData(data) {
-=======
         .then(response => response.json())
         .then(data => {
             if (data.status === true) {
@@ -590,7 +565,6 @@ function normalizeLayoutData(data) {
  const availableSeatImage = "{{ asset('assets/seat.png') }}";
  const bookedSeatImage = "{{ asset('assets/seat.png') }}";
  function normalizeLayoutData(data) {
->>>>>>> 0e40248d1a68966c952c70d2d6744049579e38d2
     const normalized = {
         lower: [],
         upper: [],
@@ -616,44 +590,6 @@ function renderSeatLayout(seatDetails) {
     const seatLayoutContainer = document.getElementById('seatLayout');
     const normalizedData = normalizeLayoutData(seatDetails);
     
-<<<<<<< HEAD
-    let layoutHTML = `
-        <div class="bus-layout">
-            <div class="seat-legend">
-                <div class="legend-item">
-                    <div class="seat seat-available"></div>
-                    <span>Available</span>
-                </div>
-                <div class="legend-item">
-                    <div class="seat seat-booked"></div>
-                    <span>Booked</span>
-                </div>
-                <div class="legend-item">
-                    <div class="seat seat-ladies"></div>
-                    <span>Ladies Seat</span>
-                </div>
-            </div>`;
-
-    if (normalizedData.lower.length > 0) {
-        layoutHTML += `
-            <div class="deck lower-deck">
-                <h4>Lower Deck</h4>
-                <div class="deck-seats">
-                    ${renderDeckSeats(normalizedData.lower, false)}
-                </div>
-            </div>`;
-    }
-
-    if (normalizedData.upper.length > 0) {
-        layoutHTML += `
-            <div class="deck upper-deck">
-                <h4>Upper Deck</h4>
-                <div class="deck-seats">
-                    ${renderDeckSeats(normalizedData.upper, true)}
-                </div>
-            </div>`;
-    }
-=======
     
     let layoutHTML = '<div class="bus-layout">';
 // Render Lower Deck and Upper Deck side-by-side
@@ -680,7 +616,6 @@ if (normalizedData.lower.length > 0 || normalizedData.upper.length > 0) {
                 : ''}
         </div>`;
 }
->>>>>>> 0e40248d1a68966c952c70d2d6744049579e38d2
 
     // Add selected seat info and buttons
     layoutHTML += `
@@ -730,10 +665,7 @@ function renderSeaterLayout(deckData)
             const seat = deckData[rowIndex][columnIndex]; // Get the seat at [row][column]
 
             if (seat && typeof seat === 'object') {
-<<<<<<< HEAD
-=======
                 // Determine seat properties
->>>>>>> 0e40248d1a68966c952c70d2d6744049579e38d2
                 const isSleeper = seat.SeatType === 2;
                 const seatTypeClass = isSleeper ? 'sleeper' : 'seater';
 
@@ -768,8 +700,6 @@ function renderSeaterLayout(deckData)
                         </div>
                     </div>`;
             } else {
-<<<<<<< HEAD
-=======
                  // Add empty space for missing seats
                  seatsHTML += '<div class="seat-wrapper empty"></div>';
             }
@@ -832,7 +762,6 @@ function renderSleeperLayout(deckData) {
                     </div>`;
             } else {
                 // Add empty space for missing seats
->>>>>>> 0e40248d1a68966c952c70d2d6744049579e38d2
                 seatsHTML += '<div class="seat-wrapper empty"></div>';
             }
         }
@@ -844,67 +773,9 @@ function renderSleeperLayout(deckData) {
     return seatsHTML;
 }
 
-<<<<<<< HEAD
-function selectSeat(element, seatData) {
-    if (element.classList.contains('seat-booked')) return;
-
-    document.querySelectorAll('.seat-selected').forEach(seat => 
-        seat.classList.remove('seat-selected'));
-    element.classList.add('seat-selected');
-
-    selectedSeatDetails = seatData;
-    selectedSeat = seatData.SeatName;
-
-    const selectedSeatInfo = document.getElementById('selectedSeatInfo');
-    const seatDetailsDisplay = document.getElementById('seatDetailsDisplay');
-    
-    const seatPrice = seatData.Price?.PublishedPriceRoundedOff || 
-                     seatData.Price?.FareRoundedOff || 
-                     seatData.FareRoundedOff || 0;
-
-    const seatType = seatData.SeatType === 2 ? 'Sleeper' : 'Seater';
-    const deckType = seatData.IsUpper ? 'Upper Deck' : 'Lower Deck';
-    
-    seatDetailsDisplay.innerHTML = `
-        <div class="seat-details-grid">
-            <p><strong>Seat Number:</strong> ${seatData.SeatName}</p>
-            <p><strong>Seat Type:</strong> ${seatType}</p>
-            <p><strong>Deck:</strong> ${deckType}</p>
-            <p><strong>Price:</strong> ₹${seatPrice}</p>
-            ${seatData.IsLadiesSeat ? '<p><strong>Ladies Seat:</strong> Yes</p>' : ''}
-        </div>`;
-
-    selectedSeatInfo.classList.remove('d-none');
-    document.getElementById('continueButton').classList.remove('d-none');
-}
-
-// Continue button click handler
-document.addEventListener('DOMContentLoaded', function() {
-    document.getElementById('continueButton')?.addEventListener('click', function() {
-        if (selectedSeatDetails) {
-            document.getElementById('openPassengerDetailsModal').click();
-        } else {
-            showError('Please select a seat first.');
-        }
-    });
-});
-
-// Error handling
-function showError(message) {
-    const errorMessage = document.getElementById('errorMessage');
-    errorMessage.classList.remove('d-none');
-    errorMessage.innerText = message;
-}
-
-function showError(message) {
-    const errorMessage = document.getElementById('errorMessage');
-    errorMessage.classList.remove('d-none');
-    errorMessage.innerText = message;
-=======
 function selectSeat(element) {
     try {
         const seatData = JSON.parse(element.dataset.seat);
-        
         if (!seatData.SeatStatus) {
             showError('This seat is already booked.');
             return;
@@ -914,27 +785,24 @@ function selectSeat(element) {
         
         if (isSelected) {
             // Deselect seat
-            element.classList.remove('seat-selected');
-            selectedSeats = selectedSeats.filter(seat => seat.SeatName !== seatData.SeatName);
-            if (selectedSeatDetails?.SeatName === seatData.SeatName) {
-                selectedSeatDetails = null;
-            }
+            removeSeat(seatData.SeatName);
         } else {
             // Select new seat
             if (selectedSeats.length >= maxSeatsAllowed) {
-                showError(`You can only select up to ${maxSeatsAllowed} seats.`);
+                showError(You can only select up to ${maxSeatsAllowed} seats.);
                 return;
             }
             
             element.classList.add('seat-selected');
             selectedSeats.push(seatData);
             selectedSeatDetails = seatData;
+            
+            // Update storage
+            sessionStorage.setItem('selectedSeats', JSON.stringify(selectedSeats));
+            sessionStorage.setItem('selectedSeatDetails', JSON.stringify(selectedSeatDetails));
+            
+            updateSelectedSeatsDisplay();
         }
-
-        updateSelectedSeatsDisplay();
-        // Store in session storage
-        sessionStorage.setItem('selectedSeats', JSON.stringify(selectedSeats));
-        sessionStorage.setItem('selectedSeatDetails', JSON.stringify(selectedSeatDetails));
     } catch (error) {
         console.error('Error in selectSeat:', error);
         showError('Error selecting seat. Please try again.');
@@ -983,9 +851,18 @@ function updateSelectedSeatsDisplay() {
 }
 
 function removeSeat(seatName) {
-    const seatElement = document.querySelector(`[data-seat*="${seatName}"]`);
-    if (seatElement) {
-        seatElement.classList.remove('seat-selected');
+    const allSeats = document.querySelectorAll('.seat');
+    for (const seatElement of allSeats) {
+        try {
+            const seatData = JSON.parse(seatElement.dataset.seat);
+            if (seatData.SeatName === seatName) {
+                // Remove the selected class
+                seatElement.classList.remove('seat-selected');
+                break;
+            }
+        } catch (error) {
+            console.error('Error parsing seat data:', error);
+        }
     }
     
     selectedSeats = selectedSeats.filter(seat => seat.SeatName !== seatName);
@@ -1020,7 +897,6 @@ function handleContinue() {
     if (modalTriggerButton) {
         modalTriggerButton.click();
     }
->>>>>>> 0e40248d1a68966c952c70d2d6744049579e38d2
 }
 function generatePassengerForm(seatNumber, index) {
     return `
