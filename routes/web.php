@@ -382,6 +382,16 @@ Route::get('/hotel-info', [HotelController::class, 'hotelinfo']);
 Route::post('/hotel-details', [HotelController::class, 'hoteldetails']);
 Route::post('/hotel-room-details', [HotelController::class, 'hotelRoomDetails']);
 Route::post('/block-room', [HotelController::class, 'blockRoom']);
+Route::get('/room-detail', [HotelController::class, 'roomDetail']);
+Route::post('/balance', [HotelController::class, 'handleBalance']);
+Route::post('/balancelog', [HotelController::class, 'balanceLog']);
+Route::post('/book-room', [HotelController::class, 'bookRoom']);
+Route::post('/cancel-room', [HotelController::class, 'cancelRoom']);
+Route::get('/fetch-hotelcity', [CityController::class, 'hotelFetchAllCities'])->name('fetch.hotel.cities');
+Route::get('/autocomplete-hotel', [CityController::class, 'hotelautocomplete'])->name('autocomplete.hotelcities');
+
+
+
 
 
 
@@ -414,6 +424,7 @@ Route::get('/search-packages', [HomeController::class, 'searchPackages'])->name(
 Route::get('/kashmir', function () {
   return view('kashmir'); // Replace 'kashmir' with the actual Blade file name without the .blade.php extension.
 })->name('kashmir');
+
 Route::get('/rishikesh', function () {
   return view('rishikesh'); // Replace 'rishikesh' with the actual Blade file name without the .blade.php extension.
 })->name('rishikesh');

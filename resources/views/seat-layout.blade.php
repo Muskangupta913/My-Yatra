@@ -55,11 +55,11 @@
 <!-- Continue Button Section -->
 <div class="mt-2 text-center" id="continueButtonContainer">
   <button class="btn btn-success" id="continueButton">Continue</button>
-  <a href="#" class="btn btn-success mt-2 d-none" id="review">Review Details</a>
+  <a href="#" class="btn btn-success mt-2 d-none" id="ew">Review Details</a>
 </div>
         </div>
       </div>
-    </div>
+</div>
   </div>
  
         <!-- Passenger Information Section -->
@@ -132,40 +132,45 @@
 <script>
   document.getElementById('loadingSpinner').classList.remove('d-none');
 
-  document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', () => {
     showLoadingSpinner();
     setTimeout(() => {
         hideLoadingSpinner();
-    }, 4000); // Spinner should hide after 4 seconds
+    }, 4000);
 });
-// Helper to show the spinner
+
+// Helper functions
 function showLoadingSpinner() {
     document.getElementById('loadingSpinner').classList.remove('d-none');
 }
 
-// Helper to hide the spinner
 function hideLoadingSpinner() {
     document.getElementById('loadingSpinner').classList.add('d-none');
 }
-  // Helper function to format date into a readable format (Date)
+
 function formatDate(dateTimeString) {
     const date = new Date(dateTimeString);
-    return date.toLocaleDateString();  // This will format it based on the locale, e.g. "MM/DD/YYYY"
+    return date.toLocaleDateString();
 }
-  // Helper function to format time into a readable format
+
 function formatTime(dateTimeString) {
     const date = new Date(dateTimeString);
     return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true });
 }
-document.addEventListener('DOMContentLoaded', function () {
-    fetchSeatLayout();
-    fetchBoardingDetails();
-});
 
+// Initialize variables
 let selectedSeat = null;
 let selectedSeatDetails = null;
 let selectedBoardingPointId = null;
 let selectedDroppingPointId = null;
+let selectedBoardingPointName = '';
+let selectedDroppingPointName = '';
+
+// Main initialization
+document.addEventListener('DOMContentLoaded', function() {
+    fetchSeatLayout();
+    fetchBoardingDetails();
+});
 
 function fetchSeatLayout() {
     const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
@@ -177,7 +182,8 @@ function fetchSeatLayout() {
         showError("TraceId and ResultIndex are required.");
         return;
     }
-    document.getElementById('seatLayout').innerHTML ='<div class="alert alert-info">Loading seat layout...</div>';
+
+    document.getElementById('seatLayout').innerHTML = '<div class="alert alert-info">Loading seat layout...</div>';
 
     fetch('/getSeatLayout', {
         method: 'POST',
@@ -190,51 +196,35 @@ function fetchSeatLayout() {
             ResultIndex: resultIndex
         })
     })
-        .then(response => response.json())
-        .then(data => {
-            if (data.status === true) {
-                // Convert both formats to a consistent array format
-                const seatData = {
-            lower: data.data.lower,
-            upper: data.data.upper
-        };
-        renderSeatLayout(seatData);
-            } else {
-                throw new Error(data.message || 'Failed to load seat layout');
-            }
-        })
-        .catch(error => {
-            showError(error.message);
-        });
+    .then(response => response.json())
+    .then(data => {
+        if (data.status === true) {
+            const seatData = {
+                lower: data.data.lower,
+                upper: data.data.upper
+            };
+            renderSeatLayout(seatData);
+        } else {
+            throw new Error(data.message || 'Failed to load seat layout');
+        }
+    })
+    .catch(error => {
+        showError(error.message);
+    });
 }
- // Pass the correct image URLs from Laravel to JavaScript
- const availableSeatImage = "{{ asset('assets/seat.png') }}";
- const bookedSeatImage = "{{ asset('assets/seat.png') }}";
 
- function normalizeLayoutData(data) {
+function normalizeLayoutData(data) {
     const normalized = {
         lower: [],
         upper: []
     };
 
-    // Handle lower deck
     if (data.lower) {
-        // For seater buses (array format)
-        if (Array.isArray(data.lower)) {
-            normalized.lower = data.lower.map(row => {
-                // Ensure each row is an array
-                return Array.isArray(row) ? row : Object.values(row);
-            });
-        } 
-        // For sleeper/mixed buses (object format)
-        else {
-            normalized.lower = Object.values(data.lower).map(row => 
-                Array.isArray(row) ? row : Object.values(row)
-            );
-        }
+        normalized.lower = Array.isArray(data.lower) 
+            ? data.lower.map(row => Array.isArray(row) ? row : Object.values(row))
+            : Object.values(data.lower).map(row => Array.isArray(row) ? row : Object.values(row));
     }
 
-    // Handle upper deck
     if (data.upper) {
         normalized.upper = Object.values(data.upper).map(row => 
             Array.isArray(row) ? row : Object.values(row)
@@ -265,7 +255,6 @@ function renderSeatLayout(seatDetails) {
                 </div>
             </div>`;
 
-    // Render Lower Deck
     if (normalizedData.lower.length > 0) {
         layoutHTML += `
             <div class="deck lower-deck">
@@ -276,7 +265,6 @@ function renderSeatLayout(seatDetails) {
             </div>`;
     }
 
-    // Render Upper Deck if exists
     if (normalizedData.upper.length > 0) {
         layoutHTML += `
             <div class="deck upper-deck">
@@ -286,6 +274,23 @@ function renderSeatLayout(seatDetails) {
                 </div>
             </div>`;
     }
+
+    // Add selected seat info and buttons
+    layoutHTML += `
+        <div class="deck-info mt-4">
+            <div id="selectedSeatInfo" class="d-none">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Selected Seat Details</h5>
+                        <div id="seatDetailsDisplay"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="mt-2 text-center" id="continueButtonContainer">
+                <button class="btn btn-success d-none" id="continueButton">Continue</button>
+                <a href="#" class="btn btn-success mt-2 d-none" id="review">Review Details</a>
+            </div>
+        </div>`;
 
     layoutHTML += '</div>';
     seatLayoutContainer.innerHTML = layoutHTML;
@@ -299,7 +304,6 @@ function renderDeckSeats(deckData, isUpper) {
         
         row.forEach((seat, seatIndex) => {
             if (seat && typeof seat === 'object') {
-                // Determine if the seat is a sleeper or seater
                 const isSleeper = seat.SeatType === 2;
                 const seatTypeClass = isSleeper ? 'sleeper' : 'seater';
                 
@@ -329,7 +333,6 @@ function renderDeckSeats(deckData, isUpper) {
                         </div>
                     </div>`;
             } else {
-                // Add empty space for null/undefined seats
                 seatsHTML += '<div class="seat-wrapper empty"></div>';
             }
         });
@@ -340,62 +343,56 @@ function renderDeckSeats(deckData, isUpper) {
     return seatsHTML;
 }
 
-// Helper function to select seats
-function selectSeat(seatElement, seatData) {
-    if (!seatData.SeatStatus) return; // Don't allow selection of booked seats
-    
-    const isSelected = seatElement.classList.contains('selected');
-    if (isSelected) {
-        seatElement.classList.remove('selected');
-        // Remove from selected seats array/storage
-    } else {
-        seatElement.classList.add('selected');
-        // Add to selected seats array/storage
-    }
-    
-    // Trigger event or callback for seat selection
-    updateSelectedSeats();
-}
-
-// Update selected seats info
-function updateSelectedSeats() {
-    const selectedSeats = document.querySelectorAll('.seat.selected');
-    // Update your UI with selected seats info
-}
-
-// Rest of the code remains the same
 function selectSeat(element, seatData) {
     if (element.classList.contains('seat-booked')) return;
 
-    document.querySelectorAll('.seat-selected').forEach(seat => seat.classList.remove('seat-selected'));
+    document.querySelectorAll('.seat-selected').forEach(seat => 
+        seat.classList.remove('seat-selected'));
     element.classList.add('seat-selected');
 
     selectedSeatDetails = seatData;
     selectedSeat = seatData.SeatName;
 
     const selectedSeatInfo = document.getElementById('selectedSeatInfo');
-    selectedSeatInfo.classList.remove('d-none');
-    selectedSeatInfo.querySelector('#selectedSeatDetails').innerText = 
-        `Seat: ${seatData.SeatName}, Price: ₹${seatData.Price.PublishedPrice}`;
+    const seatDetailsDisplay = document.getElementById('seatDetailsDisplay');
+    
+    const seatPrice = seatData.Price?.PublishedPriceRoundedOff || 
+                     seatData.Price?.FareRoundedOff || 
+                     seatData.FareRoundedOff || 0;
 
-    // Show the Continue button
+    const seatType = seatData.SeatType === 2 ? 'Sleeper' : 'Seater';
+    const deckType = seatData.IsUpper ? 'Upper Deck' : 'Lower Deck';
+    
+    seatDetailsDisplay.innerHTML = `
+        <div class="seat-details-grid">
+            <p><strong>Seat Number:</strong> ${seatData.SeatName}</p>
+            <p><strong>Seat Type:</strong> ${seatType}</p>
+            <p><strong>Deck:</strong> ${deckType}</p>
+            <p><strong>Price:</strong> ₹${seatPrice}</p>
+            ${seatData.IsLadiesSeat ? '<p><strong>Ladies Seat:</strong> Yes</p>' : ''}
+        </div>`;
+
+    selectedSeatInfo.classList.remove('d-none');
     document.getElementById('continueButton').classList.remove('d-none');
 }
-// Trigger the modal when the Continue button is clicked
-document.getElementById('continueButton').addEventListener('click', function() {
-    // Trigger the modal to show passenger details
-    const modalTriggerButton = document.getElementById('openPassengerDetailsModal');
-    modalTriggerButton.click();
 
-// document.getElementById('continueButton')?.addEventListener('click', function() {
-//     if (selectedSeatDetails) {
-//         // Trigger the passenger details modal
-//         document.getElementById('openPassengerDetailsModal').click();
-//     } else {
-//         showError('Please select a seat first.');
-//     }
+// Continue button click handler
+document.addEventListener('DOMContentLoaded', function() {
+    document.getElementById('continueButton')?.addEventListener('click', function() {
+        if (selectedSeatDetails) {
+            document.getElementById('openPassengerDetailsModal').click();
+        } else {
+            showError('Please select a seat first.');
+        }
+    });
 });
 
+// Error handling
+function showError(message) {
+    const errorMessage = document.getElementById('errorMessage');
+    errorMessage.classList.remove('d-none');
+    errorMessage.innerText = message;
+}
 
 function showError(message) {
     const errorMessage = document.getElementById('errorMessage');

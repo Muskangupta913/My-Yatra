@@ -251,6 +251,26 @@ function blockRoom(roomId, roomIndex, form) {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 .then(data => {
         if (data.status === 'success') {
             const roomDetails = data.data.HotelRoomsDetails[0];

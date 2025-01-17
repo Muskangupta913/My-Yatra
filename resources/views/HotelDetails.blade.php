@@ -393,7 +393,6 @@ button:disabled {
     <div class="room-info-container">
         <div id="room-details" class="loading-state">Loading room details...</div>
     </div>
-
 <script>
         document.addEventListener('DOMContentLoaded', function() {
             fetchHotelInfo();
@@ -486,7 +485,8 @@ button:disabled {
                     document.getElementById('hotel-details').innerHTML = hotelDetailsHtml;
                 } else {
                     document.getElementById('hotel-details').innerHTML = 
-                        '<div class="error-state">Failed to load hotel details</div>';
+    '<div class="error-state">Failed to load hotel details</div>';
+
                 }
             })
             .catch(error => {
@@ -497,22 +497,8 @@ button:disabled {
         }
 
 
-        function getRoomDataFromCard(roomId) {
-    const roomCard = document.querySelector(`[data-room-id="${roomId}"]`);
-    if (!roomCard) {
-        console.error('Room card not found');
-        return null;
-    }
 
-    return {
-        RoomTypeName: roomCard.getAttribute('data-room-type-name'),
-        RoomTypeCode: roomCard.getAttribute('data-room-type-code'),
-        RatePlan: roomCard.getAttribute('data-rate-plan'),
-        RatePlanCode: roomCard.getAttribute('data-rate-plan-code')
-    };
-}
-
-function fetchRoomDetails() {
+        function fetchRoomDetails() {
     const urlParams = new URLSearchParams(window.location.search);
     const traceId = urlParams.get('traceId');
     const resultIndex = urlParams.get('resultIndex');
@@ -550,99 +536,106 @@ function fetchRoomDetails() {
                 roomDetailsHtml += `
                     <div class="room-category">
                         <h2 class="category-name">${category.CategoryName}</h2>
-                        
-                        ${category.Rooms.map(room => `
-                            <div class="room-card"
-                                data-room-id="${room.RoomId}"
-                                data-room-type-name="${room.RoomTypeName}"
-                                data-room-type-code="${room.RoomTypeCode}"
-                                data-rate-plan="${room.RatePlan}"
-                                data-rate-plan-code="${room.RatePlanCode}"
-                                data-room-index="${room.RoomIndex}">
-                                <div class="room-header">
-                                    <h3 class="room-name">${room.RoomTypeName}</h3>
-                                    <div class="price-section">
-                                        <div class="price-amount">${room.Price.CurrencyCode} ${room.Price.OfferedPrice}</div>
-                                        ${room.Price.PublishedPrice !== room.Price.OfferedPrice ? 
-                                            `<div class="price-original">${room.Price.CurrencyCode} ${room.Price.PublishedPrice}</div>` : 
-                                            ''}
-                                    </div>
-                                </div>
+                      ${category.Rooms.map(room => `
+    <div class="room-card"
+        data-room-id="${room.RoomId}"
+        data-room-type-name="${room.RoomTypeName}"
+        data-room-type-code="${room.RoomTypeCode}"
+        data-rate-plan="${room.RatePlan}"
+        data-rate-plan-code="${room.RatePlanCode}"
+        data-room-index="${room.RoomIndex}".RoomImages || [])}' 
+        data-bed-types="${room.BedTypes || ''}"
+        data-amenities='${JSON.stringify(room.Amenities || [])}'
+        data-room-images='${JSON.stringify(room.RoomImages || [])}'  
+        data-cancellation-policies='${JSON.stringify(room.CancellationPolicies || [])}'
+         data-price-offered="${room.Price.OfferedPrice}"
+        data-price-published="${room.Price.PublishedPrice}"
+        data-price-currency="${room.Price.CurrencyCode}"
+    >
+        <div class="room-header">
+            <h3 class="room-name">${room.RoomTypeName}</h3>
+            <div class="price-section">
+                <div class="price-amount">${room.Price.CurrencyCode} ${room.Price.OfferedPrice}</div>
+                ${room.Price.PublishedPrice !== room.Price.OfferedPrice ? 
+                    `<div class="price-original">${room.Price.CurrencyCode} ${room.Price.PublishedPrice}</div>` : 
+                    ''}
+            </div>
+        </div>
 
-                                <div style="position: relative;">
-                                    ${room.RoomImages ? `
-                                        <div class="room-image-gallery">
-                                            ${room.RoomImages.map(img => `
-                                                <img src="${img.Image}" alt="${room.RoomTypeName}" class="room-image">
-                                            `).join('')}
-                                        </div>
-                                    ` : ''}
-                                </div>
+        <div style="position: relative;">
+            ${room.RoomImages && room.RoomImages.length ? `
+                <div class="room-image-gallery">
+                    ${room.RoomImages.map(img => `
+                        <img src="${img.Image}" alt="${room.RoomTypeName}" class="room-image">
+                    `).join('')}
+                </div>
+            ` : ''}
+        </div>
 
-                                <div class="room-info-grid">
-                                    <div class="room-details">
-                                        <div class="room-description">
-                                            ${room.Description.map(desc => `<p>${desc}</p>`).join('')}
-                                        </div>
-                                        
-                                        <div class="bed-type-info">
-                                            <i class="fas fa-bed"></i> ${room.BedTypes}
-                                        </div>
+        <div class="room-info-grid">
+            <div class="room-details">
+                <div class="room-description">
+                    ${room.Description}
+                </div>
+                
+                <div class="bed-type-info">
+                    <i class="fas fa-bed"></i> ${room.BedTypes || 'N/A'}
+                </div>
 
-                                        <div class="amenities-section">
-                                            ${room.Amenities.map(amenity => `
-                                                <span class="amenity-tag">
-                                                    <i class="fas ${amenity.FontAwesome}"></i>
-                                                    ${amenity.Name}
-                                                </span>
-                                            `).join('')}
-                                        </div>
-                                    </div>
+                <div class="amenities-section">
+                    ${room.Amenities.map(amenity => `
+                        <span class="amenity-tag">
+                            <i class="fas ${amenity.FontAwesome || 'fa-tag'}"></i>
+                            ${amenity.Name}
+                        </span>
+                    `).join('')}
+                </div>
+            </div>
 
-                                    <div class="room-services">
-                                        ${room.ServicesStatus ? `
-                                            <div class="services-status">
-                                                ${room.ServicesStatus.map(service => `
-                                                    <div class="service-item">
-                                                        <i class="fas fa-check-circle"></i>
-                                                        <span>${service.Name}: ${service.Value}</span>
-                                                    </div>
-                                                `).join('')}
-                                            </div>
-                                        ` : ''}
-                                    </div>
-                                </div>
-
-                                ${room.CancellationPolicies ? `
-                                    <div class="cancellation-policy">
-                                        <h4><i class="fas fa-info-circle"></i> Cancellation Policy</h4>
-                                        ${room.CancellationPolicies.map(policy => `
-                                            <div class="policy-item">
-                                                <span>${policy.FromDate.split('T')[0]} to ${policy.ToDate.split('T')[0]}</span>
-                                                <span class="policy-charge">
-                                                    ${policy.Charge > 0 ? 
-                                                        `Cancellation charge: ${policy.Currency} ${policy.Charge}` : 
-                                                        'Free cancellation'}
-                                                </span>
-                                            </div>
-                                        `).join('')}
-                                    </div>
-                                ` : ''}
-
-                                <div class="book-now-section">
-                                    <div class="room-info">
-                                        <div class="room-id">Room ID: ${room.RoomId}</div>
-                                        ${room.IsPANMandatory ? 
-                                            '<div class="pan-notice"><i class="fas fa-exclamation-circle"></i> PAN Card Required</div>' : 
-                                            ''}
-                                    </div>
-                                    <button class="book-now-button" onclick="blockRoom('${room.RoomId}')">
-                                        <i class="fas fa-calendar-check"></i>
-                                        Book Now
-                                    </button>
-                                </div>
+            <div class="room-services">
+                ${room.ServicesStatus ? `
+                    <div class="services-status">
+                        ${room.ServicesStatus.map(service => `
+                            <div class="service-item">
+                                <i class="fas fa-check-circle"></i>
+                                <span>${service.Name}: ${service.Value}</span>
                             </div>
                         `).join('')}
+                    </div>
+                ` : ''}
+            </div>
+        </div>
+
+        ${room.CancellationPolicies ? `
+            <div class="cancellation-policy">
+                <h4><i class="fas fa-info-circle"></i> Cancellation Policy</h4>
+                ${room.CancellationPolicies.map(policy => `
+                    <div class="policy-item">
+                        <span>${policy.FromDate.split('T')[0]} to ${policy.ToDate.split('T')[0]}</span>
+                        <span class="policy-charge">
+                            ${policy.Charge > 0 ? 
+                                `Cancellation charge: ${policy.Currency} ${policy.Charge}` : 
+                                'Free cancellation'}
+                        </span>
+                    </div>
+                `).join('')}
+            </div>
+        ` : ''}
+
+        <div class="book-now-section">
+            <div class="room-info">
+                <div class="room-id">Room ID: ${room.RoomId}</div>
+                ${room.IsPANMandatory ? 
+                    '<div class="pan-notice"><i class="fas fa-exclamation-circle"></i> PAN Card Required</div>' : 
+                    ''}
+            </div>
+            <button class="book-now-button" onclick="blockRoom('${room.RoomId}')">
+                <i class="fas fa-calendar-check"></i>
+                Book Now
+            </button>
+        </div>
+    </div>
+`).join('')}
                     </div>
                 `;
             });
@@ -660,6 +653,34 @@ function fetchRoomDetails() {
     });
 }
 
+
+
+
+function getRoomDataFromCard(roomId) {
+    const roomCard = document.querySelector(`[data-room-id="${roomId}"]`);
+    if (!roomCard) {
+        console.error('Room card not found');
+        return null;
+    }
+
+    return {
+        RoomTypeName: roomCard.getAttribute('data-room-type-name'),
+        RoomTypeCode: roomCard.getAttribute('data-room-type-code'),
+        RatePlan: roomCard.getAttribute('data-rate-plan'),
+        RatePlanCode: roomCard.getAttribute('data-rate-plan-code'),
+        RoomImages: JSON.parse(roomCard.getAttribute('data-room-images') || '[]'),
+        BedTypes: roomCard.getAttribute('data-bed-types'),
+        Amenities: JSON.parse(roomCard.getAttribute('data-amenities') || '[]'),
+        CancellationPolicies: JSON.parse(roomCard.getAttribute('data-cancellation-policies') || '[]'),
+        OfferedPrice: roomCard.getAttribute('data-price-offered'),
+        PublishedPrice: roomCard.getAttribute('data-price-published'),
+        Currency: roomCard.getAttribute('data-price-currency'),
+    };
+}
+
+
+
+
 function blockRoom(roomId) {
     const roomCard = document.querySelector(`[data-room-id="${roomId}"]`);
     if (!roomCard) {
@@ -674,17 +695,31 @@ function blockRoom(roomId) {
     const hotelName = document.querySelector('.hotel-name').textContent;
 
     // Get room details from the data attributes
-    const roomIndex = roomCard.getAttribute('data-room-index');
-    const roomTypeCode = roomCard.getAttribute('data-room-type-code');
-    const roomTypeName = roomCard.getAttribute('data-room-type-name');
-    const ratePlan = roomCard.getAttribute('data-rate-plan');
-    const ratePlanCode = roomCard.getAttribute('data-rate-plan-code');
+    const roomDetails = {
+        RoomId: roomId,
+        RoomIndex: roomCard.getAttribute('data-room-index'),
+        RoomTypeCode: roomCard.getAttribute('data-room-type-code'),
+        RoomTypeName: roomCard.getAttribute('data-room-type-name'),
+        RatePlan: roomCard.getAttribute('data-rate-plan'),
+        RatePlanCode: roomCard.getAttribute('data-rate-plan-code'),
+        RoomImages: JSON.parse(roomCard.getAttribute('data-room-images') || '[]'),
+        BedTypes: roomCard.getAttribute('data-bed-types'),
+        Amenities: JSON.parse(roomCard.getAttribute('data-amenities') || '[]'),
+        CancellationPolicies: JSON.parse(roomCard.getAttribute('data-cancellation-policies') || '[]'),
+        RoomImages: JSON.parse(roomCard.getAttribute('data-room-images') || '[]'),
+        OfferedPrice: roomCard.getAttribute('data-price-offered'),
+        PublishedPrice: roomCard.getAttribute('data-price-published'),
+        Currency: roomCard.getAttribute('data-price-currency')
+    };
+
+    // Serialize room details into a query string
+    const serializedRoomDetails = encodeURIComponent(JSON.stringify(roomDetails));
 
     // Show confirmation dialog
     if (!confirm('Are you sure you want to block this room?')) {
         return;
     }
-   
+
     // Show loading state
     const loadingOverlay = document.createElement('div');
     loadingOverlay.className = 'loading-overlay';
@@ -697,18 +732,7 @@ function blockRoom(roomId) {
         HotelName: hotelName,
         GuestNationality: "IN",
         NoOfRooms: "1",
-        HotelRoomsDetails: [{
-            RoomId: roomId,
-            RoomIndex: roomIndex,
-            RoomTypeCode: roomTypeCode,
-            RoomTypeName: roomTypeName,
-            RatePlan: ratePlan,
-            RatePlanCode: ratePlanCode,
-            ChildCount: 0,
-            RequireAllPaxDetails: false,
-            RoomStatus: "Active",
-            SmokingPreference: "0"
-        }],
+        HotelRoomsDetails: [roomDetails],
         SrdvType: "MixAPI",
         SrdvIndex: "15",
         TraceId: parseInt(traceId),
@@ -740,12 +764,13 @@ function blockRoom(roomId) {
                 Do you want to proceed with booking?
             `;
             
-            if (confirm(message)) {
-                // Redirect to booking page or handle next steps
-                window.location.href = `/booking?traceId=${traceId}&resultIndex=${resultIndex}`;
+            if (confirm(data.message)) {
+                // Redirect to booking page with serialized room details
+                window.location.href = `/room-detail?traceId=${traceId}&resultIndex=${resultIndex}&hotelCode=${hotelCode}&hotelName=${encodeURIComponent(hotelName)}&roomDetails=${serializedRoomDetails}`;
             }
         } else {
-            alert((data.message || 'Unknown error'));
+            alert('Status: ' + (data.message || 'Unknown error'));
+            window.location.href = `/room-detail?traceId=${traceId}&resultIndex=${resultIndex}&hotelCode=${hotelCode}&hotelName=${encodeURIComponent(hotelName)}&roomDetails=${serializedRoomDetails}`;
         }
     })
     .catch(error => {
@@ -757,6 +782,7 @@ function blockRoom(roomId) {
         document.body.removeChild(loadingOverlay);
     });
 }
+
     </script>
 </body>
 </html>
