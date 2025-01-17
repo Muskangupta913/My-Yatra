@@ -14,58 +14,114 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <div class="booking-container">
     <style>
+        :root {
+            --primary-color: #4a90e2;
+            --secondary-color: #5c6bc0;
+            --success-color: #66bb6a;
+            --background-color: #f0f2f5;
+            --card-shadow: 0 8px 16px rgba(0,0,0,0.1);
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--background-color);
+            color: #2c3e50;
+        }
+
         .booking-container {
-            background: #f8f9fa;
             padding: 40px 0;
+            background: linear-gradient(135deg, #f5f7fa 0%, #e4e7eb 100%);
             min-height: 100vh;
         }
 
         .booking-header {
             text-align: center;
-            margin-bottom: 30px;
-            color: #2c3e50;
+            margin-bottom: 40px;
+            animation: fadeInDown 0.8s ease-out;
         }
 
-        .booking-header h2 {
-            font-weight: 600;
-            margin-bottom: 10px;
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .booking-header h3 {
+            font-weight: 700;
+            color: var(--primary-color);
+            margin-bottom: 15px;
+            font-size: 2.5rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
         }
 
         .booking-status {
-            background: #e8f5e9;
-            color: #2e7d32;
-            padding: 8px 15px;
-            border-radius: 20px;
+            background: linear-gradient(45deg, #66bb6a, #43a047);
+            color: white;
+            padding: 10px 25px;
+            border-radius: 50px;
             display: inline-block;
-            font-size: 14px;
-            margin-bottom: 20px;
+            font-size: 1rem;
+            font-weight: 500;
+            box-shadow: 0 4px 8px rgba(102,187,106,0.3);
+            transition: transform 0.3s ease;
+        }
+
+        .booking-status:hover {
+            transform: translateY(-2px);
         }
 
         .booking-card {
             background: white;
-            border-radius: 15px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-            margin-bottom: 25px;
+            border-radius: 20px;
+            box-shadow: var(--card-shadow);
+            margin-bottom: 30px;
             border: none;
-            overflow: hidden;
+            transition: transform 0.3s ease;
+            animation: fadeIn 0.8s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .booking-card:hover {
+            transform: translateY(-5px);
         }
 
         .card-header {
-            background: #fff;
-            border-bottom: 1px solid #eef2f7;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            border-radius: 20px 20px 0 0 !important;
             padding: 20px;
+            border: none;
         }
 
         .section-header {
-            color: #1a237e;
-            font-size: 18px;
+            font-size: 1.25rem;
             font-weight: 600;
             margin: 0;
+            display: flex;
+            align-items: center;
         }
 
         .section-header i {
-            margin-right: 10px;
-            color: #3949ab;
+            margin-right: 12px;
+            font-size: 1.5rem;
+            background: rgba(255,255,255,0.2);
+            padding: 8px;
+            border-radius: 10px;
         }
 
         .card-body {
@@ -73,29 +129,31 @@
         }
 
         .detail-row {
-            margin-bottom: 15px;
+            margin-bottom: 20px;
             display: flex;
             align-items: center;
+            transition: transform 0.3s ease;
         }
 
-        .detail-row:last-child {
-            margin-bottom: 0;
+        .detail-row:hover {
+            transform: translateX(5px);
         }
 
         .icon-container {
-            width: 35px;
-            height: 35px;
-            background: #f5f6fa;
-            border-radius: 8px;
+            width: 45px;
+            height: 45px;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            border-radius: 12px;
             display: flex;
             align-items: center;
             justify-content: center;
             margin-right: 15px;
+            transition: all 0.3s ease;
         }
 
         .icon-container i {
-            color: #3949ab;
-            font-size: 16px;
+            color: white;
+            font-size: 1.2rem;
         }
 
         .detail-content {
@@ -103,16 +161,17 @@
         }
 
         .detail-label {
-            font-size: 13px;
+            font-size: 0.85rem;
             color: #6c757d;
-            margin-bottom: 3px;
+            margin-bottom: 5px;
             text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
 
         .detail-value {
             color: #2c3e50;
-            font-weight: 500;
-            font-size: 15px;
+            font-weight: 600;
+            font-size: 1.1rem;
         }
 
         .journey-timeline {
@@ -122,90 +181,102 @@
 
         .timeline-point {
             position: relative;
-            padding-left: 50px;
-            margin-bottom: 20px;
+            padding-left: 60px;
+            margin-bottom: 30px;
         }
 
         .timeline-point::before {
             content: '';
             position: absolute;
-            left: 17px;
+            left: 22px;
             top: 0;
-            bottom: -20px;
+            bottom: -30px;
             width: 2px;
-            background: #e0e0e0;
-        }
-
-        .timeline-point:last-child::before {
-            display: none;
-        }
-
-        .timeline-point .icon-container {
-            position: absolute;
-            left: 0;
-            top: 0;
+            background: linear-gradient(to bottom, var(--primary-color), var(--secondary-color));
         }
 
         .price-item {
             display: flex;
             justify-content: space-between;
             margin-bottom: 15px;
-            padding-bottom: 15px;
-            border-bottom: 1px dashed #eef2f7;
+            padding: 15px;
+            border-radius: 10px;
+            transition: background-color 0.3s ease;
         }
 
-        .price-item:last-child {
-            border: none;
-            margin-bottom: 0;
-            padding-bottom: 0;
-        }
-
-        .price-label {
-            color: #6c757d;
-        }
-
-        .price-value {
-            font-weight: 600;
-            color: #2c3e50;
+        .price-item:hover {
+            background-color: #f8f9fa;
         }
 
         .total-price {
-            background: #f8f9fa;
-            padding: 15px;
-            border-radius: 10px;
+            background: linear-gradient(135deg, #4a90e2, #5c6bc0);
+            color: white;
+            padding: 20px;
+            border-radius: 15px;
             margin-top: 20px;
+            box-shadow: 0 4px 8px rgba(74,144,226,0.3);
+        }
+
+        .total-price .price-label {
+            color: rgba(255,255,255,0.9);
         }
 
         .total-price .price-value {
-            color: #2e7d32;
-            font-size: 18px;
-        }
-
-        .action-buttons {
-            text-align: center;
-            margin-top: 30px;
+            color: white;
+            font-size: 1.5rem;
         }
 
         .btn-pay {
-            background: #3949ab;
+            background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
             color: white;
-            padding: 12px 35px;
-            border-radius: 25px;
-            font-weight: 500;
+            padding: 15px 40px;
+            border-radius: 50px;
+            font-weight: 600;
             letter-spacing: 0.5px;
             transition: all 0.3s ease;
             border: none;
+            box-shadow: 0 4px 15px rgba(74,144,226,0.3);
+            margin-top: 40px;
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
         }
 
         .btn-pay:hover {
-            background: #283593;
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(57, 73, 171, 0.2);
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(74,144,226,0.4);
+            color: white;
+        }
+
+        .passenger-card {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+            transition: transform 0.3s ease;
+        }
+
+        .passenger-card:hover {
+            transform: translateY(-3px);
+        }
+
+        .passenger-card h5 {
+            color: var(--primary-color);
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid rgba(74,144,226,0.1);
         }
 
         @media (max-width: 768px) {
             .booking-container {
                 padding: 20px 15px;
+            }
+            
+            .booking-header h2 {
+                font-size: 2rem;
             }
             
             .card-body {
@@ -225,7 +296,7 @@
 
     <div class="container">
         <div class="booking-header">
-            <h2>Booking Confirmation</h2>
+            <h3>Booking Confirmation</h3>
             <span class="booking-status">
                 <i class="fas fa-check-circle"></i> Booking Pending Payment
             </span>
@@ -314,168 +385,203 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Parse URL parameters
-            const urlParams = new URLSearchParams(window.location.search);
-            
-            // Get and parse all data from URL
-            const passengerData = JSON.parse(decodeURIComponent(urlParams.get('PassengerData')));
-            const boardingPoint = JSON.parse(decodeURIComponent(urlParams.get('BoardingPoint')));
-            const droppingPoint = JSON.parse(decodeURIComponent(urlParams.get('DroppingPoint')));
-            const busDetails = JSON.parse(decodeURIComponent(urlParams.get('BusDetails')));
-            const price = JSON.parse(decodeURIComponent(urlParams.get('Price')));
-            const traceId = urlParams.get('TraceId');
-            const resultIndex = urlParams.get('ResultIndex');
-            let invoiceAmount= 0;
-             let encodedPassengerData = '';
-            invoiceAmount = passengerData.Seat.Price.PublishedPrice;
-            encodedPassengerData=encodeURIComponent(passengerData);
+         // Parse URL parameters
+    const urlParams = new URLSearchParams(window.location.search);
+    
+    // Get and parse all data from URL
+    const passengers = JSON.parse(decodeURIComponent(urlParams.get('PassengerData')));
+    const boardingPoint = JSON.parse(decodeURIComponent(urlParams.get('BoardingPoint')));
+    const droppingPoint = JSON.parse(decodeURIComponent(urlParams.get('DroppingPoint')));
+    const busDetails = JSON.parse(decodeURIComponent(urlParams.get('BusDetails')));
+    const price = JSON.parse(decodeURIComponent(urlParams.get('Price')));
+    const traceId = urlParams.get('TraceId');
+    const resultIndex = urlParams.get('ResultIndex');
+    
+    // Format date and time
+    function formatDateTime(dateTimeStr) {
+        const dt = new Date(dateTimeStr);
+        return dt.toLocaleString('en-US', {
+            month: 'short',
+            day: '2-digit',
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: true
+        });
+    }
 
-            // Format date and time
-            function formatDateTime(dateTimeStr) {
-                const dt = new Date(dateTimeStr);
-                return dt.toLocaleString('en-US', {
-                    month: 'short',
-                    day: '2-digit',
-                    year: 'numeric',
-                    hour: '2-digit',
-                    minute: '2-digit',
-                    hour12: true
-                });
-            }
+    // Populate Bus Details
+    document.getElementById('busDetails').innerHTML = `
+        <div class="row">
+            <div class="col-md-4">
+                <div class="detail-row">
+                    <div class="icon-container">
+                        <i class="fas fa-bus"></i>
+                    </div>
+                    <div class="detail-content">
+                        <div class="detail-label">Service Name</div>
+                        <div class="detail-value">${busDetails.ServiceName}</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="detail-row">
+                    <div class="icon-container">
+                        <i class="fas fa-building"></i>
+                    </div>
+                    <div class="detail-content">
+                        <div class="detail-label">Travel Agency</div>
+                        <div class="detail-value">${busDetails.TravelName}</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="detail-row">
+                    <div class="icon-container">
+                        <i class="fas fa-couch"></i>
+                    </div>
+                    <div class="detail-content">
+                        <div class="detail-label">Bus Type</div>
+                        <div class="detail-value">${busDetails.BusType}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
 
-            // Populate Bus Details
-            document.getElementById('busDetails').innerHTML = `
+    // Populate Journey Details
+    document.getElementById('journeyDetails').innerHTML = `
+        <div class="timeline-point">
+            <div class="icon-container">
+                <i class="fas fa-map-marker-alt"></i>
+            </div>
+            <div class="detail-content">
+                <div class="detail-label">Boarding Point</div>
+                <div class="detail-value">${boardingPoint.Name}</div>
+                <div class="detail-time">${formatDateTime(busDetails.DepartureTime)}</div>
+            </div>
+        </div>
+        <div class="timeline-point">
+            <div class="icon-container">
+                <i class="fas fa-map-pin"></i>
+            </div>
+            <div class="detail-content">
+                <div class="detail-label">Dropping Point</div>
+                <div class="detail-value">${droppingPoint.Name}</div>
+                <div class="detail-time">${formatDateTime(busDetails.ArrivalTime)}</div>
+            </div>
+        </div>
+    `;
+
+// Populate Seat Details
+const seatDetailsHTML = passengers.map((passenger, index) => {
+    const seatDetails = passenger.SeatDetails;
+    return `
+        <div class="passenger-card ${index > 0 ? 'mt-4 pt-4 border-top' : ''}">
+            <h5 class="mb-3">Seat Details - ${passenger.Title} ${passenger.FirstName}</h5>
             <div class="row">
-                <div class="col-md-4">
+                <div class="col-md-3">
                     <div class="detail-row">
                         <div class="icon-container">
-                            <i class="fas fa-bus"></i>
+                            <i class="fas fa-chair"></i>
                         </div>
                         <div class="detail-content">
-                            <div class="detail-label">Service Name</div>
-                            <div class="detail-value">${busDetails.ServiceName}</div>
+                            <div class="detail-label">Seat Number</div>
+                            <div class="detail-value">${seatDetails.SeatNumber || 'Not assigned'}</div>
                         </div>
                     </div>
                 </div>
-                <div class="col-md-4">
-                    <div class="detail-row">
-                        <div class="icon-container">
-                            <i class="fas fa-building"></i>
-                        </div>
-                        <div class="detail-content">
-                            <div class="detail-label">Travel Agency</div>
-                            <div class="detail-value">${busDetails.TravelName}</div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-4">
+                <div class="col-md-3">
                     <div class="detail-row">
                         <div class="icon-container">
                             <i class="fas fa-couch"></i>
                         </div>
                         <div class="detail-content">
-                            <div class="detail-label">Bus Type</div>
-                            <div class="detail-value">${busDetails.BusType}</div>
+                            <div class="detail-label">Seat Type</div>
+                            <div class="detail-value">${seatDetails.SeatType}</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="detail-row">
+                        <div class="icon-container">
+                            <i class="fas fa-layer-group"></i>
+                        </div>
+                        <div class="detail-content">
+                            <div class="detail-label">Deck</div>
+                            <div class="detail-value">${seatDetails.Deck}</div>
                         </div>
                     </div>
                 </div>
             </div>
-        `;
+        </div>
+    `;
+}).join('');
 
-        // Populate Journey Details
-        document.getElementById('journeyDetails').innerHTML = `
-            <div class="timeline-point">
-                <div class="icon-container">
-                    <i class="fas fa-map-marker-alt"></i>
+document.getElementById('seatDetails').innerHTML = seatDetailsHTML;
+    // Populate Passenger Details for multiple passengers
+    const passengersHTML = passengers.map((passenger, index) => `
+        <div class="passenger-card ${index > 0 ? 'mt-4 pt-4 border-top' : ''}">
+            <h5 class="mb-3">Passenger ${index + 1} ${passenger.LeadPassenger ? '' : ''}</h5>
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="detail-row">
+                        <div class="icon-container">
+                            <i class="fas fa-user"></i>
+                        </div>
+                        <div class="detail-content">
+                            <div class="detail-label">Passenger Name</div>
+                            <div class="detail-value">${passenger.Title} ${passenger.FirstName}</div>
+                        </div>
+                    </div>
                 </div>
-                <div class="detail-content">
-                    <div class="detail-label">Boarding Point</div>
-                    <div class="detail-value">${boardingPoint.Name}</div>
-                    <div class="detail-time">${formatDateTime(busDetails.DepartureTime)}</div>
+                <div class="col-md-4">
+                    <div class="detail-row">
+                        <div class="icon-container">
+                            <i class="fas fa-info-circle"></i>
+                        </div>
+                        <div class="detail-content">
+                            <div class="detail-label">Age & Gender</div>
+                            <div class="detail-value">${passenger.Age} Years | ${passenger.Gender === 1 ? 'Male' : 'Female'}</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="detail-row">
+                        <div class="icon-container">
+                            <i class="fas fa-map-marker-alt"></i>
+                        </div>
+                        <div class="detail-content">
+                            <div class="detail-label">Address</div>
+                            <div class="detail-value">${passenger.Address}</div>
+                        </div>
+                    </div>
                 </div>
             </div>
-            <div class="timeline-point">
-                <div class="icon-container">
-                    <i class="fas fa-map-pin"></i>
-                </div>
-                <div class="detail-content">
-                    <div class="detail-label">Dropping Point</div>
-                    <div class="detail-value">${droppingPoint.Name}</div>
-                    <div class="detail-time">${formatDateTime(busDetails.ArrivalTime)}</div>
-                </div>
-            </div>
-        `;
+        </div>
+    `).join('');
 
-        // Populate Passenger Details
-        document.getElementById('passengerDetails').innerHTML = `
-            <div class="detail-row">
-                <div class="icon-container">
-                    <i class="fas fa-user"></i>
-                </div>
-                <div class="detail-content">
-                    <div class="detail-label">Passenger Name</div>
-                    <div class="detail-value">${passengerData.Title} ${passengerData.FirstName}</div>
-                </div>
-            </div>
-            <div class="detail-row">
-                <div class="icon-container">
-                    <i class="fas fa-phone"></i>
-                </div>
-                <div class="detail-content">
-                    <div class="detail-label">Contact Number</div>
-                    <div class="detail-value">${passengerData.Phoneno}</div>
-                </div>
-            </div>
-            <div class="detail-row">
-                <div class="icon-container">
-                    <i class="fas fa-info-circle"></i>
-                </div>
-                <div class="detail-content">
-                    <div class="detail-label">Age & Gender</div>
-                    <div class="detail-value">${passengerData.Age} Years | ${passengerData.Gender === 1 ? 'Female' : 'Male'}</div>
-                </div>
-            </div>
-        `;
+    document.getElementById('passengerDetails').innerHTML = passengersHTML;
 
-        // Populate Seat Details
-        document.getElementById('seatDetails').innerHTML = `
-            <div class="detail-row">
-                <div class="icon-container">
-                    <i class="fas fa-chair"></i>
-                </div>
-                <div class="detail-content">
-                    <div class="detail-label">Seat Number</div>
-                    <div class="detail-value">${passengerData.Seat.SeatName}</div>
-                </div>
-            </div>
-            <div class="detail-row">
-                <div class="icon-container">
-                    <i class="fas fa-layer-group"></i>
-                </div>
-                <div class="detail-content">
-                    <div class="detail-label">Deck & Type</div>
-                    <div class="detail-value">${passengerData.Seat.IsUpper ? 'Upper' : 'Lower'} Deck | ${passengerData.Seat.SeatType === 1 ? 'Seater' : 'Sleeper'}</div>
-                </div>
-            </div>
-        `;
+    // Calculate total amount
+    const basePrice = price.BasePrice;
+    const totalAmount = basePrice * passengers.length;
 
-        // Populate Price Details
-        document.getElementById('priceDetails').innerHTML = `
-            <div class="price-item">
-                <span class="price-label">Base Fare</span>
-                <span class="price-value">₹${passengerData.Seat.Price.BasePrice}</span>
-            </div>
-            <div class="price-item">
-                <span class="price-label">GST</span>
-                <span class="price-value">₹${passengerData.Seat.Price.GST.IGSTAmount}</span>
-            </div>
-            <div class="total-price price-item">
-                <span class="price-label">Total Amount</span>
-                <span class="price-value">₹${passengerData.Seat.Price.PublishedPrice}</span>
-            </div>
-        `;
-
-
+    // Populate Price Details
+    document.getElementById('priceDetails').innerHTML = `
+        <div class="price-item">
+            <span class="price-label">Base Fare (per passenger)</span>
+            <span class="price-value">₹${basePrice.toFixed(2)}</span>
+        </div>
+        <div class="price-item">
+            <span class="price-label">Number of Passengers</span>
+            <span class="price-value">${passengers.length}</span>
+        </div>
+        <div class="total-price price-item">
+            <span class="price-label">Total Amount</span>
+            <span class="price-value">₹${totalAmount.toFixed(2)}</span>
+        </div>
+    `;
 
 // Set the href for Pay Now button with all necessary parameters
 // Set the href for Pay Now button with all necessary parameters
@@ -490,7 +596,7 @@ document.getElementById('payNowButton').addEventListener('click', function (e) {
             const payload = {
                 TraceId: traceId,
                 Amount: invoiceAmount,
-                PassengerData: passengerData,
+                PassengerData: passengers,
                 BoardingPointName: boardingPoint.Name,
                 DroppingPointName: droppingPoint.Name,
                 SeatNumber: passengerData.Seat.SeatName

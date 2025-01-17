@@ -1,251 +1,144 @@
-public function blockRoom(Request $request)
-    {
-        try {
-            $validator = Validator::make($request->all(), [
-                'ResultIndex' => 'required',
-                'HotelCode' => 'required',
-                'HotelName' => 'required',
-                'GuestNationality' => 'required',
-                'NoOfRooms' => 'required',
-                'HotelRoomsDetails' => 'required|array',
-                'HotelRoomsDetails.*.RoomId' => 'required',
-                'HotelRoomsDetails.*.RoomIndex' => 'required',
-                'HotelRoomsDetails.*.HotelPassenger' => 'required|array',
-                'HotelRoomsDetails.*.HotelPassenger.*.Title' => 'required|in:Mr,Mrs,Ms',
-                'HotelRoomsDetails.*.HotelPassenger.*.FirstName' => 'required',
-                'HotelRoomsDetails.*.HotelPassenger.*.LastName' => 'required',
-                'HotelRoomsDetails.*.HotelPassenger.*.Phoneno' => 'required',
-                'HotelRoomsDetails.*.HotelPassenger.*.Email' => 'required|email',
-            ]);
-
-            if ($validator->fails()) {
-                return response()->json([
-                    'status' => 'error',
-                    'message' => 'Validation failed',
-                    'errors' => $validator->errors()
-                ], 400);
-            }
-
-            // Merge client credentials with request data
-            $requestBody = array_merge($request->all(), [
-                "EndUserIp" => "1.1.1.1",
-            "ClientId" => "180133",
-            "UserName" => "MakeMy91",
-            "Password" => "MakeMy@910"
-            ]);
-
-            // Call the booking API
-            $response = Http::post($this->baseUrl . 'Book', $requestBody);
-
-            if ($response->successful()) {
-                $bookResult = $response->json()['BookResult'] ?? null;
-
-                if ($bookResult && $bookResult['Status'] === 'Confirmed') {
-                    // Log successful booking
-                    Log::info('Successful Booking', [
-                        'BookingRefNo' => $bookResult['BookingRefNo'],
-                        'ConfirmationNo' => $bookResult['ConfirmationNo']
-                    ]);
-
-                    // You might want to save booking details to your database here
-                    // $this->saveBookingToDatabase($bookResult, $request->all());
-
-                    return response()->json([
-                        'status' => 'success',
-                        'message' => 'Booking confirmed successfully',
-                        'BookResult' => $bookResult
-                    ]);
-                }
-
-                return response()->json([
-                    'status' => 'error',
-                    'message' => 'Booking failed',
-                    'BookResult' => $bookResult
-                ]);
-            }
-
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Failed to process booking',
-                'error' => $response->json()
-            ], $response->status());
-
-        } catch (\Exception $e) {
-            Log::error('Booking Error: ' . $e->getMessage());
-            return response()->json([
-                'status' => 'error',
-                'message' => 'An error occurred while processing the booking',
-                'error' => $e->getMessage()
-            ], 500);
-        }
+function renderSeatLayout(seatDetails) {
+    const seatLayoutContainer = document.getElementById('seatLayout');
+    const normalizedData = normalizeLayoutData(seatDetails);
+    
+    let layoutHTML = '<div class="bus-layout" style="padding: 1rem;">';
+    
+    // Render Lower Deck and Upper Deck side-by-side
+    if (normalizedData.lower.length > 0 || normalizedData.upper.length > 0) {
+        layoutHTML += `
+            <div class="decks-container" style="width: 100%;">
+                ${normalizedData.lower.length > 0
+                    ? `
+                    <div class="deck lower-deck" style="margin-bottom: 2rem;">
+                        <h4 style="font-size: 1.2rem; margin-bottom: 1rem;">Lower Deck</h4>
+                        <div class="deck-seats">
+                            ${renderDeckSeats(normalizedData.lower, 'mixed')}
+                        </div>
+                    </div>`
+                    : ''}
+                ${normalizedData.upper.length > 0
+                    ? `
+                    <div class="deck upper-deck">
+                        <h4 style="font-size: 1.2rem; margin-bottom: 1rem;">Upper Deck</h4>
+                        <div class="deck-seats">
+                            ${renderDeckSeats(normalizedData.upper, 'mixed')}
+                        </div>
+                    </div>`
+                    : ''}
+            </div>`;
     }
+    
+    layoutHTML += '</div>';
+    seatLayoutContainer.innerHTML = layoutHTML;
 
+    document.getElementById('continueButton')?.addEventListener('click', handleContinue);
+}
 
+function renderDeckSeats(deckData, busType) {
+    // Handle different bus types
+    switch(busType) {
+        case 'sleeper':
+            return renderSleeperLayout(deckData);
+        case 'mixed':
+            return renderMixedLayout(deckData);
+        default:
+            return renderSeaterLayout(deckData);
+    }
+}
 
+function renderMixedLayout(deckData) {
+    let seatsHTML = '<div style="display: flex; gap: 2rem;">';
+    
+    // Left side (1 seat)
+    seatsHTML += '<div style="display: flex; flex-direction: column;">';
+    seatsHTML += renderSeatColumn(deckData, 0); // First column
+    seatsHTML += '</div>';
+    
+    // Aisle gap
+    seatsHTML += '<div style="width: 2rem;"></div>';
+    
+    // Right side (2 seats)
+    seatsHTML += '<div style="display: flex; gap: 1rem;">';
+    seatsHTML += renderSeatColumn(deckData, 1); // Second column
+    seatsHTML += renderSeatColumn(deckData, 2); // Third column
+    seatsHTML += '</div>';
+    
+    seatsHTML += '</div>';
+    return seatsHTML;
+}
 
-
-
-
-
-
-
-
-
-
-
-
-    function bookRoom(roomId, roomIndex) {
-    // Show modal with passenger form
-    const modal = document.createElement('div');
-    modal.className = 'modal';
-    modal.innerHTML = `
-        <div class="modal-content">
-            <span class="close">&times;</span>
-            <h2>Enter Passenger Details</h2>
-            <form id="passengerForm">
-                <div class="passenger-container" id="passengerContainer">
-                    <div class="passenger-entry">
-                        <h3>Lead Passenger</h3>
-                        <div class="form-group">
-                            <select name="title" required>
-                                <option value="Mr">Mr</option>
-                                <option value="Mrs">Mrs</option>
-                                <option value="Ms">Ms</option>
-                            </select>
-                            <input type="text" name="firstName" placeholder="First Name" required>
-                            <input type="text" name="lastName" placeholder="Last Name" required>
-                            <input type="email" name="email" placeholder="Email" required>
-                            <input type="tel" name="phone" placeholder="Phone Number" required>
-                            <input type="text" name="pan" placeholder="PAN Number (Optional)">
+function renderSeatColumn(deckData, columnIndex) {
+    let columnHTML = '<div style="display: flex; flex-direction: column; gap: 0.5rem;">';
+    
+    for (let rowIndex = 0; rowIndex < deckData.length; rowIndex++) {
+        const seat = deckData[rowIndex][columnIndex];
+        
+        if (seat && typeof seat === 'object') {
+            const isSleeper = seat.SeatType === 2;
+            const seatHeight = isSleeper ? '8rem' : '4rem';
+            
+            const seatClasses = [
+                'seat',
+                isSleeper ? 'sleeper' : 'seater',
+                seat.SeatStatus ? 'seat-available' : 'seat-booked',
+                seat.IsLadiesSeat ? 'ladies-seat' : ''
+            ].filter(Boolean).join(' ');
+            
+            const seatPrice = seat.Price?.PublishedPriceRoundedOff || 
+                            seat.Price?.FareRoundedOff || 
+                            seat.FareRoundedOff || 0;
+            
+            const statusText = seat.SeatStatus ? 'Available' : 'Booked';
+            const genderText = seat.IsLadiesSeat ? 'Female Only' : 'Male/Female';
+            const fullStatus = `${statusText} (${genderText})`;
+            
+            columnHTML += `
+                <div class="seat-wrapper" 
+                     style="width: 4rem; height: ${seatHeight}; margin: 0.25rem;" 
+                     data-row="${rowIndex + 1}" 
+                     data-column="${columnIndex + 1}">
+                    <div class="${seatClasses}" 
+                         style="width: 100%; height: 100%; padding: 0.5rem; 
+                                border: 2px solid ${seat.IsLadiesSeat ? '#ff4081' : '#ccc'}; 
+                                border-radius: 0.5rem;
+                                background-color: ${isSleeper ? '#f0f8ff' : 'white'};
+                                cursor: ${seat.SeatStatus ? 'pointer' : 'not-allowed'};"
+                         data-seat='${JSON.stringify(seat)}' 
+                         onclick="selectSeat(this)">
+                        <div class="seat-info" style="font-size: 0.8rem; text-align: center;">
+                            <div style="font-weight: bold; margin-bottom: 0.25rem;">
+                                ${seat.SeatName || `${rowIndex + 1}-${columnIndex + 1}`}
+                            </div>
+                            <div style="color: #666;">₹${seatPrice}</div>
+                            <div style="font-size: 0.7rem; color: ${seat.SeatStatus ? '#4CAF50' : '#f44336'};">
+                                ${fullStatus}
+                            </div>
                         </div>
                     </div>
-                </div>
-                <button type="button" onclick="addPassenger()">Add Another Passenger</button>
-                <button type="submit">Block Room</button>
-            </form>
-        </div>
-    `;
-
-    document.body.appendChild(modal);
-
-    // Close modal functionality
-    const closeBtn = modal.querySelector('.close');
-    closeBtn.onclick = function() {
-        modal.remove();
-    }
-
-    // Form submission handler
-    const form = modal.querySelector('#passengerForm');
-    form.onsubmit = function(e) {
-        e.preventDefault();
-        blockRoom(roomId, roomIndex, form);
-    }
-}
-
-function addPassenger() {
-    const container = document.getElementById('passengerContainer');
-    const passengerEntry = document.createElement('div');
-    passengerEntry.className = 'passenger-entry';
-    passengerEntry.innerHTML = `
-        <h3>Additional Passenger</h3>
-        <div class="form-group">
-            <select name="title" required>
-                <option value="Mr">Mr</option>
-                <option value="Mrs">Mrs</option>
-                <option value="Ms">Ms</option>
-            </select>
-            <input type="text" name="firstName" placeholder="First Name" required>
-            <input type="text" name="lastName" placeholder="Last Name" required>
-            <input type="email" name="email" placeholder="Email" required>
-            <input type="tel" name="phone" placeholder="Phone Number" required>
-            <input type="text" name="pan" placeholder="PAN Number (Optional)">
-        </div>
-        <button type="button" class="remove-passenger" onclick="this.parentElement.remove()">Remove</button>
-    `;
-    container.appendChild(passengerEntry);
-}
-
-function blockRoom(roomId, roomIndex, form) {
-    const urlParams = new URLSearchParams(window.location.search);
-    const traceId = urlParams.get('traceId');
-    const hotelCode = urlParams.get('hotelCode');
-    const hotelName = document.querySelector('.hotel-name').textContent;
-
-    // Collect all passenger entries
-    const passengers = [];
-    const passengerEntries = form.querySelectorAll('.passenger-entry');
-    
-    passengerEntries.forEach((entry, index) => {
-        passengers.push({
-            Title: entry.querySelector('select[name="title"]').value,
-            FirstName: entry.querySelector('input[name="firstName"]').value,
-            MiddleName: null,
-            LastName: entry.querySelector('input[name="lastName"]').value,
-            Phoneno: entry.querySelector('input[name="phone"]').value,
-            Email: entry.querySelector('input[name="email"]').value,
-            PaxType: "1",
-            LeadPassenger: index === 0,
-            PAN: entry.querySelector('input[name="pan"]').value || ""
-        });
-    });
-
-    const requestBody = {
-        ResultIndex: hotelCode,
-        HotelCode: hotelCode,
-        HotelName: hotelName,
-        GuestNationality: "IN",
-        NoOfRooms: "1",
-        ClientReferenceNo: 0,
-        IsVoucherBooking: true,
-        HotelRoomsDetails: [{
-            RoomId: roomId,
-            RoomIndex: roomIndex,
-            HotelPassenger: passengers
-            // Add other required room details from your existing data
-        }],
-        SrdvType: "MixAPI",
-        SrdvIndex: "15",
-        TraceId: parseInt(traceId),
-        EndUserIp: "1.1.1.1"
-    };
-
-    // Show loading state
-    const submitButton = form.querySelector('button[type="submit"]');
-    submitButton.disabled = true;
-    submitButton.textContent = 'Blocking Room...';
-
-    fetch('/block-room', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-        },
-        body: JSON.stringify(requestBody)
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.BookResult && data.BookResult.Status === 'Confirmed') {
-            alert(`Booking Confirmed!\nBooking Reference: ${data.BookResult.BookingRefNo}`);
-            // Close modal and refresh page or redirect to booking confirmation page
-            form.closest('.modal').remove();
-            // Optionally redirect to booking confirmation page
-            // window.location.href = `/booking-confirmation/${data.BookResult.BookingRefNo}`;
+                </div>`;
         } else {
-            alert('Booking failed: ' + (data.BookResult?.Error?.ErrorMessage || 'Unknown error'));
+            columnHTML += `<div style="width: 4rem; height: 4rem; visibility: hidden;"></div>`;
         }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        alert('An error occurred while processing your booking. Please try again.');
-    })
-    .finally(() => {
-        submitButton.disabled = false;
-        submitButton.textContent = 'Block Room';
-    });
+    }
+    
+    columnHTML += '</div>';
+    return columnHTML;
 }
 
+// Your existing renderSeaterLayout and renderSleeperLayout functions remain unchanged
+// Only modify the selectSeat function to handle the new styling
 
+function selectSeat(element) {
+    try {
+        const seatData = JSON.parse(element.dataset.seat);
+        
+        if (!seatData.SeatStatus) {
+            showError('This seat is already booked.');
+            return;
+        }
 
+<<<<<<< HEAD
 
 
 
@@ -296,7 +189,37 @@ function blockRoom(roomId, roomIndex, form) {
                 }).toString();
                 
                 window.location.href = bookingUrl;
+=======
+        const isSelected = element.classList.contains('seat-selected');
+        
+        if (isSelected) {
+            // Deselect seat
+            element.classList.remove('seat-selected');
+            element.style.backgroundColor = seatData.SeatType === 2 ? '#f0f8ff' : 'white';
+            selectedSeats = selectedSeats.filter(seat => seat.SeatName !== seatData.SeatName);
+            if (selectedSeatDetails?.SeatName === seatData.SeatName) {
+                selectedSeatDetails = null;
+>>>>>>> 0e40248d1a68966c952c70d2d6744049579e38d2
             }
         } else {
-            alert('Failed to block room: ' + (data.message || 'Unknown error'));
+            // Select new seat
+            if (selectedSeats.length >= maxSeatsAllowed) {
+                showError(`You can only select up to ${maxSeatsAllowed} seats.`);
+                return;
+            }
+            
+            element.classList.add('seat-selected');
+            element.style.backgroundColor = '#4CAF50';
+            selectedSeats.push(seatData);
+            selectedSeatDetails = seatData;
         }
+
+        updateSelectedSeatsDisplay();
+        // Store in session storage
+        sessionStorage.setItem('selectedSeats', JSON.stringify(selectedSeats));
+        sessionStorage.setItem('selectedSeatDetails', JSON.stringify(selectedSeatDetails));
+    } catch (error) {
+        console.error('Error in selectSeat:', error);
+        showError('Error selecting seat. Please try again.');
+    }
+}
