@@ -595,6 +595,8 @@ function updateRoomGuestsTitle() {
         const title = `${rooms} Room${rooms > 1 ? "s" : ""}, ${adults} Adult${adults > 1 ? "s" : ""}, ${children} Child${children > 1 ? "ren" : ""}`;
         document.getElementById("roomGuestsDropdown").textContent = title;
     }
+
+    
   $(document).ready(function () {
     // CSRF Token setup for AJAX
     $.ajaxSetup({
@@ -828,7 +830,7 @@ function updateRoomGuestsTitle() {
 
 
 
- $.ajaxSetup({
+  $.ajaxSetup({
     headers: {
         'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content'),
         'Accept': 'application/json'
@@ -849,8 +851,8 @@ function fetchHotelAllCities(inputField, listId) {
             if (response.status === 'success' && response.data && response.data.length > 0) {
                 response.data.forEach(city => {
                     const cityHTML = `
-                        <div class="list-group-item city-option" style="cursor: pointer;" data-cityid="${city.CityId}">
-                            <i class="fa-solid fa-location-dot"></i> ${city.CityName}
+                        <div class="list-group-item city-option" style="cursor: pointer;" data-cityid="${city.cityid}">
+                            <i class="fa-solid fa-location-dot"></i> ${city.Destination}
                         </div>`;
                     list.append(cityHTML);
                 });
@@ -879,11 +881,11 @@ function fetchHotelCities(inputField, listId) {
                 const list = $(listId);
                 list.empty().show();
 
-                if (response.length > 0) {
-                    response.forEach(city => {
+                if (response.data && response.data.length > 0) {
+                    response.data.forEach(city => {
                         list.append(
-                            `<div class="list-group-item city-option" data-cityid="${city.CityId}">
-                                ${city.CityName}
+                            `<div class="list-group-item city-option" data-cityid="${city.cityid}">
+                                ${city.Destination}
                             </div>`
                         );
                     });
@@ -940,9 +942,6 @@ $(document).on('click keydown', function (e) {
 
 
 
-
-
-
  
  document.addEventListener('DOMContentLoaded', function () {
     // Initialize datepicker with API-compatible format
@@ -967,14 +966,14 @@ $(document).on('click keydown', function (e) {
             const formattedCheckInDate = `${year}-${month}-${day}`;
 
             const payload = {
-                ClientId: "180133",
+                ClientId: "180189",
                 UserName: "MakeMy91",
                 Password: "MakeMy@910",
                 EndUserIp: "1.1.1.1",
                 BookingMode: "5",
                 CheckInDate: formattedCheckInDate,
                 NoOfNights: String(data.NoOfNights),
-                CityId: data.CityId|| "699261",
+                CityId: data.CityId,
                 CountryCode: data.CountryCode || '',
                 GuestNationality: document.getElementById("nationalitySelect").value,
                 PreferredCurrency: "INR",

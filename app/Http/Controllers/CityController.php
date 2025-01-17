@@ -23,7 +23,7 @@ class CityController extends Controller
     {
         try {
             // Try to get cities from cache first
-            $cities = Cache::remember('all_cities', 3600, function () {
+            $cities = Cache::remember('bus_cities', 3600, function () {
                 return Newcity::all();  // Using Newcity model to fetch cities
             });
 
@@ -101,9 +101,9 @@ class CityController extends Controller
     {
         try {
             // Try to get cities from cache first
-            $cities = Cache::remember('all_cities', 3600, function () {
+            $cities = Cache::remember('hotel_cities', 3600, function () {
                 return HotelCity::where('status', 'Active') // Only fetch active cities
-                    ->select('Destination as CityName', 'cityid as CityId')
+                   ->select('Destination', 'cityid')
                     ->get();
             });
 

@@ -74,7 +74,7 @@ public function search(Request $request)
             "BookingMode" => "5",
             "CheckInDate" => $request->input('CheckInDate'),
             "NoOfNights" => (string)$request->input('NoOfNights'),
-            "CityId" => $request->input('CityId', '699261'),
+            "CityId" => $request->input('CityId'),
             "CountryCode" => $request->input('CountryCode', ''),
             "GuestNationality" => $request->input('GuestNationality'),
             "PreferredCurrency" => "INR",
@@ -95,10 +95,13 @@ public function search(Request $request)
         // Log the payload being sent to the API
         \Log::info('API Payload:', $payload);
 
-        $response = Http::withHeaders([
+        $response = Http::timeout(60) // 60 seconds timeout
+        ->withHeaders([
             'Content-Type' => 'application/json',
             'Api-Token' => 'MakeMy@910@23',
-        ])->post('https://hotel.srdvapi.com/v8/rest/Search', $payload);
+        ])
+        ->retry(3, 100) // Retry 3 times with 100ms delay between attempts
+        ->post('https://hotel.srdvapi.com/v8/rest/Search', $payload);
 
         // Log the raw API response
         \Log::info('API Response:', ['status' => $response->status(), 'body' => $response->body()]);
