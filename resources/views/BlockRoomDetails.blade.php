@@ -219,49 +219,6 @@ document.getElementById('passenger-form').addEventListener('submit', function(ev
         Currency
     } = bookingDetails.roomDetails;
 
-<<<<<<< HEAD
-            bookingContainer.innerHTML = `
-                <div class="">
-                    <h2 class="">${bookingDetails.hotelName}</h2>
-                    <p class="">Hotel Code: ${bookingDetails.hotelCode}</p>
-                </div>
-
-                <div class="">
-                    <h3 class="">${RoomTypeName}</h3>
-                    <p class="">Rate Plan: ${RatePlan}</p>
-                    <p class="">
-                        <strong>Price: ${Currency} ${OfferedPrice}</strong>
-                        ${PublishedPrice !== OfferedPrice ? `<span class="original-price">${Currency} ${PublishedPrice}</span>` : ''}
-                    </p>
-                </div>
-
-                <div class="">
-                    <h4>Room Images</h4>
-                    <div class="">
-                        ${RoomImages.map(image => `<img src="${image.Image}" alt="${RoomTypeName}" class="">`).join('')}
-                    </div>
-                </div>
-
-                <div class="">
-                    <h4>Bed Types</h4>
-                    <p>${BedTypes || 'N/A'}</p>
-                </div>
-
-                <div class="">
-                    <h4>Amenities</h4>
-                    <ul>
-                        ${Amenities.map(amenity => `<li>${amenity.Name}</li>`).join('')}
-                    </ul>
-                </div>
-
-                <div class="">
-                    <h4>Cancellation Policies</h4>
-                    ${CancellationPolicies.map(policy => `
-                        <div class="">
-                            <p><strong>From:</strong> ${policy.FromDate.split('T')[0]}</p>
-                            <p><strong>To:</strong> ${policy.ToDate.split('T')[0]}</p>
-                            <p><strong>Charge:</strong> ${policy.Charge > 0 ? `${Currency} ${policy.Charge}` : 'Free Cancellation'}</p>
-=======
     const discount = PublishedPrice !== OfferedPrice 
         ? Math.round(((PublishedPrice - OfferedPrice) / PublishedPrice) * 100)
         : 0;
@@ -342,7 +299,6 @@ document.getElementById('passenger-form').addEventListener('submit', function(ev
                                     </span>
                                 </div>
                             ` : ''}
->>>>>>> 5c4bf6deca94922020921d40c095a73b50c4bf72
                         </div>
                         
                         <!-- Original confirm booking button structure preserved -->
