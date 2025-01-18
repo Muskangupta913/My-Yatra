@@ -440,11 +440,11 @@
 <!-- Continue Button Section -->
 <div class="mt-2 text-center" id="continueButtonContainer">
   <button class="btn btn-success" id="continueButton">Continue</button>
-  <a href="#" class="btn btn-success mt-2 d-none" id="review">Review Details</a>
+  <a href="#" class="btn btn-success mt-2 d-none" id="ew">Review Details</a>
 </div>
         </div>
       </div>
-    </div>
+</div>
   </div>
  
         <!-- Passenger Information Section -->
@@ -478,35 +478,31 @@
 <script>
   document.getElementById('loadingSpinner').classList.remove('d-none');
 
-  document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', () => {
     showLoadingSpinner();
     setTimeout(() => {
         hideLoadingSpinner();
-    }, 4000); // Spinner should hide after 4 seconds
+    }, 4000);
 });
-// Helper to show the spinner
+
+// Helper functions
 function showLoadingSpinner() {
     document.getElementById('loadingSpinner').classList.remove('d-none');
 }
 
-// Helper to hide the spinner
 function hideLoadingSpinner() {
     document.getElementById('loadingSpinner').classList.add('d-none');
 }
-  // Helper function to format date into a readable format (Date)
+
 function formatDate(dateTimeString) {
     const date = new Date(dateTimeString);
-    return date.toLocaleDateString();  // This will format it based on the locale, e.g. "MM/DD/YYYY"
+    return date.toLocaleDateString();
 }
-  // Helper function to format time into a readable format
+
 function formatTime(dateTimeString) {
     const date = new Date(dateTimeString);
     return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true });
 }
-document.addEventListener('DOMContentLoaded', function () {
-    fetchSeatLayout();
-    fetchBoardingDetails();
-});
 
 
 let selectedSeats = [];
@@ -514,6 +510,14 @@ const maxSeatsAllowed = 6;
 let selectedSeatDetails = null;
 let selectedBoardingPointId = null;
 let selectedDroppingPointId = null;
+let selectedBoardingPointName = '';
+let selectedDroppingPointName = '';
+
+// Main initialization
+document.addEventListener('DOMContentLoaded', function() {
+    fetchSeatLayout();
+    fetchBoardingDetails();
+});
 
 function fetchSeatLayout() {
     const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
@@ -525,7 +529,8 @@ function fetchSeatLayout() {
         showError("TraceId and ResultIndex are required.");
         return;
     }
-    document.getElementById('seatLayout').innerHTML ='<div class="alert alert-info">Loading seat layout...</div>';
+
+    document.getElementById('seatLayout').innerHTML = '<div class="alert alert-info">Loading seat layout...</div>';
 
     fetch('/getSeatLayout', {
         method: 'POST',
@@ -566,24 +571,12 @@ function fetchSeatLayout() {
         busType: data.busType || 'seater',
     };
 
-    // Handle lower deck
     if (data.lower) {
-        // For seater buses (array format)
-        if (Array.isArray(data.lower)) {
-            normalized.lower = data.lower.map(row => {
-                // Ensure each row is an array
-                return Array.isArray(row) ? row : Object.values(row);
-            });
-        } 
-        // For sleeper/mixed buses (object format)
-        else {
-            normalized.lower = Object.values(data.lower).map(row => 
-                Array.isArray(row) ? row : Object.values(row)
-            );
-        }
+        normalized.lower = Array.isArray(data.lower) 
+            ? data.lower.map(row => Array.isArray(row) ? row : Object.values(row))
+            : Object.values(data.lower).map(row => Array.isArray(row) ? row : Object.values(row));
     }
 
-    // Handle upper deck
     if (data.upper) {
         normalized.upper = Object.values(data.upper).map(row => 
             Array.isArray(row) ? row : Object.values(row)
@@ -623,6 +616,23 @@ if (normalizedData.lower.length > 0 || normalizedData.upper.length > 0) {
                 : ''}
         </div>`;
 }
+
+    // Add selected seat info and buttons
+    layoutHTML += `
+        <div class="deck-info mt-4">
+            <div id="selectedSeatInfo" class="d-none">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Selected Seat Details</h5>
+                        <div id="seatDetailsDisplay"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="mt-2 text-center" id="continueButtonContainer">
+                <button class="btn btn-success d-none" id="continueButton">Continue</button>
+                <a href="#" class="btn btn-success mt-2 d-none" id="review">Review Details</a>
+            </div>
+        </div>`;
 
     layoutHTML += '</div>';
     seatLayoutContainer.innerHTML = layoutHTML;
@@ -779,7 +789,7 @@ function selectSeat(element) {
         } else {
             // Select new seat
             if (selectedSeats.length >= maxSeatsAllowed) {
-                showError(`You can only select up to ${maxSeatsAllowed} seats.`);
+                showError('You can only select up to ${maxSeatsAllowed} seats.');
                 return;
             }
             

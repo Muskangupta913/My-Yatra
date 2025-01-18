@@ -1,8 +1,11 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>Hotel Information</title>
+    <title>Hotel Details</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
         /* Reset and Base Styles */
@@ -362,7 +365,35 @@ button:disabled {
             padding: 2rem;
             color: #7f8c8d;
         }
-
+        .image-gallery {
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .gallery-nav-button {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(0, 0, 0, 0.5);
+            color: white;
+            padding: 1rem;
+            border-radius: 9999px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        
+        .gallery-nav-button:hover {
+            background: rgba(0, 0, 0, 0.7);
+        }
+        
+        .gallery-nav-button.prev {
+            left: 1rem;
+        }
+        
+        .gallery-nav-button.next {
+            right: 1rem;
+        }
+        
         /* Responsive Design */
         @media (max-width: 768px) {
             .hotel-name {
@@ -385,15 +416,71 @@ button:disabled {
         }
     </style>
 </head>
-<body>
-    <div class="hotel-info-container">
-        <div id="hotel-details" class="loading-state">Loading hotel information...</div>
+<body class="bg-gray-100">
+    <div id="hotel-details" class="max-w-6xl mx-auto p-4 space-y-6">
+        <!-- Content will be populated by JavaScript -->
     </div>
-    
+    <template id="hotel-template">
+        <div class="space-y-6">
+            <!-- Hotel Header -->
+            <div class="bg-white rounded-lg shadow p-6">
+                <h1 class="text-3xl font-bold hotel-name"></h1>
+                <div class="flex flex-wrap gap-4 text-sm text-gray-600 mt-2">
+                    <div class="flex items-center gap-1">
+                        <i class="fas fa-map-marker-alt"></i>
+                        <span class="hotel-address"></span>
+                    </div>
+                    <div class="flex items-center gap-1">
+                        <i class="fas fa-star text-yellow-400"></i>
+                        <span class="hotel-rating"></span>
+                    </div>
+                    <div class="flex items-center gap-1">
+                        <i class="fas fa-phone"></i>
+                        <span class="hotel-contact"></span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Image Gallery -->
+            <div class="image-gallery bg-white rounded-lg shadow p-4">
+                <div class="relative aspect-video rounded-lg overflow-hidden">
+                    <img src="" alt="Main Hotel Image" class="main-image w-full h-full object-cover">
+                    <button class="gallery-nav-button prev">
+                        <i class="fas fa-chevron-left"></i>
+                    </button>
+                    <button class="gallery-nav-button next">
+                        <i class="fas fa-chevron-right"></i>
+                    </button>
+                </div>
+                <div class="flex gap-2 mt-2 overflow-x-auto pb-2 thumbnails-container">
+                    <!-- Thumbnails will be populated here -->
+                </div>
+            </div>
+
+            <!-- Hotel Info Grid -->
+            <div class="grid md:grid-cols-2 gap-6">
+                <!-- Facilities -->
+                <div class="bg-white rounded-lg shadow p-6">
+                    <h2 class="text-xl font-semibold mb-4">Hotel Facilities</h2>
+                    <div class="grid grid-cols-2 gap-4 facilities-list">
+                        <!-- Facilities will be populated here -->
+                    </div>
+                </div>
+
+                <!-- Description -->
+                <div class="bg-white rounded-lg shadow p-6">
+                    <h2 class="text-xl font-semibold mb-4">About the Hotel</h2>
+                    <div class="space-y-4 hotel-description">
+                        <!-- Description will be populated here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </template>
+
     <div class="room-info-container">
         <div id="room-details" class="loading-state">Loading room details...</div>
     </div>
-
 <script>
         document.addEventListener('DOMContentLoaded', function() {
             fetchHotelInfo();
@@ -434,85 +521,113 @@ button:disabled {
             .then(response => response.json())
             .then(data => {
                 if (data.status === 'success' && data.data?.HotelInfoResult?.HotelDetails) {
-                    const hotel = data.data.HotelInfoResult.HotelDetails;
-                    const hotelDetailsHtml = `
-                        <div class="hotel-header">
-                            <h1 class="hotel-name">${hotel.HotelName}</h1>
-                            <div class="hotel-meta">
-                                <p><i class="fas fa-map-marker-alt"></i> ${hotel.Address}, ${hotel.City}, ${hotel.State}, ${hotel.PinCode}</p>
-                                <p><i class="fas fa-star"></i> ${hotel.StarRating} Star Rating</p>
-                                <p><i class="fas fa-phone"></i> ${hotel.HotelContactNo}</p>
-                            </div>
-                        </div>
-
-                        ${hotel.Images ? `
-                            <div class="hotel-images">
-                                ${hotel.Images.map(img => `
-                                    <img src="${img}" alt="Hotel Image" onclick="openImageGallery(this.src)">
-                                `).join('')}
-                            </div>
-                        ` : ''}
-
-                        <div class="hotel-info">
-                            ${hotel.HotelFacilities ? `
-                                <div class="info-section">
-                                    <h2>Hotel Facilities</h2>
-                                    <div class="facilities-list">
-                                        ${hotel.HotelFacilities.map(facility => `
-                                            <div class="facility-item">
-                                                <i class="${facility.FontAwesome}"></i>
-                                                <span>${facility.Name}</span>
-                                            </div>
-                                        `).join('')}
-                                    </div>
-                                </div>
-                            ` : ''}
-
-                            ${hotel.Description ? `
-                                <div class="info-section">
-                                    <h2>About the Hotel</h2>
-                                    ${hotel.Description.map(desc => `
-                                        <div class="description-section">
-                                            <h3>${desc.Name}</h3>
-                                            <ul>
-                                                ${desc.Detail.map(detail => `<li>${detail}</li>`).join('')}
-                                            </ul>
-                                        </div>
-                                    `).join('')}
-                                </div>
-                            ` : ''}
-                        </div>
-                    `;
-                    document.getElementById('hotel-details').innerHTML = hotelDetailsHtml;
-                } else {
-                    document.getElementById('hotel-details').innerHTML = 
-                        '<div class="error-state">Failed to load hotel details</div>';
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                document.getElementById('hotel-details').innerHTML = 
-                    '<div class="error-state">An error occurred while loading hotel details</div>';
-            });
+                     renderHotelDetails(data.data.HotelInfoResult.HotelDetails);
+        } else {
+            document.getElementById('hotel-details').innerHTML = 
+                '<div class="error-state">Failed to load hotel details</div>';
         }
-
-
-        function getRoomDataFromCard(roomId) {
-    const roomCard = document.querySelector(`[data-room-id="${roomId}"]`);
-    if (!roomCard) {
-        console.error('Room card not found');
-        return null;
-    }
-
-    return {
-        RoomTypeName: roomCard.getAttribute('data-room-type-name'),
-        RoomTypeCode: roomCard.getAttribute('data-room-type-code'),
-        RatePlan: roomCard.getAttribute('data-rate-plan'),
-        RatePlanCode: roomCard.getAttribute('data-rate-plan-code')
-    };
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        document.getElementById('hotel-details').innerHTML = 
+            '<div class="error-state">An error occurred while loading hotel details</div>';
+    });
 }
 
-function fetchRoomDetails() {
+function renderHotelDetails(hotel) {
+    const template = document.getElementById('hotel-template');
+    const content = template.content.cloneNode(true);
+    const container = document.getElementById('hotel-details');
+    
+    // Clear existing content
+    container.innerHTML = '';
+    
+    // Set basic hotel information
+    content.querySelector('.hotel-name').textContent = hotel.HotelName;
+    content.querySelector('.hotel-address').textContent = 
+        `${hotel.Address}, ${hotel.City}, ${hotel.State}, ${hotel.PinCode}`;
+    content.querySelector('.hotel-rating').textContent = `${hotel.StarRating} Star Rating`;
+    content.querySelector('.hotel-contact').textContent = hotel.HotelContactNo;
+
+    // Setup image gallery
+    let currentImageIndex = 0;
+    const mainImage = content.querySelector('.main-image');
+    const thumbnailsContainer = content.querySelector('.thumbnails-container');
+    
+    if (hotel.Images && hotel.Images.length > 0) {
+        mainImage.src = hotel.Images[0];
+        
+        // Create thumbnails
+        hotel.Images.forEach((img, index) => {
+            const thumbnail = document.createElement('button');
+            thumbnail.className = `flex-none w-24 h-16 rounded-lg overflow-hidden thumbnail ${index === 0 ? 'active' : ''}`;
+            thumbnail.innerHTML = `<img src="${img}" alt="Thumbnail ${index + 1}" class="w-full h-full object-cover">`;
+            thumbnail.onclick = () => {
+                currentImageIndex = index;
+                updateMainImage();
+            };
+            thumbnailsContainer.appendChild(thumbnail);
+        });
+
+        // Setup navigation buttons
+        content.querySelector('.gallery-nav-button.prev').onclick = () => {
+            currentImageIndex = (currentImageIndex - 1 + hotel.Images.length) % hotel.Images.length;
+            updateMainImage();
+        };
+        
+        content.querySelector('.gallery-nav-button.next').onclick = () => {
+            currentImageIndex = (currentImageIndex + 1) % hotel.Images.length;
+            updateMainImage();
+        };
+
+        function updateMainImage() {
+            mainImage.src = hotel.Images[currentImageIndex];
+            thumbnailsContainer.querySelectorAll('.thumbnail').forEach((thumb, index) => {
+                thumb.classList.toggle('active', index === currentImageIndex);
+            });
+        }
+    }
+
+    // Render facilities
+    const facilitiesList = content.querySelector('.facilities-list');
+    if (hotel.HotelFacilities) {
+        hotel.HotelFacilities.forEach(facility => {
+            const facilityDiv = document.createElement('div');
+            facilityDiv.className = 'flex items-center gap-2 p-2 rounded-lg hover:bg-gray-50';
+            facilityDiv.innerHTML = `
+                <i class="${facility.FontAwesome}"></i>
+                <span>${facility.Name}</span>
+            `;
+            facilitiesList.appendChild(facilityDiv);
+        });
+    }
+
+    // Render description
+    const descriptionContainer = content.querySelector('.hotel-description');
+    if (hotel.Description) {
+        hotel.Description.forEach(section => {
+            const sectionDiv = document.createElement('div');
+            sectionDiv.className = 'mb-4';
+            sectionDiv.innerHTML = `
+                <h3 class="font-semibold mb-2">${section.Name}</h3>
+                <ul class="list-disc list-inside space-y-1">
+                    ${section.Detail.map(detail => `
+                        <li class="text-gray-600">${detail}</li>
+                    `).join('')}
+                </ul>
+            `;
+            descriptionContainer.appendChild(sectionDiv);
+        });
+    }
+
+    container.appendChild(content);
+}
+
+// Initialize the page
+document.addEventListener('DOMContentLoaded', fetchHotelInfo);
+
+
+        function fetchRoomDetails() {
     const urlParams = new URLSearchParams(window.location.search);
     const traceId = urlParams.get('traceId');
     const resultIndex = urlParams.get('resultIndex');
@@ -550,105 +665,113 @@ function fetchRoomDetails() {
                 roomDetailsHtml += `
                     <div class="room-category">
                         <h2 class="category-name">${category.CategoryName}</h2>
-                        
-                        ${category.Rooms.map(room => `
-                            <div class="room-card"
-                                data-room-id="${room.RoomId}"
-                                data-room-type-name="${room.RoomTypeName}"
-                                data-room-type-code="${room.RoomTypeCode}"
-                                data-rate-plan="${room.RatePlan}"
-                                data-rate-plan-code="${room.RatePlanCode}"
-                                data-room-index="${room.RoomIndex}">
-                                <div class="room-header">
-                                    <h3 class="room-name">${room.RoomTypeName}</h3>
-                                    <div class="price-section">
-                                        <div class="price-amount">${room.Price.CurrencyCode} ${room.Price.OfferedPrice}</div>
-                                        ${room.Price.PublishedPrice !== room.Price.OfferedPrice ? 
-                                            `<div class="price-original">${room.Price.CurrencyCode} ${room.Price.PublishedPrice}</div>` : 
-                                            ''}
-                                    </div>
-                                </div>
+                      ${category.Rooms.map(room => `
+    <div class="room-card"
+        data-room-id="${room.RoomId}"
+        data-room-type-name="${room.RoomTypeName}"
+        data-room-type-code="${room.RoomTypeCode}"
+        data-rate-plan="${room.RatePlan}"
+        data-rate-plan-code="${room.RatePlanCode}"
+        data-room-index="${room.RoomIndex}".RoomImages || [])}' 
+        data-bed-types="${room.BedTypes || ''}"
+        data-amenities='${JSON.stringify(room.Amenities || [])}'
+        data-room-images='${JSON.stringify(room.RoomImages || [])}'  
+        data-cancellation-policies='${JSON.stringify(room.CancellationPolicies || [])}'
+         data-price-offered="${room.Price.OfferedPrice}"
+        data-price-published="${room.Price.PublishedPrice}"
+        data-price-currency="${room.Price.CurrencyCode}"
+    >
+        <div class="room-header">
+            <h3 class="room-name">${room.RoomTypeName}</h3>
+            <div class="price-section">
+                <div class="price-amount">${room.Price.CurrencyCode} ${room.Price.OfferedPrice}</div>
+                ${room.Price.PublishedPrice !== room.Price.OfferedPrice ? 
+                    `<div class="price-original">${room.Price.CurrencyCode} ${room.Price.PublishedPrice}</div>` : 
+                    ''}
+            </div>
+        </div>
 
-                                <div style="position: relative;">
-                                    ${room.RoomImages ? `
-                                        <div class="room-image-gallery">
-                                            ${room.RoomImages.map(img => `
-                                                <img src="${img.Image}" alt="${room.RoomTypeName}" class="room-image">
-                                            `).join('')}
-                                        </div>
-                                    ` : ''}
-                                </div>
+        <div style="position: relative;">
+            ${room.RoomImages && room.RoomImages.length ? `
+                <div class="room-image-gallery">
+                    ${room.RoomImages.map(img => `
+                        <img src="${img.Image}" alt="${room.RoomTypeName}" class="room-image">
+                    `).join('')}
+                </div>
+            ` : ''}
+        </div>
 
-                                <div class="room-info-grid">
-                                    <div class="room-details">
-                                        <div class="room-description">
-                                            ${room.Description.map(desc => `<p>${desc}</p>`).join('')}
-                                        </div>
-                                        
-                                        <div class="bed-type-info">
-                                            <i class="fas fa-bed"></i> ${room.BedTypes}
-                                        </div>
+        <div class="room-info-grid">
+            <div class="room-details">
+                <div class="room-description">
+                    ${room.Description}
+                </div>
+                
+                <div class="bed-type-info">
+                    <i class="fas fa-bed"></i> ${room.BedTypes || 'N/A'}
+                </div>
 
-                                        <div class="amenities-section">
-                                            ${room.Amenities.map(amenity => `
-                                                <span class="amenity-tag">
-                                                    <i class="fas ${amenity.FontAwesome}"></i>
-                                                    ${amenity.Name}
-                                                </span>
-                                            `).join('')}
-                                        </div>
-                                    </div>
+                <div class="amenities-section">
+                    ${room.Amenities.map(amenity => `
+                        <span class="amenity-tag">
+                            <i class="fas ${amenity.FontAwesome || 'fa-tag'}"></i>
+                            ${amenity.Name}
+                        </span>
+                    `).join('')}
+                </div>
+            </div>
 
-                                    <div class="room-services">
-                                        ${room.ServicesStatus ? `
-                                            <div class="services-status">
-                                                ${room.ServicesStatus.map(service => `
-                                                    <div class="service-item">
-                                                        <i class="fas fa-check-circle"></i>
-                                                        <span>${service.Name}: ${service.Value}</span>
-                                                    </div>
-                                                `).join('')}
-                                            </div>
-                                        ` : ''}
-                                    </div>
-                                </div>
-
-                                ${room.CancellationPolicies ? `
-                                    <div class="cancellation-policy">
-                                        <h4><i class="fas fa-info-circle"></i> Cancellation Policy</h4>
-                                        ${room.CancellationPolicies.map(policy => `
-                                            <div class="policy-item">
-                                                <span>${policy.FromDate.split('T')[0]} to ${policy.ToDate.split('T')[0]}</span>
-                                                <span class="policy-charge">
-                                                    ${policy.Charge > 0 ? 
-                                                        `Cancellation charge: ${policy.Currency} ${policy.Charge}` : 
-                                                        'Free cancellation'}
-                                                </span>
-                                            </div>
-                                        `).join('')}
-                                    </div>
-                                ` : ''}
-
-                                <div class="book-now-section">
-                                    <div class="room-info">
-                                        <div class="room-id">Room ID: ${room.RoomId}</div>
-                                        ${room.IsPANMandatory ? 
-                                            '<div class="pan-notice"><i class="fas fa-exclamation-circle"></i> PAN Card Required</div>' : 
-                                            ''}
-                                    </div>
-                                    <button class="book-now-button" onclick="blockRoom('${room.RoomId}')">
-                                        <i class="fas fa-calendar-check"></i>
-                                        Book Now
-                                    </button>
-                                </div>
+            <div class="room-services">
+                ${room.ServicesStatus ? `
+                    <div class="services-status">
+                        ${room.ServicesStatus.map(service => `
+                            <div class="service-item">
+                                <i class="fas fa-check-circle"></i>
+                                <span>${service.Name}: ${service.Value}</span>
                             </div>
                         `).join('')}
+                    </div>
+                ` : ''}
+            </div>
+        </div>
+
+        ${room.CancellationPolicies ? `
+            <div class="cancellation-policy">
+                <h4><i class="fas fa-info-circle"></i> Cancellation Policy</h4>
+                ${room.CancellationPolicies.map(policy => `
+                    <div class="policy-item">
+                        <span>${policy.FromDate.split('T')[0]} to ${policy.ToDate.split('T')[0]}</span>
+                        <span class="policy-charge">
+                            ${policy.Charge > 0 ? 
+                                `Cancellation charge: ${policy.Currency} ${policy.Charge}` : 
+                                'Free cancellation'}
+                        </span>
+                    </div>
+                `).join('')}
+            </div>
+        ` : ''}
+
+        <div class="book-now-section">
+            <div class="room-info">
+                <div class="room-id">Room ID: ${room.RoomId}</div>
+                ${room.IsPANMandatory ? 
+                    '<div class="pan-notice"><i class="fas fa-exclamation-circle"></i> PAN Card Required</div>' : 
+                    ''}
+            </div>
+            <button class="book-now-button" onclick="blockRoom('${room.RoomId}')">
+                <i class="fas fa-calendar-check"></i>
+                Book Now
+            </button>
+        </div>
+    </div>
+`).join('')}
                     </div>
                 `;
             });
             
             document.getElementById('room-details').innerHTML = roomDetailsHtml;
-        } else {
+        } 
+        else {
             document.getElementById('room-details').innerHTML = 
                 '<div class="error-state">Failed to load room details</div>';
         }
@@ -658,6 +781,31 @@ function fetchRoomDetails() {
         document.getElementById('room-details').innerHTML = 
             '<div class="error-state">An error occurred while loading room details</div>';
     });
+}
+
+
+
+
+function getRoomDataFromCard(roomId) {
+    const roomCard = document.querySelector(`[data-room-id="${roomId}"]`);
+    if (!roomCard) {
+        console.error('Room card not found');
+        return null;
+    }
+
+    return {
+        RoomTypeName: roomCard.getAttribute('data-room-type-name'),
+        RoomTypeCode: roomCard.getAttribute('data-room-type-code'),
+        RatePlan: roomCard.getAttribute('data-rate-plan'),
+        RatePlanCode: roomCard.getAttribute('data-rate-plan-code'),
+        RoomImages: JSON.parse(roomCard.getAttribute('data-room-images') || '[]'),
+        BedTypes: roomCard.getAttribute('data-bed-types'),
+        Amenities: JSON.parse(roomCard.getAttribute('data-amenities') || '[]'),
+        CancellationPolicies: JSON.parse(roomCard.getAttribute('data-cancellation-policies') || '[]'),
+        OfferedPrice: roomCard.getAttribute('data-price-offered'),
+        PublishedPrice: roomCard.getAttribute('data-price-published'),
+        Currency: roomCard.getAttribute('data-price-currency'),
+    };
 }
 
 function blockRoom(roomId) {
@@ -674,17 +822,31 @@ function blockRoom(roomId) {
     const hotelName = document.querySelector('.hotel-name').textContent;
 
     // Get room details from the data attributes
-    const roomIndex = roomCard.getAttribute('data-room-index');
-    const roomTypeCode = roomCard.getAttribute('data-room-type-code');
-    const roomTypeName = roomCard.getAttribute('data-room-type-name');
-    const ratePlan = roomCard.getAttribute('data-rate-plan');
-    const ratePlanCode = roomCard.getAttribute('data-rate-plan-code');
+    const roomDetails = {
+        RoomId: roomId,
+        RoomIndex: roomCard.getAttribute('data-room-index'),
+        RoomTypeCode: roomCard.getAttribute('data-room-type-code'),
+        RoomTypeName: roomCard.getAttribute('data-room-type-name'),
+        RatePlan: roomCard.getAttribute('data-rate-plan'),
+        RatePlanCode: roomCard.getAttribute('data-rate-plan-code'),
+        RoomImages: JSON.parse(roomCard.getAttribute('data-room-images') || '[]'),
+        BedTypes: roomCard.getAttribute('data-bed-types'),
+        Amenities: JSON.parse(roomCard.getAttribute('data-amenities') || '[]'),
+        CancellationPolicies: JSON.parse(roomCard.getAttribute('data-cancellation-policies') || '[]'),
+        RoomImages: JSON.parse(roomCard.getAttribute('data-room-images') || '[]'),
+        OfferedPrice: roomCard.getAttribute('data-price-offered'),
+        PublishedPrice: roomCard.getAttribute('data-price-published'),
+        Currency: roomCard.getAttribute('data-price-currency')
+    };
+
+    // Serialize room details into a query string
+    const serializedRoomDetails = encodeURIComponent(JSON.stringify(roomDetails));
 
     // Show confirmation dialog
     if (!confirm('Are you sure you want to block this room?')) {
         return;
     }
-   
+
     // Show loading state
     const loadingOverlay = document.createElement('div');
     loadingOverlay.className = 'loading-overlay';
@@ -697,18 +859,7 @@ function blockRoom(roomId) {
         HotelName: hotelName,
         GuestNationality: "IN",
         NoOfRooms: "1",
-        HotelRoomsDetails: [{
-            RoomId: roomId,
-            RoomIndex: roomIndex,
-            RoomTypeCode: roomTypeCode,
-            RoomTypeName: roomTypeName,
-            RatePlan: ratePlan,
-            RatePlanCode: ratePlanCode,
-            ChildCount: 0,
-            RequireAllPaxDetails: false,
-            RoomStatus: "Active",
-            SmokingPreference: "0"
-        }],
+        HotelRoomsDetails: [roomDetails],
         SrdvType: "MixAPI",
         SrdvIndex: "15",
         TraceId: parseInt(traceId),
@@ -740,12 +891,13 @@ function blockRoom(roomId) {
                 Do you want to proceed with booking?
             `;
             
-            if (confirm(message)) {
-                // Redirect to booking page or handle next steps
-                window.location.href = `/booking?traceId=${traceId}&resultIndex=${resultIndex}`;
+            if (confirm(data.message)) {
+                // Redirect to booking page with serialized room details
+                window.location.href = `/room-detail?traceId=${traceId}&resultIndex=${resultIndex}&hotelCode=${hotelCode}&hotelName=${encodeURIComponent(hotelName)}&roomDetails=${serializedRoomDetails}`;
             }
         } else {
-            alert((data.message || 'Unknown error'));
+            alert('Status: ' + (data.message || 'Unknown error'));
+            window.location.href = `/room-detail?traceId=${traceId}&resultIndex=${resultIndex}&hotelCode=${hotelCode}&hotelName=${encodeURIComponent(hotelName)}&roomDetails=${serializedRoomDetails}`;
         }
     })
     .catch(error => {
@@ -757,6 +909,7 @@ function blockRoom(roomId) {
         document.body.removeChild(loadingOverlay);
     });
 }
+
     </script>
 </body>
 </html>

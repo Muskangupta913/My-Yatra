@@ -73,74 +73,80 @@
     <form id="hotelSearchForm">
         <div class="row">
             <!-- City Input -->
-            <div class="mb-3 col-md-3 hotel-search">
-                <div class="date-caption">City</div>
-                <input type="text" class="form-control rounded-0 py-3" name="CityName" id="hotelSearchCity" placeholder="Enter City Name" required autocomplete="off">
+            <div class="mb-3 col-md-3 hotel-search"style="display: flex; flex-direction: column;">
+                <div class="date-caption">Enter City</div>
+                <input type="text" class="form-control rounded-0 py-3" name="CityName" id="hotelSearchCity" placeholder="Enter City Name" required autocomplete="off" style="text-align: center; width: 100%;" >
                 <input type="hidden" name="CityId" id="cityIdInput" value="">
-                <div id="hotelSearchCityList" class="city-suggestions"></div>
+                <div id="hotelSearchCityList" class="card" style="position: absolute; width: 23%; max-height: 150px; overflow-y: scroll;"></div>
             </div>
 
             <!-- Check-in Date -->
             <div class="mb-3 col-md-2">
     <div class="date-caption">Check-in Date</div>
-    <input type="text" id="checkinDatepicker" name="CheckInDate" class="form-control rounded-0 py-3 datepicker" placeholder="Select Check-in Date" required>
+    <input type="text" id="checkinDatepicker" name="CheckInDate" class="form-control rounded-0 py-3 datepicker" placeholder="Select Check-in Date" required style="text-align: center;">
 </div>
 
             <!-- Number of Nights -->
             <div class="mb-3 col-md-2">
                 <div class="date-caption">No. of Nights</div>
-                <input type="number" name="NoOfNights" class="form-control rounded-0 py-3" placeholder="Enter No. of Nights" required>
+                <input type="number" name="NoOfNights" class="form-control rounded-0 py-3" placeholder="Enter No. of Nights" required style="text-align: center;">
             </div>
 
             <!-- Room & Guests -->
             <div class="mb-3 col-md-3">
-                <div class="date-caption">Room & Guests</div>
-                <div class="dropdown">
-                    <button class="btn btn-outline-secondary dropdown-toggle w-100 rounded-0 py-3" type="button" id="roomGuestsDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-                        1 Room, 2 Adults, 0 Children
-                    </button>
-                    <ul class="dropdown-menu p-3" aria-labelledby="roomGuestsDropdown" style="width: 100%; max-width: 300px;">
-                        <li class="mb-3">
-                            <div class="d-flex justify-content-between align-items-center">
-                                <label for="noOfRooms" class="form-label mb-0">Rooms</label>
-                                <select id="noOfRooms" name="NoOfRooms" class="form-select w-auto">
-                                    <option value="1" selected>1</option>
-                                    <option value="2">2</option>
-                                    <option value="3">3</option>
-                                    <option value="4">4</option>
-                                </select>
-                            </div>
-                        </li>
-                        <li class="mb-3">
-                            <div class="d-flex justify-content-between align-items-center">
-                                <label for="noOfAdults" class="form-label mb-0">Adults</label>
-                                <select id="noOfAdults" name="RoomGuests[0][NoOfAdults]" class="form-select w-auto">
-                                    <option value="1">1</option>
-                                    <option value="2" selected>2</option>
-                                    <option value="3">3</option>
-                                    <option value="4">4</option>
-                                </select>
-                            </div>
-                        </li>
-                        <li>
-                            <div class="d-flex justify-content-between align-items-center">
-                                <label for="noOfChildren" class="form-label mb-0">Children</label>
-                                <select id="noOfChildren" name="RoomGuests[0][NoOfChild]" class="form-select w-auto" onchange="toggleChildAgeDropdown(this.value)">
-                                    <option value="0" selected>0</option>
-                                    <option value="1">1</option>
-                                    <option value="2">2</option>
-                                    <option value="3">3</option>
-                                </select>
-                            </div>
-                        </li> 
-                    </ul>
+    <div class="date-caption">Room & Guests</div>
+    <div class="dropdown">
+        <button
+            class="btn btn-outline-secondary dropdown-toggle w-100 rounded-0 py-3"
+            type="button"
+            id="roomGuestsDropdown"
+            data-bs-toggle="dropdown"
+            aria-expanded="false"
+            style="background-color: white; color: #6c757d; border-color: #ced4da;"
+        >
+            1 Room, 2 Adults, 0 Children
+        </button>
+        <ul class="dropdown-menu p-3" aria-labelledby="roomGuestsDropdown" style="width: 100%; max-width: 300px;">
+            <li class="mb-3">
+                <div class="d-flex justify-content-between align-items-center">
+                    <label for="noOfRooms" class="form-label mb-0">Rooms</label>
+                    <select id="noOfRooms" name="NoOfRooms" class="form-select w-auto" onchange="updateRoomGuestsTitle()">
+                        <option value="1" selected>1</option>
+                        <option value="2">2</option>
+                        <option value="3">3</option>
+                        <option value="4">4</option>
+                    </select>
                 </div>
-            </div>
-
+            </li>
+            <li class="mb-3">
+                <div class="d-flex justify-content-between align-items-center">
+                    <label for="noOfAdults" class="form-label mb-0">Adults</label>
+                    <select id="noOfAdults" name="RoomGuests[0][NoOfAdults]" class="form-select w-auto" onchange="updateRoomGuestsTitle()">
+                        <option value="1">1</option>
+                        <option value="2" selected>2</option>
+                        <option value="3">3</option>
+                        <option value="4">4</option>
+                    </select>
+                </div>
+            </li>
+            <li>
+                <div class="d-flex justify-content-between align-items-center">
+                    <label for="noOfChildren" class="form-label mb-0">Children</label>
+                    <select id="noOfChildren" name="RoomGuests[0][NoOfChild]" class="form-select w-auto" onchange="updateRoomGuestsTitle()">
+                        <option value="0" selected>0</option>
+                        <option value="1">1</option>
+                        <option value="2">2</option>
+                        <option value="3">3</option>
+                    </select>
+                </div>
+            </li> 
+        </ul>
+    </div>
+</div>
             <!-- Guest Nationality -->
             <div class="mb-3 col-md-2">
-                <div class="date-caption">Nationality</div>
-                <select id="nationalitySelect" class="form-control rounded-0 py-3">
+                <div class="date-caption"style="text-align: center;">Nationality</div>
+                <select id="nationalitySelect" class="form-control rounded-0 py-3 text-center">
                     <option value="" selected>Select Nationality</option>
                     <option value="IN" data-nationality="Indian">IN</option>
                     <option value="US" data-nationality="American">American</option>
@@ -580,6 +586,17 @@
 
 
    <script>
+
+function updateRoomGuestsTitle() {
+        const rooms = document.getElementById("noOfRooms").value;
+        const adults = document.getElementById("noOfAdults").value;
+        const children = document.getElementById("noOfChildren").value;
+
+        const title = `${rooms} Room${rooms > 1 ? "s" : ""}, ${adults} Adult${adults > 1 ? "s" : ""}, ${children} Child${children > 1 ? "ren" : ""}`;
+        document.getElementById("roomGuestsDropdown").textContent = title;
+    }
+
+    
   $(document).ready(function () {
     // CSRF Token setup for AJAX
     $.ajaxSetup({
@@ -806,7 +823,126 @@
 
 
 
- // hotel search
+  //  ****************************************************
+  //                    HOTEL SEARCH
+  //  ****************************************************
+
+
+
+
+  $.ajaxSetup({
+    headers: {
+        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content'),
+        'Accept': 'application/json'
+    },
+});
+
+// Function to fetch all hotel cities
+function fetchHotelAllCities(inputField, listId) {
+    console.log("Fetching hotel cities...");
+    $.ajax({
+        url: "{{ route('fetch.hotel.cities') }}",
+        method: "GET",
+        success: function (response) {
+            console.log("Cities fetched successfully:", response);
+            const list = $(listId);
+            list.empty();
+
+            if (response.status === 'success' && response.data && response.data.length > 0) {
+                response.data.forEach(city => {
+                    const cityHTML = `
+                        <div class="list-group-item city-option" style="cursor: pointer;" data-cityid="${city.cityid}">
+                            <i class="fa-solid fa-location-dot"></i> ${city.Destination}
+                        </div>`;
+                    list.append(cityHTML);
+                });
+                list.show();
+            } else {
+                list.html('<div class="list-group-item">No cities found</div>').show();
+            }
+        },
+        error: function () {
+            console.error("Error fetching hotel cities");
+            $(listId).html('<div class="list-group-item text-danger">Failed to load cities</div>').show();
+        }
+    });
+}
+
+// Function to fetch cities based on user input (autocomplete)
+function fetchHotelCities(inputField, listId) {
+    const query = $(inputField).val().trim();
+
+    if (query.length > 0) {
+        $.ajax({
+            url: "{{ route('autocomplete.hotelcities') }}",
+            method: "GET",
+            data: { query },
+            success: function (response) {
+                const list = $(listId);
+                list.empty().show();
+
+                if (response.data && response.data.length > 0) {
+                    response.data.forEach(city => {
+                        list.append(
+                            `<div class="list-group-item city-option" data-cityid="${city.cityid}">
+                                ${city.Destination}
+                            </div>`
+                        );
+                    });
+                } else {
+                    list.append('<div class="list-group-item">No cities found</div>');
+                }
+            },
+            error: function () {
+                console.error("Error fetching hotel cities");
+                $(listId).html('<div class="list-group-item text-danger">Failed to load cities</div>');
+            }
+        });
+    } else {
+        fetchHotelAllCities(inputField, listId); // Fetch all cities if input is cleared
+    }
+}
+
+// Input field focus and input handlers
+const cityInputConfig = [
+    { input: '#hotelSearchCity', list: '#hotelSearchCityList', hidden: '#cityIdInput' }
+];
+
+cityInputConfig.forEach(config => {
+    // Fetch all cities on input focus
+    $(config.input).on('focus', function () {
+        fetchHotelAllCities(config.input, config.list);
+    });
+
+    // Autocomplete based on user input
+    $(config.input).on('input', function () {
+        fetchHotelCities(config.input, config.list);
+    });
+
+    // Handle city selection from the dropdown
+    $(document).on('click', `${config.list} .city-option`, function () {
+        const cityName = $(this).text();
+        const cityId = $(this).data('cityid');
+
+        $(config.input).val(cityName); // Update input field
+        $(config.hidden).val(cityId); // Update hidden field
+        $(config.list).hide(); // Hide dropdown
+    });
+});
+
+// Hide dropdowns on outside click or Escape key
+$(document).on('click keydown', function (e) {
+    if (e.type === "keydown" && e.key !== "Escape") return;
+
+    cityInputConfig.forEach(config => {
+        $(config.list).hide();
+    });
+});
+
+
+
+
+ 
  document.addEventListener('DOMContentLoaded', function () {
     // Initialize datepicker with API-compatible format
     $('.datepicker').datepicker({
@@ -830,23 +966,23 @@
             const formattedCheckInDate = `${year}-${month}-${day}`;
 
             const payload = {
-                ClientId: "180133",
+                ClientId: "180189",
                 UserName: "MakeMy91",
                 Password: "MakeMy@910",
                 EndUserIp: "1.1.1.1",
                 BookingMode: "5",
                 CheckInDate: formattedCheckInDate,
                 NoOfNights: String(data.NoOfNights),
-                CityId: data.CityId || "699261",
+                CityId: data.CityId,
                 CountryCode: data.CountryCode || '',
-                GuestNationality: document.getElementById("nationalitySelect").value || 'IN',
+                GuestNationality: document.getElementById("nationalitySelect").value,
                 PreferredCurrency: "INR",
                 NoOfRooms: String(data.NoOfRooms),
                 RoomGuests: [
                     {
-                        NoOfAdults: String(data["RoomGuests[0][NoOfAdults]"] || "1"),
-                        NoOfChild: String(data["RoomGuests[0][NoOfChild]"] || "0"),
-                        ChildAge: [],
+                        NoOfAdults: String(data["RoomGuests[0][NoOfAdults]"]),
+                        NoOfChild: String(data["RoomGuests[0][NoOfChild]"]),
+                        ChildAge: [15],
                     },
                 ],
             };

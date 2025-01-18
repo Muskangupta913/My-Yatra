@@ -3,142 +3,230 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Search Results - Loaded</title>
-<link rel="icon" href="favicon.ico">
-
+    <title>Hotel Search Results</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
-        body {
-            font-family: Arial, sans-serif;
+        :root {
+            --primary-color: #2563eb;
+            --secondary-color: #1e40af;
+            --text-primary: #1f2937;
+            --text-secondary: #4b5563;
+            --background-light: #f3f4f6;
+            --card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+
+        * {
             margin: 0;
             padding: 0;
-            background-color: #f4f4f9;
+            box-sizing: border-box;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
         }
-        .container {
-            width: 90%;
-            margin: 20px auto;
-            background: #fff;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+
+        body {
+            background-color: var(--background-light);
+            color: var(--text-primary);
+            line-height: 1.6;
         }
-        h1 {
+
+        .header {
+            background: linear-gradient(to right, #2563eb, #1e40af);
+            padding: 2rem 0;
+            color: white;
+            margin-bottom: 2rem;
+        }
+
+        .header h1 {
             text-align: center;
-            color: #333;
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin: 0;
         }
-        .hotel {
-            display: flex;
-            align-items: flex-start;
-            border-bottom: 1px solid #ddd;
-            padding: 15px 0;
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 1.5rem;
         }
-        .hotel:last-child {
-            border-bottom: none;
+
+        .results-grid {
+            display: grid;
+            gap: 1.5rem;
+            margin-top: 2rem;
         }
-        .hotel img {
-            width: 150px;
-            height: 100px;
+
+        .hotel-card {
+            background: white;
+            border-radius: 1rem;
+            overflow: hidden;
+            box-shadow: var(--card-shadow);
+            transition: transform 0.2s ease;
+        }
+
+        .hotel-card:hover {
+            transform: translateY(-4px);
+        }
+
+        .hotel-image {
+            position: relative;
+            height: 200px;
+            overflow: hidden;
+        }
+
+        .hotel-image img {
+            width: 100%;
+            height: 100%;
             object-fit: cover;
-            border-radius: 4px;
-            margin-right: 20px;
         }
-        .hotel-details {
-            flex: 1;
+
+        .hotel-rating {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: rgba(0, 0, 0, 0.7);
+            color: #fbbf24;
+            padding: 0.5rem;
+            border-radius: 0.5rem;
+            font-size: 0.875rem;
         }
+
+        .hotel-content {
+            padding: 1.5rem;
+        }
+
         .hotel-name {
-            font-size: 18px;
-            font-weight: bold;
-            color: #333;
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
         }
-        .hotel-description {
-            font-size: 14px;
-            color: #666;
-            margin: 10px 0;
+
+        .hotel-address {
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: start;
+            gap: 0.5rem;
         }
+
+        .hotel-address i {
+            color: var(--primary-color);
+            margin-top: 0.25rem;
+        }
+
         .hotel-price {
-            font-size: 16px;
-            font-weight: bold;
-            color: #27ae60;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            margin: 1rem 0;
         }
-        .btn-book {
+
+        .view-details-btn {
             display: inline-block;
-            margin-top: 10px;
-            padding: 10px 15px;
-            background-color: #007bff;
-            color: #fff;
+            background-color: var(--primary-color);
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
             text-decoration: none;
-            border-radius: 4px;
-            font-size: 14px;
+            font-weight: 500;
+            transition: background-color 0.2s ease;
         }
-        .btn-book:hover {
-            background-color: #0056b3;
+
+        .view-details-btn:hover {
+            background-color: var(--secondary-color);
+        }
+
+        @media (min-width: 768px) {
+            .results-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (min-width: 1024px) {
+            .results-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+
+        .no-results {
+            text-align: center;
+            padding: 3rem;
+            background: white;
+            border-radius: 1rem;
+            box-shadow: var(--card-shadow);
         }
     </style>
-    <script>
-       document.addEventListener('DOMContentLoaded', function () {
-    const searchResults = JSON.parse(sessionStorage.getItem('searchResults')) || [];
-    const resultsContainer = document.getElementById('results-container');
-    
-    // Get traceId from sessionStorage at the top level
-    const traceId = sessionStorage.getItem('traceId');
-    console.log('TraceId from sessionStorage:', traceId);
-
-    if (searchResults.length === 0) {
-        resultsContainer.innerHTML = '<p>No results found. Please try again.</p>';
-        return;
-    }
-
-    searchResults.forEach(result => {
-        const hotelElement = document.createElement('div');
-        hotelElement.classList.add('hotel');
-        
-        // Fixed template literal syntax and added traceId to the href
-        hotelElement.innerHTML = `
-            <img src="${result.HotelPicture || 'https://via.placeholder.com/150'}" alt="${result.HotelName}">
-            <div class="hotel-details">
-                <div class="hotel-name">${result.HotelName || 'Unnamed Hotel'} (${result.StarRating} Stars)</div>
-                <div class="hotel-description">${result.HotelAddress || 'No description available.'}</div>
-                <div class="hotel-price">Price: ₹${result.Price?.PublishedPrice || 'N/A'}</div>
-               <a href="/hotel-info?traceId=${traceId}&resultIndex=${result.ResultIndex}&hotelCode=${result.HotelCode}" 
-                   onclick="viewHotelDetails('${result.ResultIndex}', '${result.HotelCode}')" 
-                   class="view-details-btn">
-                    View Details
-                </a>
-            </div>
-        `;
-        
-        resultsContainer.appendChild(hotelElement);
-    });
-});
-
-function viewHotelDetails(resultIndex) {
-    console.log('Setting session storage:');
-    console.log('ResultIndex:', resultIndex);
-    console.log('HotelCode:', hotelCode);
-    
-    // Get traceId from sessionStorage
-    const traceId = sessionStorage.getItem('traceId');
-    console.log('TraceId from sessionStorage:', traceId);
-
-    if (!traceId) {
-        console.error('TraceId is not found in sessionStorage');
-        return;
-    }
-
-    sessionStorage.setItem('selectedHotelResultIndex', resultIndex);
-    sessionStorage.setItem('selectedHotelTraceId', traceId);
-    sessionStorage.setItem('selectedHotelCode', hotelCode);
-    
-    
-    // Use template literals for the URL
-    window.location.href = `/hotel-info?traceId=${traceId}&resultIndex=${resultIndex}&hotelCode=${hotelCode}`;
-}
-    </script>
 </head>
 <body>
+    <header class="header">
+        <div class="container">
+            <h1>Hotel Search Results</h1>
+        </div>
+    </header>
+
     <div class="container">
-        <h1>Search Results</h1>
-        <!-- Missing container added here -->
-        <div id="results-container"></div>
+        <div id="results-container" class="results-grid"></div>
     </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const searchResults = JSON.parse(sessionStorage.getItem('searchResults')) || [];
+            const resultsContainer = document.getElementById('results-container');
+            const traceId = sessionStorage.getItem('traceId');
+
+            if (searchResults.length === 0) {
+                resultsContainer.innerHTML = `
+                    <div class="no-results">
+                        <i class="fas fa-search fa-3x" style="color: var(--text-secondary); margin-bottom: 1rem;"></i>
+                        <p>No results found. Please try another search.</p>
+                    </div>`;
+                return;
+            }
+
+            searchResults.forEach(result => {
+                const hotelCard = document.createElement('div');
+                hotelCard.classList.add('hotel-card');
+                
+                hotelCard.innerHTML = `
+                    <div class="hotel-image">
+                        <img src="${result.HotelPicture || '/api/placeholder/400/200'}" alt="${result.HotelName}">
+                        <div class="hotel-rating">
+                            <i class="fas fa-star"></i> ${result.StarRating}
+                        </div>
+                    </div>
+                    <div class="hotel-content">
+                        <h2 class="hotel-name">${result.HotelName || 'Unnamed Hotel'}</h2>
+                        <div class="hotel-address">
+                            <i class="fas fa-map-marker-alt"></i>
+                            <span>${result.HotelAddress || 'Address not available'}</span>
+                        </div>
+                        <div class="hotel-price">₹${result.Price?.PublishedPrice?.toLocaleString() || 'N/A'}</div>
+                        <a href="/hotel-info?traceId=${traceId}&resultIndex=${result.ResultIndex}&hotelCode=${result.HotelCode}" 
+                           onclick="viewHotelDetails('${result.ResultIndex}', '${result.HotelCode}')" 
+                           class="view-details-btn">
+                            <i class="fas fa-info-circle"></i> View Details
+                        </a>
+                    </div>
+                `;
+                
+                resultsContainer.appendChild(hotelCard);
+            });
+        });
+
+        function viewHotelDetails(resultIndex, hotelCode) {
+            const traceId = sessionStorage.getItem('traceId');
+            
+            if (!traceId) {
+                console.error('TraceId is not found in sessionStorage');
+                return;
+            }
+
+            sessionStorage.setItem('selectedHotelResultIndex', resultIndex);
+            sessionStorage.setItem('selectedHotelTraceId', traceId);
+            sessionStorage.setItem('selectedHotelCode', hotelCode);
+            
+            window.location.href = `/hotel-info?traceId=${traceId}&resultIndex=${resultIndex}&hotelCode=${hotelCode}`;
+        }
+    </script>
 </body>
 </html>

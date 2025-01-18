@@ -212,6 +212,8 @@ form {
                     <input type="text" id="cvv" placeholder="123" required>
                 </div>
                 <div class="submit-btn-container">
+                <div id="balanceResult" class="balance-result-container"></div>
+    
                 <a href="#" id="payNowButton" class="submit-btn">Pay Now</a>
                 </div>
                 <div class="submit-btn-container">
@@ -257,6 +259,7 @@ form {
                 <button type="submit">Submit</button>
             </form>
         </div>
+        <div id="bookingResult"></div>
     </div>
 
     <script>
@@ -348,7 +351,7 @@ document.getElementById("payNowButton").addEventListener("click", function (even
     const resultIndex = urlParams.get('ResultIndex');
     
     if (!traceId || !amount || !passengerDataStr) {
-        alert("Missing required parameters!");
+        // alert("Missing required parameters!");
         return;
     }
 
@@ -514,6 +517,234 @@ document.getElementById("cancelBookingButton").addEventListener("click", functio
         alert("An error occurred while canceling the booking. Please try again later.");
     });
 });
+
+
+
+
+
+//HOTEL RELATED FUNCTION 
+
+function getUrlParameters() {
+    const urlParams = new URLSearchParams(window.location.search);
+
+    // Parse room details JSON
+    const roomDetailsStr = urlParams.get('roomDetails');
+    console.log("Raw room details string:", roomDetailsStr);
+    const roomDetails = roomDetailsStr ? JSON.parse(decodeURIComponent(roomDetailsStr)) : null;
+    console.log("Room Details:", roomDetails);
+    console.log("Room Childcount:", roomDetails.childCount);
+
+    // Parse passenger details JSON with detailed logging
+    const passengerDetailsStr = urlParams.get('passengerDetails');
+    console.log("Raw passenger details string:", passengerDetailsStr);
+
+    let passengerDetails = [];
+    
+    try {
+        // First decode the URI component
+        const decodedStr = decodeURIComponent(passengerDetailsStr);
+        console.log("Decoded passenger details string:", decodedStr);
+        
+        // Then parse the JSON
+        const parsedData = JSON.parse(decodedStr);
+        console.log("Parsed passenger data type:", typeof parsedData);
+        console.log("Is Array?", Array.isArray(parsedData));
+        
+        // Handle both array and single object cases
+        if (Array.isArray(parsedData)) {
+            passengerDetails = parsedData;
+            console.log("Passenger details is already an array:", passengerDetails);
+        } else if (typeof parsedData === 'object' && parsedData !== null) {
+            passengerDetails = [parsedData];
+            console.log("Converted single object to array:", passengerDetails);
+        } else {
+            console.error("Invalid passenger data format:", parsedData);
+            passengerDetails = [];
+        }
+
+        // Validate array contents
+        console.log("Final passenger details array length:", passengerDetails.length);
+        passengerDetails.forEach((passenger, index) => {
+            console.log(`Passenger ${index + 1}:`, passenger);
+        });
+
+    } catch (error) {
+        console.error("Error parsing passenger details:", error);
+        console.log("Defaulting to empty array");
+        passengerDetails = [];
+    }
+
+    // Final validation
+    if (!Array.isArray(passengerDetails)) {
+        console.error("Final check - Passenger details is not an array!");
+        alert("Error: Passenger details are not in the expected format.");
+        passengerDetails = [];
+    }
+
+    const result = {
+        hotelDetails: {
+            traceId: urlParams.get('traceId'),
+            resultIndex: urlParams.get('resultIndex'),
+            hotelCode: urlParams.get('hotelCode'),
+            hotelName: urlParams.get('hotelName')
+        },
+        roomDetails: roomDetails,
+        passengerDetails: passengerDetails
+    };
+
+    console.log("Final returned object:", result);
+    return result;
+}
+document.getElementById("payNowButton").addEventListener("click", async function (event) {
+    event.preventDefault();
+
+    const bookingData = getUrlParameters();
+    console.log("Booking Data:", bookingData);
+
+    if (!bookingData.roomDetails || !bookingData.passengerDetails) {
+        alert("Missing booking details. Please check and try again.");
+        console.error("Error: Missing booking details");
+        return;
+    }
+
+    try {
+        
+        const balancePayload = {
+            EndUserIp: "1.1.1.1",
+            ClientId: "180133",
+            UserName: "MakeMy91",
+            Password: "MakeMy@910",
+            amount: parseFloat(bookingData.roomDetails.OfferedPrice),
+            TraceId: bookingData.hotelDetails.traceId,
+            bookingDetails: {
+                hotelName: bookingData.hotelDetails.hotelName,
+                roomType: bookingData.roomDetails.RoomTypeName
+            }
+        };
+
+        console.log("Balance Payload:", balancePayload);
+
+        const balanceResponse = await fetch('/balancelog', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+            },
+            body: JSON.stringify(balancePayload),
+        });
+
+        const balanceData = await balanceResponse.json();
+        console.log("Balance Data:", balanceData);
+
+        if (!balanceData.success) {
+            throw new Error(balanceData.errorMessage || 'Insufficient balance or payment failed.');
+        }
+
+        if (!balanceData.balanceLogs || balanceData.balanceLogs.length === 0) {
+            throw new Error('Balance log details not found.');
+        }
+
+        // Show payment success message
+        alert(`Payment Successful!\n\nDebited Amount: ₹${balanceData.balanceLogs[0].Debit}\nUpdated Balance: ₹${balanceData.balanceLogs[0].Balance}`);
+        
+       
+        const childCount = bookingData.roomDetails?.childCount || 0;
+        console.log("Child Count from room details:", childCount);
+        let passengerDetails = bookingData.passengerDetails;
+        console.log("Passenger Details (used in hotelPassengers):", passengerDetails);
+
+        const hotelPassengers = passengerDetails.map(passenger => ({
+            Title: passenger.title,
+            ChildCount: passenger.childCount,     
+            FirstName: passenger.firstName,
+            LastName: passenger.lastName,
+            Phoneno: passenger.phone,
+            Email: passenger.email,
+            PaxType: passenger.paxType || "1",
+            LeadPassenger: passenger.leadPassenger || false,
+            PAN: passenger.pan || ""
+        }));
+
+        const roomDetail = {
+            RoomId: bookingData.roomDetails.RoomId,       
+            RoomStatus: "Active",
+            RoomIndex: bookingData.roomDetails.RoomIndex, 
+            RoomTypeCode: bookingData.roomDetails.RoomTypeCode,
+            RoomTypeName: bookingData.roomDetails.RoomTypeName,
+            RatePlanCode: bookingData.roomDetails.RatePlanCode,
+            RatePlan: bookingData.roomDetails.RatePlan,
+            InfoSource: bookingData.roomDetails.InfoSource || "",
+            SequenceNo: bookingData.roomDetails.SequenceNo || "",
+            SmokingPreference: "0",
+            ChildCount: childCount,
+            RequireAllPaxDetails: false,
+            HotelPassenger: hotelPassengers,
+            Currency: bookingData.roomDetails.Currency,
+            OfferedPrice: bookingData.roomDetails.OfferedPrice
+        };
+
+        if (!roomDetail.RoomIndex) {
+            console.error("Missing RoomIndex!");
+            alert("Error: Missing room details. Please try again.");
+            return;
+        }
+
+        const bookingPayload = {
+            ResultIndex: bookingData.hotelDetails.resultIndex,
+            HotelCode: bookingData.hotelDetails.hotelCode,
+            HotelName: bookingData.hotelDetails.hotelName,
+            GuestNationality: "IN",
+            NoOfRooms: bookingData.roomDetails.NoOfRooms || 1,
+            ClientReferenceNo: 0,
+            IsVoucherBooking: true,
+            HotelRoomsDetails: [roomDetail],
+            SrdvType: "MixAPI",
+            SrdvIndex: "15",
+            TraceId: bookingData.hotelDetails.traceId,
+            EndUserIp: "1.1.1.1",
+            ClientId: "180133",
+            UserName: "MakeMy91",
+            Password: "MakeMy@910"
+        };
+
+        console.log("Booking Payload:", bookingPayload);
+
+        // This was the missing fetch call
+        const bookingResponse = await fetch('/book-room', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+            },
+            body: JSON.stringify(bookingPayload),
+        });
+
+        const bookingDataResponse = await bookingResponse.json();
+        console.log("Booking Data Response:", bookingDataResponse);
+
+        if (!bookingDataResponse.success) {
+            throw new Error(bookingDataResponse.errorMessage || 'Booking failed after successful payment.');
+        }
+
+        const bookingDetails = bookingDataResponse.bookingDetails;
+        
+        // Show final success message
+        alert(`Payment and Booking Successful!\n\n` +
+              `Payment Details:\n` +
+              `Debited Amount: ₹${balanceData.balanceLogs[0].Debit}\n` +
+              `Updated Balance: ₹${balanceData.balanceLogs[0].Balance}\n\n` +
+              `Booking Details:\n` +
+              `Hotel: ${bookingDetails.HotelName || bookingPayload.HotelName}\n` +
+              `Booking ID: ${bookingDetails.BookingId}\n` +
+              `Confirmation No: ${bookingDetails.ConfirmationNo}\n` +
+              `Status: ${bookingDetails.Status}`);
+
+    } catch (error) {
+        console.error('Error:', error);
+        alert(`Error: ${error.message}`);
+    }
+});
+
     </script>
 </body>
 </html>

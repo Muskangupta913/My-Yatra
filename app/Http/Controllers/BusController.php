@@ -19,10 +19,10 @@ class BusController extends Controller
 
     public function __construct()
     {
-         $this->ClientId = env('BUS_API_CLIENT_ID');
-        $this->UserName = env('BUS_API_USERNAME');
-        $this->Password = env('BUS_API_PASSWORD');
-        $this->ApiToken = env('BUS_API_TOKEN');
+         $this->ClientId = env('BUS_API_CLIENT_ID' , '180189');
+        $this->UserName = env('BUS_API_USERNAME', 'MakeMy91');
+        $this->Password = env('BUS_API_PASSWORD', 'MakeMy@910');
+        $this->ApiToken = env('BUS_API_TOKEN', 'MakeMy@910@23');
     }
 
     public function index()
@@ -718,4 +718,7 @@ public function balanceLog(Request $request)
         'errorMessage' => $data['Error']['ErrorMessage'] ?? 'Unknown error occurred.',
     ]);
 }
+
+
+
 }
