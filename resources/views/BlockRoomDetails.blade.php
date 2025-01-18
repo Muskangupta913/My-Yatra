@@ -209,43 +209,43 @@ document.getElementById('passenger-form').addEventListener('submit', async funct
             } = bookingDetails.roomDetails;
 
             bookingContainer.innerHTML = `
-                <div class="hotel-details">
-                    <h2 class="hotel-name">${bookingDetails.hotelName}</h2>
-                    <p class="hotel-code">Hotel Code: ${bookingDetails.hotelCode}</p>
+                <div class="">
+                    <h2 class="">${bookingDetails.hotelName}</h2>
+                    <p class="">Hotel Code: ${bookingDetails.hotelCode}</p>
                 </div>
 
-                <div class="room-details">
-                    <h3 class="room-type">${RoomTypeName}</h3>
-                    <p class="rate-plan">Rate Plan: ${RatePlan}</p>
-                    <p class="price">
+                <div class="">
+                    <h3 class="">${RoomTypeName}</h3>
+                    <p class="">Rate Plan: ${RatePlan}</p>
+                    <p class="">
                         <strong>Price: ${Currency} ${OfferedPrice}</strong>
                         ${PublishedPrice !== OfferedPrice ? `<span class="original-price">${Currency} ${PublishedPrice}</span>` : ''}
                     </p>
                 </div>
 
-                <div class="room-images">
+                <div class="">
                     <h4>Room Images</h4>
-                    <div class="image-gallery">
-                        ${RoomImages.map(image => `<img src="${image.Image}" alt="${RoomTypeName}" class="room-image">`).join('')}
+                    <div class="">
+                        ${RoomImages.map(image => `<img src="${image.Image}" alt="${RoomTypeName}" class="">`).join('')}
                     </div>
                 </div>
 
-                <div class="bed-types">
+                <div class="">
                     <h4>Bed Types</h4>
                     <p>${BedTypes || 'N/A'}</p>
                 </div>
 
-                <div class="amenities">
+                <div class="">
                     <h4>Amenities</h4>
                     <ul>
                         ${Amenities.map(amenity => `<li>${amenity.Name}</li>`).join('')}
                     </ul>
                 </div>
 
-                <div class="cancellation-policies">
+                <div class="">
                     <h4>Cancellation Policies</h4>
                     ${CancellationPolicies.map(policy => `
-                        <div class="policy-item">
+                        <div class="">
                             <p><strong>From:</strong> ${policy.FromDate.split('T')[0]}</p>
                             <p><strong>To:</strong> ${policy.ToDate.split('T')[0]}</p>
                             <p><strong>Charge:</strong> ${policy.Charge > 0 ? `${Currency} ${policy.Charge}` : 'Free Cancellation'}</p>

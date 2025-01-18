@@ -97,7 +97,6 @@
                 <input type="number" name="NoOfNights" class="form-control rounded-0 py-3" placeholder="Enter No. of Nights" required style="text-align: center;">
             </div>
 
-            <!-- Room & Guests -->
             <div class="mb-3 col-md-3">
     <div class="date-caption">Room & Guests</div>
     <div class="dropdown">
@@ -134,17 +133,26 @@
                     </select>
                 </div>
             </li>
-            <li>
+            <li class="mb-3">
                 <div class="d-flex justify-content-between align-items-center">
                     <label for="noOfChildren" class="form-label mb-0">Children</label>
-                    <select id="noOfChildren" name="RoomGuests[0][NoOfChild]" class="form-select w-auto" onchange="updateRoomGuestsTitle()">
+                    <select id="noOfChildren" name="RoomGuests[0][NoOfChild]" class="form-select w-auto" onchange="handleChildrenChange()">
                         <option value="0" selected>0</option>
                         <option value="1">1</option>
                         <option value="2">2</option>
                         <option value="3">3</option>
                     </select>
                 </div>
-            </li> 
+            </li>
+            <li>
+            <div id="childAgesContainer" class="mt-3" style="display: none;">
+    <label class="form-label" style="font-size: 16px; font-weight: bold; color: #333;">Child Ages</label>
+    <div id="childAgesInputs" class="d-flex flex-column gap-2">
+        <!-- Child age inputs will be dynamically added here -->
+    </div>
+</div>
+
+            </li>
         </ul>
     </div>
 </div>
@@ -166,7 +174,7 @@
             <!-- Search Button -->
             <div class="mb-3 col-md-2">
                 <div class="date-caption" style="visibility: hidden">Search</div>
-                <button type="button" class="btn btn-warning w-100 rounded-0 py-3 fw-bold hotelbuttonsearch" id="searchButton">Search</button>
+                <button type="button" class="btn item-center btn-warning w-100 rounded-0 py-3 fw-bold hotelbuttonsearch" id="searchButton">Search</button>
             </div>
         </div>
     </form>
@@ -247,7 +255,7 @@
             <div class="date-caption">From</div>
             <input type="text" class="form-control rounded-0 py-3" name="source_city" id="busFromCity" placeholder="Enter Departure City" required>
             <input type="hidden" name="source_code" id="busFromCode"> <!-- Hidden field to store source city code -->
-            <div id="busFromCityList" class="card" style="position: absolute; width: 23%; max-height: 150px; overflow-y: scroll;"></div>
+            <div id="busFromCityList" class="card" style="position: absolute; width: 23%; max-height: 200px; overflow-y: scroll;"></div>
         </div>
 
         <!-- Destination City -->
@@ -591,15 +599,56 @@
 
 
    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+    updateRoomGuestsTitle();
+});
 
 function updateRoomGuestsTitle() {
-        const rooms = document.getElementById("noOfRooms").value;
-        const adults = document.getElementById("noOfAdults").value;
-        const children = document.getElementById("noOfChildren").value;
+    const rooms = document.getElementById("noOfRooms").value;
+    const adults = document.getElementById("noOfAdults").value;
+    const children = document.getElementById("noOfChildren").value;
 
-        const title = `${rooms} Room${rooms > 1 ? "s" : ""}, ${adults} Adult${adults > 1 ? "s" : ""}, ${children} Child${children > 1 ? "ren" : ""}`;
-        document.getElementById("roomGuestsDropdown").textContent = title;
+    const title = `${rooms} Room${rooms > 1 ? "s" : ""}, ${adults} Adult${adults > 1 ? "s" : ""}, ${children} Child${children > 1 ? "ren" : ""}`;
+    document.getElementById("roomGuestsDropdown").textContent = title;
+}
+
+function handleChildrenChange() {
+    const childCount = parseInt(document.getElementById("noOfChildren").value);
+    const container = document.getElementById("childAgesContainer");
+    const inputsContainer = document.getElementById("childAgesInputs");
+    
+    // Update the title
+    updateRoomGuestsTitle();
+    
+    // Show/hide the child ages container
+    container.style.display = childCount > 0 ? "block" : "none";
+    
+    // Clear existing inputs
+    inputsContainer.innerHTML = "";
+    
+    // Create age selectors for each child
+    for (let i = 0; i < childCount; i++) {
+        const ageSelector = document.createElement("div");
+        ageSelector.className = "d-flex justify-content-between align-items-center";
+        ageSelector.innerHTML = `
+            <label class="form-label mb-0">Child ${i + 1} Age</label>
+            <select name="RoomGuests[0][ChildAges][${i}]" class="form-select w-auto ms-2" onchange="updateRoomGuestsTitle()">
+                ${generateAgeOptions()}
+            </select>
+        `;
+        inputsContainer.appendChild(ageSelector);
     }
+}
+
+function generateAgeOptions() {
+    let options = '';
+    // Generate options for ages 0-12
+    for (let i = 0; i <= 12; i++) {
+        options += `<option value="${i}">${i} ${i === 1 ? 'year' : 'years'}</option>`;
+    }
+    return options;
+}
+
 
     
   $(document).ready(function () {
@@ -971,6 +1020,46 @@ $(document).on('click keydown', function (e) {
             const paddedDay = day.padStart(2, '0');
             const formattedCheckInDate = `${year}-${paddedMonth}-${paddedDay}`;
 
+
+            // Get all child ages
+        const childCount = parseInt(data["RoomGuests[0][NoOfChild]"]);
+        const childAges = [];
+        
+        // Only collect ages if there are children
+        if (childCount > 0) {
+            for (let i = 0; i < childCount; i++) {
+                const ageSelect = document.querySelector(`select[name="RoomGuests[0][ChildAges][${i}]"]`);
+                if (ageSelect) {
+                    childAges.push(parseInt(ageSelect.value));
+                }
+            }
+        }
+
+
+        function getCookie(name) {
+    const value = `; ${document.cookie}`;
+    const parts = value.split(`; ${name}=`);
+    if (parts.length === 2) return parts.pop().split(';').shift();
+    return null;
+}
+
+// Example usage - Get cookie values
+console.log('NoOfChildren:', getCookie('noOfChildren'));
+console.log('ChildAges:', getCookie('childAges'));
+console.log('NoOfAdults:', getCookie('noOfAdults'));
+
+        // Set cookies with expiry time (e.g., 7 days)
+document.cookie = `noOfChildren=${noOfChildren}; path=/; max-age=604800`;
+document.cookie = `childAges=${childAges}; path=/; max-age=604800`;
+document.cookie = `noOfAdults=${String(data["RoomGuests[0][NoOfAdults]"])}; path=/; max-age=604800`;
+
+
+// Check specific cookies
+console.log('Cookies:', document.cookie);
+
+
+
+
             const payload = {
                 ClientId: "180189",
                 UserName: "MakeMy91",
@@ -988,7 +1077,7 @@ $(document).on('click keydown', function (e) {
                     {
                         NoOfAdults: String(data["RoomGuests[0][NoOfAdults]"]),
                         NoOfChild: String(data["RoomGuests[0][NoOfChild]"]),
-                        ChildAge: [15],
+                        ChildAge:  childAges,
                     },
                 ],
             };
