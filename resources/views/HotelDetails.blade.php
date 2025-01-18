@@ -716,9 +716,9 @@ function blockRoom(roomId) {
     const serializedRoomDetails = encodeURIComponent(JSON.stringify(roomDetails));
 
     // Show confirmation dialog
-    if (!confirm('Are you sure you want to block this room?')) {
-        return;
-    }
+    // if (!confirm('Are you sure you want to book this room?')) {
+    //     return;
+    // }
 
     // Show loading state
     const loadingOverlay = document.createElement('div');
@@ -769,7 +769,7 @@ function blockRoom(roomId) {
                 window.location.href = `/room-detail?traceId=${traceId}&resultIndex=${resultIndex}&hotelCode=${hotelCode}&hotelName=${encodeURIComponent(hotelName)}&roomDetails=${serializedRoomDetails}`;
             }
         } else {
-            alert('Status: ' + (data.message || 'Unknown error'));
+            // alert('Status: ' + (data.message || 'Unknown error'));
             window.location.href = `/room-detail?traceId=${traceId}&resultIndex=${resultIndex}&hotelCode=${hotelCode}&hotelName=${encodeURIComponent(hotelName)}&roomDetails=${serializedRoomDetails}`;
         }
     })

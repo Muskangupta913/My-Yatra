@@ -61,7 +61,12 @@
           <div class="tab-pane fade" id="home" role="tabpanel" aria-labelledby="home-tab">
             <p>Comming Soon!</p>
           </div>
+
+
           <!-- // hotel booking -->
+
+
+
           <div class="tab-content" id="myTabContent">
   <div class="tab-pane fade" id="home" role="tabpanel" aria-labelledby="home-tab">
     <p>Coming Soon!</p>
@@ -945,7 +950,7 @@ $(document).on('click keydown', function (e) {
  document.addEventListener('DOMContentLoaded', function () {
     // Initialize datepicker with API-compatible format
     $('.datepicker').datepicker({
-        format: 'dd/mm/yyyy', // User-friendly format
+        format: 'mm/dd/yyyy', // Changed to MM/DD/YYYY format
         autoclose: true,
         startDate: 'today',
         todayHighlight: true,
@@ -956,13 +961,14 @@ $(document).on('click keydown', function (e) {
     if (searchButton) {
         searchButton.addEventListener('click', function (event) {
             event.preventDefault();
-
             const formData = new FormData(document.getElementById('hotelSearchForm'));
             const data = Object.fromEntries(formData.entries());
 
-            // Convert CheckInDate to yyyy-mm-dd for API
-            const [day, month, year] = data.CheckInDate.split('/');
-            const formattedCheckInDate = `${year}-${month}-${day}`;
+            const [month, day, year] = data.CheckInDate.split('/');
+            // Ensure month and day are padded with leading zeros if needed
+            const paddedMonth = month.padStart(2, '0');
+            const paddedDay = day.padStart(2, '0');
+            const formattedCheckInDate = `${year}-${paddedMonth}-${paddedDay}`;
 
             const payload = {
                 ClientId: "180189",
