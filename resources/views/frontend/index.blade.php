@@ -78,9 +78,9 @@
     <form id="hotelSearchForm">
         <div class="row">
             <!-- City Input -->
-            <div class="mb-3 col-md-3 hotel-search">
-                <div class="date-caption">City</div>
-                <input type="text" class="form-control rounded-0 py-3" name="CityName" id="hotelSearchCity" placeholder="Enter City Name" required autocomplete="off">
+            <div class="mb-3 col-md-3 hotel-search"style="display: flex; flex-direction: column;">
+                <div class="date-caption">Enter City</div>
+                <input type="text" class="form-control rounded-0 py-3" name="CityName" id="hotelSearchCity" placeholder="Enter City Name" required autocomplete="off" style="text-align: center; width: 100%;" >
                 <input type="hidden" name="CityId" id="cityIdInput" value="">
                 <div id="hotelSearchCityList" class="card" style="position: absolute; width: 23%; max-height: 150px; overflow-y: scroll;"></div>
             </div>
@@ -88,13 +88,13 @@
             <!-- Check-in Date -->
             <div class="mb-3 col-md-2">
     <div class="date-caption">Check-in Date</div>
-    <input type="text" id="checkinDatepicker" name="CheckInDate" class="form-control rounded-0 py-3 datepicker" placeholder="Select Check-in Date" required>
+    <input type="text" id="checkinDatepicker" name="CheckInDate" class="form-control rounded-0 py-3 datepicker" placeholder="Select Check-in Date" required style="text-align: center;">
 </div>
 
             <!-- Number of Nights -->
             <div class="mb-3 col-md-2">
                 <div class="date-caption">No. of Nights</div>
-                <input type="number" name="NoOfNights" class="form-control rounded-0 py-3" placeholder="Enter No. of Nights" required>
+                <input type="number" name="NoOfNights" class="form-control rounded-0 py-3" placeholder="Enter No. of Nights" required style="text-align: center;">
             </div>
 
             <!-- Room & Guests -->
@@ -107,6 +107,7 @@
             id="roomGuestsDropdown"
             data-bs-toggle="dropdown"
             aria-expanded="false"
+            style="background-color: white; color: #6c757d; border-color: #ced4da;"
         >
             1 Room, 2 Adults, 0 Children
         </button>
@@ -149,8 +150,8 @@
 </div>
             <!-- Guest Nationality -->
             <div class="mb-3 col-md-2">
-                <div class="date-caption">Nationality</div>
-                <select id="nationalitySelect" class="form-control rounded-0 py-3">
+                <div class="date-caption"style="text-align: center;">Nationality</div>
+                <select id="nationalitySelect" class="form-control rounded-0 py-3 text-center">
                     <option value="" selected>Select Nationality</option>
                     <option value="IN" data-nationality="Indian">IN</option>
                     <option value="US" data-nationality="American">American</option>
