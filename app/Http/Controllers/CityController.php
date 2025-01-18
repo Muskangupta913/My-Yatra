@@ -153,7 +153,7 @@ class CityController extends Controller
                 // Query to fetch cities where the name starts with the input letter(s)
                 $cities = HotelCity::where('Destination', 'LIKE', $query . '%')
                     ->where('status', 'Active') // Only fetch active cities
-                    ->select('cityid as CityId', 'Destination as CityName')
+                    ->select('cityid', 'Destination')
                     ->limit(10) // Limit the number of results
                     ->get();
 

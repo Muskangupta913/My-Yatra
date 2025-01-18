@@ -92,16 +92,25 @@ public function search(Request $request)
             "IsNearBySearchAllowed" => false
         ];
 
-        // Log the payload being sent to the API
-        \Log::info('API Payload:', $payload);
-
-        $response = Http::timeout(60) // 60 seconds timeout
-        ->withHeaders([
-            'Content-Type' => 'application/json',
-            'Api-Token' => 'MakeMy@910@23',
-        ])
-        ->retry(3, 100) // Retry 3 times with 100ms delay between attempts
-        ->post('https://hotel.srdvapi.com/v8/rest/Search', $payload);
+        ini_set('max_execution_time', '300'); // 5 minutes
+        ini_set('default_socket_timeout', '300');
+        set_time_limit(300);
+        
+        // Then modify your HTTP request:
+        $response = Http::timeout(300)
+            ->connectTimeout(300)
+            ->withHeaders([
+                'Content-Type' => 'application/json',
+                'Api-Token' => 'MakeMy@910@23',
+            ])
+            ->withOptions([
+                'curl' => [
+                    CURLOPT_TIMEOUT => 300,
+                    CURLOPT_CONNECTTIMEOUT => 300
+                ]
+            ])
+            ->retry(3, 100)
+            ->post('https://hotel.srdvapi.com/v8/rest/Search', $payload);
 
         // Log the raw API response
         \Log::info('API Response:', ['status' => $response->status(), 'body' => $response->body()]);

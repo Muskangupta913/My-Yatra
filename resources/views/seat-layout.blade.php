@@ -789,7 +789,7 @@ function selectSeat(element) {
         } else {
             // Select new seat
             if (selectedSeats.length >= maxSeatsAllowed) {
-                showError('You can only select up to ${maxSeatsAllowed} seats.');
+                showEshowError(`You can only select up to ${maxSeatsAllowed} seats.`);
                 return;
             }
             
@@ -1048,6 +1048,7 @@ function renderPickupPoints(points) {
         </div>
     `).join('');
 }
+
 
 function renderDroppingPoints(points) {
     const container = document.getElementById('droppingPointsContainer');

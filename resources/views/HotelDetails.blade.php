@@ -282,67 +282,7 @@ button:disabled {
             box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
         }
 
-        .price-badge {
-            position: absolute;
-            top: 1rem;
-            right: 1rem;
-            background: rgba(255, 255, 255, 0.95);
-            padding: 0.5rem 1rem;
-            border-radius: 20px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-            z-index: 1;
-        }
-
-        .room-info-grid {
-            display: grid;
-            grid-template-columns: 2fr 1fr;
-            gap: 2rem;
-            margin-top: 1rem;
-        }
-
-        @media (max-width: 768px) {
-            .room-info-grid {
-                grid-template-columns: 1fr;
-            }
-        }
-  
-
-
-        /* Room Details Section */
-        .room-card {
-            background: white;
-            border-radius: 12px;
-            padding: 2rem;
-            margin-bottom: 2rem;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-
-        .room-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1.5rem;
-        }
-
-        .room-name {
-            font-size: 1.8rem;
-            color: #2c3e50;
-        }
-
-        .room-price {
-            text-align: right;
-        }
-
-        .price-amount {
-            font-size: 1.8rem;
-            color: #27ae60;
-            font-weight: bold;
-        }
-
-        .price-original {
-            text-decoration: line-through;
-            color: #7f8c8d;
-        }
+       
 
         .room-amenities {
             display: flex;
@@ -404,16 +344,11 @@ button:disabled {
                 grid-template-columns: 1fr;
             }
 
-            .room-header {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 1rem;
-            }
-
             .facilities-list {
                 grid-template-columns: 1fr;
             }
         }
+        
     </style>
 </head>
 <body class="bg-gray-100">
@@ -505,7 +440,7 @@ button:disabled {
                 SrdvType: "MixAPI",
                 hotelCode: hotelCode,
                 traceId: traceId,
-                ClientId: "180133",
+                ClientId: "180189",
                 UserName: "MakeMy@91",
                 Password: "MakeMy@910",
             };
@@ -626,8 +561,7 @@ function renderHotelDetails(hotel) {
 // Initialize the page
 document.addEventListener('DOMContentLoaded', fetchHotelInfo);
 
-
-        function fetchRoomDetails() {
+function fetchRoomDetails() {
     const urlParams = new URLSearchParams(window.location.search);
     const traceId = urlParams.get('traceId');
     const resultIndex = urlParams.get('resultIndex');
@@ -635,7 +569,7 @@ document.addEventListener('DOMContentLoaded', fetchHotelInfo);
 
     if (!resultIndex || !traceId || !hotelCode) {
         document.getElementById('room-details').innerHTML = 
-            '<div class="error-state">No room information available</div>';
+            '<div style="text-align: center; padding: 2rem; color: #ef4444;">No room information available</div>';
         return;
     }
 
@@ -659,129 +593,203 @@ document.addEventListener('DOMContentLoaded', fetchHotelInfo);
     .then(data => {
         if (data.status === 'success' && data.data?.hotelRoomsDetails) {
             let roomDetailsHtml = '';
-            const roomCombinations = data.data.roomCombinations;
             
             data.data.hotelRoomsDetails.forEach(category => {
                 roomDetailsHtml += `
-                    <div class="room-category">
-                        <h2 class="category-name">${category.CategoryName}</h2>
-                      ${category.Rooms.map(room => `
-    <div class="room-card"
-        data-room-id="${room.RoomId}"
-        data-room-type-name="${room.RoomTypeName}"
-        data-room-type-code="${room.RoomTypeCode}"
-        data-rate-plan="${room.RatePlan}"
-        data-rate-plan-code="${room.RatePlanCode}"
-        data-room-index="${room.RoomIndex}".RoomImages || [])}' 
-        data-bed-types="${room.BedTypes || ''}"
-        data-amenities='${JSON.stringify(room.Amenities || [])}'
-        data-room-images='${JSON.stringify(room.RoomImages || [])}'  
-        data-cancellation-policies='${JSON.stringify(room.CancellationPolicies || [])}'
-         data-price-offered="${room.Price.OfferedPrice}"
-        data-price-published="${room.Price.PublishedPrice}"
-        data-price-currency="${room.Price.CurrencyCode}"
-    >
-        <div class="room-header">
-            <h3 class="room-name">${room.RoomTypeName}</h3>
-            <div class="price-section">
-                <div class="price-amount">${room.Price.CurrencyCode} ${room.Price.OfferedPrice}</div>
-                ${room.Price.PublishedPrice !== room.Price.OfferedPrice ? 
-                    `<div class="price-original">${room.Price.CurrencyCode} ${room.Price.PublishedPrice}</div>` : 
-                    ''}
-            </div>
-        </div>
+                    <div style="margin-bottom: 2rem;">
+                        <h2 style="font-size: 1.5rem; font-weight: 600; color: #1e293b; margin-bottom: 1rem; padding-bottom: 0.5rem; border-bottom: 2px solid #e2e8f0;">
+                            ${category.CategoryName}
+                        </h2>
+                        ${category.Rooms.map(room => `
+                            <div class="room-card" 
+                                style="display: flex; background: white; border-radius: 1rem; padding: 1.5rem; margin-bottom: 1.5rem; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1); border: 1px solid #f1f5f9;"
+                                data-room-id="${room.RoomId}"
+                                data-room-type-name="${room.RoomTypeName}"
+                                data-room-type-code="${room.RoomTypeCode}"
+                                data-rate-plan="${room.RatePlan}"
+                                data-rate-plan-code="${room.RatePlanCode}"
+                                data-room-index="${room.RoomIndex}"
+                                data-bed-types="${room.BedTypes || ''}"
+                                data-amenities='${JSON.stringify(room.Amenities || [])}'
+                                data-room-images='${JSON.stringify(room.RoomImages || [])}'
+                                data-cancellation-policies='${JSON.stringify(room.CancellationPolicies || [])}'
+                                data-price-offered="${room.Price.OfferedPrice}"
+                                data-price-published="${room.Price.PublishedPrice}"
+                                data-price-currency="${room.Price.CurrencyCode}">
+                                
+                                <!-- Left Side - Images -->
+                                <div style="flex: 0 0 300px; margin-right: 1.5rem;">
+                                    <div style="position: relative; width: 100%; height: 200px; border-radius: 0.5rem; overflow: hidden;">
+                                        <img src="${room.RoomImages?.[0]?.Image || '/api/placeholder/300/200'}" 
+                                             alt="${room.RoomTypeName}"
+                                             style="width: 100%; height: 100%; object-fit: cover;">
+                                    </div>
+                                    ${room.RoomImages && room.RoomImages.length > 1 ? `
+                                        <div style="display: flex; gap: 0.5rem; margin-top: 0.5rem; overflow-x: auto;">
+                                            ${room.RoomImages.map((img, idx) => `
+                                                <img src="${img.Image}" 
+                                                     alt="Room view ${idx + 1}"
+                                                     style="width: 60px; height: 60px; object-fit: cover; border-radius: 0.25rem; cursor: pointer; opacity: ${idx === 0 ? '1' : '0.6'};"
+                                                     onclick="updateMainImage(this)">
+                                            `).join('')}
+                                        </div>
+                                    ` : ''}
+                                </div>
 
-        <div style="position: relative;">
-            ${room.RoomImages && room.RoomImages.length ? `
-                <div class="room-image-gallery">
-                    ${room.RoomImages.map(img => `
-                        <img src="${img.Image}" alt="${room.RoomTypeName}" class="room-image">
-                    `).join('')}
-                </div>
-            ` : ''}
-        </div>
+                                <!-- Right Side - Room Details -->
+                                <div style="flex: 1;">
+                                    <!-- Price and Room Type -->
+                                    <div style="display: flex; justify-content: space-between; margin-bottom: 1rem;">
+                                        <h3 style="font-size: 1.25rem; font-weight: 600; color: #1e293b;">
+                                            ${room.RoomTypeName}
+                                        </h3>
+                                        <div style="text-align: right;">
+                                            <div style="font-size: 1.5rem; font-weight: 700; color: #2563eb;">
+                                                ${room.Price.CurrencyCode} ${room.Price.OfferedPrice}
+                                            </div>
+                                            ${room.Price.PublishedPrice !== room.Price.OfferedPrice ? `
+                                                <div style="text-decoration: line-through; color: #64748b; font-size: 0.875rem;">
+                                                    ${room.Price.CurrencyCode} ${room.Price.PublishedPrice}
+                                                </div>
+                                            ` : ''}
+                                        </div>
+                                    </div>
 
-        <div class="room-info-grid">
-            <div class="room-details">
-                <div class="room-description">
-                    ${room.Description}
-                </div>
-                
-                <div class="bed-type-info">
-                    <i class="fas fa-bed"></i> ${room.BedTypes || 'N/A'}
-                </div>
+                                    <!-- Description and Bed Type -->
+                                    <div style="color: #475569; margin-bottom: 1rem;">
+                                        ${room.Description}
+                                        <div style="display: flex; align-items: center; gap: 0.5rem; margin-top: 0.5rem;">
+                                            <i class="fas fa-bed"></i>
+                                            ${room.BedTypes || 'N/A'}
+                                        </div>
+                                    </div>
 
-                <div class="amenities-section">
-                    ${room.Amenities.map(amenity => `
-                        <span class="amenity-tag">
-                            <i class="fas ${amenity.FontAwesome || 'fa-tag'}"></i>
-                            ${amenity.Name}
-                        </span>
-                    `).join('')}
-                </div>
-            </div>
+                                    <!-- Amenities -->
+                                    <div style="margin-bottom: 1rem;">
+                                        <div style="display: flex; flex-wrap: wrap; gap: 0.5rem;">
+                                            ${(room.Amenities || []).map(amenity => `
+                                                <span style="display: inline-flex; align-items: center; background: #f1f5f9; padding: 0.5rem 1rem; border-radius: 0.25rem; font-size: 0.875rem;">
+                                                    <i class="fas ${amenity.FontAwesome || 'fa-check'}" style="margin-right: 0.5rem;"></i>
+                                                    ${amenity.Name}
+                                                </span>
+                                            `).join('')}
+                                        </div>
+                                    </div>
 
-            <div class="room-services">
-                ${room.ServicesStatus ? `
-                    <div class="services-status">
-                        ${room.ServicesStatus.map(service => `
-                            <div class="service-item">
-                                <i class="fas fa-check-circle"></i>
-                                <span>${service.Name}: ${service.Value}</span>
+                                    <!-- Cancellation Policy -->
+                                    ${room.CancellationPolicies ? `
+                                        <div style="margin-top: 1rem; padding: 1rem; background: #f8fafc; border-radius: 0.5rem;">
+                                            ${room.CancellationPolicies.map(policy => `
+                                                <div style="padding: 0.5rem 0; display: flex; justify-content: space-between; align-items: center;">
+                                                    <span style="font-size: 0.875rem;">
+                                                        ${policy.FromDate.split('T')[0]} to ${policy.ToDate.split('T')[0]}
+                                                    </span>
+                                                    <span style="font-size: 0.875rem; font-weight: 500; color: ${policy.Charge > 0 ? '#ef4444' : '#22c55e'};">
+                                                        ${policy.Charge > 0 ? 
+                                                            `Charge: ${policy.Currency} ${policy.Charge}` : 
+                                                            'Free cancellation'}
+                                                    </span>
+                                                </div>
+                                            `).join('')}
+                                        </div>
+                                    ` : ''}
+
+                                    <!-- Book Now Section -->
+                                    <div style="margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center;">
+                                        <div>
+                                            ${room.IsPANMandatory ? `
+                                                <div style="color: #f59e0b;">
+                                                    <i class="fas fa-exclamation-circle"></i>
+                                                    PAN Card Required
+                                                </div>
+                                            ` : ''}
+                                        </div>
+                                        <button onclick="blockRoom('${room.RoomId}')" 
+                                                style="background: #2563eb; color: white; padding: 0.75rem 1.5rem; border-radius: 0.5rem; border: none; cursor: pointer; display: flex; align-items: center; gap: 0.5rem;">
+                                            <i class="fas fa-calendar-check"></i>
+                                            Book Now
+                                        </button>
+                                    </div>
+                                </div>
                             </div>
                         `).join('')}
-                    </div>
-                ` : ''}
-            </div>
-        </div>
-
-        ${room.CancellationPolicies ? `
-            <div class="cancellation-policy">
-                <h4><i class="fas fa-info-circle"></i> Cancellation Policy</h4>
-                ${room.CancellationPolicies.map(policy => `
-                    <div class="policy-item">
-                        <span>${policy.FromDate.split('T')[0]} to ${policy.ToDate.split('T')[0]}</span>
-                        <span class="policy-charge">
-                            ${policy.Charge > 0 ? 
-                                `Cancellation charge: ${policy.Currency} ${policy.Charge}` : 
-                                'Free cancellation'}
-                        </span>
-                    </div>
-                `).join('')}
-            </div>
-        ` : ''}
-
-        <div class="book-now-section">
-            <div class="room-info">
-                <div class="room-id">Room ID: ${room.RoomId}</div>
-                ${room.IsPANMandatory ? 
-                    '<div class="pan-notice"><i class="fas fa-exclamation-circle"></i> PAN Card Required</div>' : 
-                    ''}
-            </div>
-            <button class="book-now-button" onclick="blockRoom('${room.RoomId}')">
-                <i class="fas fa-calendar-check"></i>
-                Book Now
-            </button>
-        </div>
-    </div>
-`).join('')}
                     </div>
                 `;
             });
             
             document.getElementById('room-details').innerHTML = roomDetailsHtml;
-        } 
-        else {
+        } else {
             document.getElementById('room-details').innerHTML = 
-                '<div class="error-state">Failed to load room details</div>';
+                '<div style="text-align: center; padding: 2rem; color: #ef4444;">Failed to load room details</div>';
         }
     })
     .catch(error => {
         console.error('Error:', error);
         document.getElementById('room-details').innerHTML = 
-            '<div class="error-state">An error occurred while loading room details</div>';
+            '<div style="text-align: center; padding: 2rem; color: #ef4444;">An error occurred while loading room details</div>';
     });
 }
+
+// Helper function for image gallery
+function updateMainImage(thumbnail) {
+    const roomCard = thumbnail.closest('.room-card');
+    const mainImage = roomCard.querySelector('img[style*="height: 100%"]');
+    const thumbnails = roomCard.querySelectorAll('img[style*="width: 60px"]');
+    
+    mainImage.src = thumbnail.src;
+    thumbnails.forEach(thumb => thumb.style.opacity = '0.6');
+    thumbnail.style.opacity = '1';
+}
+
+// Initialize the room details when the page loads
+document.addEventListener('DOMContentLoaded', function() {
+    fetchRoomDetails();
+});
+
+// Image Gallery Functions
+function changeImage(roomId, direction) {
+    const images = document.querySelectorAll(`.room-image-${roomId}`);
+    const counter = document.querySelector(`.image-counter-${roomId}`);
+    
+    let currentIndex = Array.from(images).findIndex(img => img.style.opacity === '1');
+    images[currentIndex].style.opacity = '0';
+    
+    if (direction === 'next') {
+        currentIndex = (currentIndex + 1) % images.length;
+    } else {
+        currentIndex = (currentIndex - 1 + images.length) % images.length;
+    }
+    
+    images[currentIndex].style.opacity = '1';
+    counter.textContent = `${currentIndex + 1}/${images.length}`;
+}
+
+// Toggle Section Function
+function toggleSection(sectionId) {
+    const section = document.getElementById(sectionId);
+    const icon = document.querySelector(`.toggle-icon-${sectionId}`);
+    
+    if (section.style.display === 'none') {
+        section.style.display = 'block';
+        icon.classList.remove('fa-chevron-down');
+        icon.classList.add('fa-chevron-up');
+    } else {
+        section.style.display = 'none';
+        icon.classList.remove('fa-chevron-up');
+        icon.classList.add('fa-chevron-down');
+    }
+}
+
+// Block Room Function (implement according to your needs)
+function blockRoom(roomId) {
+    // Implement your room booking logic here
+    console.log('Blocking room:', roomId);
+}
+
+// Call the function when the page loads
+document.addEventListener('DOMContentLoaded', function() {
+    fetchRoomDetails();
+});
 
 
 
