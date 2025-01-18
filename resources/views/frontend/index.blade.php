@@ -78,7 +78,7 @@
     <form id="hotelSearchForm">
         <div class="row">
             <!-- City Input -->
-            <div class="mb-3 col-md-3 hotel-search"style="display: flex; flex-direction: column;">
+            <div class="mb-3 col-md-3 hotel-search">
                 <div class="date-caption">Enter City</div>
                 <input type="text" class="form-control rounded-0 py-3" name="CityName" id="hotelSearchCity" placeholder="Enter City Name" required autocomplete="off" style="text-align: center; width: 100%;" >
                 <input type="hidden" name="CityId" id="cityIdInput" value="">
