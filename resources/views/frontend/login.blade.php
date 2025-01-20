@@ -1,155 +1,131 @@
-// Update the addNewPassengerForm function
-function addNewPassengerForm() {
-    const formData = new FormData(document.getElementById('passenger-form'));
-    
-    // Create passenger data object
-    const passengerData = {
-        title: formData.get('Title'),
-        firstName: formData.get('FirstName'),
-        lastName: formData.get('LastName'),
-        email: formData.get('Email'),
-        phone: formData.get('Phoneno'),
-        paxType: formData.get('PaxType'),
-        pan: formData.get('PAN'),
-        leadPassenger: formData.get('LeadPassenger') === 'on',
-        childCount: parseInt(formData.get('ChildCount') || '0')  // Fix: Properly get childCount
+function fetchRoomDetails() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const traceId = urlParams.get('traceId');
+    const resultIndex = urlParams.get('resultIndex');
+    const hotelCode = urlParams.get('hotelCode');
+
+    if (!resultIndex || !traceId || !hotelCode) {
+        document.getElementById('room-details').innerHTML = 
+            '<div style="text-align: center; padding: 2rem; color: #ef4444;">No room information available</div>';
+            roomDetailsLoaded = true;
+            hideLoadingSpinner();
+            return;
+    }
+
+    const payload = {
+        resultIndex: resultIndex,
+        srdvIndex: "15",
+        srdvType: "MixAPI",
+        hotelCode: hotelCode,
+        traceId: parseInt(traceId),
     };
 
-    // Validate required fields
-    if (!passengerData.title || !passengerData.firstName || !passengerData.lastName || 
-        !passengerData.email || !passengerData.phone || !passengerData.paxType) {
-        alert('Please fill in all required fields');
-        return;
-    }
+    fetch('/hotel-room-details', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+        },
+        body: JSON.stringify(payload),
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.status === 'success' && data.data?.hotelRoomsDetails) {
+            let roomDetailsHtml = '';
+        
+            data.data.hotelRoomsDetails.forEach(category => {
+                roomDetailsHtml += `
+                    <div style="margin-bottom: 2rem;">
+                        <h2 style="font-size: 1.5rem; font-weight: 600; color: #1e293b; margin-bottom: 1rem; padding-bottom: 0.5rem; border-bottom: 2px solid #e2e8f0;">
+                            ${category.CategoryName}
+                        </h2>
+                        ${category.Rooms.map(room => `
+                            <div class="room-card" 
+                                style="display: flex; background: white; border-radius: 1rem; padding: 1.5rem; margin-bottom: 1.5rem; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1); border: 1px solid #f1f5f9;"
+                                data-room-id="${room.RoomId}"
+                                data-room-type-name="${room.RoomTypeName}"
+                                data-room-type-code="${room.RoomTypeCode}"
+                                data-rate-plan="${room.RatePlan}"
+                                data-rate-plan-code="${room.RatePlanCode}"
+                                data-room-index="${room.RoomIndex}"
+                                data-bed-types="${room.BedTypes || ''}"
+                                data-amenities='${JSON.stringify(room.Amenities || [])}'
+                                data-room-images='${JSON.stringify(room.RoomImages || [])}'
+                                data-cancellation-policies='${JSON.stringify(room.CancellationPolicies || [])}'
+                                data-price-offered="${room.Price.OfferedPrice}"
+                                data-price-published="${room.Price.PublishedPrice}"
+                                data-price-currency="${room.Price.CurrencyCode}">
+                                
+                                <!-- Left Side - Images -->
+                                [Previous image section remains the same...]
 
-    // Validate email format
-    if (!isValidEmail(passengerData.email)) {
-        alert('Please enter a valid email address');
-        return;
-    }
+                                <!-- Right Side - Room Details -->
+                                <div style="flex: 1;">
+                                    <!-- Price and Room Type -->
+                                    <div style="display: flex; justify-content: space-between; margin-bottom: 1rem;">
+                                        <h3 style="font-size: 1.25rem; font-weight: 600; color: #1e293b;">
+                                            ${room.RoomTypeName}
+                                        </h3>
+                                        <div style="text-align: right;">
+                                            <div style="font-size: 1.5rem; font-weight: 700; color: #2563eb;">
+                                                ${room.Price.CurrencyCode} ${room.Price.OfferedPrice}
+                                            </div>
+                                            ${room.Price.PublishedPrice !== room.Price.OfferedPrice ? `
+                                                <div style="text-decoration: line-through; color: #64748b; font-size: 0.875rem;">
+                                                    ${room.Price.CurrencyCode} ${room.Price.PublishedPrice}
+                                                </div>
+                                            ` : ''}
+                                        </div>
+                                    </div>
 
-    // Initialize passengerDetails array if it doesn't exist
-    if (!window.passengerDetails) {
-        window.passengerDetails = [];
-    }
+                                    <!-- Additional Charges Section -->
+                                    <div style="margin-bottom: 1rem; padding: 1rem; background: #f8fafc; border-radius: 0.5rem;">
+                                        <h4 style="font-size: 1rem; font-weight: 600; color: #475569; margin-bottom: 0.5rem;">
+                                            Additional Charges
+                                        </h4>
+                                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+                                            <div style="background: white; padding: 0.75rem; border-radius: 0.5rem; border: 1px solid #e2e8f0;">
+                                                <div style="font-size: 0.875rem; color: #64748b;">Extra Guest Charge</div>
+                                                <div style="font-weight: 600; color: #2563eb;">
+                                                    ${room.Price.CurrencyCode} ${room.Price.ExtraGuestCharge || 0}
+                                                </div>
+                                            </div>
+                                            <div style="background: white; padding: 0.75rem; border-radius: 0.5rem; border: 1px solid #e2e8f0;">
+                                                <div style="font-size: 0.875rem; color: #64748b;">Child Charge</div>
+                                                <div style="font-weight: 600; color: #2563eb;">
+                                                    ${room.Price.CurrencyCode} ${room.Price.ChildCharge || 0}
+                                                </div>
+                                            </div>
+                                            <div style="background: white; padding: 0.75rem; border-radius: 0.5rem; border: 1px solid #e2e8f0;">
+                                                <div style="font-size: 0.875rem; color: #64748b;">Service Tax</div>
+                                                <div style="font-weight: 600; color: #2563eb;">
+                                                    ${room.Price.CurrencyCode} ${room.Price.ServiceTax || 0}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
 
-    // Add to global array
-    window.passengerDetails.push(passengerData);
-
-    // Update display
-    updatePassengersDisplay();
-
-    // Reset form
-    document.getElementById('passenger-form').reset();
-
-    // Show success message
-    alert('Passenger added successfully!');
-}
-
-// Update the updatePassengersDisplay function
-function updatePassengersDisplay() {
-    const container = document.getElementById('passengers-container');
-    
-    // Create or get the passengers list section
-    let passengersListSection = document.getElementById('passengers-list');
-    if (!passengersListSection) {
-        passengersListSection = document.createElement('div');
-        passengersListSection.id = 'passengers-list';
-        passengersListSection.style.marginTop = '20px';
-        container.appendChild(passengersListSection);
-    }
-    
-    // Update the display
-    if (window.passengerDetails && window.passengerDetails.length > 0) {
-        passengersListSection.innerHTML = '<h3>Added Passengers:</h3>' + 
-            window.passengerDetails.map((passenger, index) => `
-                <div style="border: 1px solid #ddd; padding: 10px; margin: 10px 0; border-radius: 4px;">
-                    <div>
-                        <strong>${passenger.title} ${passenger.firstName} ${passenger.lastName}</strong>
-                        ${passenger.leadPassenger ? ' (Lead Passenger)' : ''}
+                                    [Rest of the existing sections remain the same...]
+                                </div>
+                            </div>
+                        `).join('')}
                     </div>
-                    <div>Type: ${passenger.paxType}</div>
-                    <div>Email: ${passenger.email}</div>
-                    <div>Phone: ${passenger.phone}</div>
-                    ${passenger.pan ? `<div>PAN: ${passenger.pan}</div>` : ''}
-                    ${passenger.childCount > 0 ? `<div>Children: ${passenger.childCount}</div>` : ''}
-                    <button onclick="removePassenger(${index})" 
-                            style="background-color: #ff4444; color: white; border: none; 
-                                   padding: 5px 10px; margin-top: 10px; border-radius: 4px; 
-                                   cursor: pointer;">
-                        Remove
-                    </button>
-                </div>
-            `).join('');
-    } else {
-        passengersListSection.innerHTML = '';
-    }
-}
-
-// Update the checkBalance function
-async function checkBalance() {
-    const loadingOverlay = document.createElement('div');
-    loadingOverlay.className = 'loading-overlay';
-    loadingOverlay.innerHTML = '<div class="loading-spinner">Checking balance...</div>';
-    document.body.appendChild(loadingOverlay);
-
-    try {
-        const requestData = {
-            EndUserIp: '1.1.1.1',
-            ClientId: '180133',
-            UserName: 'MakeMy91',
-            Password: 'MakeMy@910'
-        };
-
-        const response = await fetch('/balance', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-            },
-            body: JSON.stringify(requestData)
-        });
-
-        const data = await response.json();
-
-        if (!response.ok) {
-            throw new Error(data.message || 'Network response was not ok');
-        }
-
-        if (data.status === 'success') {
-            const formattedBalance = new Intl.NumberFormat('en-IN', {
-                style: 'currency',
-                currency: 'INR'
-            }).format(data.balance);
-
-            if (confirm(`Available Balance: ${formattedBalance}\nDo you want to proceed with the booking?`)) {
-                const bookingDetails = fetchBookingDetails();
-                const passengerDetails = window.passengerDetails || [];
-
-                // Get room details with passenger information
-                const roomDetailsWithPassengers = {
-                    ...bookingDetails.roomDetails,
-                    passengers: passengerDetails
-                };
-
-                const paymentParams = new URLSearchParams({
-                    traceId: bookingDetails.traceId,
-                    resultIndex: bookingDetails.resultIndex,
-                    hotelCode: bookingDetails.hotelCode,
-                    hotelName: bookingDetails.hotelName,
-                    roomDetails: JSON.stringify(roomDetailsWithPassengers),
-                    passengerDetails: JSON.stringify(passengerDetails)
-                });
-
-                window.location.href = `/payment?${paymentParams}`;
-            }
+                `;
+            });
+            
+            document.getElementById('room-details').innerHTML = roomDetailsHtml;
         } else {
-            throw new Error(data.message || 'Failed to fetch balance');
+            document.getElementById('room-details').innerHTML = 
+                '<div style="text-align: center; padding: 2rem; color: #ef4444;">Failed to load room details</div>';
         }
-    } catch (error) {
-        console.error('Balance check failed:', error);
-        alert('Unable to check balance: ' + error.message);
-    } finally {
-        document.body.removeChild(loadingOverlay);
-    }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        document.getElementById('room-details').innerHTML = 
+            '<div style="text-align: center; padding: 2rem; color: #ef4444;">An error occurred while loading room details</div>';
+    })
+    .finally(() => {
+        roomDetailsLoaded = true;
+        hideLoadingSpinner();
+    });
 }

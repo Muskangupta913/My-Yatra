@@ -47,17 +47,16 @@
                     <option value="Child">Child</option>
                 </select>
                 <div style="width: 100%; padding: 10px 0;">
-                    <label for="child-count" style="display: block; margin-bottom: 5px; color: #444; font-size: 14px;">Number of Children:</label>
-                    <select id="child-count" name="ChildCount" 
-                        style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; background-color: white;">
-                        <option value="0">No Children</option>
-                        <option value="1">1 Child</option>
-                        <option value="2">2 Children</option>
-                    </select>
-                </div>
-                <input type="text" name="PAN" placeholder="PAN Number" 
-                    style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px;">
-
+    <label for="child-count" style="display: block; margin-bottom: 5px; color: #444; font-size: 14px;">Number of Children:</label>
+    <select id="child-count" name="ChildCount" required
+        style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; background-color: white;">
+        <option value="0" selected>No Children</option>
+        <option value="1">1 Child</option>
+        <option value="2">2 Children</option>
+    </select>
+</div>
+<input type="text" name="PAN" id="pan" placeholder="PAN Number" required 
+    style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px;">
                 <div style="display: flex; align-items: center; gap: 10px;">
                     <input type="checkbox" name="LeadPassenger" id="lead-passenger" 
                         style="width: 18px; height: 18px;">
@@ -85,7 +84,15 @@
 
 window.passengerDetails = [];
 function addNewPassengerForm() {
-    const formData = new FormData(document.getElementById('passenger-form'));
+    const form = document.getElementById('passenger-form');
+    const formData = new FormData(form);
+    
+    // Validate all fields
+    const validation = validateFormFields(formData);
+    if (!validation.isValid) {
+        alert(validation.message);
+        return false;
+    }
     
     // Create passenger data object
     const passengerData = {
@@ -99,31 +106,41 @@ function addNewPassengerForm() {
         leadPassenger: formData.get('LeadPassenger') === 'on'
     };
 
-    // Validate required fields
-    if (!passengerData.title || !passengerData.firstName || !passengerData.lastName || 
-        !passengerData.email || !passengerData.phone || !passengerData.paxType) {
-        alert('Please fill in all required fields');
-        return;
-    }
-
-    // Validate email format
-    if (!isValidEmail(passengerData.email)) {
-        alert('Please enter a valid email address');
-        return;
-    }
-
     // Add to global array
+    window.passengerDetails = window.passengerDetails || [];
     window.passengerDetails.push(passengerData);
 
     // Update display
     updatePassengersDisplay();
+    
+    // Save child count before reset
+    const childCount = form.querySelector('#child-count').value;
+    form.reset();
+    form.querySelector('#child-count').value = childCount;
 
-    // Reset form
-    document.getElementById('passenger-form').reset();
-
-    // Show success message
     alert('Passenger added successfully!');
+    return true;
 }
+
+// PAN input event listener for real-time validation
+document.getElementById('pan').addEventListener('input', function(e) {
+    const panInput = e.target;
+    let value = panInput.value.toUpperCase();
+    
+    // Remove any non-alphanumeric characters
+    value = value.replace(/[^A-Z0-9]/g, '');
+    
+    // Limit to 10 characters
+    value = value.substring(0, 10);
+    
+    // Update input value
+    panInput.value = value;
+    
+    // Real-time validation feedback
+    const validation = validatePANFormat(value);
+    panInput.setCustomValidity(validation.message);
+    panInput.reportValidity();
+});
 
 function updatePassengersDisplay() {
     const container = document.getElementById('passengers-container');
@@ -173,11 +190,98 @@ function removePassenger(index) {
 function isValidEmail(email) {
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 }
+function validatePANFormat(pan) {
+    if (!pan || pan.trim() === '') {
+        return { 
+            isValid: false, 
+            message: 'PAN number is required' 
+        };
+    }
+    
+    pan = pan.trim().toUpperCase();
+    
+    if (pan.length !== 10) {
+        return { 
+            isValid: false, 
+            message: 'PAN number must be exactly 10 characters long' 
+        };
+    }
 
-// Update the form submit handler
-document.getElementById('passenger-form').addEventListener('submit', function(event) {
+    const panRegex = /^[A-Z]{5}[0-9]{4}[A-Z]{1}$/;
+    if (!panRegex.test(pan)) {
+        return { 
+            isValid: false, 
+            message: 'Invalid PAN format. Format should be: AAAPL1234A (5 letters, 4 numbers, 1 letter)' 
+        };
+    }
+
+    return { isValid: true, message: '' };
+}
+
+// Function to validate all form fields
+function validateFormFields(formData) {
+    // Validate required fields
+    const requiredFields = ['Title', 'FirstName', 'LastName', 'Email', 'Phoneno', 'PaxType', 'PAN'];
+    for (const field of requiredFields) {
+        const value = formData.get(field);
+        if (!value || value.trim() === '') {
+            return {
+                isValid: false,
+                message: `${field.replace(/([A-Z])/g, ' $1').trim()} is required`
+            };
+        }
+    }
+
+    // Validate PAN
+    const panValidation = validatePANFormat(formData.get('PAN'));
+    if (!panValidation.isValid) {
+        return panValidation;
+    }
+
+    // Validate email
+    const email = formData.get('Email');
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        return {
+            isValid: false,
+            message: 'Please enter a valid email address'
+        };
+    }
+
+    // Validate phone (Indian format)
+    const phone = formData.get('Phoneno');
+    if (!/^[6-9]\d{9}$/.test(phone)) {
+        return {
+            isValid: false,
+            message: 'Please enter a valid 10-digit phone number'
+        };
+    }
+
+    return { isValid: true, message: '' };
+}
+//submit button handler
+document.getElementById('passenger-form').addEventListener('submit', async function(event) {
     event.preventDefault();
-    addNewPassengerForm();
+    
+    // Only proceed if addNewPassengerForm validation passes
+    if (addNewPassengerForm()) {
+        closeModal();
+        try {
+            await checkBalance();
+        } catch (error) {
+            console.error('Error checking balance:', error);
+            // Remove the last added passenger if balance check fails
+            if (window.passengerDetails && window.passengerDetails.length > 0) {
+                window.passengerDetails.pop();
+                updatePassengersDisplay();
+            }
+        }
+    }
+});
+
+// Add this to handle real-time PAN input formatting
+document.getElementById('pan').addEventListener('input', function(e) {
+    const panInput = e.target;
+    panInput.value = panInput.value.toUpperCase();
 });
 
 
@@ -370,6 +474,7 @@ window.addEventListener('resize', () => {
         }
 
         async function checkBalance() {
+            
             const loadingOverlay = document.createElement('div');
             loadingOverlay.className = 'loading-overlay';
             loadingOverlay.innerHTML = '<div class="loading-spinner">Checking balance...</div>';
@@ -410,6 +515,7 @@ window.addEventListener('resize', () => {
                         window.passengerDetails : [window.passengerDetails];
 
                         const childCount = document.getElementById('child-count')?.value || 0;
+                        
 
                         const roomDetailsWithChildCount = {
                     RoomTypeName: bookingDetails.roomDetails.RoomTypeName,
@@ -474,341 +580,6 @@ window.addEventListener('resize', () => {
         document.addEventListener('DOMContentLoaded', populateBookingPage);
     </script>
 
-    <style>
-        /* Global Styles */
-        body {
-            font-family: 'Roboto', Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: #f4f6f9;
-            color: #333;
-            line-height: 1.6;
-        }
-
-        a {
-            text-decoration: none;
-        }
-
-        #booking-container {
-            max-width: 900px;
-            margin: 30px auto;
-            padding: 25px;
-            background-color: #fff;
-            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
-            border-radius: 10px;
-        }
-
-        /* Header Styles */
-        .hotel-name {
-            font-size: 28px;
-            font-weight: 700;
-            color: #2c3e50;
-            margin-bottom: 5px;
-        }
-
-        .hotel-code {
-            font-size: 14px;
-            color: #7f8c8d;
-            margin-bottom: 15px;
-        }
-
-        /* Room Details */
-        .room-type {
-            font-size: 22px;
-            font-weight: bold;
-            color: #34495e;
-            margin-bottom: 10px;
-        }
-
-        .rate-plan {
-            font-size: 16px;
-            color: #7f8c8d;
-            margin-bottom: 20px;
-        }
-
-        .price {
-            font-size: 20px;
-            color: #27ae60;
-            margin-bottom: 15px;
-        }
-
-        .original-price {
-            font-size: 16px;
-            color: #e74c3c;
-            text-decoration: line-through;
-            margin-left: 10px;
-        }
-
-        /* Room Images */
-        .room-images {
-            margin-top: 20px;
-        }
-
-        .room-images h4 {
-            font-size: 18px;
-            margin-bottom: 15px;
-        }
-
-        .image-gallery {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 15px;
-        }
-
-        .room-image {
-            width: calc(33.33% - 10px);
-            height: 120px;
-            object-fit: cover;
-            border-radius: 6px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-        }
-
-        .room-image:hover {
-            transform: scale(1.05);
-            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
-        }
-
-        /* Bed Types and Amenities */
-        .amenities ul {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 10px;
-        }
-
-        .amenities ul li {
-            background-color: #ecf0f1;
-            padding: 8px 12px;
-            border-radius: 4px;
-            font-size: 14px;
-            color: #2c3e50;
-        }
-
-        /* Cancellation Policies */
-        .cancellation-policies {
-            margin-top: 30px;
-        }
-
-        .policy-item {
-            margin-bottom: 20px;
-            padding: 15px;
-            background-color: #f9fafb;
-            border-radius: 8px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
-        }
-
-        .policy-item p {
-            margin: 5px 0;
-        }
-
-        /* Confirm Booking Button */
-        .confirm-booking {
-            text-align: center;
-            margin-top: 30px;
-        }
-
-        .book-now-button {
-            background-color: #2980b9;
-            color: #fff;
-            padding: 15px 30px;
-            border: none;
-            font-size: 18px;
-            cursor: pointer;
-            border-radius: 5px;
-            transition: background-color 0.3s ease;
-        }
-
-        .book-now-button:hover {
-            background-color: #3498db;
-        }
-
-        /* Modal Styles */
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-color: rgba(0, 0, 0, 0.7);
-            z-index: 1000;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .modal-content {
-            background-color: #fff;
-            padding: 25px;
-            border-radius: 10px;
-            width: 500px;
-            max-width: 100%;
-            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
-        }
-
-        .modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .modal-body {
-            margin-top: 15px;
-        }
-
-        .close-button {
-            background: none;
-            border: none;
-            font-size: 24px;
-            color: #333;
-            cursor: pointer;
-        }
-
-        .form-group {
-            margin-bottom: 15px;
-        }
-
-        .form-group label {
-            font-weight: 600;
-            display: block;
-        }
-
-        .form-group input {
-            width: 100%;
-            padding: 8px 12px;
-            border: 1px solid #ccc;
-            border-radius: 6px;
-        }
-
-        .form-actions {
-            text-align: center;
-            margin-top: 20px;
-        }
-
-        .submit-btn {
-            background-color: #27ae60;
-            color: #fff;
-            padding: 12px 25px;
-            border: none;
-            font-size: 16px;
-            cursor: pointer;
-            border-radius: 5px;
-        }
-
-        .modal {
-    display: none;
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.5);
-    z-index: 1000;
-}
-
-.modal-content {
-    position: relative;
-    background-color: #fff;
-    margin: 20px auto;
-    padding: 20px;
-    width: 90%;
-    max-width: 600px;
-    border-radius: 8px;
-    max-height: 90vh;
-    overflow-y: auto;
-}
-
-.added-passengers-section {
-    margin-bottom: 20px;
-    padding: 15px;
-    background-color: #f8f9fa;
-    border-radius: 8px;
-}
-
-.passenger-card {
-    background-color: white;
-    padding: 15px;
-    margin-bottom: 10px;
-    border: 1px solid #ddd;
-    border-radius: 6px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.passenger-info {
-    flex-grow: 1;
-}
-
-.lead-badge {
-    display: inline-block;
-    background-color: #28a745;
-    color: white;
-    padding: 2px 8px;
-    border-radius: 4px;
-    font-size: 12px;
-    margin-top: 5px;
-}
-
-.remove-btn {
-    background-color: #dc3545;
-    color: white;
-    border: none;
-    padding: 5px 10px;
-    border-radius: 4px;
-    cursor: pointer;
-}
-
-.form-group {
-    margin-bottom: 15px;
-}
-
-.form-group label {
-    display: block;
-    margin-bottom: 5px;
-    font-weight: 600;
-}
-
-.form-control {
-    width: 100%;
-    padding: 8px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-}
-
-.form-actions {
-    display: flex;
-    gap: 10px;
-    margin-top: 20px;
-}
-
-.add-passenger-btn, .submit-btn {
-    padding: 10px 20px;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-}
-
-.add-passenger-btn {
-    background-color: #007bff;
-    color: white;
-}
-
-.submit-btn {
-    background-color: #28a745;
-    color: white;
-}
-
-        .checkbox-group {
-            display: flex;
-            align-items: center;
-        }
-
-        .checkbox-group input {
-            margin-left: 10px;
-        }
-    </style>
+ 
 </body>
 </html>
