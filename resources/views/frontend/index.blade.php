@@ -12,6 +12,16 @@
 .flatpickr-day {
   padding: 8px;
 }
+.city-option {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.country-code {
+    color: #666;
+    font-size: 0.9em;
+}
 </style>
 @endsection
 
@@ -161,7 +171,7 @@
                 <div class="date-caption"style="text-align: center;">Nationality</div>
                 <select id="nationalitySelect" class="form-control rounded-0 py-3 text-center">
                     <option value="" selected>Select Nationality</option>
-                    <option value="IN" data-nationality="Indian">IN</option>
+                    <option value="IN" data-nationality="Indian">INDIA</option>
                     <option value="US" data-nationality="American">American</option>
                     <option value="GB" data-nationality="British">British</option>
                     <option value="CA" data-nationality="Canadian">Canadian</option>
@@ -906,7 +916,8 @@ function fetchHotelAllCities(inputField, listId) {
                 response.data.forEach(city => {
                     const cityHTML = `
                         <div class="list-group-item city-option" style="cursor: pointer;" data-cityid="${city.cityid}">
-                            <i class="fa-solid fa-location-dot"></i> ${city.Destination}
+                            <i class="fa-solid fa-location-dot"></i> 
+                            ${city.Destination} 
                         </div>`;
                     list.append(cityHTML);
                 });
@@ -939,7 +950,7 @@ function fetchHotelCities(inputField, listId) {
                     response.data.forEach(city => {
                         list.append(
                             `<div class="list-group-item city-option" data-cityid="${city.cityid}">
-                                ${city.Destination}
+                                ${city.Destination} (${city.country})
                             </div>`
                         );
                     });
@@ -975,13 +986,24 @@ cityInputConfig.forEach(config => {
 
     // Handle city selection from the dropdown
     $(document).on('click', `${config.list} .city-option`, function () {
-        const cityName = $(this).text();
+        const cityName = $(this).data('cityname');
+        const countryCode = $(this).data('countrycode');
         const cityId = $(this).data('cityid');
-
-        $(config.input).val(cityName); // Update input field
-        $(config.hidden).val(cityId); // Update hidden field
-        $(config.list).hide(); // Hide dropdown
+        
+        // Set the display value with city and country
+        $(config.input).val(`${cityName} (${countryCode})`);
+        $(config.hidden).val(cityId);
+        $(config.list).hide();
     });
+});
+
+$(document).on('click', '.city-option', function() {
+    const cityId = $(this).data('cityid');
+    const cityText = $(this).text().trim();
+    
+    $('#hotelSearchCity').val(cityText);
+    $('#cityIdInput').val(cityId);
+    $('#hotelSearchCityList').hide();
 });
 
 // Hide dropdowns on outside click or Escape key
@@ -1048,10 +1070,16 @@ console.log('NoOfChildren:', getCookie('noOfChildren'));
 console.log('ChildAges:', getCookie('childAges'));
 console.log('NoOfAdults:', getCookie('noOfAdults'));
 
-        // Set cookies with expiry time (e.g., 7 days)
-document.cookie = `noOfChildren=${noOfChildren}; path=/; max-age=604800`;
+       
+        // Get the selected number of children
+const noOfChildrenSelect = document.querySelector('select[name="RoomGuests[0][NoOfChild]"]');
+const selectedChildCount = noOfChildrenSelect ? noOfChildrenSelect.value : '0';
+
+// Set cookies with expiry time (e.g., 7 days)
+document.cookie = `noOfChildren=${selectedChildCount}; path=/; max-age=604800`;
 document.cookie = `childAges=${childAges}; path=/; max-age=604800`;
 document.cookie = `noOfAdults=${String(data["RoomGuests[0][NoOfAdults]"])}; path=/; max-age=604800`;
+
 
 
 // Check specific cookies
