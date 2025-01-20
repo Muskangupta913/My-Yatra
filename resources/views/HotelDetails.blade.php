@@ -1,6 +1,20 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <div id="loadingSpinner" style="
+    display: none; 
+    position: fixed; 
+    top: 0; 
+    left: 0; 
+    width: 100%; 
+    height: 100%; 
+    background-color: rgba(255, 255, 255, 0.8); 
+    z-index: 9999; 
+    display: flex; 
+    align-items: center; 
+    justify-content: center;">
+    <img src="{{ asset('assets/loading.gif') }}" alt="Loading..." style="width: 10vw; height: 10vw; max-width: 150px; max-height: 150px;" />
+</div>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
@@ -341,6 +355,34 @@ body {
         <div id="room-details" class="loading-state">Loading room details...</div>
     </div>
 <script>
+      document.getElementById('loadingSpinner').classList.remove('d-none');
+
+document.addEventListener('DOMContentLoaded', () => {
+    showLoadingSpinner();
+    setTimeout(() => {
+        hideLoadingSpinner();
+    }, 4000);
+});
+let hotelDetailsLoaded = false;
+let roomDetailsLoaded = false;
+
+// Modified loading spinner functions
+function showLoadingSpinner() {
+    const spinner = document.getElementById('loadingSpinner');
+    if (spinner) {
+        spinner.style.display = 'flex';
+    }
+}
+
+function hideLoadingSpinner() {
+    if (hotelDetailsLoaded && roomDetailsLoaded) {
+        const spinner = document.getElementById('loadingSpinner');
+        if (spinner) {
+            spinner.style.display = 'none';
+        }
+    }
+}
+
         document.addEventListener('DOMContentLoaded', function() {
             fetchHotelInfo();
             fetchRoomDetails();
@@ -355,7 +397,9 @@ body {
             if (!resultIndex || !traceId || !hotelCode) {
                 document.getElementById('hotel-details').innerHTML = 
                     '<div class="error-state">No hotel information available</div>';
-                return;
+                    hotelDetailsLoaded = true;
+                    hideLoadingSpinner();
+                    return;
             }
 
             const requestBody = {
@@ -390,6 +434,10 @@ body {
         console.error('Error:', error);
         document.getElementById('hotel-details').innerHTML = 
             '<div class="error-state">An error occurred while loading hotel details</div>';
+    })
+    .finally(() => {
+        hotelDetailsLoaded = true;
+        hideLoadingSpinner();
     });
 }
 
@@ -494,7 +542,9 @@ function fetchRoomDetails() {
     if (!resultIndex || !traceId || !hotelCode) {
         document.getElementById('room-details').innerHTML = 
             '<div style="text-align: center; padding: 2rem; color: #ef4444;">No room information available</div>';
-        return;
+            roomDetailsLoaded = true;
+            hideLoadingSpinner();
+            return;
     }
 
     const payload = {
@@ -578,7 +628,52 @@ function fetchRoomDetails() {
                                             ` : ''}
                                         </div>
                                     </div>
-
+                                        <!-- Additional Charges Section -->
+                                    <div style="margin-bottom: 1rem; padding: 1rem; background: #f8fafc; border-radius: 0.5rem;">
+                                        <h4 style="font-size: 1rem; font-weight: 600; color: #475569; margin-bottom: 0.5rem;">
+                                            Additional Charges
+                                        </h4>
+                                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+                                            <div style="background: white; padding: 0.75rem; border-radius: 0.5rem; border: 1px solid #e2e8f0;">
+                                                <div style="font-size: 0.875rem; color: #64748b;">Extra Guest Charge</div>
+                                                <div style="font-weight: 600; color: #2563eb;">
+                                                    ${room.Price.CurrencyCode} ${room.Price.ExtraGuestCharge || 0}
+                                                </div>
+                                            </div>
+                                            <div style="background: white; padding: 0.75rem; border-radius: 0.5rem; border: 1px solid #e2e8f0;">
+                                                <div style="font-size: 0.875rem; color: #64748b;">Child Charge</div>
+                                                <div style="font-weight: 600; color: #2563eb;">
+                                                    ${room.Price.CurrencyCode} ${room.Price.ChildCharge || 0}
+                                                </div>
+                                            </div>
+                                            <div style="background: white; padding: 0.75rem; border-radius: 0.5rem; border: 1px solid #e2e8f0;">
+                                                <div style="font-size: 0.875rem; color: #64748b;">Service Tax</div>
+                                                <div style="font-weight: 600; color: #2563eb;">
+                                                    ${room.Price.CurrencyCode} ${room.Price.ServiceTax || 0}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                   <!-- Day Rates Section -->
+                                    ${room.DayRates && room.DayRates.length > 0 ? `
+                                        <div style="margin-bottom: 1rem; padding: 1rem; background: #f8fafc; border-radius: 0.5rem;">
+                                            <h4 style="font-size: 1rem; font-weight: 600; color: #475569; margin-bottom: 0.5rem;">
+                                                Daily Rate Breakdown
+                                            </h4>
+                                            <div style="display: flex; flex-wrap: wrap; gap: 1rem;">
+                                                ${room.DayRates.map(rate => `
+                                                    <div style="background: white; padding: 0.5rem 1rem; border-radius: 0.25rem; border: 1px solid #e2e8f0;">
+                                                        <div style="font-size: 0.875rem; color: #64748b;">
+                                                            ${new Date(rate.Date).toLocaleDateString()}
+                                                        </div>
+                                                        <div style="font-weight: 600; color: #2563eb;">
+                                                            ${room.Price.CurrencyCode} ${rate.Amount.toFixed(2)}
+                                                        </div>
+                                                    </div>
+                                                `).join('')}
+                                            </div>
+                                        </div>
+                                    ` : ''}
                                     <!-- Description and Bed Type -->
                                     <div style="color: #475569; margin-bottom: 1rem;">
                                         ${room.Description}
@@ -651,8 +746,18 @@ function fetchRoomDetails() {
         console.error('Error:', error);
         document.getElementById('room-details').innerHTML = 
             '<div style="text-align: center; padding: 2rem; color: #ef4444;">An error occurred while loading room details</div>';
+    })
+    .finally(() => {
+        roomDetailsLoaded = true;
+        hideLoadingSpinner();
     });
 }
+// Initialize everything when the page loads
+document.addEventListener('DOMContentLoaded', () => {
+    showLoadingSpinner();
+    fetchHotelInfo();
+    fetchRoomDetails();
+});
 
 // Helper function for image gallery
 function updateMainImage(thumbnail) {
