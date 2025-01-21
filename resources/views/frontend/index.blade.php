@@ -1,3 +1,9 @@
+<!-- Include jQuery from CDN -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<!-- Include Flatpickr CSS -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+<!-- Include Flatpickr JS -->
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 @extends('frontend.layouts.master')
 @section('content')
 @section('styles')
@@ -58,14 +64,12 @@
           </li>
         </ul>
         <div class="tab-content" id="myTabContent">
-          <div class="tab-pane fade" id="home" role="tabpanel" aria-labelledby="home-tab">
+          <!-- <div class="tab-pane fade" id="home" role="tabpanel" aria-labelledby="home-tab">
             <p>Comming Soon!</p>
-          </div>
+          </div> -->
           <!-- // hotel booking -->
           <div class="tab-content" id="myTabContent">
-  <div class="tab-pane fade" id="home" role="tabpanel" aria-labelledby="home-tab">
-    <p>Coming Soon!</p>
-  </div>
+
   <!-- Hotel Booking -->
   <div class="tab-pane fade mt-5" id="profile" role="tabpanel" aria-labelledby="profile-tab">
     <h4 class="mb-5" id="hotel-title">Book Hotels in India</h4>
@@ -168,68 +172,98 @@
 </div>
 
 <!-- // flight booking -->
+<!-- // flight booking -->
 <div class="tab-pane fade mt-5" id="flight" role="tabpanel" aria-labelledby="home-tab">
-  <h4 class="mb-5" id="flight-title">Book Flights</h4>
-  <hr class="searchline">
-  <form action="{{ route('flight.booking') }}" method="GET">
-    <div class="row">
-      <div class="mb-3 col-md-3">
-        <div class="date-caption">From</div>
-        <input type="text" class="form-control rounded-0 py-3" name="fromCity" id="flightFromCity" placeholder="Enter Departure City" required>
-        <div id="flightFromCityList" class="card" style="position: absolute; width: 23%; max-height: 150px; overflow-y: scroll;"></div>
-      </div>
-      <div class="mb-3 col-md-3">
-        <div class="date-caption">To</div>
-        <input type="text" class="form-control rounded-0 py-3" name="toCity" id="flightToCity" placeholder="Enter Destination City" required>
-        <div id="flightToCityList" class="card" style="position: absolute; width: 23%; max-height: 150px; overflow-y: scroll;"></div>
-      </div>
-      <div class="mb-3 col-md-2">
-        <div class="date-caption">Departure Date</div>
-        <input type="text" id="flightDepartureDate" name="departure_date" class="form-control rounded-0 py-3 datepicker" placeholder="Select Departure Date" required>
-      </div>
-      <div class="mb-3 col-md-2">
-        <div class="date-caption">Return Date</div>
-        <input type="text" id="flightReturnDate" name="return_date" class="form-control rounded-0 py-3 datepicker" placeholder="Select Return Date">
-      </div>
-      <div class="mb-3 col-md-2">
-        <div class="date-caption" style="visibility: hidden">Search</div>
-        <button type="submit" class="btn btn-warning w-100 rounded-0 py-3 fw-bold">Search Flights</button>
-      </div>
-    </div>
-  </form>
-</div>
- <!-- Car Booking -->
-<div class="tab-pane fade mt-5" id="car" role="tabpanel" aria-labelledby="car-tab">
-  <h4 class="mb-5" id="car-title">Book Cars</h4>
-  <hr class="searchline">
-  <form action="{{ route('cars') }}" method="GET">
-    <div class="row">
-      <div class="mb-3 col-md-3">
-        <div class="date-caption">Pickup Location</div>
-        <input type="text" class="form-control rounded-0 py-3" name="pickupLocation" id="carPickupLocation" placeholder="Enter Pickup Location" required>
-        <div id="carPickupLocationList" class="card" style="position: absolute; width: 23%; max-height: 150px; overflow-y: scroll;"></div>
-      </div>
-      <div class="mb-3 col-md-3">
-        <div class="date-caption">Drop-off Location</div>
-        <input type="text" class="form-control rounded-0 py-3" name="dropoffLocation" id="carDropoffLocation" placeholder="Enter Drop-off Location" required>
-        <div id="carDropoffLocationList" class="card" style="position: absolute; width: 23%; max-height: 150px; overflow-y: scroll;"></div>
-      </div>
-      <div class="mb-3 col-md-2">
-        <div class="date-caption">Pickup Date</div>
-        <input type="text" id="carPickupDate" name="pickup_date" class="form-control rounded-0 py-3 datepicker" placeholder="Select Pickup Date" required>
-      </div>
-      <div class="mb-3 col-md-2">
-        <div class="date-caption">Drop-off Date</div>
-        <input type="text" id="carDropoffDate" name="dropoff_date" class="form-control rounded-0 py-3 datepicker" placeholder="Select Drop-off Date" required>
-      </div>
-      <div class="mb-3 col-md-2">
-        <div class="date-caption" style="visibility: hidden">Search</div>
-        <button type="submit" class="btn btn-warning w-100 rounded-0 py-3 fw-bold">Search Cars</button>
-      </div>
-    </div>
-  </form>
-</div>
- <!-- Bus Booking -->
+                            <h4 class="mb-5" id="flight-title">Book Flights</h4>
+                            <hr class="searchline">
+                            <form action="{{ route('flight.index') }}" method="GET">
+                                <div class="row">
+                                    <div class="mb-2 col-md-2">
+                                        <div class="date-caption">From</div>
+                                        <input type="text" class="form-control rounded-0 py-3" name="fromCity"
+                                            id="flightFromCity" placeholder="Enter Departure City" required>
+                                        <div id="flightFromCityList" class="card"
+                                            style="position: absolute; width: 23%; max-height: 150px; overflow-y: scroll;">
+                                        </div>
+                                    </div>
+                                    <div class="mb-2 col-md-2">
+                                        <div class="date-caption">To</div>
+                                        <input type="text" class="form-control rounded-0 py-3" name="toCity"
+                                            id="flightToCity" placeholder="Enter Destination City" required>
+                                        <div id="flightToCityList" class="card"
+                                            style="position: absolute; width: 23%; max-height: 150px; overflow-y: scroll;">
+                                        </div>
+                                    </div>
+                                    <div class="mb-2 col-md-2">
+                                        <div class="date-caption">Departure Date</div>
+                                        <input type="text" id="flightDepartureDate" name="departure_date"
+                                            class="form-control rounded-0 py-3 datepicker"
+                                            placeholder="Select Departure Date" required>
+                                    </div>
+                                    <div class="mb-2 col-md-2">
+                                        <div class="date-caption">Return Date</div>
+                                        <input type="text" id="flightReturnDate" name="return_date"
+                                            class="form-control rounded-0 py-3 datepicker"
+                                            placeholder="Select Return Date">
+                                    </div>
+                                    <div class="mb-2 col-md-2">
+                                        <label for="passengers" class="form-label">Passengers</label>
+                                        <input type="number" class="form-control rounded-0 py-3" id="passengers"
+                                            name="passengers" placeholder="No. of passengers" min="1">
+                                    </div>
+                                    <div class="mb-2 col-md-2">
+                                        <div class="date-caption" style="visibility: hidden">Search</div>
+                                        <button type="submit" class="btn btn-warning w-100 rounded-0 py-3 fw-bold">Search Flights</button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                        <!-- Car Booking -->
+                        <div class="tab-pane fade mt-5" id="car" role="tabpanel" aria-labelledby="car-tab">
+                            <h4 class="mb-5" id="car-title">Book Cars</h4>
+                            <hr class="searchline">
+                            <form action="{{ route('cars.index') }}" method="GET">
+                                <div class="row">
+                                    <div class="mb-3 col-md-3">
+                                        <div class="date-caption">Pickup Location</div>
+                                        <input type="text" class="form-control rounded-0 py-3" name="pickupLocation"
+                                            id="carPickupLocation" placeholder="Enter Pickup Location" required>
+                                        <input type="hidden" name="pickupLocationCode" id="carPickupLocationCode">
+                                        <div id="carPickupLocationList" class="card"
+                                            style="position: absolute; width: 23%; max-height: 150px; overflow-y: scroll;">
+                                        </div>
+                                    </div>
+                                    <div class="mb-3 col-md-3">
+                                        <div class="date-caption">Drop-off Location</div>
+                                        <input type="text" class="form-control rounded-0 py-3" name="dropoffLocation"
+                                            id="carDropoffLocation" placeholder="Enter Drop-off Location" required>
+                                        <input type="hidden" name="dropoffLocationCode" id="carDropoffLocationCode">
+                                        <div id="carDropoffLocationList" class="card"
+                                            style="position: absolute; width: 23%; max-height: 150px; overflow-y: scroll;">
+                                        </div>
+                                    </div>
+                                    <div class="mb-3 col-md-2">
+                                        <div class="date-caption">Pickup Date</div>
+                                        <input type="text" id="carPickupDate" name="pickup_date"
+                                            class="form-control rounded-0 py-3 datepicker"
+                                            placeholder="Select Pickup Date" required>
+                                    </div>
+                                    <div class="mb-3 col-md-2">
+                                        <label>Trip Type</label>
+                                        <select name="trip_type" id="carTripType" class="form-control rounded-0 py-3">
+                                            <option value="0">One Way</option>
+                                            <option value="1">Return</option>
+                                            <option value="2">Local</option>
+                                        </select>
+                                    </div>
+                                    <div class="mb-3 col-md-2">
+                                        <div class="date-caption" style="visibility: hidden">Search</div>
+                                        <button type="submit" class="btn btn-warning w-100 rounded-0 py-3 fw-bold">Search
+                                            Cars</button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div> <!-- Bus Booking -->
  <div class="tab-pane fade mt-5" id="bus" role="tabpanel" aria-labelledby="bus-tab">
   <h4 class="mb-5" id="bus-title">Book Bus Tickets</h4>
   <hr class="searchline">
@@ -1027,7 +1061,123 @@ $(document).on('click keydown', function (e) {
     }
 });
 
-   
+     // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+        // +                  Car Script                                   +
+        // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+        document.addEventListener('DOMContentLoaded', function() {
+            flatpickr("#carPickupDate", {
+                dateFormat: "d/m/Y",
+                minDate: "today",
+                defaultDate: 'today'
+            });
+        });
+
+        function fetchCities(inputId, suggestionId) {
+            const query = document.getElementById(inputId).value;
+            if (query.length < 2) {
+                document.getElementById(suggestionId).innerHTML = '';
+                return;
+            }
+            fetch('{{ route('fetchCities') }}', {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        query
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    const suggestionList = document.getElementById(suggestionId);
+                    suggestionList.innerHTML = '';
+                    data.forEach(city => {
+                        const option = document.createElement('div');
+                        option.className = 'suggestion-item';
+                        option.textContent =
+                        `${city.caoncitlst_city_name}, ${city.caoncitlst_id}`; // Display city name and code
+                        option.onclick = () => {
+                            document.getElementById(inputId).value = city.caoncitlst_city_name;
+                            document.getElementById(inputId === 'carPickupLocation' ?
+                                    'carPickupLocationCode' : 'carDropoffLocationCode').value = city
+                                .caoncitlst_id; // Set city code
+                            suggestionList.innerHTML = '';
+                        };
+                        suggestionList.appendChild(option);
+                    });
+                })
+                .catch(error => console.error('Error fetching cities:', error));
+        }
+
+        document.getElementById('carPickupLocation').addEventListener('input', () => {
+            fetchCities('carPickupLocation', 'carPickupLocationList');
+        });
+        document.getElementById('carDropoffLocation').addEventListener('input', () => {
+            fetchCities('carDropoffLocation', 'carDropoffLocationList');
+        });
+
+
+        // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+        // +                  Flight Script                                +
+        // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+        $(document).ready(function() {
+            // Fetch Airports for "From" City and "To" City
+            function fetchAirports(inputId, listId) {
+                $(inputId).on('keyup', function() {
+                    let query = $(this).val();
+                    if (query.length > 1) {
+                        $.ajax({
+                            url: '{{ route('fetch.airports') }}',
+                            method: 'GET',
+                            data: {
+                                query: query
+                            },
+                            success: function(response) {
+                                let suggestions = '';
+                                response.forEach(function(airport) {
+                                    suggestions += `
+                                <a href="#" class="dropdown-item airport-option"
+                                    data-value="${airport.airport_city_name} (${airport.airport_name}) (${airport.airport_code})"
+                                    data-target="${inputId}">
+                                    ${airport.airport_city_name} (${airport.airport_name}) (${airport.airport_code})
+                                </a>`;
+                                });
+                                $(listId).html(suggestions).addClass('show');
+                            }
+                        });
+                    } else {
+                        $(listId).removeClass('show').empty();
+                    }
+                });
+
+                // Select Airport Option
+                $(document).on('click', '.airport-option', function(e) {
+                    e.preventDefault();
+                    let selectedValue = $(this).data('value');
+                    let targetInput = $(this).data('target');
+                    $(targetInput).val(selectedValue); // Only update the specific input
+                    $(listId).removeClass('show').empty();
+                });
+
+                // Close dropdown when clicking outside
+                $(document).click(function(e) {
+                    if (!$(e.target).closest(inputId).length && !$(e.target).closest(listId).length) {
+                        $(listId).removeClass('show').empty();
+                    }
+                });
+            }
+
+            // Independent initialization for From and To fields
+            fetchAirports('#flightFromCity', '#flightFromCityList');
+            fetchAirports('#flightToCity', '#flightToCityList');
+
+            // Flatpickr for Datepickers
+            flatpickr('.datepicker', {
+                dateFormat: 'd-m-Y',
+                defaultDate: 'today',
+            });
+        });
 
 </script>
 
