@@ -1,4 +1,3 @@
-
 <!doctype html>
 <html lang="en">
 <head>
@@ -33,7 +32,6 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
 <!-- Google tag (gtag.js) -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-6VR342NV7T"></script>
-
 <script>
   window.dataLayer = window.dataLayer || [];
   function gtag(){dataLayer.push(arguments);}
@@ -54,31 +52,33 @@
               class="fa-solid fa-envelope px-1"></i> info@makemybharatyatra.com</a>
         </div>
         <div class="col-md-6 text-end">
-          {{-- <button class="btn btn-warning btn-sm rounded-0 fw-bold mx-3 px-4 d-none d-lg-block"> <i
-              class="fa fa-map-signs"></i> PLAN A TRIP</button> --}}
+                {{-- Conditionally show Login or Logout button --}}
+                @guest
+                    <!-- Show Login Button if the user is not logged in -->
+                    <a href="{{ route('loginView') }}" class="btn btn-warning btn-sm rounded-0 fw-bold mx-3 px-3">
+                        <i class="fa-regular fa-user"></i> LOGIN
+                    </a>
+                @else
+                    <!-- Show Logout Button if the user is logged in -->
+                    <form action="{{ route('logout') }}" method="POST" style="display:inline;">
+                      @csrf
+                       <button type="submit" class="btn btn-warning btn-sm rounded-0 fw-bold mx-3 px-3">
+                          <i class="fa-solid fa-sign-out-alt"></i> LOGOUT
+                       </button>
+                    </form>
 
-          <a href="tel:1204379908" target="_blank"
-            class="text-white float-start text-decoration-none px-2 d-lg-none "><i class="fa-solid fa-phone px-1">
-            </i></a>
-
-          <a href="mailto:info@makemybharatyatra.com" target="_blank"
-            class="text-white float-start text-decoration-none border-start border-2 px-3 d-lg-none"> <i
-              class="fa-solid fa-envelope px-1"></i></a>
-          <!-- Button to open the modal -->
-<button type="button" class="btn btn-warning btn-sm rounded-0 fw-bold mx-3 px-3" data-bs-toggle="modal" data-bs-target="#loginModal">
-    <i class="fa-regular fa-user"></i> LOGIN
-</button>
-            <<a href="{{ route('checkout') }}" class="nav-link d-inline-block position-relative" style="margin-top: 5px;">
-    <i class="fa fa-shopping-cart" style="font-size: 18px;"></i>
-    <span id="cart-count" class="badge bg-danger rounded-pill position-absolute" 
-          style="top: -10px; right: -10px; font-size: 11px;">
-        {{ $cartCount }}
-    </span>
-</a>
+                @endguest
+                <a href="{{ route('checkout') }}" class="nav-link d-inline-block position-relative" style="margin-top: 5px;">
+                    <i class="fa fa-shopping-cart" style="font-size: 18px;"></i>
+                    <span id="cart-count" class="badge bg-danger rounded-pill position-absolute"
+                          style="top: -10px; right: -10px; font-size: 11px;">
+                        {{ $cartCount }}
+                    </span>
+                </a>
+            </div>
         </div>
-      </div>
     </div>
-  </div>
+</div>
   {{-- end top header --}}
   <nav class="navbar navbar-expand-lg navbar-light primary-header shadow bg-light">
     <div class="container">
@@ -137,7 +137,6 @@
       </div>
     </div>
   </nav>
-  
   @yield('content')
   <footer class="footer mt-5">
     <div class="container">
@@ -196,48 +195,6 @@
       </div>
     </div>
   </footer>
-  <!-- Modal HTML -->
-<div class="modal fade" id="loginModal" tabindex="-1" aria-labelledby="loginModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header bg-warning">
-                <h5 class="modal-title" id="loginModalLabel">Login</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <form action="{{ route('login') }}" method="post">
-                    @csrf
-                    <div class="mb-3">
-                        <label for="email" class="form-label">Email</label>
-                        <input type="email" class="form-control" value="{{ old('email') }}" id="email" name="email" placeholder="Enter email" required>
-                        @error('email')
-                        <small class="text-danger">{{ $message }}</small>
-                        @enderror
-                    </div>
-                    <div class="mb-3">
-                        <label for="password" class="form-label">Password</label>
-                        <input type="password" class="form-control" id="password" name="password" placeholder="****" required>
-                        @error('password')
-                        <small class="text-danger">{{ $message }}</small>
-                        @enderror
-                    </div>
-                    <div class="form-check mb-3">
-                        <input class="form-check-input" type="checkbox" value="" id="flexCheckDefault">
-                        <label class="form-check-label" for="flexCheckDefault">Remember Me</label>
-                        <a href="{{ route('forgotView') }}" class="float-end">Forgot Password</a>
-                    </div>
-                    <div class="mb-4">
-                        <button type="submit" class="btn btn-primary rounded-0 w-100">Login</button>
-                    </div>
-                </form>
-                <div class="mb-3">
-                    <a href="{{ route('registerView') }}" class="text-center d-block">If you are a new user, create an account!</a>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
   <!-- Swiper JS -->
   <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
