@@ -496,5 +496,9 @@ Route::post('/store-seat', [FlightController::class, 'storeSeat'])->name('flight
 
 
 
-
+//updated flight Routes
 Route::post('flight/search', [FlightController::class, 'searchFlights'])->name('flight.search');
+Route::post('flight/farerule', [FlightController::class, 'fareRules']);
+Route::post('flight/fareQutes', [FlightController::class, 'fareQutes']);
+Route::get('flight/fareQutesResult', [FlightController::class, 'fareQutesResult']);
+

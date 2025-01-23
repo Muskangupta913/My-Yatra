@@ -1632,26 +1632,46 @@ $(document).ready(function () {
         };
 
         $.ajax({
-            url: '/flight/search',
-            method: 'POST',
-            contentType: 'application/json',
-            headers: {
-                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content'),
-            },
-            data: JSON.stringify(payload),
-            success: function (response) {
-                if (response.success) {
-                    console.log('Flights:', response.results);
-                } else {
-                    alert(response.message || 'No flights found.');
-                }
-            },
-            error: function (xhr) {
-                console.error('Error:', xhr.responseJSON);
-                alert(xhr.responseJSON?.message || 'An error occurred.');
-            }
-        });
+    url: '/flight/search',
+    method: 'POST',
+    contentType: 'application/json',
+    headers: {
+        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content'),
+    },
+    data: JSON.stringify(payload),
+    success: function (response) {
+        if (response.success) {
+            console.log('Flights:', response.results);
+
+            console.log('Flight search results:', response.results);
+        console.log('TraceId:', response.traceId);
+
+        // Store response data in sessionStorage
+        sessionStorage.setItem('flightSearchResults', JSON.stringify(response.results));
+        sessionStorage.setItem('flightTraceId', response.traceId);
+        sessionStorage.setItem('flightSearchParams', JSON.stringify(payload));
+
+        // Optional: Add a log to confirm data is stored
+        console.log('Stored in sessionStorage:');
+        console.log('flightSearchResults:', sessionStorage.getItem('flightSearchResults'));
+        console.log('flightTraceId:', sessionStorage.getItem('flightTraceId'));
+        console.log('flightSearchParams:', sessionStorage.getItem('flightSearchParams'));
+        window.location.href = '/flight';
+
+ 
+            // Optional: Keep only the last 5 searches
+        
+        } else {
+            alert(response.message || 'No flights found.');
+        }
+    },
+    error: function (xhr) {
+        console.error('Error:', xhr.responseJSON);
+        alert(xhr.responseJSON?.message || 'An error occurred.');
+    }
+});
     });
+
 
     // Initialize components
     initializeAirportSearch();
