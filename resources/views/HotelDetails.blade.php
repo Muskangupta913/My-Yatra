@@ -1,6 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <!-- Leaflet CSS -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+<!-- Leaflet JavaScript -->
+<script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+
     <div id="loadingSpinner" style="
     display: none; 
     position: fixed; 
@@ -249,6 +254,8 @@ body {
             </div>
 
             <!-- Right Side - Hotel Details Sidebar -->
+             <!-- Inside your hotel template, add this where you want the map to appear -->
+<div id="hotel-map" style="height: 300px; width: 100%; margin-top: 1rem; border-radius: 0.5rem; overflow: hidden;"></div>
             <div class="md:w-1/3">
                 <div class="bg-white rounded-lg shadow p-6 space-y-6 sticky top-4">
                     <h2 class="text-xl font-semibold border-b pb-2">Hotel Information</h2>
@@ -402,7 +409,8 @@ function hideLoadingSpinner() {
         hotelDetailsLoaded = true;
         hideLoadingSpinner();
     });
-}function renderHotelDetails(hotel) {
+}
+function renderHotelDetails(hotel) {
     const template = document.getElementById('hotel-template');
     const content = template.content.cloneNode(true);
     const container = document.getElementById('hotel-details');
@@ -599,7 +607,8 @@ function hideLoadingSpinner() {
             `;
             descriptionContainer.appendChild(sectionDiv);
         });
-    }
+
+    } 
 }
 
 // Initialize the page

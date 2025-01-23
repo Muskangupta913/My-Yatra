@@ -710,9 +710,7 @@
   }).datepicker('setDate', new Date()); // Automatically set today's date
   </script>
    -->
-
-<<<<<<< HEAD
-<script>
+   <script>
 // Modified loading spinner functions
 function showLoadingSpinner() {
     const spinner = document.getElementById('loadingSpinner');
@@ -728,13 +726,11 @@ function hideLoadingSpinner() {
         }
     }
 }
-=======
 
-   <script>
+
     document.addEventListener('DOMContentLoaded', function() {
     updateRoomGuestsTitle();
 });
->>>>>>> 93128f6a93b0f68970e3176af8d9d53f991e9419
 
 function updateRoomGuestsTitle() {
     const rooms = document.getElementById("noOfRooms").value;
@@ -1124,12 +1120,8 @@ cityInputConfig.forEach(config => {
 
     // Handle city selection from the dropdown
     $(document).on('click', `${config.list} .city-option`, function () {
-<<<<<<< HEAD
-        const cityName = $(this).text().trim(); // Ensure trim on selection
-=======
         const cityName = $(this).data('cityname');
         const countryCode = $(this).data('countrycode');
->>>>>>> 93128f6a93b0f68970e3176af8d9d53f991e9419
         const cityId = $(this).data('cityid');
         
         // Set the display value with city and country
@@ -1300,8 +1292,6 @@ console.log('Cookies:', document.cookie);
     }
 });
 
-<<<<<<< HEAD
-=======
      // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
         // +                  Car Script                                   +
         // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -1744,7 +1734,6 @@ $(document).ready(function () {
     handleTripTypeChange();
 });
 
->>>>>>> 93128f6a93b0f68970e3176af8d9d53f991e9419
 </script>
 
 
