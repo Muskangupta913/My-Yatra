@@ -55,6 +55,9 @@ class FlightController extends Controller
     }
 
 
+    
+
+
 
 
 
@@ -328,6 +331,106 @@ class FlightController extends Controller
 
 
 
+    public function fareQutes(Request $request)
+    {
+        try {
+            $data = $request->all();
+
+            $validator = Validator::make($data, [
+                'EndUserIp' => 'required',
+                'ClientId' => 'required',
+                'UserName' => 'required',
+                'Password' => 'required',
+                'SrdvType' => 'required',
+                'SrdvIndex' => 'required',
+                'TraceId' => 'required',
+                'ResultIndex' => 'required'
+            ]);
+
+            if ($validator->fails()) {
+                Log::error('Fare Quote Validation Failed', [
+                    'errors' => $validator->errors()->toArray(),
+                    'data' => $data
+                ]);
+
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Validation failed',
+                    'errors' => $validator->errors()->toArray()
+                ], 422);
+            }
+
+            $payload = [
+                'EndUserIp' => $data['EndUserIp'],
+                'ClientId' => $data['ClientId'],
+                'UserName' => $data['UserName'],
+                'Password' => $data['Password'],
+                'SrdvType' => $data['SrdvType'],
+                'SrdvIndex' => $data['SrdvIndex'],
+                'TraceId' => $data['TraceId'],
+                'ResultIndex' => $data['ResultIndex']
+            ];
+
+            $response = Http::timeout(300)
+                ->connectTimeout(300)
+                ->withHeaders([
+                    'Content-Type' => 'application/json',
+                    'Api-Token' => 'MakeMy@910@23',
+                ])
+                ->post('https://flight.srdvtest.com/v8/rest/FareQuote', $payload);
+
+            if ($response->successful()) {
+                $responseData = $response->json();
+
+                if (isset($responseData['Error']) && $responseData['Error']['ErrorCode'] === "0") {
+                    return response()->json([
+                        'success' => true,
+                        'fareQuote' => $responseData['Results'] ?? null,
+                        'traceId' => $responseData['TraceId'] ?? null
+                    ], 200);
+                } else {
+                    return response()->json([
+                        'success' => false,
+                        'message' => $responseData['Error']['ErrorMessage'] ?? 'Unknown API error',
+                        'errorCode' => $responseData['Error']['ErrorCode'] ?? null
+                    ], 400);
+                }
+            }
+
+            return response()->json([
+                'status' => 'error',
+                'message' => 'API request failed',
+                'debug' => [
+                    'status' => $response->status(),
+                    'body' => $response->body()
+                ]
+            ], $response->status());
+
+        } catch (\Exception $e) {
+            Log::error('Fare Quote Exception', [
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            return response()->json([
+                'status' => 'error',
+                'message' => 'An unexpected error occurred',
+                'debug' => [
+                    'exception' => get_class($e),
+                    'message' => $e->getMessage()
+                ]
+            ], 500);
+        }
+    }
+
+    public function showFareQuotePage(Request $request)
+    {
+        // Pass necessary data to the view
+        return view('fare-quote', [
+            'traceId' => $request->query('traceId'),
+            'resultIndex' => $request->query('resultIndex')
+        ]);
+    }
 
 
 

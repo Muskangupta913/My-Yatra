@@ -116,11 +116,11 @@
                                         <p>Class: ${fareData.FareSegments[0]?.CabinClassName || 'N/A'}</p>
                                     </div>
                                     <div class="action-buttons">
-                                        <a href="flight/fareQutesResult" 
+                                        <button
                                            onclick="viewFlightDetails('${fareData.ResultIndex}')" 
                                            class="view-details-btn">
                                             <i class="fas fa-info-circle"></i> View Details
-                                        </a>
+                                        </button>
                                         <button onclick="fetchFareRules('${fareData.ResultIndex}')" 
                                                 class="fare-rules-btn">
                                             <i class="fas fa-file-alt"></i> Fare Rules
@@ -135,20 +135,80 @@
                 });
             });
         });
-
         function viewFlightDetails(resultIndex) {
-            const traceId = sessionStorage.getItem('flightTraceId');
-            
-            if (!traceId) {
-                console.error('TraceId is not found in sessionStorage');
-                return;
-            }
+    const traceId = sessionStorage.getItem('flightTraceId');
+    const results = JSON.parse(sessionStorage.getItem('flightSearchResults')) || [];
 
+    if (!traceId) {
+        console.error('TraceId is not found in sessionStorage');
+        return;
+    }
+
+    // Find the SrdvIndex for the specific resultIndex
+    let srdvIndex = null;
+    results.forEach(resultGroup => {
+        resultGroup.forEach(result => {
+            if (result.FareDataMultiple) {
+                result.FareDataMultiple.forEach(fareData => {
+                    if (fareData.ResultIndex === resultIndex) {
+                        srdvIndex = fareData.SrdvIndex;
+                    }
+                });
+            }
+        });
+    });
+
+    // Ensure we have a valid SrdvIndex before making the API call
+    if (!srdvIndex) {
+        console.error('Unable to find SrdvIndex for the selected flight');
+        alert('Error: Could not retrieve fare details for the selected flight.');
+        return;
+    }
+
+    // Prepare payload for fareQuote API
+    const payload = {
+        EndUserIp: '1.1.1.1', // Replace with actual IP
+        ClientId: '180133',
+        UserName: 'MakeMy91',
+        Password: 'MakeMy@910',
+        SrdvType: 'MixAPI',
+        SrdvIndex: srdvIndex,
+        TraceId: traceId,
+        ResultIndex: resultIndex
+    };
+
+    // Call the FareQuote API
+    fetch('/flight/fareQutes', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+        },
+        body: JSON.stringify(payload)
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Store fare quote data in sessionStorage
+            sessionStorage.setItem('fareQuoteData', JSON.stringify(data.fareQuote));
             sessionStorage.setItem('selectedFlightResultIndex', resultIndex);
             sessionStorage.setItem('selectedFlightTraceId', traceId);
-            
-            window.location.href = `/flight-info?traceId=${traceId}&resultIndex=${resultIndex}`;
+            window.location.href = '/flight/fareQutesResult';
+
+            // Redirect to the fare quote result page
+            // window.location.href = `/flight-info?traceId=${traceId}&resultIndex=${resultIndex}`;
+        } else {
+            // Handle API error
+            console.error('Fare Quote API Error:', data.message);
+            alert(`Error fetching fare details: ${data.message}`);
         }
+    })
+    .catch(error => {
+        console.error('Error fetching fare quote:', error);
+        alert('An error occurred while fetching flight details.');
+    });
+}
+     
 
         function fetchFareRules(resultIndex) {
     const results = JSON.parse(sessionStorage.getItem('flightSearchResults')) || [];
@@ -225,6 +285,9 @@
                 fareRulesDetails.innerHTML = `<p>Error fetching fare rules: ${error.message}</p>`;
             });
         }
+
+  
+    
     </script>
 </body>
 </html>
