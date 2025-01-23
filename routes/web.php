@@ -144,6 +144,12 @@ Route::post('/register', [AuthController::class, 'register'])->name('register');
 Route::get('/login', [AuthController::class, 'loginView'])->name('login');
 Route::post('/login', [AuthController::class, 'login']);
 
+// Logout routes
+Route::post('/logout', [AuthController::class, 'logout']);
+Route::get('/logout', [AuthController::class, 'logout']);
+Route::post('admin/logout', [AdminController::class, 'logout'])->name('admin.logout');
+
+
 // Forgot password routes
 Route::get('/forgot-password', [AuthController::class, 'forgotView'])->name('forgot.password');
 Route::post('/forgot-password', [AuthController::class, 'forgot']);
@@ -428,3 +434,71 @@ Route::get('/kashmir', function () {
 Route::get('/rishikesh', function () {
   return view('rishikesh'); // Replace 'rishikesh' with the actual Blade file name without the .blade.php extension.
 })->name('rishikesh');
+
+// Car Route
+Route::get('/cars', [CarController::class, 'index'])->name('cars');
+Route::get('/cars', [HomeController::class, 'cars']);
+Route::post('/cars', [CarController::class, 'index'])->name('cars.index');
+Route::post('/fetch-cities', [CarController::class, 'fetchCities'])->name('fetchCities');
+Route::post('/search-cars', [CarController::class, 'searchCars'])->name('searchCars');
+Route::get('/search-destination', [HomeController::class, 'search'])->name('search.destination');
+// web.php (Route file)
+Route::get('/fetch-all-states', [HomeController::class, 'fetchAllStates'])->name('fetch.all.states');
+
+// Route::get('/search/cities', [HomeController::class, 'searchCities'])->name('search.cities');
+
+// Searching Packages
+Route::get('/search-packages', [HomeController::class, 'searchPackages'])->name('searchPackages');
+
+// Car city fatch
+Route::get('/fetch-cities', [CityController::class, 'fetchCities'])->name('fetch.cities');
+
+// Car Wallet Balance
+Route::get('/wallet-balance', [CarController::class, 'walletBalance']);
+
+//Car booking form
+Route::get('/car-booking', [CarController::class, 'showBookingForm'])->name('car.booking');
+Route::get('/cars', [CarController::class, 'showCars'])->name('car.cars');
+
+// Carbalance Log
+Route::post('/car/process-to-pay', [CarController::class, 'processToPay'])->name('car.processToPay');
+Route::get('/check-wallet-balance', [CarController::class, 'checkWalletBalance'])->name('wallet.check');
+//Car Booking form
+Route::post('/process-booking', [CarController::class, 'processBooking'])->name('car.processBooking');
+Route::get('/cars', [CarController::class, 'index'])->name('cars');
+Route::get('/car-booking/success', function () {
+    return view('frontend.car_booking');
+})->name('car.booking.success');
+// Route::get('/car/booking-success', [CarController::class, 'bookingSuccess'])->name('car.bookingSuccess');
+Route::post('/car/process-payment', [CarController::class, 'processPayment'])->name('car.book');
+
+// Card pay
+Route::post('/cardpay', [CardpayController::class, 'store'])->name('cardpay.store');
+Route::post('/car/check-wallet', [CarController::class, 'checkWalletBalance'])->name('car.checkWallet');
+Route::post('/book-car', [CarController::class, 'bookCar']);
+Route::post('/save-car-booking', [CarController::class, 'saveCarBooking']);
+Route::post('/car/process-payment', [CarController::class, 'processPayment'])->name('car.process.payment');
+Route::get('/car/booking-success', [CarController::class, 'bookingSuccess'])->name('car.booking.success');
+Route::post('/car/book', [CarController::class, 'processPayment'])->name('car.book');
+Route::get('/car/booking-success', [CarController::class, 'bookingSuccess'])->name('car.bookingSuccess');
+
+
+// Flight Route
+Route::get('/flight', [FlightController::class, 'index'])->name('flight.index');
+Route::get('/fetch-airports', [FlightController::class, 'fetchAirports'])->name('fetch.airports');
+
+Route::post('/flights/calendar-fare', [FlightController::class, 'getCalendarFare'])->name('flights.calendar-fare');
+Route::get('/flight-booking', [FlightController::class, 'showBookingForm'])->name('flight.booking');
+Route::get('/ssr', [FlightController::class, 'getSSRData'])->name('get.ssr.data');
+Route::get('/flight-seats', [FlightController::class, 'selectSeat'])->name('flight.seat');
+Route::post('/store-seat', [FlightController::class, 'storeSeat'])->name('flight.storeSeat');
+
+
+
+
+//updated flight Routes
+Route::post('flight/search', [FlightController::class, 'searchFlights'])->name('flight.search');
+Route::post('flight/farerule', [FlightController::class, 'fareRules']);
+Route::post('flight/fareQutes', [FlightController::class, 'fareQutes']);
+Route::get('flight/fareQutesResult', [FlightController::class, 'fareQutesResult']);
+

@@ -1,3 +1,9 @@
+<!-- Include jQuery from CDN -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<!-- Include Flatpickr CSS -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+<!-- Include Flatpickr JS -->
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 @extends('frontend.layouts.master')
 @section('content')
 <div id="loadingSpinner" style="
@@ -25,6 +31,16 @@
 
 .flatpickr-day {
   padding: 8px;
+}
+.city-option {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.country-code {
+    color: #666;
+    font-size: 0.9em;
 }
 </style>
 @endsection
@@ -71,14 +87,15 @@
           </li>
         </ul>
         <div class="tab-content" id="myTabContent">
-          <div class="tab-pane fade" id="home" role="tabpanel" aria-labelledby="home-tab">
+          <!-- <div class="tab-pane fade" id="home" role="tabpanel" aria-labelledby="home-tab">
             <p>Comming Soon!</p>
-          </div>
+          </div> -->
           <!-- // hotel booking -->
+
+
+
           <div class="tab-content" id="myTabContent">
-  <div class="tab-pane fade" id="home" role="tabpanel" aria-labelledby="home-tab">
-    <p>Coming Soon!</p>
-  </div>
+
   <!-- Hotel Booking -->
   <div class="tab-pane fade mt-5" id="profile" role="tabpanel" aria-labelledby="profile-tab">
     <h4 class="mb-5" id="hotel-title">Book Hotels in India</h4>
@@ -111,7 +128,6 @@
                 <input type="number" name="NoOfNights" class="form-control rounded-0 py-3" placeholder="Enter No. of Nights" required style="text-align: center;">
             </div>
 
-            <!-- Room & Guests -->
             <div class="mb-3 col-md-3">
     <div class="date-caption">Room & Guests</div>
     <div class="dropdown">
@@ -148,17 +164,26 @@
                     </select>
                 </div>
             </li>
-            <li>
+            <li class="mb-3">
                 <div class="d-flex justify-content-between align-items-center">
                     <label for="noOfChildren" class="form-label mb-0">Children</label>
-                    <select id="noOfChildren" name="RoomGuests[0][NoOfChild]" class="form-select w-auto" onchange="updateRoomGuestsTitle()">
+                    <select id="noOfChildren" name="RoomGuests[0][NoOfChild]" class="form-select w-auto" onchange="handleChildrenChange()">
                         <option value="0" selected>0</option>
                         <option value="1">1</option>
                         <option value="2">2</option>
                         <option value="3">3</option>
                     </select>
                 </div>
-            </li> 
+            </li>
+            <li>
+            <div id="childAgesContainer" class="mt-3" style="display: none;">
+    <label class="form-label" style="font-size: 16px; font-weight: bold; color: #333;">Child Ages</label>
+    <div id="childAgesInputs" class="d-flex flex-column gap-2">
+        <!-- Child age inputs will be dynamically added here -->
+    </div>
+</div>
+
+            </li>
         </ul>
     </div>
 </div>
@@ -167,7 +192,7 @@
                 <div class="date-caption"style="text-align: center;">Nationality</div>
                 <select id="nationalitySelect" class="form-control rounded-0 py-3 text-center">
                     <option value="" selected>Select Nationality</option>
-                    <option value="IN" data-nationality="Indian">IN</option>
+                    <option value="IN" data-nationality="Indian">INDIA</option>
                     <option value="US" data-nationality="American">American</option>
                     <option value="GB" data-nationality="British">British</option>
                     <option value="CA" data-nationality="Canadian">Canadian</option>
@@ -180,75 +205,160 @@
             <!-- Search Button -->
             <div class="mb-3 col-md-2">
                 <div class="date-caption" style="visibility: hidden">Search</div>
-                <button type="button" class="btn btn-warning w-100 rounded-0 py-3 fw-bold hotelbuttonsearch" id="searchButton">Search</button>
+                <button type="button" class="btn item-center btn-warning w-100 rounded-0 py-3 fw-bold hotelbuttonsearch" id="searchButton">Search</button>
             </div>
         </div>
     </form>
 </div>
 
-<!-- // flight booking -->
+
 <div class="tab-pane fade mt-5" id="flight" role="tabpanel" aria-labelledby="home-tab">
-  <h4 class="mb-5" id="flight-title">Book Flights</h4>
-  <hr class="searchline">
-  <form action="{{ route('flight.booking') }}" method="GET">
-    <div class="row">
-      <div class="mb-3 col-md-3">
-        <div class="date-caption">From</div>
-        <input type="text" class="form-control rounded-0 py-3" name="fromCity" id="flightFromCity" placeholder="Enter Departure City" required>
-        <div id="flightFromCityList" class="card" style="position: absolute; width: 23%; max-height: 150px; overflow-y: scroll;"></div>
-      </div>
-      <div class="mb-3 col-md-3">
-        <div class="date-caption">To</div>
-        <input type="text" class="form-control rounded-0 py-3" name="toCity" id="flightToCity" placeholder="Enter Destination City" required>
-        <div id="flightToCityList" class="card" style="position: absolute; width: 23%; max-height: 150px; overflow-y: scroll;"></div>
-      </div>
-      <div class="mb-3 col-md-2">
-        <div class="date-caption">Departure Date</div>
-        <input type="text" id="flightDepartureDate" name="departure_date" class="form-control rounded-0 py-3 datepicker" placeholder="Select Departure Date" required>
-      </div>
-      <div class="mb-3 col-md-2">
-        <div class="date-caption">Return Date</div>
-        <input type="text" id="flightReturnDate" name="return_date" class="form-control rounded-0 py-3 datepicker" placeholder="Select Return Date">
-      </div>
-      <div class="mb-3 col-md-2">
-        <div class="date-caption" style="visibility: hidden">Search</div>
-        <button type="submit" class="btn btn-warning w-100 rounded-0 py-3 fw-bold">Search Flights</button>
-      </div>
-    </div>
-  </form>
+    <h4 class="mb-5" id="flight-title">Book Flights</h4>
+    <hr class="searchline">
+    
+    <form id="flightSearchForm" action="{{ route('flight.search') }}" method="POST">
+        @csrf
+        <div class="row mb-3">
+            <div class="col-md-4">
+                <div class="form-check form-check-inline">
+                    <input class="form-check-input" type="radio" name="journeyType" id="oneWay" value="1" checked>
+                    <label class="form-check-label" for="oneWay">One Way</label>
+                </div>
+                <div class="form-check form-check-inline">
+                    <input class="form-check-input" type="radio" name="journeyType" id="roundTrip" value="2">
+                    <label class="form-check-label" for="roundTrip">Round Trip</label>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+        <div class="mb-2 col-md-2">
+    <div class="date-caption">From</div>
+    <input type="text" class="form-control rounded-0 py-3" id="flightFromCity" placeholder="Enter Departure City" required>
+    <!-- Note: removed 'name' attribute from display input and added it to hidden input -->
+    <input type="hidden" id="flightFromCityCode" name="origin" required>
+    <div id="flightFromCityList" class="card" style="position: absolute; width: 23%; max-height: 150px; overflow-y: scroll;"></div>
 </div>
- <!-- Car Booking -->
-<div class="tab-pane fade mt-5" id="car" role="tabpanel" aria-labelledby="car-tab">
-  <h4 class="mb-5" id="car-title">Book Cars</h4>
-  <hr class="searchline">
-  <form action="{{ route('cars') }}" method="GET">
-    <div class="row">
-      <div class="mb-3 col-md-3">
-        <div class="date-caption">Pickup Location</div>
-        <input type="text" class="form-control rounded-0 py-3" name="pickupLocation" id="carPickupLocation" placeholder="Enter Pickup Location" required>
-        <div id="carPickupLocationList" class="card" style="position: absolute; width: 23%; max-height: 150px; overflow-y: scroll;"></div>
-      </div>
-      <div class="mb-3 col-md-3">
-        <div class="date-caption">Drop-off Location</div>
-        <input type="text" class="form-control rounded-0 py-3" name="dropoffLocation" id="carDropoffLocation" placeholder="Enter Drop-off Location" required>
-        <div id="carDropoffLocationList" class="card" style="position: absolute; width: 23%; max-height: 150px; overflow-y: scroll;"></div>
-      </div>
-      <div class="mb-3 col-md-2">
-        <div class="date-caption">Pickup Date</div>
-        <input type="text" id="carPickupDate" name="pickup_date" class="form-control rounded-0 py-3 datepicker" placeholder="Select Pickup Date" required>
-      </div>
-      <div class="mb-3 col-md-2">
-        <div class="date-caption">Drop-off Date</div>
-        <input type="text" id="carDropoffDate" name="dropoff_date" class="form-control rounded-0 py-3 datepicker" placeholder="Select Drop-off Date" required>
-      </div>
-      <div class="mb-3 col-md-2">
-        <div class="date-caption" style="visibility: hidden">Search</div>
-        <button type="submit" class="btn btn-warning w-100 rounded-0 py-3 fw-bold">Search Cars</button>
-      </div>
-    </div>
-  </form>
+            
+<div class="mb-2 col-md-2">
+    <div class="date-caption">To</div>
+    <input type="text" class="form-control rounded-0 py-3" id="flightToCity" placeholder="Enter Destination City" required>
+    <!-- Note: removed 'name' attribute from display input and added it to hidden input -->
+    <input type="hidden" id="flightToCityCode" name="destination" required>
+    <div id="flightToCityList" class="card" style="position: absolute; width: 23%; max-height: 150px; overflow-y: scroll;"></div>
 </div>
- <!-- Bus Booking -->
+            <div class="mb-2 col-md-2">
+                <div class="date-caption">Departure Date</div>
+                <input type="text" id="flightDepartureDate" name="departureDate"
+                    class="form-control rounded-0 py-3 datepicker"
+                    placeholder="Select Departure Date" required>
+            </div>
+            <div class="mb-2 col-md-2">
+                <div class="date-caption">Return Date</div>
+                <input type="text" id="flightReturnDate" name="returnDate"
+                    class="form-control rounded-0 py-3 datepicker"
+                    placeholder="Select Return Date">
+            </div>
+            <div class="mb-2 col-md-2">
+    <div class="date-caption">Passengers</div>
+    <div class="dropdown">
+        <button class="btn btn-secondary dropdown-toggle w-100" type="button" id="passengerDropdown" data-bs-toggle="dropdown">
+            Passengers
+        </button>
+        <div class="dropdown-menu p-3" style="width: 250px;">
+            <div class="mb-2">
+                <label for="adultCount">Adults</label>
+                <input type="number" 
+                       id="adultCount"
+                       name="adultCount" 
+                       class="form-control" 
+                       value="1" 
+                       min="1" 
+                       max="9">
+            </div>
+            <div class="mb-2">
+                <label for="childCount">Children</label>
+                <input type="number" 
+                       id="childCount"
+                       name="childCount" 
+                       class="form-control" 
+                       value="0" 
+                       min="0" 
+                       max="9">
+            </div>
+            <div class="mb-2">
+                <label for="infantCount">Infants</label>
+                <input type="number" 
+                       id="infantCount"
+                       name="infantCount" 
+                       class="form-control" 
+                       value="0" 
+                       min="0" 
+                       max="9">
+            </div>
+        </div>
+    </div>
+</div>
+            <div class="mb-2 col-md-2">
+                <div class="date-caption" style="visibility: hidden">Search</div>
+                <button type="submit" id="flightSearch" class="btn btn-warning w-100 rounded-0 py-3 fw-bold">Search Flights</button>
+            </div>
+        </div>
+
+      
+    </form>
+</div>
+
+
+
+                        <!-- Car Booking -->
+                        <div class="tab-pane fade mt-5" id="car" role="tabpanel" aria-labelledby="car-tab">
+                            <h4 class="mb-5" id="car-title">Book Cars</h4>
+                            <hr class="searchline">
+                            <form action="{{ route('cars.index') }}" method="GET">
+                                <div class="row">
+                                    <div class="mb-3 col-md-3">
+                                        <div class="date-caption">Pickup Location</div>
+                                        <input type="text" class="form-control rounded-0 py-3" name="pickupLocation"
+                                            id="carPickupLocation" placeholder="Enter Pickup Location" required>
+                                        <input type="hidden" name="pickupLocationCode" id="carPickupLocationCode">
+                                        <div id="carPickupLocationList" class="card"
+                                            style="position: absolute; width: 23%; max-height: 150px; overflow-y: scroll;">
+                                        </div>
+                                    </div>
+                                    <div class="mb-3 col-md-3">
+                                        <div class="date-caption">Drop-off Location</div>
+                                        <input type="text" class="form-control rounded-0 py-3" name="dropoffLocation"
+                                            id="carDropoffLocation" placeholder="Enter Drop-off Location" required>
+                                        <input type="hidden" name="dropoffLocationCode" id="carDropoffLocationCode">
+                                        <div id="carDropoffLocationList" class="card"
+                                            style="position: absolute; width: 23%; max-height: 150px; overflow-y: scroll;">
+                                        </div>
+                                    </div>
+                                    <div class="mb-3 col-md-2">
+                                        <div class="date-caption">Pickup Date</div>
+                                        <input type="text" id="carPickupDate" name="pickup_date"
+                                            class="form-control rounded-0 py-3 datepicker"
+                                            placeholder="Select Pickup Date" required>
+                                    </div>
+                                    <div class="mb-3 col-md-2">
+                                        <label>Trip Type</label>
+                                        <select name="trip_type" id="carTripType" class="form-control rounded-0 py-3">
+                                            <option value="0">One Way</option>
+                                            <option value="1">Return</option>
+                                            <option value="2">Local</option>
+                                        </select>
+                                    </div>
+                                    <div class="mb-3 col-md-2">
+                                        <div class="date-caption" style="visibility: hidden">Search</div>
+                                        <button type="submit" class="btn btn-warning w-100 rounded-0 py-3 fw-bold">Search
+                                            Cars</button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                        
+                        <!-- Bus Booking -->
  <div class="tab-pane fade mt-5" id="bus" role="tabpanel" aria-labelledby="bus-tab">
   <h4 class="mb-5" id="bus-title">Book Bus Tickets</h4>
   <hr class="searchline">
@@ -261,7 +371,7 @@
             <div class="date-caption">From</div>
             <input type="text" class="form-control rounded-0 py-3" name="source_city" id="busFromCity" placeholder="Enter Departure City" required>
             <input type="hidden" name="source_code" id="busFromCode"> <!-- Hidden field to store source city code -->
-            <div id="busFromCityList" class="card" style="position: absolute; width: 23%; max-height: 150px; overflow-y: scroll;"></div>
+            <div id="busFromCityList" class="card" style="position: absolute; width: 23%; max-height: 200px; overflow-y: scroll;"></div>
         </div>
 
         <!-- Destination City -->
@@ -601,6 +711,7 @@
   </script>
    -->
 
+<<<<<<< HEAD
 <script>
 // Modified loading spinner functions
 function showLoadingSpinner() {
@@ -617,15 +728,60 @@ function hideLoadingSpinner() {
         }
     }
 }
+=======
+
+   <script>
+    document.addEventListener('DOMContentLoaded', function() {
+    updateRoomGuestsTitle();
+});
+>>>>>>> 93128f6a93b0f68970e3176af8d9d53f991e9419
 
 function updateRoomGuestsTitle() {
-        const rooms = document.getElementById("noOfRooms").value;
-        const adults = document.getElementById("noOfAdults").value;
-        const children = document.getElementById("noOfChildren").value;
+    const rooms = document.getElementById("noOfRooms").value;
+    const adults = document.getElementById("noOfAdults").value;
+    const children = document.getElementById("noOfChildren").value;
 
-        const title = `${rooms} Room${rooms > 1 ? "s" : ""}, ${adults} Adult${adults > 1 ? "s" : ""}, ${children} Child${children > 1 ? "ren" : ""}`;
-        document.getElementById("roomGuestsDropdown").textContent = title;
+    const title = `${rooms} Room${rooms > 1 ? "s" : ""}, ${adults} Adult${adults > 1 ? "s" : ""}, ${children} Child${children > 1 ? "ren" : ""}`;
+    document.getElementById("roomGuestsDropdown").textContent = title;
+}
+
+function handleChildrenChange() {
+    const childCount = parseInt(document.getElementById("noOfChildren").value);
+    const container = document.getElementById("childAgesContainer");
+    const inputsContainer = document.getElementById("childAgesInputs");
+    
+    // Update the title
+    updateRoomGuestsTitle();
+    
+    // Show/hide the child ages container
+    container.style.display = childCount > 0 ? "block" : "none";
+    
+    // Clear existing inputs
+    inputsContainer.innerHTML = "";
+    
+    // Create age selectors for each child
+    for (let i = 0; i < childCount; i++) {
+        const ageSelector = document.createElement("div");
+        ageSelector.className = "d-flex justify-content-between align-items-center";
+        ageSelector.innerHTML = `
+            <label class="form-label mb-0">Child ${i + 1} Age</label>
+            <select name="RoomGuests[0][ChildAges][${i}]" class="form-select w-auto ms-2" onchange="updateRoomGuestsTitle()">
+                ${generateAgeOptions()}
+            </select>
+        `;
+        inputsContainer.appendChild(ageSelector);
     }
+}
+
+function generateAgeOptions() {
+    let options = '';
+    // Generate options for ages 0-12
+    for (let i = 0; i <= 12; i++) {
+        options += `<option value="${i}">${i} ${i === 1 ? 'year' : 'years'}</option>`;
+    }
+    return options;
+}
+
 
     
   $(document).ready(function () {
@@ -884,7 +1040,8 @@ function fetchHotelAllCities(inputField, listId) {
                 response.data.forEach(city => {
                     const cityHTML = `
                         <div class="list-group-item city-option" style="cursor: pointer;" data-cityid="${city.cityid}">
-                            <i class="fa-solid fa-location-dot"></i> ${city.Destination}
+                            <i class="fa-solid fa-location-dot"></i> 
+                            ${city.Destination} 
                         </div>`;
                     list.append(cityHTML);
                 });
@@ -921,7 +1078,7 @@ function fetchHotelCities(inputField, listId) {
                     response.data.forEach(city => {
                         list.append(
                             `<div class="list-group-item city-option" data-cityid="${city.cityid}">
-                                ${city.Destination}
+                                ${city.Destination} (${city.country})
                             </div>`
                         );
                     });
@@ -967,13 +1124,28 @@ cityInputConfig.forEach(config => {
 
     // Handle city selection from the dropdown
     $(document).on('click', `${config.list} .city-option`, function () {
+<<<<<<< HEAD
         const cityName = $(this).text().trim(); // Ensure trim on selection
+=======
+        const cityName = $(this).data('cityname');
+        const countryCode = $(this).data('countrycode');
+>>>>>>> 93128f6a93b0f68970e3176af8d9d53f991e9419
         const cityId = $(this).data('cityid');
-
-        $(config.input).val(cityName); // Update input field
-        $(config.hidden).val(cityId); // Update hidden field
-        $(config.list).hide(); // Hide dropdown
+        
+        // Set the display value with city and country
+        $(config.input).val(`${cityName} (${countryCode})`);
+        $(config.hidden).val(cityId);
+        $(config.list).hide();
     });
+});
+
+$(document).on('click', '.city-option', function() {
+    const cityId = $(this).data('cityid');
+    const cityText = $(this).text().trim();
+    
+    $('#hotelSearchCity').val(cityText);
+    $('#cityIdInput').val(cityId);
+    $('#hotelSearchCityList').hide();
 });
 
 // Hide dropdowns on outside click or Escape key
@@ -988,7 +1160,7 @@ $(document).on('click keydown', function (e) {
  document.addEventListener('DOMContentLoaded', function () {
     // Initialize datepicker with API-compatible format
     $('.datepicker').datepicker({
-        format: 'dd/mm/yyyy', // User-friendly format
+        format: 'mm/dd/yyyy', // Changed to MM/DD/YYYY format
         autoclose: true,
         startDate: 'today',
         todayHighlight: true,
@@ -999,13 +1171,60 @@ $(document).on('click keydown', function (e) {
     if (searchButton) {
         searchButton.addEventListener('click', function (event) {
             event.preventDefault();
-
             const formData = new FormData(document.getElementById('hotelSearchForm'));
             const data = Object.fromEntries(formData.entries());
 
-            // Convert CheckInDate to yyyy-mm-dd for API
-            const [day, month, year] = data.CheckInDate.split('/');
-            const formattedCheckInDate = `${year}-${month}-${day}`;
+            const [month, day, year] = data.CheckInDate.split('/');
+            // Ensure month and day are padded with leading zeros if needed
+            const paddedMonth = month.padStart(2, '0');
+            const paddedDay = day.padStart(2, '0');
+            const formattedCheckInDate = `${year}-${paddedMonth}-${paddedDay}`;
+
+
+            // Get all child ages
+        const childCount = parseInt(data["RoomGuests[0][NoOfChild]"]);
+        const childAges = [];
+        
+        // Only collect ages if there are children
+        if (childCount > 0) {
+            for (let i = 0; i < childCount; i++) {
+                const ageSelect = document.querySelector(`select[name="RoomGuests[0][ChildAges][${i}]"]`);
+                if (ageSelect) {
+                    childAges.push(parseInt(ageSelect.value));
+                }
+            }
+        }
+
+
+        function getCookie(name) {
+    const value = `; ${document.cookie}`;
+    const parts = value.split(`; ${name}=`);
+    if (parts.length === 2) return parts.pop().split(';').shift();
+    return null;
+}
+
+// Example usage - Get cookie values
+console.log('NoOfChildren:', getCookie('noOfChildren'));
+console.log('ChildAges:', getCookie('childAges'));
+console.log('NoOfAdults:', getCookie('noOfAdults'));
+
+       
+        // Get the selected number of children
+const noOfChildrenSelect = document.querySelector('select[name="RoomGuests[0][NoOfChild]"]');
+const selectedChildCount = noOfChildrenSelect ? noOfChildrenSelect.value : '0';
+
+// Set cookies with expiry time (e.g., 7 days)
+document.cookie = `noOfChildren=${selectedChildCount}; path=/; max-age=604800`;
+document.cookie = `childAges=${childAges}; path=/; max-age=604800`;
+document.cookie = `noOfAdults=${String(data["RoomGuests[0][NoOfAdults]"])}; path=/; max-age=604800`;
+
+
+
+// Check specific cookies
+console.log('Cookies:', document.cookie);
+
+
+
 
             const payload = {
                 ClientId: "180189",
@@ -1024,7 +1243,7 @@ $(document).on('click keydown', function (e) {
                     {
                         NoOfAdults: String(data["RoomGuests[0][NoOfAdults]"]),
                         NoOfChild: String(data["RoomGuests[0][NoOfChild]"]),
-                        ChildAge: [15],
+                        ChildAge:  childAges,
                     },
                 ],
             };
@@ -1081,6 +1300,451 @@ $(document).on('click keydown', function (e) {
     }
 });
 
+<<<<<<< HEAD
+=======
+     // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+        // +                  Car Script                                   +
+        // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+        document.addEventListener('DOMContentLoaded', function() {
+            flatpickr("#carPickupDate", {
+                dateFormat: "d/m/Y",
+                minDate: "today",
+                defaultDate: 'today'
+            });
+        });
+
+        function fetchCities(inputId, suggestionId) {
+            const query = document.getElementById(inputId).value;
+            if (query.length < 2) {
+                document.getElementById(suggestionId).innerHTML = '';
+                return;
+            }
+            fetch('{{ route('fetchCities') }}', {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        query
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    const suggestionList = document.getElementById(suggestionId);
+                    suggestionList.innerHTML = '';
+                    data.forEach(city => {
+                        const option = document.createElement('div');
+                        option.className = 'suggestion-item';
+                        option.textContent =
+                        `${city.caoncitlst_city_name}, ${city.caoncitlst_id}`; // Display city name and code
+                        option.onclick = () => {
+                            document.getElementById(inputId).value = city.caoncitlst_city_name;
+                            document.getElementById(inputId === 'carPickupLocation' ?
+                                    'carPickupLocationCode' : 'carDropoffLocationCode').value = city
+                                .caoncitlst_id; // Set city code
+                            suggestionList.innerHTML = '';
+                        };
+                        suggestionList.appendChild(option);
+                    });
+                })
+                .catch(error => console.error('Error fetching cities:', error));
+        }
+
+        document.getElementById('carPickupLocation').addEventListener('input', () => {
+            fetchCities('carPickupLocation', 'carPickupLocationList');
+        });
+        document.getElementById('carDropoffLocation').addEventListener('input', () => {
+            fetchCities('carDropoffLocation', 'carDropoffLocationList');
+        });
+
+
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        $(document).ready(function() {
+    // Airport search functionality
+    function initializeAirportSearch() {
+        const searchConfig = [
+            { inputId: '#flightFromCity', listId: '#flightFromCityList' },
+            { inputId: '#flightToCity', listId: '#flightToCityList' }
+        ];
+
+        searchConfig.forEach(config => {
+            const input = $(config.inputId);
+            const list = $(config.listId);
+            let searchTimeout;
+
+            // Input event handler with debounce
+            input.on('input', function() {
+                clearTimeout(searchTimeout);
+                const query = $(this).val();
+                
+                if (query.length < 2) {
+                    list.fadeOut().empty();
+                    return;
+                }
+
+                searchTimeout = setTimeout(() => {
+                    fetchAirports(query, list, input);
+                }, 300);
+            });
+
+            // Close dropdown when clicking outside
+            $(document).on('click', function(e) {
+                if (!$(e.target).closest(config.inputId).length && 
+                    !$(e.target).closest(config.listId).length) {
+                    list.fadeOut().empty();
+                }
+            });
+        });
+    }
+
+    // Function to fetch airports from the server
+    function fetchAirports(query, listElement, inputElement) {
+        $.ajax({
+            url: '/fetch-airports',
+            method: 'GET',
+            data: { query: query },
+            beforeSend: function() {
+                listElement.html('<div class="p-2">Loading...</div>').show();
+            },
+            success: function(response) {
+                if (!response.length) {
+                    listElement.html('<div class="p-2">No airports found</div>');
+                    return;
+                }
+
+                const suggestions = response.map(airport => `
+                    <a href="#" class="dropdown-item airport-option py-2" 
+                       data-code="${airport.airport_code}"
+                       data-name="${airport.airport_city_name} (${airport.airport_name}) (${airport.airport_code})">
+                        <div class="d-flex align-items-center">
+                            <div>
+                                <div class="font-weight-bold">${airport.airport_city_name}</div>
+                                <div class="small text-muted">${airport.airport_name}</div>
+                            </div>
+                            <div class="ml-auto">
+                                <span class="badge badge-light">${airport.airport_code}</span>
+                            </div>
+                        </div>
+                    </a>
+                `).join('');
+
+                listElement.html(suggestions).show();
+
+                // Handle airport selection
+                listElement.find('.airport-option').on('click', function(e) {
+                    e.preventDefault();
+                    const code = $(this).data('code');
+                    const name = $(this).data('name');
+                    
+                    inputElement.val(name);
+                    inputElement.attr('data-code', code);
+                    listElement.fadeOut().empty();
+
+                    // Trigger validation if needed
+                    validateForm();
+                });
+            },
+            error: function() {
+                listElement.html('<div class="p-2 text-danger">Error fetching airports</div>');
+            }
+        });
+    }
+
+    // Form validation
+    function validateForm() {
+        const fromCity = $('#flightFromCity');
+        const toCity = $('#flightToCity');
+        
+        // Basic validation
+        if (fromCity.val() === toCity.val() && fromCity.val() !== '') {
+            toCity.addClass('is-invalid');
+            $('#sameCityError').show();
+            return false;
+        }
+        
+        toCity.removeClass('is-invalid');
+        $('#sameCityError').hide();
+        return true;
+    }
+
+    // Trip type handling
+    function handleTripTypeChange() {
+        const tripType = $('input[name="journeyType"]:checked').val();
+        const returnDateField = $('#flightReturnDate');
+        
+        if (tripType === '1') { // One way
+            returnDateField.prop('disabled', true).val('');
+            returnDateField.closest('.mb-2').fadeOut();
+        } else { // Round trip
+            returnDateField.prop('disabled', false);
+            returnDateField.closest('.mb-2').fadeIn();
+        }
+    }
+
+    // Initialize all components
+    initializeAirportSearch();
+    
+    // Set up event listeners
+    $('input[name="journeyType"]').on('change', handleTripTypeChange);
+    
+    // Initialize trip type on page load
+    handleTripTypeChange();
+
+    // Form submission
+    $('#flightSearchForm').on('submit', function(e) {
+        if (!validateForm()) {
+            e.preventDefault();
+        }
+    });
+});
+
+$(document).ready(function () {
+    // Initialize datepicker with the correct format
+    $('.datepicker').datepicker({
+        format: 'yyyy-mm-dd',
+        autoclose: true,
+        startDate: new Date()
+    });
+
+    // Airport search functionality
+    function initializeAirportSearch() {
+        const searchConfig = [
+            {
+                inputId: '#flightFromCity',
+                codeInputId: '#flightFromCityCode',
+                listId: '#flightFromCityList'
+            },
+            {
+                inputId: '#flightToCity',
+                codeInputId: '#flightToCityCode',
+                listId: '#flightToCityList'
+            }
+        ];
+
+        searchConfig.forEach(config => {
+            const input = $(config.inputId);
+            const codeInput = $(config.codeInputId);
+            const list = $(config.listId);
+            let searchTimeout;
+
+            // Input event handler with debounce
+            input.on('input', function () {
+                clearTimeout(searchTimeout);
+                const query = $(this).val();
+
+                if (query.length < 2) {
+                    list.fadeOut().empty();
+                    return;
+                }
+
+                searchTimeout = setTimeout(() => {
+                    fetchAirports(query, list, input, codeInput);
+                }, 300);
+            });
+
+            // Close dropdown when clicking outside
+            $(document).on('click', function (e) {
+                if (!$(e.target).closest(config.inputId).length &&
+                    !$(e.target).closest(config.listId).length) {
+                    list.fadeOut().empty();
+                }
+            });
+        });
+    }
+
+    // Function to fetch airports from the server
+    function fetchAirports(query, listElement, inputElement, codeInputElement) {
+        $.ajax({
+            url: '/fetch-airports',
+            method: 'GET',
+            data: { query: query },
+            beforeSend: function () {
+                listElement.html('<div class="p-2">Loading...</div>').show();
+            },
+            success: function (response) {
+                if (!response.length) {
+                    listElement.html('<div class="p-2">No airports found</div>');
+                    return;
+                }
+
+                const suggestions = response.map(airport => `
+                    <a href="#" class="dropdown-item airport-option py-2" 
+                       data-code="${airport.airport_code}"
+                       data-name="${airport.airport_city_name} (${airport.airport_name}) (${airport.airport_code})">
+                        <div class="d-flex align-items-center">
+                            <div>
+                                <div class="font-weight-bold">${airport.airport_city_name}</div>
+                                <div class="small text-muted">${airport.airport_name}</div>
+                            </div>
+                            <div class="ml-auto">
+                                <span class="badge badge-light">${airport.airport_code}</span>
+                            </div>
+                        </div>
+                    </a>
+                `).join('');
+
+                listElement.html(suggestions).show();
+
+                // Handle airport selection
+                listElement.find('.airport-option').on('click', function (e) {
+                    e.preventDefault();
+                    const code = $(this).data('code');
+                    const name = $(this).data('name');
+
+                    inputElement.val(name);
+                    codeInputElement.val(code); // Store the code in hidden input
+                    listElement.fadeOut().empty();
+
+                    validateForm();
+                });
+            },
+            error: function () {
+                listElement.html('<div class="p-2 text-danger">Error fetching airports</div>');
+            }
+        });
+    }
+
+    // Form validation
+    function validateForm() {
+        const fromCity = $('#flightFromCity');
+        const toCity = $('#flightToCity');
+
+        if (fromCity.val() === toCity.val() && fromCity.val() !== '') {
+            toCity.addClass('is-invalid');
+            $('#sameCityError').show();
+            return false;
+        }
+
+        toCity.removeClass('is-invalid');
+        $('#sameCityError').hide();
+        return true;
+    }
+
+    // Trip type handling
+    function handleTripTypeChange() {
+        const tripType = $('input[name="journeyType"]:checked').val();
+        const returnDateField = $('#flightReturnDate');
+
+        if (tripType === '1') { // One way
+            returnDateField.prop('disabled', true).val('');
+            returnDateField.closest('.mb-2').fadeOut();
+        } else { // Round trip
+            returnDateField.prop('disabled', false);
+            returnDateField.closest('.mb-2').fadeIn();
+        }
+    }
+
+    // Form submission
+    $('#flightSearchForm').on('submit', function (e) {
+        e.preventDefault();
+
+        function convertToISODate(dateString) {
+        const [month, day, year] = dateString.split('/');
+        return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
+    }
+
+    const adultCount = $('input[name="adultCount"]').val() || "1";
+    const childCount = $('input[name="childCount"]').val() || "0";
+    const infantCount = $('input[name="infantCount"]').val() || "0";
+
+    const departureDate = convertToISODate($('#flightDepartureDate').val());
+        const segments = [{
+            Origin: $('#flightFromCityCode').val().toUpperCase(),
+            Destination: $('#flightToCityCode').val().toUpperCase(),
+            FlightCabinClass: parseInt($('#flightCabinClass').val()) || 1,
+            PreferredDepartureTime: `${departureDate}T00:00:00`,
+            PreferredArrivalTime: `${departureDate}T00:00:00`
+        }];
+
+        if ($('input[name="journeyType"]:checked').val() === '2') {
+            const returnDate = $('#flightReturnDate').val();
+            segments.push({
+                Origin: $('#flightToCityCode').val().toUpperCase(),
+                Destination: $('#flightFromCityCode').val().toUpperCase(),
+                FlightCabinClass: parseInt($('#flightCabinClass').val()) || 1,
+                PreferredDepartureTime: `${returnDate}T00:00:00`,
+                PreferredArrivalTime: `${returnDate}T00:00:00`
+            });
+        }
+
+        const payload = {
+            EndUserIp: "1.1.1.1",
+            ClientId: "180133",
+            UserName: "MakeMy91",
+            Password: "MakeMy@910",
+            AdultCount: adultCount.toString(),
+        ChildCount: childCount.toString(),
+        InfantCount: infantCount.toString(),
+            JourneyType: $('input[name="journeyType"]:checked').val(),
+            FareType: "1",
+            Segments: segments
+        };
+
+        $.ajax({
+    url: '/flight/search',
+    method: 'POST',
+    contentType: 'application/json',
+    headers: {
+        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content'),
+    },
+    data: JSON.stringify(payload),
+    success: function (response) {
+        if (response.success) {
+            console.log('Flights:', response.results);
+
+            console.log('Flight search results:', response.results);
+        console.log('TraceId:', response.traceId);
+
+        // Store response data in sessionStorage
+        sessionStorage.setItem('flightSearchResults', JSON.stringify(response.results));
+        sessionStorage.setItem('flightTraceId', response.traceId);
+        sessionStorage.setItem('flightSearchParams', JSON.stringify(payload));
+
+        // Optional: Add a log to confirm data is stored
+        console.log('Stored in sessionStorage:');
+        console.log('flightSearchResults:', sessionStorage.getItem('flightSearchResults'));
+        console.log('flightTraceId:', sessionStorage.getItem('flightTraceId'));
+        console.log('flightSearchParams:', sessionStorage.getItem('flightSearchParams'));
+        window.location.href = '/flight';
+
+ 
+            // Optional: Keep only the last 5 searches
+        
+        } else {
+            alert(response.message || 'No flights found.');
+        }
+    },
+    error: function (xhr) {
+        console.error('Error:', xhr.responseJSON);
+        alert(xhr.responseJSON?.message || 'An error occurred.');
+    }
+});
+    });
+
+
+    // Initialize components
+    initializeAirportSearch();
+    $('input[name="journeyType"]').on('change', handleTripTypeChange);
+    handleTripTypeChange();
+});
+
+>>>>>>> 93128f6a93b0f68970e3176af8d9d53f991e9419
 </script>
 
 

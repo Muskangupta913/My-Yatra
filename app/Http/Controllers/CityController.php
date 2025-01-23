@@ -95,7 +95,7 @@ class CityController extends Controller
     }
 
 
-
+   //HOTEL RELATED CONTROLLER 
 
     public function hotelFetchAllCities()
     {
@@ -103,7 +103,7 @@ class CityController extends Controller
             // Try to get cities from cache first
             $cities = Cache::remember('hotel_cities', 3600, function () {
                 return HotelCity::where('status', 'Active') // Only fetch active cities
-                   ->select('Destination', 'cityid')
+                   ->select('Destination', 'cityid','country')
                     ->get();
             });
 
@@ -153,7 +153,7 @@ class CityController extends Controller
                 // Query to fetch cities where the name starts with the input letter(s)
                 $cities = HotelCity::where('Destination', 'LIKE', $query . '%')
                     ->where('status', 'Active') // Only fetch active cities
-                    ->select('cityid', 'Destination')
+                    ->select('cityid', 'Destination', 'country')
                     ->limit(10) // Limit the number of results
                     ->get();
 
