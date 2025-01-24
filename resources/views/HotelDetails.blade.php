@@ -1,11 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <!-- Leaflet CSS -->
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
-<!-- Leaflet JavaScript -->
-<script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
-
     <div id="loadingSpinner" style="
     display: none; 
     position: fixed; 
@@ -254,8 +249,6 @@ body {
             </div>
 
             <!-- Right Side - Hotel Details Sidebar -->
-             <!-- Inside your hotel template, add this where you want the map to appear -->
-<div id="hotel-map" style="height: 300px; width: 100%; margin-top: 1rem; border-radius: 0.5rem; overflow: hidden;"></div>
             <div class="md:w-1/3">
                 <div class="bg-white rounded-lg shadow p-6 space-y-6 sticky top-4">
                     <h2 class="text-xl font-semibold border-b pb-2">Hotel Information</h2>
@@ -409,8 +402,7 @@ function hideLoadingSpinner() {
         hotelDetailsLoaded = true;
         hideLoadingSpinner();
     });
-}
-function renderHotelDetails(hotel) {
+}function renderHotelDetails(hotel) {
     const template = document.getElementById('hotel-template');
     const content = template.content.cloneNode(true);
     const container = document.getElementById('hotel-details');
@@ -607,8 +599,7 @@ function renderHotelDetails(hotel) {
             `;
             descriptionContainer.appendChild(sectionDiv);
         });
-
-    } 
+    }
 }
 
 // Initialize the page
@@ -938,9 +929,9 @@ function blockRoom(roomId) {
     const serializedRoomDetails = encodeURIComponent(JSON.stringify(roomDetails));
 
     // Show confirmation dialog
-    // if (!confirm('Are you sure you want to book this room?')) {
-    //     return;
-    // }
+    if (!confirm('Are you sure you want to block this room?')) {
+        return;
+    }
 
     // Show loading state
     const loadingOverlay = document.createElement('div');
@@ -991,7 +982,7 @@ function blockRoom(roomId) {
                 window.location.href = `/room-detail?traceId=${traceId}&resultIndex=${resultIndex}&hotelCode=${hotelCode}&hotelName=${encodeURIComponent(hotelName)}&roomDetails=${serializedRoomDetails}`;
             }
         } else {
-            // alert('Status: ' + (data.message || 'Unknown error'));
+            alert('Status: ' + (data.message || 'Unknown error'));
             window.location.href = `/room-detail?traceId=${traceId}&resultIndex=${resultIndex}&hotelCode=${hotelCode}&hotelName=${encodeURIComponent(hotelName)}&roomDetails=${serializedRoomDetails}`;
         }
     })

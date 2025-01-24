@@ -1661,7 +1661,18 @@ $(document).ready(function () {
             PreferredDepartureTime: `${departureDate}T00:00:00`,
             PreferredArrivalTime: `${departureDate}T00:00:00`
         }];
-
+        const searchParams = new URLSearchParams({
+        from: $('#flightFromCity').val(),
+        fromCode: $('#flightFromCityCode').val(),
+        to: $('#flightToCity').val(),
+        toCode: $('#flightToCityCode').val(),
+        departureDate: $('#flightDepartureDate').val(),
+        tripType: $('input[name="journeyType"]:checked').val(),
+        adults: adultCount,
+        children: childCount,
+        infants: infantCount,
+        cabinClass: $('#flightCabinClass').val() || "1"
+    });
         if ($('input[name="journeyType"]:checked').val() === '2') {
             const returnDate = $('#flightReturnDate').val();
             segments.push({
@@ -1711,7 +1722,7 @@ $(document).ready(function () {
         console.log('flightSearchResults:', sessionStorage.getItem('flightSearchResults'));
         console.log('flightTraceId:', sessionStorage.getItem('flightTraceId'));
         console.log('flightSearchParams:', sessionStorage.getItem('flightSearchParams'));
-        window.location.href = '/flight';
+        window.location.href =  `/flight?${searchParams.toString()}`;
 
  
             // Optional: Keep only the last 5 searches
