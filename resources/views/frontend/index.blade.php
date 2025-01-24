@@ -6,6 +6,20 @@
 <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 @extends('frontend.layouts.master')
 @section('content')
+<div id="loadingSpinner" style="
+    display: none; 
+    position: fixed; 
+    top: 0; 
+    left: 0; 
+    width: 100%; 
+    height: 100%; 
+    background-color: rgba(255, 255, 255, 0.8); 
+    z-index: 9999; 
+    display: none; 
+    align-items: center; 
+    justify-content: center;">
+    <img src="{{ asset('assets/loading.gif') }}" alt="Loading..." style="width: 10vw; height: 10vw; max-width: 150px; max-height: 150px;" />
+</div>
 @section('styles')
 <!-- Include Toastr CSS -->
 <link href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/css/toastr.min.css" rel="stylesheet">
@@ -30,7 +44,6 @@
 }
 </style>
 @endsection
-
 <section class="hero">
   <div class="container">
     <div class="row">
@@ -90,13 +103,19 @@
     <form id="hotelSearchForm">
         <div class="row">
             <!-- City Input -->
-            <div class="mb-3 col-md-3 hotel-search">
+            <!-- <div class="mb-3 col-md-3 hotel-search">
                 <div class="date-caption">Enter City</div>
                 <input type="text" class="form-control rounded-0 py-3" name="CityName" id="hotelSearchCity" placeholder="Enter City Name" required autocomplete="off" style="text-align: center; width: 100%;" >
                 <input type="hidden" name="CityId" id="cityIdInput" value="">
                 <div id="hotelSearchCityList" class="card" style="position: absolute; width: 23%; max-height: 150px; overflow-y: scroll;"></div>
+            </div> -->
+            
+            <div class="mb-3 col-md-3">
+                <div class="date-caption">Enter City</div>
+                <input type="text" class="form-control rounded-0 py-3" name="CityName" id="hotelSearchCity" placeholder="Enter City Name" required autocomplete="off" >
+                <input type="hidden" name="CityId" id="cityIdInput" value="" >
+                <div id="hotelSearchCityList" class="card" style="position: absolute; width: 23%; max-height: 150px; overflow-y: scroll;"></div>
             </div>
-
             <!-- Check-in Date -->
             <div class="mb-3 col-md-2">
     <div class="date-caption">Check-in Date</div>
@@ -679,8 +698,6 @@
 </section>
 @endsection
 @section('scripts')
-
-
 <!-- Include Toastr JS -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/js/toastr.min.js"></script>
 
@@ -693,9 +710,24 @@
   }).datepicker('setDate', new Date()); // Automatically set today's date
   </script>
    -->
-
-
    <script>
+// Modified loading spinner functions
+function showLoadingSpinner() {
+    const spinner = document.getElementById('loadingSpinner');
+    if (spinner) {
+        spinner.style.display = 'flex';
+    }
+}
+function hideLoadingSpinner() {
+    if (hotelDetailsLoaded && roomDetailsLoaded) {
+        const spinner = document.getElementById('loadingSpinner');
+        if (spinner) {
+            spinner.style.display = 'none';
+        }
+    }
+}
+
+
     document.addEventListener('DOMContentLoaded', function() {
     updateRoomGuestsTitle();
 });
@@ -964,7 +996,8 @@ function generateAgeOptions() {
     "&destination_city=" + encodeURIComponent(data.destination_city) +
     "&depart_date=" + data.depart_date +
     "&trace_id=" + responseData.traceId;
-    } else {
+    } 
+    else {
       toastr.error('No buses found in this route', 'Error');
     }
 })
@@ -1022,13 +1055,17 @@ function fetchHotelAllCities(inputField, listId) {
 
 // Function to fetch cities based on user input (autocomplete)
 function fetchHotelCities(inputField, listId) {
-    const query = $(inputField).val().trim();
+    // Trim the input and remove multiple spaces
+    const query = $(inputField).val()
+        .replace(/\s+/g, ' ')  // Replace multiple spaces with a single space
+        .trim();  // Remove leading and trailing spaces
 
+    // Only proceed if there's a meaningful input
     if (query.length > 0) {
         $.ajax({
             url: "{{ route('autocomplete.hotelcities') }}",
             method: "GET",
-            data: { query },
+            data: { query: query },  // Send the cleaned query
             success: function (response) {
                 const list = $(listId);
                 list.empty().show();
@@ -1051,24 +1088,34 @@ function fetchHotelCities(inputField, listId) {
             }
         });
     } else {
-        fetchHotelAllCities(inputField, listId); // Fetch all cities if input is cleared
+        // If input is just whitespace, fetch all cities
+        fetchHotelAllCities(inputField, listId);
     }
 }
 
-// Input field focus and input handlers
+// Modify the input event handler for hotel city search
 const cityInputConfig = [
     { input: '#hotelSearchCity', list: '#hotelSearchCityList', hidden: '#cityIdInput' }
 ];
 
 cityInputConfig.forEach(config => {
-    // Fetch all cities on input focus
-    $(config.input).on('focus', function () {
-        fetchHotelAllCities(config.input, config.list);
-    });
-
-    // Autocomplete based on user input
+    // Autocomplete based on user input with white space handling
     $(config.input).on('input', function () {
-        fetchHotelCities(config.input, config.list);
+        // Clean the input value
+        let cleanedValue = $(this).val()
+            .replace(/\s+/g, ' ')  // Replace multiple spaces with a single space
+            .trim();  // Remove leading and trailing spaces
+        
+        // Update the input with cleaned value
+        $(this).val(cleanedValue);
+
+        // Trigger search if there's a meaningful input
+        if (cleanedValue.length > 0) {
+            fetchHotelCities(config.input, config.list);
+        } else {
+            // If input is empty or just whitespace, fetch all cities
+            fetchHotelAllCities(config.input, config.list);
+        }
     });
 
     // Handle city selection from the dropdown
@@ -1102,10 +1149,6 @@ $(document).on('click keydown', function (e) {
     });
 });
 
-
-
-
- 
  document.addEventListener('DOMContentLoaded', function () {
     // Initialize datepicker with API-compatible format
     $('.datepicker').datepicker({
@@ -1196,7 +1239,7 @@ console.log('Cookies:', document.cookie);
                     },
                 ],
             };
-
+            showLoadingSpinner();
             fetch('/search-hotel', {
     method: 'POST',
     headers: {
@@ -1213,6 +1256,16 @@ console.log('Cookies:', document.cookie);
 })
 .then(data => {
     if (data.status === 'success') {
+      const searchParams = new URLSearchParams({
+                        city: document.getElementById('hotelSearchCity').value,
+                        cityId: payload.CityId,
+                        checkIn: payload.CheckInDate,
+                        nights: payload.NoOfNights,
+                        rooms: payload.NoOfRooms,
+                        adults: payload.RoomGuests[0].NoOfAdults,
+                        children: payload.RoomGuests[0].NoOfChild,
+                        nationality: payload.GuestNationality
+                    });
       console.log('Search results:', data.results);
       console.log('TraceId:', data.traceId); // Debug log
         sessionStorage.setItem('searchResults', JSON.stringify(data.results));
@@ -1223,13 +1276,15 @@ console.log('Cookies:', document.cookie);
 
             // Optional: Store HotelCodes as a separate sessionStorage item
             sessionStorage.setItem('hotelCodes', JSON.stringify(hotelCodes));
-        window.location.href = '/search-result';
-    } else {
+        window.location.href = `/search-result?${searchParams.toString()}`;
+    } 
+    else {
         console.error('API Error:', data.message);
         alert(data.message || 'No results found. Please try different search criteria.');
     }
 })
 .catch(error => {
+  hideLoadingSpinner();
     console.error('Error:', error);
     alert('An error occurred while searching. Please try again later.');
 });
@@ -1606,7 +1661,18 @@ $(document).ready(function () {
             PreferredDepartureTime: `${departureDate}T00:00:00`,
             PreferredArrivalTime: `${departureDate}T00:00:00`
         }];
-
+        const searchParams = new URLSearchParams({
+        from: $('#flightFromCity').val(),
+        fromCode: $('#flightFromCityCode').val(),
+        to: $('#flightToCity').val(),
+        toCode: $('#flightToCityCode').val(),
+        departureDate: $('#flightDepartureDate').val(),
+        tripType: $('input[name="journeyType"]:checked').val(),
+        adults: adultCount,
+        children: childCount,
+        infants: infantCount,
+        cabinClass: $('#flightCabinClass').val() || "1"
+    });
         if ($('input[name="journeyType"]:checked').val() === '2') {
             const returnDate = $('#flightReturnDate').val();
             segments.push({
@@ -1656,7 +1722,7 @@ $(document).ready(function () {
         console.log('flightSearchResults:', sessionStorage.getItem('flightSearchResults'));
         console.log('flightTraceId:', sessionStorage.getItem('flightTraceId'));
         console.log('flightSearchParams:', sessionStorage.getItem('flightSearchParams'));
-        window.location.href = '/flight';
+        window.location.href =  `/flight?${searchParams.toString()}`;
 
  
             // Optional: Keep only the last 5 searches

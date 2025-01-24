@@ -21,7 +21,10 @@
     <title>Hotel Details</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <!-- Include Toastr CSS -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/css/toastr.min.css" rel="stylesheet">
     <style>
+/* Core layout and reset */
 * {
     margin: 0;
     padding: 0;
@@ -33,30 +36,6 @@ body {
     background-color: #f5f5f5;
     color: #333;
     line-height: 1.6;
-}
-
-/* Modal Styles */
-.modal {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.5);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 1000;
-}
-
-.modal-content {
-    background-color: white;
-    padding: 2rem;
-    border-radius: 8px;
-    max-width: 600px;
-    width: 90%;
-    max-height: 90vh;
-    overflow-y: auto;
 }
 
 /* Container and Card Styles */
@@ -75,14 +54,6 @@ body {
 }
 
 /* Image Gallery */
-.image-gallery {
-    position: relative;
-    overflow: hidden;
-    border-radius: 12px;
-    background: white;
-    padding: 1rem;
-}
-
 .gallery-container {
     position: relative;
     width: 100%;
@@ -103,19 +74,6 @@ body {
     height: 100%;
     object-fit: cover;
     flex-shrink: 0;
-}
-
-/* Image Counter */
-.image-counter {
-    position: absolute;
-    bottom: 1rem;
-    right: 1rem;
-    background: rgba(0, 0, 0, 0.7);
-    color: white;
-    padding: 0.5rem 1rem;
-    border-radius: 20px;
-    font-size: 0.9rem;
-    z-index: 20;
 }
 
 /* Gallery Navigation Buttons */
@@ -149,44 +107,18 @@ body {
     right: 1rem;
 }
 
-/* Thumbnails Container */
-.thumbnails-container {
+/* Loading Spinner */
+#loadingSpinner {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(255, 255, 255, 0.8);
+    z-index: 9999;
     display: flex;
-    gap: 0.5rem;
-    margin-top: 1rem;
-    overflow-x: auto;
-    padding: 0.5rem;
-    scrollbar-width: thin;
-    scrollbar-color: #3498db #f8f9fa;
-}
-
-.thumbnail {
-    width: 80px;
-    height: 60px;
-    border-radius: 4px;
-    cursor: pointer;
-    opacity: 0.6;
-    transition: opacity 0.3s ease;
-    flex-shrink: 0;
-}
-
-.thumbnail.active {
-    opacity: 1;
-    border: 2px solid #3498db;
-}
-
-.thumbnails-container::-webkit-scrollbar {
-    height: 6px;
-}
-
-.thumbnails-container::-webkit-scrollbar-track {
-    background: #f8f9fa;
-    border-radius: 10px;
-}
-
-.thumbnails-container::-webkit-scrollbar-thumb {
-    background: #3498db;
-    border-radius: 10px;
+    align-items: center;
+    justify-content: center;
 }
 
 /* Room Card */
@@ -220,28 +152,7 @@ body {
     border-radius: 8px;
 }
 
-.room-thumbnails {
-    display: flex;
-    gap: 0.5rem;
-    margin-top: 0.5rem;
-    overflow-x: auto;
-}
-
-.room-thumbnail {
-    width: 60px;
-    height: 60px;
-    border-radius: 4px;
-    cursor: pointer;
-    opacity: 0.6;
-    transition: opacity 0.3s;
-}
-
-.room-thumbnail.active {
-    opacity: 1;
-    border: 2px solid #3498db;
-}
-
-/* Button Styles */
+/* Book Now Button */
 .book-now-button {
     background: #2563eb;
     color: white;
@@ -278,82 +189,134 @@ body {
         height: 32px;
     }
     
-    .image-counter {
-        font-size: 0.8rem;
-        padding: 0.3rem 0.8rem;
-    }
-    
     .room-image-gallery {
         flex: none;
     }
 }
 </style>
 </head>
-<body class="bg-gray-100">
+<body >
     <div id="hotel-details" class="max-w-6xl mx-auto p-4 space-y-6">
         <!-- Content will be populated by JavaScript -->
     </div>
     <template id="hotel-template">
-        <div class="space-y-6">
-            <!-- Hotel Header -->
-            <div class="bg-white rounded-lg shadow p-6">
-                <h1 class="text-3xl font-bold hotel-name"></h1>
-                <div class="flex flex-wrap gap-4 text-sm text-gray-600 mt-2">
-                    <div class="flex items-center gap-1">
-                        <i class="fas fa-map-marker-alt"></i>
-                        <span class="hotel-address"></span>
-                    </div>
-                    <div class="flex items-center gap-1">
-                        <i class="fas fa-star text-yellow-400"></i>
-                        <span class="hotel-rating"></span>
-                    </div>
-                    <div class="flex items-center gap-1">
-                        <i class="fas fa-phone"></i>
-                        <span class="hotel-contact"></span>
-                    </div>
+    <div class="space-y-6">
+        <!-- Hotel Header -->
+        <div class="bg-white rounded-lg shadow p-6">
+            <h1 class="text-3xl font-bold hotel-name"></h1>
+            <div class="flex flex-wrap gap-4 text-sm text-gray-600 mt-2">
+                <div class="flex items-center gap-1">
+                    <i class="fas fa-map-marker-alt"></i>
+                    <span class="hotel-address"></span>
+                </div>
+                <div class="flex items-center gap-1">
+                    <i class="fas fa-star text-yellow-400"></i>
+                    <span class="hotel-rating"></span>
+                </div>
+                <div class="flex items-center gap-1">
+                    <i class="fas fa-phone"></i>
+                    <span class="hotel-contact"></span>
                 </div>
             </div>
+        </div>
 
-            <!-- Image Gallery -->
-            <div class="image-gallery bg-white rounded-lg shadow p-4">
-                <div class="relative aspect-video rounded-lg overflow-hidden">
-                    <img src="" alt="Main Hotel Image" class="main-image w-full h-full object-cover">
-                    <button class="gallery-nav-button prev">
-                        <i class="fas fa-chevron-left"></i>
-                    </button>
-                    <button class="gallery-nav-button next">
-                        <i class="fas fa-chevron-right"></i>
-                    </button>
-                </div>
-                <div class="flex gap-2 mt-2 overflow-x-auto pb-2 thumbnails-container">
-                    <!-- Thumbnails will be populated here -->
-                </div>
-            </div>
-
-            <!-- Hotel Info Grid -->
-            <div class="grid md:grid-cols-2 gap-6">
-                <!-- Facilities -->
-                <div class="bg-white rounded-lg shadow p-6">
-                    <h2 class="text-xl font-semibold mb-4">Hotel Facilities</h2>
-                    <div class="grid grid-cols-2 gap-4 facilities-list">
-                        <!-- Facilities will be populated here -->
+        <!-- Main Content Area -->
+        <div class="flex flex-col md:flex-row gap-6">
+            <!-- Left Side - Image Gallery -->
+            <div class="md:w-2/3">
+                <div class="bg-white rounded-lg shadow p-4">
+                    <div class="relative aspect-video rounded-lg overflow-hidden">
+                        <img src="" alt="Main Hotel Image" class="main-image w-full h-full object-cover">
+                        <button class="gallery-nav-button prev absolute left-2 top-1/2 -translate-y-1/2 bg-black/50 text-white p-2 rounded-full hover:bg-black/70">
+                            <i class="fas fa-chevron-left"></i>
+                        </button>
+                        <button class="gallery-nav-button next absolute right-2 top-1/2 -translate-y-1/2 bg-black/50 text-white p-2 rounded-full hover:bg-black/70">
+                            <i class="fas fa-chevron-right"></i>
+                        </button>
+                    </div>
+                    <div class="flex gap-2 mt-2 overflow-x-auto pb-2 thumbnails-container">
+                        <!-- Thumbnails will be populated here -->
                     </div>
                 </div>
 
-                <!-- Description -->
-                <div class="bg-white rounded-lg shadow p-6">
+                <!-- Hotel Description Below Gallery -->
+                <div class="mt-6 bg-white rounded-lg shadow p-6">
                     <h2 class="text-xl font-semibold mb-4">About the Hotel</h2>
                     <div class="space-y-4 hotel-description">
                         <!-- Description will be populated here -->
                     </div>
                 </div>
             </div>
+
+            <!-- Right Side - Hotel Details Sidebar -->
+            <div class="md:w-1/3">
+                <div class="bg-white rounded-lg shadow p-6 space-y-6 sticky top-4">
+                    <h2 class="text-xl font-semibold border-b pb-2">Hotel Information</h2>
+                    
+                    <!-- Location Details -->
+                    <div class="space-y-4">
+                        <div class="flex items-start gap-3">
+                            <i class="fas fa-map-marked-alt text-blue-500 mt-1"></i>
+                            <div>
+                                <h3 class="font-semibold text-gray-700">Address</h3>
+                                <p class="text-gray-600 hotel-full-address"></p>
+                            </div>
+                        </div>
+
+                        <div class="flex items-start gap-3">
+                            <i class="fas fa-globe-asia text-blue-500 mt-1"></i>
+                            <div>
+                                <h3 class="font-semibold text-gray-700">Location</h3>
+                                <p class="text-gray-600">
+                                    <span class="hotel-city"></span>,
+                                    <span class="hotel-state"></span>
+                                </p>
+                                <p class="text-gray-600">
+                                    <span class="hotel-country"></span>
+                                    <span class="hotel-pincode"></span>
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="flex items-start gap-3">
+                            <i class="fas fa-location-crosshairs text-blue-500 mt-1"></i>
+                            <div>
+                                <h3 class="font-semibold text-gray-700">Coordinates</h3>
+                                <p class="text-gray-600">
+                                    <span class="hotel-latitude"></span>, 
+                                    <span class="hotel-longitude"></span>
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="flex items-start gap-3">
+                            <i class="fas fa-phone-alt text-blue-500 mt-1"></i>
+                            <div>
+                                <h3 class="font-semibold text-gray-700">Contact</h3>
+                                <p class="text-gray-600 hotel-phone"></p>
+                                <p class="text-gray-600 hotel-email"></p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Facilities Section -->
+                    <div class="border-t pt-4">
+                        <h3 class="font-semibold text-gray-700 mb-3">Hotel Facilities</h3>
+                        <div class="grid grid-cols-1 gap-2 facilities-list">
+                            <!-- Facilities will be populated here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
-    </template>
+    </div>
+</template>
 
     <div class="room-info-container">
         <div id="room-details" class="loading-state">Loading room details...</div>
     </div>
+    <!-- Include Toastr JS -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/js/toastr.min.js"></script>
 <script>
       document.getElementById('loadingSpinner').classList.remove('d-none');
 
@@ -439,9 +402,7 @@ function hideLoadingSpinner() {
         hotelDetailsLoaded = true;
         hideLoadingSpinner();
     });
-}
-
-function renderHotelDetails(hotel) {
+}function renderHotelDetails(hotel) {
     const template = document.getElementById('hotel-template');
     const content = template.content.cloneNode(true);
     const container = document.getElementById('hotel-details');
@@ -449,17 +410,127 @@ function renderHotelDetails(hotel) {
     // Clear existing content
     container.innerHTML = '';
     
-    // Set basic hotel information
-    content.querySelector('.hotel-name').textContent = hotel.HotelName;
-    content.querySelector('.hotel-address').textContent = 
-        `${hotel.Address}, ${hotel.City}, ${hotel.State}, ${hotel.PinCode}`;
-    content.querySelector('.hotel-rating').textContent = `${hotel.StarRating} Star Rating`;
-    content.querySelector('.hotel-contact').textContent = hotel.HotelContactNo;
+    // Enhanced header section with styling
+    const headerHtml = `
+        <div style="background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%); border-radius: 1rem; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); border: 1px solid #e2e8f0; padding: 2rem; margin-bottom: 2rem;">
+            <h1 style="font-size: 2rem; font-weight: 700; color: #1e40af; margin-bottom: 1.5rem; border-bottom: 2px solid #93c5fd; padding-bottom: 0.75rem;">
+                ${hotel.HotelName}
+            </h1>
+            
+            <div style="display: flex; flex-wrap: wrap; gap: 2rem; margin-top: 1rem;">
+                <!-- Location Info -->
+                <div style="display: flex; align-items: center; gap: 0.75rem; background: #f0f9ff; padding: 0.75rem 1.25rem; border-radius: 0.75rem; border: 1px solid #bfdbfe;">
+                    <div style="background: #2563eb; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                        <i class="fas fa-map-marker-alt" style="color: white; font-size: 1.25rem;"></i>
+                    </div>
+                    <div>
+                        <div style="font-size: 0.875rem; color: #64748b; margin-bottom: 0.25rem;">Location</div>
+                        <div style="color: #1e40af; font-weight: 500;">${hotel.Address}</div>
+                    </div>
+                </div>
+
+                <!-- Rating Info -->
+                <div style="display: flex; align-items: center; gap: 0.75rem; background: #fffbeb; padding: 0.75rem 1.25rem; border-radius: 0.75rem; border: 1px solid #fcd34d;">
+                    <div style="background: #f59e0b; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                        <i class="fas fa-star" style="color: white; font-size: 1.25rem;"></i>
+                    </div>
+                    <div>
+                        <div style="font-size: 0.875rem; color: #64748b; margin-bottom: 0.25rem;">Rating</div>
+                        <div style="color: #b45309; font-weight: 500;">${hotel.StarRating} Star Rating</div>
+                    </div>
+                </div>
+
+                <!-- Contact Info -->
+                <div style="display: flex; align-items: center; gap: 0.75rem; background: #f0fdf4; padding: 0.75rem 1.25rem; border-radius: 0.75rem; border: 1px solid #86efac;">
+                    <div style="background: #16a34a; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                        <i class="fas fa-phone" style="color: white; font-size: 1.25rem;"></i>
+                    </div>
+                    <div>
+                        <div style="font-size: 0.875rem; color: #64748b; margin-bottom: 0.25rem;">Contact</div>
+                        <div style="color: #166534; font-weight: 500;">${hotel.HotelContactNo}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content Area -->
+        <div class="flex flex-col md:flex-row gap-6">
+            <!-- Left Side - Image Gallery -->
+            <div class="md:w-2/3">
+                <div style="background: white; border-radius: 1rem; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); border: 1px solid #e2e8f0; padding: 1.5rem;">
+                    <div style="position: relative; border-radius: 0.75rem; overflow: hidden; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);">
+                        <img src="${hotel.Images?.[0] || ''}" alt="Main Hotel Image" class="main-image" style="width: 100%; height: 400px; object-fit: cover;">
+                        <button class="gallery-nav-button prev" style="position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); background: rgba(0, 0, 0, 0.6); color: white; width: 40px; height: 40px; border-radius: 50%; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: background 0.3s;">
+                            <i class="fas fa-chevron-left"></i>
+                        </button>
+                        <button class="gallery-nav-button next" style="position: absolute; right: 1rem; top: 50%; transform: translateY(-50%); background: rgba(0, 0, 0, 0.6); color: white; width: 40px; height: 40px; border-radius: 50%; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: background 0.3s;">
+                            <i class="fas fa-chevron-right"></i>
+                        </button>
+                    </div>
+                    <div class="thumbnails-container" style="display: flex; gap: 0.5rem; margin-top: 1rem; overflow-x: auto; padding: 0.5rem;"></div>
+                </div>
+
+                <!-- Hotel Description Below Gallery -->
+                <div style="margin-top: 2rem; background: white; border-radius: 1rem; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); border: 1px solid #e2e8f0; padding: 1.5rem;">
+                    <h2 style="font-size: 1.5rem; font-weight: 600; color: #1e40af; margin-bottom: 1rem; border-bottom: 2px solid #93c5fd; padding-bottom: 0.5rem;">About the Hotel</h2>
+                    <div class="hotel-description" style="color: #475569;"></div>
+                </div>
+            </div>
+
+            <!-- Right Side - Hotel Details Sidebar -->
+            <div class="md:w-1/3">
+                <div style="background: white; border-radius: 1rem; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); border: 1px solid #e2e8f0; padding: 1.5rem; position: sticky; top: 1rem;">
+                    <h2 style="font-size: 1.5rem; font-weight: 600; color: #1e40af; margin-bottom: 1rem; border-bottom: 2px solid #93c5fd; padding-bottom: 0.5rem;">Hotel Information</h2>
+                    
+                    <!-- Location Details -->
+                    <div style="space-y-4">
+                        <div style="display: flex; gap: 1rem; margin-bottom: 1rem;">
+                            <i class="fas fa-map-marked-alt" style="color: #2563eb; margin-top: 0.25rem;"></i>
+                            <div>
+                                <h3 style="font-weight: 600; color: #1e40af; margin-bottom: 0.25rem;">Address</h3>
+                                <p style="color: #475569;">${hotel.Address}</p>
+                            </div>
+                        </div>
+
+                        <div style="display: flex; gap: 1rem; margin-bottom: 1rem;">
+                            <i class="fas fa-globe-asia" style="color: #2563eb; margin-top: 0.25rem;"></i>
+                            <div>
+                                <h3 style="font-weight: 600; color: #1e40af; margin-bottom: 0.25rem;">Location</h3>
+                                <p style="color: #475569;">
+                                    ${hotel.City}, ${hotel.State}<br>
+                                    ${hotel.CountryName} ${hotel.PinCode}
+                                </p>
+                            </div>
+                        </div>
+
+                        <div style="display: flex; gap: 1rem; margin-bottom: 1rem;">
+                            <i class="fas fa-phone-alt" style="color: #2563eb; margin-top: 0.25rem;"></i>
+                            <div>
+                                <h3 style="font-weight: 600; color: #1e40af; margin-bottom: 0.25rem;">Contact</h3>
+                                <p style="color: #475569;">
+                                    ${hotel.HotelContactNo}<br>
+                                    ${hotel.Email || 'Not Available'}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Facilities Section -->
+                    <div style="border-top: 1px solid #e2e8f0; margin-top: 1.5rem; padding-top: 1.5rem;">
+                        <h3 style="font-weight: 600; color: #1e40af; margin-bottom: 1rem;">Hotel Facilities</h3>
+                        <div class="facilities-list" style="display: grid; gap: 0.5rem;"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+
+    container.innerHTML = headerHtml;
 
     // Setup image gallery
     let currentImageIndex = 0;
-    const mainImage = content.querySelector('.main-image');
-    const thumbnailsContainer = content.querySelector('.thumbnails-container');
+    const mainImage = container.querySelector('.main-image');
+    const thumbnailsContainer = container.querySelector('.thumbnails-container');
     
     if (hotel.Images && hotel.Images.length > 0) {
         mainImage.src = hotel.Images[0];
@@ -467,8 +538,8 @@ function renderHotelDetails(hotel) {
         // Create thumbnails
         hotel.Images.forEach((img, index) => {
             const thumbnail = document.createElement('button');
-            thumbnail.className = `flex-none w-24 h-16 rounded-lg overflow-hidden thumbnail ${index === 0 ? 'active' : ''}`;
-            thumbnail.innerHTML = `<img src="${img}" alt="Thumbnail ${index + 1}" class="w-full h-full object-cover">`;
+            thumbnail.style = `flex: 0 0 auto; width: 80px; height: 60px; border-radius: 0.5rem; overflow: hidden; border: 2px solid ${index === 0 ? '#2563eb' : 'transparent'}; transition: all 0.3s ease;`;
+            thumbnail.innerHTML = `<img src="${img}" alt="Thumbnail ${index + 1}" style="width: 100%; height: 100%; object-fit: cover;">`;
             thumbnail.onclick = () => {
                 currentImageIndex = index;
                 updateMainImage();
@@ -477,57 +548,58 @@ function renderHotelDetails(hotel) {
         });
 
         // Setup navigation buttons
-        content.querySelector('.gallery-nav-button.prev').onclick = () => {
+        const prevButton = container.querySelector('.gallery-nav-button.prev');
+        const nextButton = container.querySelector('.gallery-nav-button.next');
+        
+        prevButton.onclick = () => {
             currentImageIndex = (currentImageIndex - 1 + hotel.Images.length) % hotel.Images.length;
             updateMainImage();
         };
         
-        content.querySelector('.gallery-nav-button.next').onclick = () => {
+        nextButton.onclick = () => {
             currentImageIndex = (currentImageIndex + 1) % hotel.Images.length;
             updateMainImage();
         };
 
         function updateMainImage() {
             mainImage.src = hotel.Images[currentImageIndex];
-            thumbnailsContainer.querySelectorAll('.thumbnail').forEach((thumb, index) => {
-                thumb.classList.toggle('active', index === currentImageIndex);
+            thumbnailsContainer.querySelectorAll('button').forEach((thumb, index) => {
+                thumb.style.border = `2px solid ${index === currentImageIndex ? '#2563eb' : 'transparent'}`;
             });
         }
     }
 
     // Render facilities
-    const facilitiesList = content.querySelector('.facilities-list');
+    const facilitiesList = container.querySelector('.facilities-list');
     if (hotel.HotelFacilities) {
         hotel.HotelFacilities.forEach(facility => {
             const facilityDiv = document.createElement('div');
-            facilityDiv.className = 'flex items-center gap-2 p-2 rounded-lg hover:bg-gray-50';
+            facilityDiv.style = 'display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem; background: #f8fafc; border-radius: 0.5rem; border: 1px solid #e2e8f0; transition: all 0.3s ease;';
             facilityDiv.innerHTML = `
-                <i class="${facility.FontAwesome}"></i>
-                <span>${facility.Name}</span>
+                <i class="fas ${facility.FontAwesome}" style="color: #2563eb;"></i>
+                <span style="color: #475569;">${facility.Name}</span>
             `;
             facilitiesList.appendChild(facilityDiv);
         });
     }
 
-    // Render description
-    const descriptionContainer = content.querySelector('.hotel-description');
+    // Render hotel description
+    const descriptionContainer = container.querySelector('.hotel-description');
     if (hotel.Description) {
         hotel.Description.forEach(section => {
             const sectionDiv = document.createElement('div');
-            sectionDiv.className = 'mb-4';
+            sectionDiv.style = 'margin-bottom: 1.5rem;';
             sectionDiv.innerHTML = `
-                <h3 class="font-semibold mb-2">${section.Name}</h3>
-                <ul class="list-disc list-inside space-y-1">
+                <h3 style="font-weight: 600; color: #1e40af; margin-bottom: 0.75rem;">${section.Name}</h3>
+                <ul style="list-style-type: disc; padding-left: 1.5rem; color: #475569;">
                     ${section.Detail.map(detail => `
-                        <li class="text-gray-600">${detail}</li>
+                        <li style="margin-bottom: 0.5rem;">${detail}</li>
                     `).join('')}
                 </ul>
             `;
             descriptionContainer.appendChild(sectionDiv);
         });
     }
-
-    container.appendChild(content);
 }
 
 // Initialize the page
@@ -628,32 +700,7 @@ function fetchRoomDetails() {
                                             ` : ''}
                                         </div>
                                     </div>
-                                        <!-- Additional Charges Section -->
-                                    <div style="margin-bottom: 1rem; padding: 1rem; background: #f8fafc; border-radius: 0.5rem;">
-                                        <h4 style="font-size: 1rem; font-weight: 600; color: #475569; margin-bottom: 0.5rem;">
-                                            Additional Charges
-                                        </h4>
-                                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
-                                            <div style="background: white; padding: 0.75rem; border-radius: 0.5rem; border: 1px solid #e2e8f0;">
-                                                <div style="font-size: 0.875rem; color: #64748b;">Extra Guest Charge</div>
-                                                <div style="font-weight: 600; color: #2563eb;">
-                                                    ${room.Price.CurrencyCode} ${room.Price.ExtraGuestCharge || 0}
-                                                </div>
-                                            </div>
-                                            <div style="background: white; padding: 0.75rem; border-radius: 0.5rem; border: 1px solid #e2e8f0;">
-                                                <div style="font-size: 0.875rem; color: #64748b;">Child Charge</div>
-                                                <div style="font-weight: 600; color: #2563eb;">
-                                                    ${room.Price.CurrencyCode} ${room.Price.ChildCharge || 0}
-                                                </div>
-                                            </div>
-                                            <div style="background: white; padding: 0.75rem; border-radius: 0.5rem; border: 1px solid #e2e8f0;">
-                                                <div style="font-size: 0.875rem; color: #64748b;">Service Tax</div>
-                                                <div style="font-weight: 600; color: #2563eb;">
-                                                    ${room.Price.CurrencyCode} ${room.Price.ServiceTax || 0}
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
+                                         
                                    <!-- Day Rates Section -->
                                     ${room.DayRates && room.DayRates.length > 0 ? `
                                         <div style="margin-bottom: 1rem; padding: 1rem; background: #f8fafc; border-radius: 0.5rem;">
@@ -698,8 +745,10 @@ function fetchRoomDetails() {
                                     <!-- Cancellation Policy -->
                                     ${room.CancellationPolicies ? `
                                         <div style="margin-top: 1rem; padding: 1rem; background: #f8fafc; border-radius: 0.5rem;">
+                                        Cancellation Policies:-
                                             ${room.CancellationPolicies.map(policy => `
                                                 <div style="padding: 0.5rem 0; display: flex; justify-content: space-between; align-items: center;">
+                                                
                                                     <span style="font-size: 0.875rem;">
                                                         ${policy.FromDate.split('T')[0]} to ${policy.ToDate.split('T')[0]}
                                                     </span>
@@ -726,7 +775,7 @@ function fetchRoomDetails() {
                                         <button onclick="blockRoom('${room.RoomId}')" 
                                                 style="background: #2563eb; color: white; padding: 0.75rem 1.5rem; border-radius: 0.5rem; border: none; cursor: pointer; display: flex; align-items: center; gap: 0.5rem;">
                                             <i class="fas fa-calendar-check"></i>
-                                            Book Now
+                                            Select Room
                                         </button>
                                     </div>
                                 </div>
@@ -880,9 +929,9 @@ function blockRoom(roomId) {
     const serializedRoomDetails = encodeURIComponent(JSON.stringify(roomDetails));
 
     // Show confirmation dialog
-    // if (!confirm('Are you sure you want to book this room?')) {
-    //     return;
-    // }
+    if (!confirm('Are you sure you want to block this room?')) {
+        return;
+    }
 
     // Show loading state
     const loadingOverlay = document.createElement('div');
@@ -933,7 +982,7 @@ function blockRoom(roomId) {
                 window.location.href = `/room-detail?traceId=${traceId}&resultIndex=${resultIndex}&hotelCode=${hotelCode}&hotelName=${encodeURIComponent(hotelName)}&roomDetails=${serializedRoomDetails}`;
             }
         } else {
-            // alert('Status: ' + (data.message || 'Unknown error'));
+            alert('Status: ' + (data.message || 'Unknown error'));
             window.location.href = `/room-detail?traceId=${traceId}&resultIndex=${resultIndex}&hotelCode=${hotelCode}&hotelName=${encodeURIComponent(hotelName)}&roomDetails=${serializedRoomDetails}`;
         }
     })
