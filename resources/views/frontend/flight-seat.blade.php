@@ -1,54 +1,66 @@
-
-@section('content')
-<div class="container py-4">
-    <div class="row mb-4">
-        <div class="col-12">
-            <h1 class="mb-3">Select Your Seat</h1>
-
-            @if(session('error'))
-                <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                    {{ session('error') }}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                </div>
-            @endif
-        </div>
+<style>
+.seat-map-container {
+    max-width: 800px;
+    margin: 0 auto;
+}
+.seat-item .card {
+    transition: all 0.2s ease;
+}
+.seat-item .card:hover {
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+}
+.seat-features {
+    font-size: 0.8rem;
+}
+.price {
+    font-size: 1.1rem;
+}
+</style>
+<div class="seat-map-container">
+    @if(isset($flightInfo))
+    <div class="flight-info mb-3">
+        <h5>{{ $flightInfo['airline'] }}</h5>
+        <p class="mb-2">{{ $flightInfo['from'] }} → {{ $flightInfo['to'] }}</p>
     </div>
+    @endif
 
-    <div class="row" id="seatContainer">
+    <div class="seat-map">
         @forelse($availableSeats as $seat)
-            <div class="col-md-3 col-sm-6 mb-4">
-                <div class="card h-100 {{ $seat['IsLegroom'] ? 'border-success' : '' }} {{ $seat['IsAisle'] ? 'border-info' : '' }}">
-                    <div class="card-header bg-transparent">
-                        <h5 class="card-title mb-0">Seat {{ $seat['SeatNumber'] }}</h5>
-                    </div>
-                    <div class="card-body">
-                        <div class="seat-features mb-3">
-                            @if($seat['IsLegroom'])
-                                <span class="badge bg-success me-2">Extra Legroom</span>
-                            @endif
-                            @if($seat['IsAisle'])
-                                <span class="badge bg-info">Aisle Seat</span>
-                            @endif
+            <div class="seat-item mb-2">
+                <div class="card {{ $seat['IsLegroom'] ? 'border-success' : '' }} {{ $seat['IsAisle'] ? 'border-info' : '' }}">
+                    <div class="card-body p-3">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="mb-1">Seat {{ $seat['SeatNumber'] }}</h6>
+                                <div class="seat-features">
+                                    @if($seat['IsLegroom'])
+                                        <span class="badge bg-success me-1">Extra Legroom</span>
+                                    @endif
+                                    @if($seat['IsAisle'])
+                                        <span class="badge bg-info">Aisle</span>
+                                    @endif
+                                </div>
+                            </div>
+                            <div class="text-end">
+                                <div class="price mb-2">
+                                    <strong>₹{{ number_format($seat['Amount'], 2) }}</strong>
+                                </div>
+                                <button type="button" 
+                                    class="btn btn-primary btn-sm"
+                                    onclick="selectSeat('{{ $seat['Code'] }}', '{{ $seat['SeatNumber'] }}', '{{ $seat['Amount'] }}')"
+                                >
+                                    Select
+                                </button>
+                            </div>
                         </div>
-                        <p class="card-text mb-3">
-                            <strong class="d-block mb-2">Price: ${{ number_format($seat['Amount'], 2) }}</strong>
-                        </p>
-                        <form method="POST" action="{{ route('flight.storeSeat') }}" class="seat-booking-form">
-                            @csrf
-                            <input type="hidden" name="seat_code" value="{{ $seat['Code'] }}">
-                            <input type="hidden" name="price" value="{{ $seat['Amount'] }}">
-                            <button type="submit" class="btn btn-primary w-100">
-                                Book This Seat
-                            </button>
-                        </form>
                     </div>
                 </div>
             </div>
         @empty
-            <div class="col-12">
-                <div class="alert alert-info">No seats are currently available. Please try again later.</div>
+            <div class="alert alert-info">
+                No seats are currently available for this flight.
             </div>
         @endforelse
     </div>
 </div>
-@endsection
+
