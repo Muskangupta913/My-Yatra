@@ -502,3 +502,10 @@ Route::post('/flight/farerule', [FlightController::class, 'fareRules']);
 Route::post('/flight/fareQutes', [FlightController::class, 'fareQutes']);
 Route::get('/flight/fareQutesResult', [FlightController::class, 'fareQutesResult']);
 
+Route::get('/flight-seats', [FlightController::class, 'selectSeat'])->name('flight.seat');
+Route::get('/flight-booking', function () {
+  return view('frontend.flight-booking');
+})->name('flight.booking');
+Route::post('/fetch-options', [FlightController::class, 'fetchOptions'])->name('fetch.options');
+Route::post('/fetch-ssr-data', [FlightController::class, 'fetchSSRData'])->name('fetch.ssr.data');
+Route::post('/flight/get-seat-map', [FlightController::class, 'getSeatMap'])->name('flight.getSeatMap');

@@ -155,8 +155,8 @@ class FlightController extends Controller
     
             \Log::info('Constructed API Payload:', $payload);
     
-            $response = Http::timeout(300)
-                ->connectTimeout(300)
+            $response = Http::timeout(500)
+                ->connectTimeout(500)
                 ->withHeaders([
                     'Content-Type' => 'application/json',
                     'Api-Token' => 'MakeMy@910@23',
@@ -218,13 +218,6 @@ class FlightController extends Controller
             ], 500);
         }
     }
-
-
-
-
-
-
-
     public function fareRules(Request $request)
     {
         try {
@@ -324,11 +317,6 @@ class FlightController extends Controller
             ], 500);
         }
     }
-
-
-
-
-
 
 
     public function fareQutes(Request $request)
@@ -431,6 +419,174 @@ class FlightController extends Controller
             'resultIndex' => $request->query('resultIndex')
         ]);
     }
+
+    public function fetchSSRData(Request $request)
+    {
+        try {
+            // Validate input data
+            $validatedData = $request->validate([
+                'EndUserIp' => 'required|ip',
+                'ClientId' => 'required|string',
+                'UserName' => 'required|string',
+                'Password' => 'required|string',
+                'SrdvType' => 'required|string',
+                'SrdvIndex' => 'required',
+                'TraceId' => 'required|string',
+                'ResultIndex' => 'required'
+            ]);
+    
+            // Prepare payload (using validated data)
+            $payload = $validatedData;
+    
+            // Log outgoing request
+            Log::info('SSR Request Payload', $payload);
+    
+            // Make API call
+            $response = Http::withHeaders([
+                'API-Token' => 'MakeMy@910@23',
+                'Content-Type' => 'application/json'
+            ])->post('https://flight.srdvtest.com/v8/rest/SSR', $payload);
+    
+            // Process API response
+            if ($response->successful()) {
+                $responseData = $response->json();
+                
+                // Check for specific error conditions
+                if (isset($responseData['Error']) && $responseData['Error']['ErrorCode'] !== "0") {
+                    return response()->json([
+                        'success' => false,
+                        'message' => $responseData['Error']['ErrorMessage'] ?? 'Unknown API error',
+                        'errorCode' => $responseData['Error']['ErrorCode']
+                    ], 400);
+                }
+    
+                // Normalize response to handle empty or missing data
+                return response()->json([
+                    'success' => true,
+                    'Baggage' => $responseData['Baggage'] ?? [],
+                    'MealDynamic' => $responseData['MealDynamic'] ?? [],
+                    'TraceId' => $responseData['TraceId'] ?? '',
+                ]);
+            }
+    
+            // API call failed
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to fetch SSR data',
+                'details' => $response->body()
+            ], $response->status());
+    
+        } catch (ValidationException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Invalid request data',
+                'errors' => $e->errors()
+            ], 422);
+        } catch (\Exception $e) {
+            Log::error('SSR API Exception', [
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+    
+            return response()->json([
+                'success' => false,
+                'message' => 'Unexpected error occurred',
+            ], 500);
+        }
+    }
+    // Seat Map API
+    public function getSeatMap(Request $request)
+{
+    try {
+        // API Payload
+        $validatedData = $request->validate([
+            'EndUserIp' => 'required|ip',
+            'ClientId' => 'required|string',
+            'UserName' => 'required|string',
+            'Password' => 'required|string',
+            'SrdvType' => 'required|string',
+            'SrdvIndex' => 'required',
+            'TraceId' => 'required|string',
+            'ResultIndex' => 'required'
+        ]);
+        $payload = $validatedData;
+
+
+        $response = Http::withHeaders([
+            'API-Token' => 'MakeMy@910@23',
+            'Content-Type' => 'application/json'
+        ])->post('https://flight.srdvtest.com/v8/rest/SeatMap', $validatedData);
+
+        Log::info('Seat Map API Full Response', [
+            'status' => $response->status(),
+            'body' => $response->body() // Log full response body
+        ]);
+
+        if ($response->successful()) {
+            $seatMapData = $response->json();
+            
+            // More explicit error checking
+            if ($seatMapData['Error']['ErrorCode'] !== 0) {
+                return response()->json([
+                    'error' => $seatMapData['Error']['ErrorMessage'] ?? 'Unknown error'
+                ], 400);
+            }
+
+            if (isset($seatMapData['Results'][0]['Seats'])) {
+                $availableSeats = $this->processSeatsData($seatMapData['Results'][0]['Seats']);
+                
+                return response()->json([
+                    'html' => view('frontend.flight-seat', [
+                        'availableSeats' => $availableSeats,
+                        'flightInfo' => [
+                            'from' => $seatMapData['Results'][0]['FromCity'],
+                            'to' => $seatMapData['Results'][0]['ToCity'],
+                            'airline' => $seatMapData['Results'][0]['AirlineName']
+                        ]
+                    ])->render()
+                ]);
+            }
+        }
+
+        return response()->json(['error' => 'No seat map data found'], 404);
+
+    } catch (\Exception $e) {
+        Log::error('Seat Map Error: ' . $e->getMessage());
+        return response()->json([
+            'error' => 'System error',
+            'message' => $e->getMessage()
+        ], 500);
+    }
+}
+
+
+
+
+
+private function processSeatsData($seatsData)
+{
+    $availableSeats = [];
+    
+    foreach ($seatsData as $rowKey => $rowData) {
+        $rowNumber = substr($rowKey, 3);
+        
+        foreach ($rowData as $columnKey => $seat) {
+            if (!$seat['IsBooked']) {
+                $availableSeats[] = [
+                    'SeatNumber' => $seat['SeatNumber'],
+                    'Code' => $seat['Code'],
+                    'IsLegroom' => $seat['IsLegroom'] ?? false,
+                    'IsAisle' => $seat['IsAisle'] ?? false,
+                    'Amount' => $seat['Amount'],
+                    'Row' => $rowNumber,
+                    'Column' => substr($columnKey, 6) 
+                ];
+            }
+        }
+    }
+    
+    return $availableSeats;
+}
 
 
 

@@ -193,7 +193,9 @@
             sessionStorage.setItem('fareQuoteData', JSON.stringify(data.fareQuote));
             sessionStorage.setItem('selectedFlightResultIndex', resultIndex);
             sessionStorage.setItem('selectedFlightTraceId', traceId);
-            window.location.href = '/flight/fareQutesResult';
+         
+            window.location.href = `/flight-booking?traceId=${traceId}&resultIndex=${resultIndex}`;
+
 
             // Redirect to the fare quote result page
             // window.location.href = `/flight-info?traceId=${traceId}&resultIndex=${resultIndex}`;
