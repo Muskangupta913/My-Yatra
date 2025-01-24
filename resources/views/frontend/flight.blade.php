@@ -1,25 +1,37 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
+@extends('frontend.layouts.master')
+@section('title', 'flight search')
+@section('content')
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Flight Search Results</title>
+@section('styles')
      <!-- Tailwind CSS -->
-     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     
-    <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
-    
-    <style>
-        .modal {
-            background-color: rgba(0,0,0,0.5);
-            z-index: 1000;
+   <!-- Font Awesome -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+
+<style>
+    .modal {
+        background-color: rgba(0,0,0,0.5);
+        z-index: 1000;
+    }
+    @media (max-width: 768px) {
+        .responsive-flex {
+            flex-direction: column;
         }
-    </style>
-</head>
-<body class="bg-gray-100">
-    <div class="container mx-auto px-4 py-8">
+        .responsive-width {
+            width: 100%;
+            margin-bottom: 1rem;
+        }
+        .mobile-full-width {
+            width: 100%;
+        }
+    }
+</style>
+ @endsection 
+<div class="container mx-auto px-4 py-8">
       <!-- Search Summary Header -->
 <div class="bg-gradient-to-r from-indigo-600 via-purple-700 to-pink-600 shadow-2xl rounded-xl p-6 mb-6 relative overflow-hidden">
     <div class="absolute inset-0 bg-white bg-opacity-10 backdrop-blur-sm"></div>
@@ -29,92 +41,113 @@
                 <i class="fas fa-plane text-3xl text-white"></i>
             </div>
             <div>
-                <script>
-                    document.addEventListener('DOMContentLoaded', function() {
-                        const urlParams = new URLSearchParams(window.location.search);
-                        const from = urlParams.get('from').split('(')[0].trim();
-                        const to = urlParams.get('to').split('(')[0].trim();
-                        const fromCode = urlParams.get('fromCode');
-                        const toCode = urlParams.get('toCode');
-                        const departureDate = urlParams.get('departureDate');
-                        const adults = urlParams.get('adults');
-                        const cabinClass = urlParams.get('cabinClass');
-
-                        // Mapping cabin class
-                        const cabinClassMap = {
-                            '1': 'Economy',
-                            '2': 'Premium Economy',
-                            '3': 'Business',
-                            '4': 'First Class'
-                        };
-
-                        document.getElementById('flight-header').innerHTML = `
-                            <h1 class="text-3xl font-bold text-white mb-2">
-                                ${from} (${fromCode}) <i class="fas fa-arrow-right text-xl mx-3 text-white"></i> ${to} (${toCode})
-                            </h1>
-                            <div class="text-white text-opacity-90 space-y-1">
-                                <p class="flex items-center">
-                                    <i class="fas fa-calendar-alt mr-2"></i>
-                                    ${new Date(departureDate).toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
-                                </p>
-                                <div class="flex space-x-4">
-                                    <p class="flex items-center">
-                                        <i class="fas fa-users mr-2"></i>
-                                        ${adults} Passenger${adults > 1 ? 's' : ''}
-                                    </p>
-                                    <p class="flex items-center">
-                                        <i class="fas fa-chair mr-2"></i>
-                                        ${cabinClassMap[cabinClass] || 'Economy'} Class
-                                    </p>
-                                </div>
-                            </div>
-                        `;
-                    });
-                </script>
                 <div id="flight-header"></div>
             </div>
         </div>
     </div>
 </div>
-        <div class="flex">
-            <!-- Filters Sidebar -->
-            <div id="airline-filter" class="mb-4">
-    <!-- Airline filters will be dynamically generated here -->
-</div>
+<div class="flex flex-col md:flex-row space-y-4 md:space-y-0 md:space-x-4">
+    <!-- Filters Sidebar -->
+    <div class="w-full md:w-1/4 bg-white shadow-md rounded-lg p-4">
+        <h3 class="font-bold text-lg mb-4">Filters</h3>
 
-<div class="mb-4">
-    <h3 class="font-medium mb-2">Price Range</h3>
-    <div class="flex items-center">
-        <input type="number" id="min-price" placeholder="Min" class="w-1/2 mr-2 p-2 border rounded">
-        <input type="number" id="max-price" placeholder="Max" class="w-1/2 p-2 border rounded">
-    </div>
-    <button id="apply-price-filter" class="mt-2 w-full bg-blue-500 text-white py-2 rounded">
-        Apply Price Filter
-    </button>
-</div>
-            <!-- Flight Results -->
-            <div class="w-3/4">
-                <!-- Flight Cards -->
-                <div id="results-container"></div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Fare Rules Modal -->
-    <div id="fareRulesModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
-        <div class="bg-white rounded-lg p-6 max-w-2xl w-full">
-            <div class="flex justify-between items-center mb-4">
-                <h2 class="text-xl font-semibold">Fare Rules</h2>
-                <button onclick="closeFareRulesModal()" class="text-gray-600 hover:text-gray-900">
-                    <i class="fas fa-times"></i>
+        <!-- Responsive Filter Sections -->
+        <div class="space-y-4">
+            <!-- Price Range Filter -->
+            <div>
+                <h4 class="font-semibold mb-2">Price Range</h4>
+                <div class="flex flex-col sm:flex-row items-center space-y-2 sm:space-y-0 sm:space-x-2 mb-2">
+                    <input type="number" id="min-price" placeholder="Min" class="w-full sm:w-1/2 p-2 border rounded">
+                    <input type="number" id="max-price" placeholder="Max" class="w-full sm:w-1/2 p-2 border rounded">
+                </div>
+                <button id="apply-price-filter" class="w-full bg-blue-500 text-white py-2 rounded">
+                    Apply Price Filter
                 </button>
             </div>
-            <div id="fareRulesDetails" class="max-h-96 overflow-y-auto">
-                <!-- Fare rules content will be dynamically loaded here -->
+
+            <!-- Airline Filter -->
+            <div>
+                <h4 class="font-semibold mb-2">Airlines</h4>
+                <div id="airline-filters" class="space-y-2"></div>
+            </div>
+
+            <!-- Stop Filter -->
+            <div>
+                <h4 class="font-semibold mb-2">Stops</h4>
+                <div id="stop-filters" class="space-y-2">
+                    <label class="flex items-center">
+                        <input type="checkbox" name="stops" value="non-stop" class="mr-2">
+                        Non-stop
+                    </label>
+                    <label class="flex items-center">
+                        <input type="checkbox" name="stops" value="1-stop" class="mr-2">
+                        1 Stop
+                    </label>
+                </div>
+            </div>
+
+            <!-- Time of Day Filter -->
+            <div>
+                <h4 class="font-semibold mb-2">Departure Time</h4>
+                <div class="grid grid-cols-2 gap-2">
+                    <label class="flex items-center">
+                        <input type="checkbox" name="departure-time" value="early-morning" class="mr-2">
+                        Early Morning
+                    </label>
+                    <label class="flex items-center">
+                        <input type="checkbox" name="departure-time" value="afternoon" class="mr-2">
+                        Afternoon
+                    </label>
+                    <label class="flex items-center">
+                        <input type="checkbox" name="departure-time" value="evening" class="mr-2">
+                        Evening
+                    </label>
+                    <label class="flex items-center">
+                        <input type="checkbox" name="departure-time" value="night" class="mr-2">
+                        Night
+                    </label>
+                </div>
             </div>
         </div>
     </div>
 
+    <!-- Flight Results -->
+    <div class="w-full md:w-3/4">
+        <!-- Sorting Options -->
+        <div class="mb-4 flex flex-col sm:flex-row justify-between items-center space-y-2 sm:space-y-0">
+            <div class="flex items-center space-x-2">
+                <span class="font-medium">Sort by:</span>
+                <select id="sort-options" class="border rounded p-2 mobile-full-width">
+                    <option value="price-low-high">Price: Low to High</option>
+                    <option value="price-high-low">Price: High to Low</option>
+                    <option value="departure-early">Departure: Early</option>
+                    <option value="departure-late">Departure: Late</option>
+                </select>
+            </div>
+            <div id="results-count" class="text-gray-600"></div>
+        </div>
+
+        <!-- Flight Cards Container -->
+        <div id="results-container" class="space-y-4"></div>
+    </div>
+</div>
+
+<!-- Fare Rules Modal -->
+<div id="fareRulesModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
+    <div class="bg-white rounded-lg p-6 max-w-2xl w-full m-4">
+        <div class="flex justify-between items-center mb-4">
+            <h2 class="text-xl font-semibold">Fare Rules</h2>
+            <button onclick="closeFareRulesModal()" class="text-gray-600 hover:text-gray-900">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div id="fareRulesDetails" class="max-h-96 overflow-y-auto">
+            <!-- Fare rules content will be dynamically loaded here -->
+        </div>
+    </div>
+</div>
+    @endsection
+    @section('scripts')
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             const results = JSON.parse(sessionStorage.getItem('flightSearchResults')) || [];
@@ -344,6 +377,48 @@ function viewFlightDetails(resultIndex) {
                 fareRulesDetails.innerHTML = `<p>Error fetching fare rules: ${error.message}</p>`;
             });
         }
+
+    
+                    document.addEventListener('DOMContentLoaded', function() {
+                        const urlParams = new URLSearchParams(window.location.search);
+                        const from = urlParams.get('from').split('(')[0].trim();
+                        const to = urlParams.get('to').split('(')[0].trim();
+                        const fromCode = urlParams.get('fromCode');
+                        const toCode = urlParams.get('toCode');
+                        const departureDate = urlParams.get('departureDate');
+                        const adults = urlParams.get('adults');
+                        const cabinClass = urlParams.get('cabinClass');
+
+                        // Mapping cabin class
+                        const cabinClassMap = {
+                            '1': 'Economy',
+                            '2': 'Premium Economy',
+                            '3': 'Business',
+                            '4': 'First Class'
+                        };
+
+                        document.getElementById('flight-header').innerHTML = `
+                            <h1 class="text-3xl font-bold text-white mb-2">
+                                ${from} (${fromCode}) <i class="fas fa-arrow-right text-xl mx-3 text-white"></i> ${to} (${toCode})
+                            </h1>
+                            <div class="text-white text-opacity-90 space-y-1">
+                                <p class="flex items-center">
+                                    <i class="fas fa-calendar-alt mr-2"></i>
+                                    ${new Date(departureDate).toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
+                                </p>
+                                <div class="flex space-x-4">
+                                    <p class="flex items-center">
+                                        <i class="fas fa-users mr-2"></i>
+                                        ${adults} Passenger${adults > 1 ? 's' : ''}
+                                    </p>
+                                    <p class="flex items-center">
+                                        <i class="fas fa-chair mr-2"></i>
+                                        ${cabinClassMap[cabinClass] || 'Economy'} Class
+                                    </p>
+                                </div>
+                            </div>
+                        `;
+                    });
+               
     </script>
-</body>
-</html>
+ @endsection

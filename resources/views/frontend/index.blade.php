@@ -1053,7 +1053,6 @@ function fetchHotelAllCities(inputField, listId) {
     });
 }
 
-// Function to fetch cities based on user input (autocomplete)
 function fetchHotelCities(inputField, listId) {
     // Trim the input and remove multiple spaces
     const query = $(inputField).val()
@@ -1074,7 +1073,7 @@ function fetchHotelCities(inputField, listId) {
                     response.data.forEach(city => {
                         list.append(
                             `<div class="list-group-item city-option" data-cityid="${city.cityid}">
-                                ${city.Destination} (${city.country})
+                                ${city.Destination}
                             </div>`
                         );
                     });
@@ -1120,24 +1119,13 @@ cityInputConfig.forEach(config => {
 
     // Handle city selection from the dropdown
     $(document).on('click', `${config.list} .city-option`, function () {
-        const cityName = $(this).data('cityname');
-        const countryCode = $(this).data('countrycode');
+        const cityName = $(this).text().trim(); // Ensure trim on selection
         const cityId = $(this).data('cityid');
-        
-        // Set the display value with city and country
-        $(config.input).val(`${cityName} (${countryCode})`);
-        $(config.hidden).val(cityId);
-        $(config.list).hide();
-    });
-});
 
-$(document).on('click', '.city-option', function() {
-    const cityId = $(this).data('cityid');
-    const cityText = $(this).text().trim();
-    
-    $('#hotelSearchCity').val(cityText);
-    $('#cityIdInput').val(cityId);
-    $('#hotelSearchCityList').hide();
+        $(config.input).val(cityName); // Update input field
+        $(config.hidden).val(cityId); // Update hidden field
+        $(config.list).hide(); // Hide dropdown
+    });
 });
 
 // Hide dropdowns on outside click or Escape key
