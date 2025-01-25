@@ -524,8 +524,8 @@ class FlightController extends Controller
 
         if ($response->successful()) {
             $seatMapData = $response->json();
-            
-            // More explicit error checking
+
+            // Handle API error response
             if ($seatMapData['Error']['ErrorCode'] !== 0) {
                 return response()->json([
                     'error' => $seatMapData['Error']['ErrorMessage'] ?? 'Unknown error'
@@ -534,16 +534,23 @@ class FlightController extends Controller
 
             if (isset($seatMapData['Results'][0]['Seats'])) {
                 $availableSeats = $this->processSeatsData($seatMapData['Results'][0]['Seats']);
-                
+
+                // Extract required airline data
+                $flightInfo = [
+                    'airline' => $seatMapData['Results'][0]['AirlineName'] ?? 'Unknown Airline',
+    'from' => $seatMapData['Results'][0]['FromCity'] ?? 'Unknown City',
+    'to' => $seatMapData['Results'][0]['ToCity'] ?? 'Unknown City',
+    'airlineName' => $seatMapData['Results'][0]['AirlineName'] ?? '',
+    'airlineCode' => $seatMapData['Results'][0]['AirlineCode'] ?? '',
+    'airlineNumber' => $seatMapData['Results'][0]['AirlineNumber'] ?? ''
+                ];
+
                 return response()->json([
                     'html' => view('frontend.flight-seat', [
                         'availableSeats' => $availableSeats,
-                        'flightInfo' => [
-                            'from' => $seatMapData['Results'][0]['FromCity'],
-                            'to' => $seatMapData['Results'][0]['ToCity'],
-                            'airline' => $seatMapData['Results'][0]['AirlineName']
-                        ]
-                    ])->render()
+                        'flightInfo' => $flightInfo
+                    ])->render(),
+                    'flightInfo' => $flightInfo // Add this in case it's needed separately
                 ]);
             }
         }
@@ -558,8 +565,6 @@ class FlightController extends Controller
         ], 500);
     }
 }
-
-
 
 
 
@@ -589,6 +594,122 @@ private function processSeatsData($seatsData)
 }
 
 
+public function bookLCC(Request $request)
+{
+    try {
+        // Validate the request
+        $validatedData = $request->validate([
+            'srdvIndex' => 'required|string',
+            'traceId' => 'required|string',
+            'resultIndex' => 'required|string',
+            'passenger.title' => 'required|string',
+            'passenger.firstName' => 'required|string',
+            'passenger.lastName' => 'required|string',
+            'passenger.gender' => 'required|integer', // Assuming 1 for male, 2 for female
+            'passenger.contactNo' => 'required|string',
+            'passenger.email' => 'required|email',
+            'passenger.paxType' => 'required|string',
+            'passenger.dateOfBirth' => 'nullable|string',
+            'passenger.passportNo' => 'nullable|string',
+            'passenger.passportExpiry' => 'nullable|string',
+            'passenger.passportIssueDate' => 'nullable|string',
+            'passenger.countryCode' => 'nullable|string',
+            'passenger.countryName' => 'nullable|string',
+            'passenger.baggage' => 'nullable|array',
+            'passenger.mealDynamic' => 'nullable|array',
+            'passenger.seat' => 'nullable|array',
+            'fare.baseFare' => 'required|numeric',
+            'fare.tax' => 'required|numeric',
+            'fare.yqTax' => 'nullable|numeric',
+            'fare.transactionFee' => 'nullable|numeric',
+            'fare.additionalTxnFeeOfrd' => 'nullable|numeric',
+            'fare.additionalTxnFeePub' => 'nullable|numeric',
+            'fare.airTransFee' => 'nullable|numeric',
+        ]);
+
+        // Default empty arrays for optional fields if not provided
+        $baggage = $validatedData['passenger']['baggage'] ?? [];
+        $mealDynamic = $validatedData['passenger']['mealDynamic'] ?? [];
+        $seat = $validatedData['passenger']['seat'] ?? [];
+
+        // Prepare the payload for the API request
+        $payload = [
+            'EndUserIp' => '1.1.1.1', // Replace with actual user IP or dynamic source
+            'ClientId' => '180133',
+            'UserName' => 'MakeMy91',
+            'Password' => 'MakeMy@910',
+            'SrdvType' => 'MixAPI',
+            'SrdvIndex' => $validatedData['srdvIndex'],
+            'TraceId' => $validatedData['traceId'],
+            'ResultIndex' => $validatedData['resultIndex'],
+            'Passengers' => [
+                [
+                    'Title' => $validatedData['passenger']['title'],
+                    'FirstName' => $validatedData['passenger']['firstName'],
+                    'LastName' => $validatedData['passenger']['lastName'],
+                    'PaxType' => $validatedData['passenger']['paxType'],
+                    'Gender' => $validatedData['passenger']['gender'],
+                    'ContactNo' => $validatedData['passenger']['contactNo'],
+                    'Email' => $validatedData['passenger']['email'],
+                    'DateOfBirth' => $validatedData['passenger']['dateOfBirth'] ?? '12/01/1998',
+                    'PassportNo' => $validatedData['passenger']['passportNo'] ?? '',
+                    'PassportExpiry' => $validatedData['passenger']['passportExpiry'] ?? '',
+                    'PassportIssueDate' => $validatedData['passenger']['passportIssueDate'] ?? '',
+                    'CountryCode' => $validatedData['passenger']['countryCode'] ?? 'IN',
+                    'CountryName' => $validatedData['passenger']['countryName'] ?? 'INDIA',
+                    'Fare' => [
+                        'BaseFare' => $validatedData['fare']['baseFare'],
+                        'Tax' => $validatedData['fare']['tax'],
+                        'YQTax' => $validatedData['fare']['yqTax'] ?? 0,
+                        'TransactionFee' => $validatedData['fare']['transactionFee'] ?? 0,
+                        'AdditionalTxnFeeOfrd' => $validatedData['fare']['additionalTxnFeeOfrd'] ?? 0,
+                        'AdditionalTxnFeePub' => $validatedData['fare']['additionalTxnFeePub'] ?? 0,
+                        'AirTransFee' => $validatedData['fare']['airTransFee'] ?? 0,
+                    ],
+                    'Baggage' => $baggage,
+                    'MealDynamic' => $mealDynamic,
+                    'Seat' => $seat,
+                ]
+            ]
+        ];
+
+        // Send payload to third-party API
+        $response = Http::withHeaders([
+            'API-Token' => 'MakeMy@910@23',
+            'Content-Type' => 'application/json',
+        ])->post('https://flight.srdvtest.com/v8/rest/TicketLCC', $payload);
+
+        if ($response->successful()) {
+            $apiResponse = $response->json();
+
+            // Extract relevant data for client response
+            $formattedResponse = [
+                'TraceId' => $apiResponse['TraceId'] ?? null,
+                'PNR' => $apiResponse['Response']['PNR'] ?? null,
+                'BookingId' => $apiResponse['Response']['BookingId'] ?? null,
+                'TicketStatus' => $apiResponse['Response']['TicketStatus'] ?? null,
+                'FareDetails' => $apiResponse['Response']['FlightItinerary']['Fare'] ?? [],
+                'Segments' => $apiResponse['Response']['FlightItinerary']['Segments'] ?? [],
+            ];
+
+            return response()->json(['success' => true, 'data' => $formattedResponse]);
+        }
+
+        // Handle API error responses
+        return response()->json([
+            'error' => 'Failed to book flight',
+            'details' => $response->json(),
+        ], $response->status());
+
+    } catch (\Exception $e) {
+        // Handle unexpected errors
+        return response()->json([
+            'error' => 'System error',
+            'message' => $e->getMessage()
+        ], 500);
+    
+    }
+}
 
 
 
@@ -615,8 +736,9 @@ private function processSeatsData($seatsData)
 
 
 
-
-
+// **************************************************
+// PREVIOUS CONTROLLER
+// *************************************************
     public function showFlights(Request $request)
     {
         // Fetch flight data (this could be from an API or database)

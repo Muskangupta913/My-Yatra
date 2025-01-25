@@ -217,6 +217,36 @@ function viewFlightDetails(resultIndex) {
         });
     });
 
+
+     // Find the detailed flight information for the specific resultIndex
+     let selectedFlight = null;
+    results.forEach(resultGroup => {
+        resultGroup.forEach(result => {
+            if (result.FareDataMultiple) {
+                result.FareDataMultiple.forEach(fareData => {
+                    if (fareData.ResultIndex === resultIndex) {
+                        selectedFlight = {
+                            airlineName: fareData.FareSegments[0]?.AirlineName,
+                            flightNumber: fareData.FareSegments[0]?.FlightNumber,
+                            cabinClass: fareData.FareSegments[0]?.CabinClassName,
+                            fare: fareData.Fare?.OfferedFare,
+                            segment: result.Segments?.[0]?.[0],
+                            origin: result.Segments?.[0]?.[0]?.Origin?.AirportCode,
+                            destination: result.Segments?.[0]?.[0]?.Destination?.AirportCode,
+                            isLCC: fareData.IsLCC
+                        };
+                    }
+                });
+            }
+        });
+    });
+
+    if (!selectedFlight) {
+        console.error('Unable to find flight details for the selected flight');
+        alert('Error: Could not retrieve flight details.');
+        return;
+    }
+
     // Ensure we have a valid SrdvIndex before making the API call
     if (!srdvIndex) {
         console.error('Unable to find SrdvIndex for the selected flight');
@@ -252,8 +282,20 @@ function viewFlightDetails(resultIndex) {
             sessionStorage.setItem('fareQuoteData', JSON.stringify(data.fareQuote));
             sessionStorage.setItem('selectedFlightResultIndex', resultIndex);
             sessionStorage.setItem('selectedFlightTraceId', traceId);
+
+           
+
+
          
-            window.location.href = `/flight-booking?traceId=${traceId}&resultIndex=${resultIndex}`;
+            window.location.href = `/flight-booking?traceId=${traceId}&resultIndex=${resultIndex}&details=${encodeURIComponent(JSON.stringify({
+    airlineName: selectedFlight.airlineName,
+    flightNumber: selectedFlight.flightNumber,
+    cabinClass: selectedFlight.cabinClass,
+    isLCC: selectedFlight.isLCC,
+    fare: selectedFlight.fare,
+    origin: selectedFlight.origin,
+    destination: selectedFlight.destination
+}))}`;
 
 
             // Redirect to the fare quote result page

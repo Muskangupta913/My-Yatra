@@ -47,7 +47,14 @@
                                 </div>
                                 <button type="button" 
                                     class="btn btn-primary btn-sm"
-                                    onclick="selectSeat('{{ $seat['Code'] }}', '{{ $seat['SeatNumber'] }}', '{{ $seat['Amount'] }}')"
+                                    onclick="selectSeat(
+                                        '{{ $seat['Code'] }}', 
+                                        '{{ $seat['SeatNumber'] }}', 
+                                        '{{ $seat['Amount'] }}',
+                                        '{{ $flightInfo['airlineName'] }}',
+                                        '{{ $flightInfo['airlineCode'] }}',
+                                        '{{ $flightInfo['airlineNumber'] }}'
+                                    )"
                                 >
                                     Select
                                 </button>
@@ -63,4 +70,5 @@
         @endforelse
     </div>
 </div>
+
 

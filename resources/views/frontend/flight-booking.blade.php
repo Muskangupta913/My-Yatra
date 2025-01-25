@@ -114,6 +114,15 @@
                                             <option value="2">Female</option>
                                         </select>
                                     </div>
+                                      <!-- Passenger Type -->
+                                    <div class="col-md-3 mb-3">
+                                        <label for="gender" class="form-label">PassengerType</label>
+                                        <select class="form-select" id="passengerType" name="PassengerType" required>
+                                            <option value="1">Adult</option>
+                                            <option value="2">Child</option>
+                                            <option value="3">Infant</option>
+                                        </select>
+                                    </div>
                                     <!-- Email -->
                                     <div class="col-md-6 mb-3">
                                         <label for="email" class="form-label">Email</label>
@@ -195,7 +204,7 @@
                         </div>
 
                         <!-- Submit Button -->
-                        <button type="submit" class="btn btn-primary">Submit Booking</button>
+                        <button  type="button" id="submitButton" class="btn btn-primary">Submit Booking</button>
                     </form>
                 </div>
             </div>
@@ -204,21 +213,54 @@
 
     <script>
 document.addEventListener('DOMContentLoaded', function() {
-    const traceId = sessionStorage.getItem('flightTraceId');
-    const results = JSON.parse(sessionStorage.getItem('flightSearchResults')) || [];
-    console.log('TraceId:', traceId);
-console.log('Flight Search Results:', results);
-const urlParams = new URLSearchParams(window.location.search);
-   
+    const urlParams = new URLSearchParams(window.location.search);
+    const traceId = urlParams.get('traceId');
     const resultIndex = urlParams.get('resultIndex');
-console.log('Fligh Results INDEX:', resultIndex);
+    const encodedDetails = urlParams.get('details');
 
-    if (!traceId) {
-        console.error('TraceId is not found in sessionStorage');
-        return;
+   
+
+    const fareQuoteData = JSON.parse(sessionStorage.getItem('fareQuoteData'));
+
+    // Log fare details for verification
+    if (fareQuoteData && fareQuoteData.Fare) {
+        console.log('Fare Details Successfully Fetched:', fareQuoteData.Fare);
+        
+        // Optional: Set total fare in a hidden input for later use
+        const totalFareInput = document.getElementById('totalFare');
+        if (totalFareInput) {
+            totalFareInput.value = fareQuoteData.Fare.OfferedFare || 0;
+        }
+    } else {
+        console.error('Fare Quote Data Not Found in Session Storage');
     }
 
-    // Find the SrdvIndex for the specific resultIndex
+    // Correctly parse details
+    let flightDetails = {};
+    if (encodedDetails) {
+        try {
+            flightDetails = JSON.parse(decodeURIComponent(encodedDetails));
+            console.log('Parsed Flight Details:', flightDetails);
+            console.log('IsLCC:', flightDetails.isLCC);
+
+            // Use the isLCC directly from parsed details
+            const isLCC = flightDetails.isLCC;
+
+            if (isLCC) {
+                console.log('This is a Low-Cost Carrier flight');
+            } else {
+                console.log('This is a Full-Service Carrier flight');
+            }
+        } catch (error) {
+            console.error('Error parsing flight details:', error);
+        }
+    }
+
+
+    // Retrieve stored flight search results
+    const results = JSON.parse(sessionStorage.getItem('flightSearchResults')) || [];
+
+    // Find SrdvIndex
     let srdvIndex = null;
     results.forEach(resultGroup => {
         resultGroup.forEach(result => {
@@ -226,46 +268,39 @@ console.log('Fligh Results INDEX:', resultIndex);
                 result.FareDataMultiple.forEach(fareData => {
                     if (fareData.ResultIndex === resultIndex) {
                         srdvIndex = fareData.SrdvIndex;
-                        console.log('SRDV INDEX', srdvIndex)
+                        console.log('SRDV INDEX', srdvIndex);
                     }
                 });
             }
         });
     });
 
-if (!srdvIndex) {
-    console.error('SrdvIndex not found for the provided ResultIndex:', resultIndex);
-} else {
-    console.log('Final SrdvIndex:', srdvIndex);
-}
-
-    // Add event listeners for baggage and meal buttons
-    document.getElementById('baggage-btn').addEventListener('click', function() {
-        fetchSSRData('baggage');
-    });
-
-    document.getElementById('meal-btn').addEventListener('click', function() {
-        fetchSSRData('meal');
-    });
+    // Add event listeners
+    if (srdvIndex) {
+        document.getElementById('baggage-btn').addEventListener('click', () => fetchSSRData('baggage'));
+        document.getElementById('meal-btn').addEventListener('click', () => fetchSSRData('meal'));
+    } else {
+        console.error('SrdvIndex not found for ResultIndex:', resultIndex);
+    }
 
     function fetchSSRData(displayType) {
-    fetch("{{ route('fetch.ssr.data') }}", {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-CSRF-TOKEN': "{{ csrf_token() }}"
-        },
-        body: JSON.stringify({
-            EndUserIp: '1.1.1.1', // Replace with actual IP
-            ClientId: '180133',
-            UserName: 'MakeMy91',
-            Password: 'MakeMy@910',
-            SrdvType: "MixAPI",
-            SrdvIndex: srdvIndex,
-            TraceId: traceId,
-            ResultIndex: resultIndex
+        fetch("{{ route('fetch.ssr.data') }}", {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': "{{ csrf_token() }}"
+            },
+            body: JSON.stringify({
+                EndUserIp: '1.1.1.1',
+                ClientId: '180133',
+                UserName: 'MakeMy91',
+                Password: 'MakeMy@910',
+                SrdvType: "MixAPI",
+                SrdvIndex: srdvIndex, // Ensure this is correctly set
+                TraceId: traceId,
+                ResultIndex: resultIndex
+            })
         })
-    })
     .then(response => response.json())
     .then(data => {
         const container = document.getElementById('options-container');
@@ -292,70 +327,160 @@ if (!srdvIndex) {
             '<p>Error fetching SSR data. Please try again.</p>';
     });
 }
-    function renderBaggageOptions(baggageData, container) {
-        if (!baggageData.length) {
-            container.innerHTML = '<p>No baggage options available.</p>';
-            return;
-        }
+function renderBaggageOptions(baggageData, container) {
+    if (!baggageData.length) {
+        container.innerHTML = '<p>No baggage options available.</p>';
+        return;
+    }
 
-        container.innerHTML = `
-            <h6 class="mb-4">Baggage Options</h6>
-            <table class="table table-bordered">
-                <thead>
+    container.innerHTML = `
+        <h6 class="mb-4">Baggage Options</h6>
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>Weight</th>
+                    <th>Price (INR)</th>
+                    <th>Route</th>
+                    <th>Select</th>
+                </tr>
+            </thead>
+            <tbody>
+                ${baggageData.map(option => `
                     <tr>
-                        <th>Weight</th>
-                        <th>Price (INR)</th>
-                        <th>Route</th>
-                        <th>Select</th>
+                        <td>${option.Weight > 0 ? option.Weight + ' kg' : 'No Baggage'}</td>
+                        <td>${option.Price > 0 ? option.Price + ' INR' : 'Free'}</td>
+                        <td>${option.Origin} → ${option.Destination}</td>
+                        <td>
+                            <input 
+                                type="radio" 
+                                name="baggage_option" 
+                                value="${option.Code}" 
+                                data-weight="${option.Weight}" 
+                                data-price="${option.Price}"
+                                data-description="${option.Description}"
+                                data-wayType="${option.WayType}"
+                                data-currency="${option.Currency}"
+                                data-origin="${option.Origin}"
+                                data-destination="${option.Destination}"
+                                ${option.Code === 'NoBaggage' ? 'checked' : ''}
+                                onchange="updateBaggageSelection(this)"
+                            >
+                        </td>
                     </tr>
-                </thead>
-                <tbody>
-                    ${baggageData.map(option => `
-                        <tr>
-                            <td>${option.Weight > 0 ? option.Weight + ' kg' : 'No Baggage'}</td>
-                            <td>${option.Price > 0 ? option.Price + ' INR' : 'Free'}</td>
-                            <td>${option.Origin} → ${option.Destination}</td>
-                            <td>
-                                <input type="radio" name="baggage_option" value="${option.Code}" 
-                                    ${option.Code === 'NoBaggage' ? 'checked' : ''}>
-                            </td>
-                        </tr>
-                    `).join('')}
-                </tbody>
-            </table>
-        `;
-    }
-
-    function renderMealOptions(mealData, container) {
-        if (!mealData.length) {
-            container.innerHTML = '<p>No meal options available.</p>';
-            return;
-        }
-
-        container.innerHTML = `
-            <h6 class="mb-4">Meal Options</h6>
-            <div class="meal-options-container">
-                ${mealData.map(meal => `
-                    <div class="meal-option border rounded p-3 mb-3">
-                        <div class="description mb-2">
-                            ${meal.Code === 'NoMeal' ? 'No Meal' : (meal.AirlineDescription || 'Standard Meal')}
-                        </div>
-                        <div class="price mb-2">
-                            ${meal.Price > 0 ? meal.Price + ' ' + meal.Currency : 'Free'}
-                        </div>
-                        <div class="route mb-2">
-                            ${meal.Origin} → ${meal.Destination}
-                        </div>
-                        <div class="select">
-                            <input type="radio" name="meal_option" value="${meal.Code}"
-                                ${meal.Code === 'NoMeal' ? 'checked' : ''}>
-                            <label>${meal.Code === 'NoMeal' ? 'Select No Meal' : 'Select This Meal'}</label>
-                        </div>
-                    </div>
                 `).join('')}
-            </div>
-        `;
+            </tbody>
+        </table>
+    `;
+}
+
+window.updateBaggageSelection = function(radio) {
+    showBaggageAlert(radio);
+    window.selectedBaggageOption = {
+        Code: radio.value,
+        Weight: radio.getAttribute('data-weight'),
+        Price: radio.getAttribute('data-price'),
+        Origin: radio.getAttribute('data-origin'),
+        Destination: radio.getAttribute('data-destination'),
+        Description: radio.getAttribute('data-description'),
+        WayType: radio.getAttribute('data-wayType'),
+        Currency: radio.getAttribute('data-currency')
+    };
+};
+
+function renderMealOptions(mealData, container) {
+    // Similar modification for meal options
+    container.innerHTML = `
+        <div class="meal-options-container">
+            ${mealData.map(meal => `
+                <div class="meal-option">
+                    <input 
+                        type="radio" 
+                        name="meal_option" 
+                        value="${meal.Code}" 
+                        data-wayType="${meal.WayType}"
+                        data-descript="${meal.Description || 'No Description'}"
+                        data-description="${meal.AirlineDescription || 'No Description'}"
+                        data-origin="${meal.Origin}"
+                        data-quantity="${meal.Quantity}"
+                        data-currency="${meal.Currency}"
+                        data-destination="${meal.Destination}"
+                        data-price="${meal.Price}"
+                        ${meal.Code === 'NoMeal' ? 'checked' : ''}
+                        onchange="updateMealSelection(this)"
+                    >
+                    <label>${meal.AirlineDescription || 'No Meal'}</label>
+                </div>
+            `).join('')}
+        </div>
+    `;
+}
+
+window.updateMealSelection = function(radio) {
+    showMealAlert(radio);
+    window.selectedMealOption = {
+        Code: radio.value,
+        AirlineDescription: radio.getAttribute('data-description'),
+        Origin: radio.getAttribute('data-origin'),
+        Destination: radio.getAttribute('data-destination'),
+        Price: radio.getAttribute('data-price'),
+        Waytype:radio.getAttribute('data-wayType'),
+        Quantity:radio.getAttribute('data-quantity'),
+        Currency: radio.getAttribute('data-currency'),
+        Description: radio.getAttribute('data-descript')
+    };
+};
+
+
+// Add these global functions to show alerts
+function showBaggageAlert(radio) {
+    const weight = radio.getAttribute('data-weight');
+    const price = radio.getAttribute('data-price');
+    
+    if (window.Swal) {
+        window.Swal.fire({
+            icon: 'info',
+            title: 'Baggage Option Selected',
+            text: `${weight > 0 ? weight + ' kg' : 'No Baggage'} - ${price > 0 ? '₹' + price : 'Free'}`,
+            showConfirmButton: false,
+            timer: 1500
+        });
+    } else {
+        alert(`Baggage: ${weight > 0 ? weight + ' kg' : 'No Baggage'} - ${price > 0 ? '₹' + price : 'Free'}`);
     }
+}
+
+window.showMealAlert = function(radio) {
+    const description = radio.getAttribute('data-description') || 'No Description';
+    
+    if (window.Swal) {
+        window.Swal.fire({
+            icon: 'info',
+            title: 'Meal Option Selected',
+            text: description,
+            showConfirmButton: false,
+            timer: 1500
+        });
+    } else {
+        alert(`Meal: ${description}`);
+    }
+};
+
+window.showBaggageAlert = function(radio) {
+    const weight = radio.getAttribute('data-weight');
+    const price = radio.getAttribute('data-price');
+    
+    if (window.Swal) {
+        window.Swal.fire({
+            icon: 'info',
+            title: 'Baggage Option Selected',
+            text: `${weight > 0 ? weight + ' kg' : 'No Baggage'} - ${price > 0 ? '₹' + price : 'Free'}`,
+            showConfirmButton: false,
+            timer: 1500
+        });
+    } else {
+        alert(`Baggage: ${weight > 0 ? weight + ' kg' : 'No Baggage'} - ${price > 0 ? '₹' + price : 'Free'}`);
+    }
+};
 
     // Seat Selection
     document.getElementById('selectSeatBtn').addEventListener('click', function() {
@@ -410,7 +535,147 @@ if (!srdvIndex) {
     function initializeBootstrapComponents() {
         // Initialize any Bootstrap components here if needed
     }
+
+    function selectSeat(code, seatNumber, amount,airlineName,airlineCode,airlineNumber) {
+    console.log('Selecting seat:', { code, seatNumber, amount,airlineName,airlineCode , airlineNumber});
+
+    // Remove any previously created seat radio buttons
+    const existingRadios = document.querySelectorAll('input[name="seat_option"]');
+    existingRadios.forEach(radio => radio.remove());
+
+    // Create new seat radio button
+    const seatRadio = document.createElement('input');
+    seatRadio.type = 'radio';
+    seatRadio.name = 'seat_option';
+    seatRadio.value = code;
+    seatRadio.setAttribute('data-seat-number', seatNumber);
+    seatRadio.setAttribute('data-amount', amount);
+    seatRadio.setAttribute('data-airlineName', airlineName);
+    seatRadio.setAttribute('data-airlineCode', airlineCode);
+    seatRadio.setAttribute('data-airlineNumber', airlineNumber);
+    seatRadio.checked = true;
+    
+    // Append to body or a specific container
+    document.body.appendChild(seatRadio);
+    
+    // Update seat info display
+    const seatInfoElement = document.getElementById('seatInfo');
+    if (seatInfoElement) {
+        seatInfoElement.textContent = `Selected Seat: ${seatNumber} (₹${amount})`;
+    } else {
+        console.error('Seat info element not found');
+    }
+    
+    // Ensure SweetAlert is properly loaded
+    if (window.Swal) {
+        window.Swal.fire({
+            icon: 'success',
+            title: 'Seat Selected!',
+            text: `You have selected Seat ${seatNumber} (₹${amount})`,
+            showConfirmButton: false,
+            timer: 1500
+        });
+    } else {
+        // Fallback alert if SweetAlert is not available
+        alert(`Seat ${seatNumber} selected for ₹${amount}`);
+        console.warn('SweetAlert not loaded, using standard alert');
+    }
+}
+
+// Ensure the function is globally accessible
+window.selectSeat = selectSeat;
+
+
+
+document.getElementById('submitButton').addEventListener('click', function(event) {
+    event.preventDefault(); // Prevent default action
+    
+    // Call bookLCC function directly
+    bookLCC();
+    
+    return false; // Prevent form submission
 });
+
+    
+    // Collect seat data
+    function bookLCC() {
+    // Collect seat data
+    const selectedSeat = document.querySelector('input[name="seat_option"]:checked');
+    const seatData = selectedSeat ? [{
+        Code: selectedSeat.value,
+        SeatNumber: selectedSeat.getAttribute('data-seat-number'),
+        Amount: selectedSeat.getAttribute('data-amount'),
+        AirlineName: selectedSeat.getAttribute('data-airlineName'),
+        AirlineCode: selectedSeat.getAttribute('data-airlineCode'),
+        AirlineNumber: selectedSeat.getAttribute('data-airlineNumber')
+    }] : [];
+
+    const baggageData = window.selectedBaggageOption ? [window.selectedBaggageOption] : [];
+    const mealData = window.selectedMealOption ? [window.selectedMealOption] : [];
+
+    // Prepare payload
+    const payload = {
+        srdvIndex: srdvIndex,
+        traceId: traceId,
+        resultIndex: resultIndex,
+        passenger: {
+            title: document.getElementById('title').value,
+            firstName: document.getElementById('firstName').value,
+            lastName: document.getElementById('lastName').value,
+            gender: document.getElementById('gender').value,
+            contactNo: document.getElementById('contactNo').value,
+            email: document.getElementById('email').value,
+            paxType:document.getElementById('passengerType').value,
+            dateOfBirth: "12/01/1998",
+            passportNo: "",
+            passportExpiry: "",
+            passportIssueDate: "",
+            countryCode: "IN",
+            countryName: "INDIA",
+            baggage: baggageData,
+            mealDynamic: mealData,
+            seat: seatData // Correctly formatted seat data
+
+        },
+        fare: {
+            baseFare: fareQuoteData.Fare.BaseFare,
+            tax: fareQuoteData.Fare.Tax,
+            yqTax: fareQuoteData.Fare.YQTax,
+            transactionFee: parseFloat(fareQuoteData.Fare.TransactionFee),
+            additionalTxnFeeOfrd: fareQuoteData.Fare.AdditionalTxnFeeOfrd,
+            additionalTxnFeePub: fareQuoteData.Fare.AdditionalTxnFeePub,
+            airTransFee: parseFloat(fareQuoteData.Fare.AirTransFee)
+        }
+    };
+
+    console.log('Payload:', payload); // For debugging purposes
+
+    // Send booking request
+    fetch('/flight/bookLcc', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': "{{ csrf_token() }}"
+        },
+        body: JSON.stringify(payload)
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.status === 'success') {
+        alert('Booking successful! Booking ID: ' + data.booking_details.booking_id);
+        // Additional actions with booking details if needed
+        console.log(data.booking_details);
+    } else {
+        alert('Booking failed: ' + (data.message || 'Unknown error'));
+    }
+})
+.catch(error => {
+    console.error('Error:', error);
+    alert('An error occurred during booking');
+});
+}
+});
+
 </script>
 
 @endsection
