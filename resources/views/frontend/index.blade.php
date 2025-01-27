@@ -1344,7 +1344,9 @@ console.log('Cookies:', document.cookie);
 
 
 
-
+  //  ****************************************************
+  //                    FLIGHT SEARCH
+  //  ****************************************************
 
 
 
@@ -1499,6 +1501,8 @@ $(document).ready(function () {
         autoclose: true,
         startDate: new Date()
     });
+
+    
 
     // Airport search functionality
     function initializeAirportSearch() {

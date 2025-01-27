@@ -1,7 +1,6 @@
 <?php
 
 namespace App\Http\Controllers;
-
 use App\Models\AirportList;
 use App\Models\Flight;
 use Carbon\Carbon;
@@ -56,12 +55,6 @@ class FlightController extends Controller
 
 
     
-
-
-
-
-
-
 
     public function fetchAirports(Request $request)
     {
