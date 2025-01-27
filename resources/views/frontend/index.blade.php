@@ -1,10 +1,10 @@
+@extends('frontend.layouts.master')
 <!-- Include jQuery from CDN -->
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <!-- Include Flatpickr CSS -->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
 <!-- Include Flatpickr JS -->
 <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-@extends('frontend.layouts.master')
 @section('content')
 <div id="loadingSpinner" style="
     display: none; 
@@ -15,7 +15,6 @@
     height: 100%; 
     background-color: rgba(255, 255, 255, 0.8); 
     z-index: 9999; 
-    display: none; 
     align-items: center; 
     justify-content: center;">
     <img src="{{ asset('assets/loading.gif') }}" alt="Loading..." style="width: 10vw; height: 10vw; max-width: 150px; max-height: 150px;" />
@@ -44,6 +43,7 @@
 }
 </style>
 @endsection
+
 <section class="hero">
   <div class="container">
     <div class="row">
@@ -86,6 +86,7 @@
             </button>
           </li>
         </ul>
+        
         <div class="tab-content" id="myTabContent">
           <!-- <div class="tab-pane fade" id="home" role="tabpanel" aria-labelledby="home-tab">
             <p>Comming Soon!</p>

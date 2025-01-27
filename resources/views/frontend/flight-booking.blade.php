@@ -1,219 +1,263 @@
-<!-- Include Bootstrap JS and jQuery -->
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
-<meta name="csrf-token" content="{{ csrf_token() }}">
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flight Booking Form</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.1.3/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- SweetAlert2 CSS -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/limonte-sweetalert2/11.4.8/sweetalert2.min.css" rel="stylesheet">
+    
+    <style>
+        .meal-options-container {
+            display: grid;
+            gap: 1rem;
+        }
 
-<style>
-    .meal-options-container {
-        display: grid;
-        gap: 1rem;
-    }
+        .meal-option {
+            background: #fff;
+            padding: 1rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            transition: all 0.3s ease;
+        }
 
-    .meal-option {
-        background: #fff;
-        transition: all 0.3s ease;
-    }
+        .meal-option:hover {
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
 
-    .meal-option:hover {
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    }
+        .table th,
+        .table td {
+            vertical-align: middle;
+        }
 
-    .table th,
-    .table td {
-        vertical-align: middle;
-    }
+        .plane {
+            margin: auto;
+            max-width: 300px;
+            background: #f0f0f0;
+            padding: 10px;
+            border-radius: 5px;
+            text-align: center;
+        }
 
-    .plane {
-        margin: auto;
-        max-width: 300px;
-        background: #f0f0f0;
-        padding: 10px;
-        border-radius: 5px;
-        text-align: center;
-    }
+        .cockpit {
+            padding: 10px 0;
+            background: #333;
+            color: white;
+            font-weight: bold;
+            border-radius: 5px 5px 0 0;
+        }
 
-    .cockpit {
-        padding: 10px 0;
-        background: #333;
-        color: white;
-        font-weight: bold;
-    }
+        .cabin {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 15px;
+        }
 
-    .cabin {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-    }
+        .row {
+            display: flex;
+            justify-content: center;
+            margin: 5px 0;
+        }
 
-    .row {
-        display: flex;
-        justify-content: center;
-        margin: 5px 0;
-    }
+        .seat {
+            width: 40px;
+            height: 40px;
+            background: #4caf50;
+            margin: 5px;
+            line-height: 40px;
+            text-align: center;
+            border-radius: 5px;
+            color: white;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
 
-    .seat {
-        width: 40px;
-        height: 40px;
-        background: #4caf50;
-        margin: 5px;
-        line-height: 40px;
-        text-align: center;
-        border-radius: 5px;
-        color: white;
-        cursor: pointer;
-    }
+        .seat:hover {
+            background: #45a049;
+        }
 
-    .seat.selected {
-        background: #ff5722;
-    }
-</style>
-@extends('frontend.layouts.master')
+        .seat.selected {
+            background: #ff5722;
+        }
 
-@section('content')
-    <!-- Booking Form Modal -->
-    <div class="modal fade show" id="bookingFormModal" tabindex="-1" aria-labelledby="bookingFormModalLabel" aria-hidden="true" style="display: block;">
-        <div class="modal-dialog modal-xl">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="bookingFormModalLabel">Booking Form</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <form id="bookingForm">
-                        <!-- Personal Details Section -->
-                        <div class="card mb-3">
-                            <div class="card-header">
-                                <h6 class="mb-0">Personal Details</h6>
-                            </div>
-                            <div class="card-body">
-                                <div class="row">
-                                    <!-- Title -->
-                                    <div class="col-md-3 mb-3">
-                                        <label for="title" class="form-label">Title</label>
-                                        <select class="form-select" id="title" name="Title" required>
-                                            <option value="Mr">Mr</option>
-                                            <option value="Mrs">Mrs</option>
-                                            <option value="Ms">Ms</option>
-                                        </select>
-                                    </div>
-                                    <!-- First Name -->
-                                    <div class="col-md-3 mb-3">
-                                        <label for="firstName" class="form-label">First Name</label>
-                                        <input type="text" class="form-control" id="firstName" name="FirstName" required>
-                                    </div>
-                                    <!-- Last Name -->
-                                    <div class="col-md-3 mb-3">
-                                        <label for="lastName" class="form-label">Last Name</label>
-                                        <input type="text" class="form-control" id="lastName" name="LastName" required>
-                                    </div>
-                                    <!-- Gender -->
-                                    <div class="col-md-3 mb-3">
-                                        <label for="gender" class="form-label">Gender</label>
-                                        <select class="form-select" id="gender" name="Gender" required>
-                                            <option value="1">Male</option>
-                                            <option value="2">Female</option>
-                                        </select>
-                                    </div>
-                                      <!-- Passenger Type -->
-                                    <div class="col-md-3 mb-3">
-                                        <label for="gender" class="form-label">PassengerType</label>
-                                        <select class="form-select" id="passengerType" name="PassengerType" required>
-                                            <option value="1">Adult</option>
-                                            <option value="2">Child</option>
-                                            <option value="3">Infant</option>
-                                        </select>
-                                    </div>
-                                    <!-- Email -->
-                                    <div class="col-md-6 mb-3">
-                                        <label for="email" class="form-label">Email</label>
-                                        <input type="email" class="form-control" id="email" name="Email" required>
-                                    </div>
-                                    <!-- Contact Number -->
-                                    <div class="col-md-6 mb-3">
-                                        <label for="contactNo" class="form-label">Contact Number</label>
-                                        <input type="tel" class="form-control" id="contactNo" name="ContactNo" required>
-                                    </div>
-                                    <!-- Address -->
-                                    <div class="col-md-12 mb-3">
-                                        <label for="addressLine1" class="form-label">Address</label>
-                                        <input type="text" class="form-control" id="addressLine1" name="AddressLine1" required>
-                                    </div>
+        .modal-xl {
+            max-width: 1140px;
+        }
+
+        .card {
+            margin-bottom: 1.5rem;
+            box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+        }
+
+        .card-header {
+            background-color: #f8f9fa;
+            border-bottom: 1px solid rgba(0,0,0,.125);
+        }
+
+        .option-selection {
+            margin-bottom: 1rem;
+        }
+
+        .option-selection button {
+            margin-right: 0.5rem;
+        }
+
+        #options-container {
+            margin-top: 1rem;
+            padding: 1rem;
+            border: 1px solid #dee2e6;
+            border-radius: 0.25rem;
+        }
+    </style>
+</head>
+<body class="bg-light">
+    <div class="container py-5">
+        <div class="card">
+            <div class="card-header">
+                <h4 class="mb-0">Flight Booking Form</h4>
+            </div>
+            <div class="card-body">
+                <form id="bookingForm">
+                    <!-- Personal Details Section -->
+                    <div class="card mb-3">
+                        <div class="card-header">
+                            <h6 class="mb-0">Personal Details</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-3 mb-3">
+                                    <label for="title" class="form-label">Title</label>
+                                    <select class="form-select" id="title" name="Title" required>
+                                        <option value="Mr">Mr</option>
+                                        <option value="Mrs">Mrs</option>
+                                        <option value="Ms">Ms</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-3 mb-3">
+                                    <label for="firstName" class="form-label">First Name</label>
+                                    <input type="text" class="form-control" id="firstName" name="FirstName" required>
+                                </div>
+                                <div class="col-md-3 mb-3">
+                                    <label for="lastName" class="form-label">Last Name</label>
+                                    <input type="text" class="form-control" id="lastName" name="LastName" required>
+                                </div>
+                                <div class="col-md-3 mb-3">
+                                    <label for="gender" class="form-label">Gender</label>
+                                    <select class="form-select" id="gender" name="Gender" required>
+                                        <option value="1">Male</option>
+                                        <option value="2">Female</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-3 mb-3">
+                                    <label for="passengerType" class="form-label">Passenger Type</label>
+                                    <select class="form-select" id="passengerType" name="PassengerType" required>
+                                        <option value="1">Adult</option>
+                                        <option value="2">Child</option>
+                                        <option value="3">Infant</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="email" class="form-label">Email</label>
+                                    <input type="email" class="form-control" id="email" name="Email" required>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="contactNo" class="form-label">Contact Number</label>
+                                    <input type="tel" class="form-control" id="contactNo" name="ContactNo" required>
+                                </div>
+                                <div class="col-md-12 mb-3">
+                                    <label for="addressLine1" class="form-label">Address</label>
+                                    <input type="text" class="form-control" id="addressLine1" name="AddressLine1" required>
                                 </div>
                             </div>
                         </div>
+                    </div>
 
-                        <!-- Passport Details Section -->
-                        <div class="card mb-3">
-                            <div class="card-header">
-                                <h6 class="mb-0">Passport Details</h6>
-                            </div>
-                            <div class="card-body">
-                                <div class="row">
-                                    <!-- Passport Number -->
-                                    <div class="col-md-4 mb-3">
-                                        <label for="passportNo" class="form-label">Passport Number</label>
-                                        <input type="text" class="form-control" id="passportNo" name="PassportNo">
-                                    </div>
-                                    <!-- Passport Expiry -->
-                                    <div class="col-md-4 mb-3">
-                                        <label for="passportExpiry" class="form-label">Passport Expiry</label>
-                                        <input type="date" class="form-control" id="passportExpiry" name="PassportExpiry">
-                                    </div>
-                                    <!-- Passport Issue Date -->
-                                    <div class="col-md-4 mb-3">
-                                        <label for="passportIssueDate" class="form-label">Passport Issue Date</label>
-                                        <input type="date" class="form-control" id="passportIssueDate" name="PassportIssueDate">
-                                    </div>
+                    <!-- Passport Details Section -->
+                    <div class="card mb-3">
+                        <div class="card-header">
+                            <h6 class="mb-0">Passport Details</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-4 mb-3">
+                                    <label for="passportNo" class="form-label">Passport Number</label>
+                                    <input type="text" class="form-control" id="passportNo" name="PassportNo">
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <label for="passportExpiry" class="form-label">Passport Expiry</label>
+                                    <input type="date" class="form-control" id="passportExpiry" name="PassportExpiry">
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <label for="passportIssueDate" class="form-label">Passport Issue Date</label>
+                                    <input type="date" class="form-control" id="passportIssueDate" name="PassportIssueDate">
                                 </div>
                             </div>
                         </div>
+                    </div>
 
-                        <!-- Dynamic Sections -->
-                        <div id="dynamicSections"></div>
-
-                        <!-- Options -->
-                        <div class="option-selection">
-                            <button type="button" class="btn btn-primary" id="baggage-btn">Baggage Options</button>
-                            <button type="button" class="btn btn-secondary" id="meal-btn">Meal Options</button>
+                    <!-- Options Section -->
+                    <div class="card mb-3">
+                        <div class="card-header">
+                            <h6 class="mb-0">Additional Options</h6>
                         </div>
-                        <div id="options-container">
-                            <p>Please select an option to view details.</p>
+                        <div class="card-body">
+                            <div class="option-selection">
+                                <button type="button" class="btn btn-primary" id="baggage-btn">Baggage Options</button>
+                                <button type="button" class="btn btn-secondary" id="meal-btn">Meal Options</button>
+                            </div>
+                            <div id="options-container">
+                                <p>Please select an option to view details.</p>
+                            </div>
                         </div>
+                    </div>
 
-                        <!-- Seat Selection -->
-                        <div class="seat-selection-section mb-3">
-                            <h6>Seat Selection</h6>
+                    <!-- Seat Selection Section -->
+                    <div class="card mb-3">
+                        <div class="card-header">
+                            <h6 class="mb-0">Seat Selection</h6>
+                        </div>
+                        <div class="card-body">
                             <button type="button" class="btn btn-secondary" id="selectSeatBtn">Select Seat</button>
                             <span id="seatInfo" class="ms-2" style="font-size: 14px;"></span>
+                            <div id="seatMapContainer" class="mt-3" style="display: none;"></div>
                         </div>
-                        <div id="seatMapContainer" class="mt-3" style="display: none;"></div>
+                    </div>
 
-                        <!-- Fare Details -->
-                        <div class="card mb-3">
-                            <div class="card-header">
-                                <h6 class="mb-0">Fare Details</h6>
-                            </div>
-                            <div class="card-body">
-                                <div class="row">
-                                    <div class="col-md-3 mb-3">
-                                        <label for="totalFare" class="form-label">Total Fare</label>
-                                        <input type="text" class="form-control" id="totalFare" readonly>
-                                    </div>
+                    <!-- Fare Details -->
+                    <div class="card mb-3">
+                        <div class="card-header">
+                            <h6 class="mb-0">Fare Details</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-3 mb-3">
+                                    <label for="totalFare" class="form-label">Total Fare</label>
+                                    <input type="text" class="form-control" id="totalFare" readonly>
                                 </div>
                             </div>
                         </div>
+                    </div>
 
-                        <!-- Submit Button -->
-                        <button  type="button" id="submitButton" class="btn btn-primary">Submit Booking</button>
-                    </form>
-                </div>
+                    <!-- Submit Button -->
+                    <button type="button" id="submitButton" class="btn btn-primary">Submit Booking</button>
+                </form>
             </div>
         </div>
     </div>
 
+    <!-- Required JavaScript -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.1.3/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/limonte-sweetalert2/11.4.8/sweetalert2.min.js"></script>
     <script>
-document.addEventListener('DOMContentLoaded', function() {
-    const urlParams = new URLSearchParams(window.location.search);
+        // Your existing JavaScript code here (unchanged)
+        document.addEventListener('DOMContentLoaded', function() {
+            const urlParams = new URLSearchParams(window.location.search);
     const traceId = urlParams.get('traceId');
     const resultIndex = urlParams.get('resultIndex');
     const encodedDetails = urlParams.get('details');
@@ -675,7 +719,6 @@ document.getElementById('submitButton').addEventListener('click', function(event
 });
 }
 });
-
-</script>
-
-@endsection
+    </script>
+</body>
+</html>

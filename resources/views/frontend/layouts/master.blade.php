@@ -41,40 +41,69 @@
 </script>
 </head>
 <body>
-  <div class="topbar bg-dark text-white py-2">
+<div class="topbar bg-dark text-white py-2">
     <div class="container">
-      <div class="row align-items-center">
-        <div class="col-md-6 col-lg-6 col-xl-6 d-none d-lg-block">
-          <a href="tel:(+91) 1204223100" target="_blank" class="text-white text-decoration-none px-2 ">
-            <i class="fa-solid fa-phone px-1"></i> +91 1204223100</a>
-          <a href="mailto:info@makemybharatyatra.com" target="_blank"
-            class="text-white text-decoration-none border-start border-2 px-3"> <i
-              class="fa-solid fa-envelope px-1"></i> info@makemybharatyatra.com</a>
-        </div>
-        <div class="col-md-6 text-end">
-                {{-- Conditionally show Login or Logout button --}}
-                @guest
-                    <!-- Show Login Button if the user is not logged in -->
-                    <a href="{{ route('loginView') }}" class="btn btn-warning btn-sm rounded-0 fw-bold mx-3 px-3">
-                        <i class="fa-regular fa-user"></i> LOGIN
+        <div class="row align-items-center">
+            <!-- Contact Info Section -->
+            <div class="col-6" style="font-size: 14px;">
+                <!-- Hidden on small screens, visible on lg -->
+                <div class="d-none d-lg-block">
+                    <a href="tel:(+91) 1204223100" target="_blank" class="text-white text-decoration-none px-2">
+                        <i class="fa-solid fa-phone px-1"></i> +91 1204223100
                     </a>
-                @else
-                    <!-- Show Logout Button if the user is logged in -->
-                    <form action="{{ route('logout') }}" method="POST" style="display:inline;">
-                      @csrf
-                       <button type="submit" class="btn btn-warning btn-sm rounded-0 fw-bold mx-3 px-3">
-                          <i class="fa-solid fa-sign-out-alt"></i> LOGOUT
-                       </button>
-                    </form>
+                    <a href="mailto:info@makemybharatyatra.com" target="_blank" 
+                       class="text-white text-decoration-none border-start border-2 px-3">
+                        <i class="fa-solid fa-envelope px-1"></i> info@makemybharatyatra.com
+                    </a>
+                </div>
+                <!-- Visible only on small screens -->
+                <div class="d-lg-none" style="display: flex; gap: 15px;">
+                    <a href="tel:(+91) 1204223100" target="_blank" 
+                       class="text-white text-decoration-none" 
+                       style="padding: 5px;">
+                        <i class="fa-solid fa-phone"></i>
+                    </a>
+                    <a href="mailto:info@makemybharatyatra.com" target="_blank" 
+                       class="text-white text-decoration-none" 
+                       style="padding: 5px;">
+                        <i class="fa-solid fa-envelope"></i>
+                    </a>
+                </div>
+            </div>
 
-                @endguest
-                <a href="{{ route('checkout') }}" class="nav-link d-inline-block position-relative" style="margin-top: 5px;">
-                    <i class="fa fa-shopping-cart" style="font-size: 18px;"></i>
-                    <span id="cart-count" class="badge bg-danger rounded-pill position-absolute"
-                          style="top: -10px; right: -10px; font-size: 11px;">
-                        {{ $cartCount }}
-                    </span>
-                </a>
+            <!-- Login/Cart Section -->
+            <div class="col-6">
+                <div style="display: flex; justify-content: flex-end; align-items: center; gap: 10px;">
+                    @guest
+                        <a href="{{ route('loginView') }}" 
+                           class="btn btn-warning btn-sm rounded-0 fw-bold" 
+                           style="padding: 6px 15px; font-size: 13px;">
+                            <i class="fa-regular fa-user"></i>
+                            <span class="d-none d-sm-inline ms-1">LOGIN</span>
+                        </a>
+                    @else
+                        <form action="{{ route('logout') }}" method="POST" style="display: inline-block;">
+                            @csrf
+                            <button type="submit" 
+                                    class="btn btn-warning btn-sm rounded-0 fw-bold" 
+                                    style="padding: 6px 15px; font-size: 13px;">
+                                <i class="fa-solid fa-sign-out-alt"></i>
+                                <span class="d-none d-sm-inline ms-1">LOGOUT</span>
+                            </button>
+                        </form>
+                    @endguest
+                    
+                    <a href="{{ route('checkout') }}" 
+                       class="nav-link position-relative" 
+                       style="padding: 5px;">
+                        <i class="fa fa-shopping-cart" style="font-size: 18px;"></i>
+                        <span id="cart-count" 
+                              class="badge bg-danger rounded-pill position-absolute" 
+                              style="top: -8px; right: -8px; font-size: 10px;">
+                            {{ $cartCount }}
+                        </span>
+                    </a>
+                </div>
             </div>
         </div>
     </div>
