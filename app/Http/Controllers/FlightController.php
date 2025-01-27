@@ -116,11 +116,12 @@ class FlightController extends Controller
                     'errors' => $validator->errors()->toArray(),
                     'data' => $data
                 ]);
+                
                 return response()->json([
-                    'status' => 'error',
-                    'message' => 'Validation failed',
+                    'success' => false,
+                    'message' => 'Please check your input and try again',
                     'errors' => $validator->errors()->toArray(),
-                    'received_data' => $data
+                    'error_code' => 'VALIDATION_ERROR'
                 ], 422);
             }
     
