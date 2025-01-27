@@ -510,3 +510,4 @@ Route::get('/flight-booking', function () {
 Route::post('/fetch-options', [FlightController::class, 'fetchOptions'])->name('fetch.options');
 Route::post('/fetch-ssr-data', [FlightController::class, 'fetchSSRData'])->name('fetch.ssr.data');
 Route::post('/flight/get-seat-map', [FlightController::class, 'getSeatMap'])->name('flight.getSeatMap');
+Route::post('/flight/bookLcc', [FlightController::class, 'bookLCC']);
