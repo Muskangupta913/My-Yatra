@@ -337,6 +337,7 @@
             document.querySelectorAll(`input[name="${name}"]:checked`)
         ).map(input => input.value);
     }
+    
     function getAirlineLogo(airlineCode) {
     // Normalize the airline code (uppercase and trim)
     const normalizedCode = (airlineCode || '').toUpperCase().trim();

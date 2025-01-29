@@ -1,412 +1,435 @@
-@extends('frontend.layouts.master')
-@section('title', 'flight search')
-@section('content')
+<!DOCTYPE html>
+<html lang="en">
+<head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>Flight Search Results</title>
-@section('styles')
-     <!-- Tailwind CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <title>Flight Booking Form</title>
     
-    <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <!-- Bootstrap CSS -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.1.3/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- SweetAlert2 CSS -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/limonte-sweetalert2/11.4.8/sweetalert2.min.css" rel="stylesheet">
     
     <style>
-        .modal {
-            background-color: rgba(0,0,0,0.5);
-            z-index: 1000;
+        :root {
+            --primary-color: #2196f3;
+            --secondary-color: #1976d2;
+            --accent-color: #64b5f6;
+            --background-color: #f8f9fa;
         }
-    </style>
- @endsection 
- <div class="container mx-auto px-4 py-8">
-    {{-- Search Summary Header --}}
-    <div class="bg-gradient-to-r from-indigo-600 via-purple-700 to-pink-600 rounded-xl p-4 md:p-6 mb-6 relative overflow-hidden">
-        <div class="relative z-10 flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
-            <div class="flex items-center space-x-4">
-                <div class="bg-white bg-opacity-20 p-3 rounded-full">
-                    <i class="fas fa-plane text-2xl md:text-3xl text-white"></i>
-                </div>
-                <div id="flight-header" class="text-white"></div>
-            </div>
-        </div>
-    </div>
 
-    {{-- Main Content Grid --}}
-    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-        {{-- Filters Sidebar --}}
-        <div class="md:col-span-1 bg-white shadow-md rounded-lg p-4">
-                <h3 class="font-bold text-lg mb-4">Advanced Filters</h3>
-                <div id="filters-container" class="space-y-4">
-                    <!-- Dynamically populated filters will go here -->
-                </div>
-            </div>
+        body {
+            background: var(--background-color);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
 
-        {{-- Flight Results --}}
-        <div class="md:col-span-3">
-            {{-- Sorting and Results Count --}}
-            <div class="flex flex-col md:flex-row justify-between items-center mb-4 space-y-2 md:space-y-0">
-                <div class="flex items-center space-x-2">
-                    <span class="font-medium">Sort by:</span>
-                    <select id="sort-options" class="border rounded p-2">
-                        <option value="price-low-high">Price: Low to High</option>
-                        <option value="price-high-low">Price: High to Low</option>
-                        <option value="departure-early">Departure: Early</option>
-                        <option value="departure-late">Departure: Late</option>
-                    </select>
-                </div>
-                <div id="results-count" class="text-gray-600"></div>
-            </div>
+        .container {
+            max-width: 1200px;
+            margin: 2rem auto;
+        }
 
-            {{-- Flight Results Container --}}
-            <div id="results-container" class="space-y-4"></div>
-        </div>
-    </div>
+        .booking-header {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 2rem;
+            border-radius: 10px 10px 0 0;
+            margin-bottom: 0;
+        }
 
-    {{-- Fare Rules Modal --}}
-    <div id="fareRulesModal" 
-         class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50 p-4">
-        <div class="bg-white rounded-lg p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-            <div class="flex justify-between items-center mb-4">
-                <h2 class="text-xl font-semibold">Fare Rules</h2>
-                <button onclick="closeFareRulesModal()" 
-                        class="text-gray-600 hover:text-gray-900">
-                    <i class="fas fa-times"></i>
-                </button>
-            </div>
-            <div id="fareRulesDetails"></div>
-        </div>
-    </div>
-</div>
-@endsection
-    @section('scripts')
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-    const results = JSON.parse(sessionStorage.getItem('flightSearchResults')) || [];
-    const resultsContainer = document.getElementById('results-container');
-    const filtersContainer = document.getElementById('filters-container');
-    const resultsCountDisplay = document.getElementById('results-count');
-    const sortOptions = document.getElementById('sort-options');
+        .booking-header h4 {
+            margin: 0;
+            font-size: 1.8rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
 
-    // Advanced filter extraction
-    function extractAdvancedFilters(results) {
-        const filters = {
-            airlines: new Set(),
-            stops: new Set(),
-            priceRange: { min: Infinity, max: -Infinity },
-            departureTime: { early: [], late: [] },
-            cabinClasses: new Set(),
-            baggageOptions: new Set(),
-            flightDurations: []
-        };
+        .booking-header h4:before {
+            content: '✈️';
+            font-size: 2rem;
+        }
 
-        results.forEach(resultGroup => {
-            resultGroup.forEach(result => {
-                if (result.FareDataMultiple) {
-                    result.FareDataMultiple.forEach(fareData => {
-                        const segment = result.Segments[0][0];
-                        const fareSegment = fareData.FareSegments[0];
+        .card {
+            border: none;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+            margin-bottom: 2rem;
+            background: white;
+        }
 
-                        // Airlines
-                        filters.airlines.add(fareSegment.AirlineName || 'Unknown');
+        .card-header {
+            background: white;
+            border-bottom: 2px solid #e0e0e0;
+            padding: 1.5rem;
+        }
 
-                        // Stops
-                        const stops = result.Segments[0].length === 1 ? 'Non-stop' : `${result.Segments[0].length - 1} Stop`;
-                        filters.stops.add(stops);
+        .card-header h6 {
+            color: var(--secondary-color);
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
 
-                        // Price Range
-                        const fare = fareData.Fare.OfferedFare;
-                        filters.priceRange.min = Math.min(filters.priceRange.min, fare);
-                        filters.priceRange.max = Math.max(filters.priceRange.max, fare);
+        .form-label {
+            font-weight: 500;
+            color: #424242;
+        }
 
-                        // Departure Times
-                        const departureTime = new Date(segment.DepTime);
-                        const hours = departureTime.getHours();
-                        filters.departureTime.early.push(hours < 12 ? 'Morning (Before 12 PM)' : '');
-                        filters.departureTime.late.push(hours >= 12 ? 'Evening (After 12 PM)' : '');
+        .form-control, .form-select {
+            border-radius: 8px;
+            padding: 0.75rem;
+            border: 2px solid #e0e0e0;
+            transition: all 0.3s ease;
+        }
 
-                        // Cabin Classes
-                        filters.cabinClasses.add(fareSegment.CabinClassName || 'Unknown');
+        .form-control:focus, .form-select:focus {
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 0.2rem rgba(33, 150, 243, 0.25);
+        }
 
-                        // Baggage Options
-                        filters.baggageOptions.add(fareSegment.Baggage || 'Unknown');
+        .btn-primary {
+            background: var(--primary-color);
+            border: none;
+            padding: 0.75rem 2rem;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
 
-                        // Flight Durations
-                        const duration = segment.Duration;
-                        if (duration) {
-                            filters.flightDurations.push(
-                                duration <= 60 ? 'Short (≤ 1 hour)' :
-                                duration <= 120 ? 'Medium (1-2 hours)' :
-                                'Long (> 2 hours)'
-                            );
-                        }
-                    });
-                }
-            });
-        });
+        .btn-primary:hover {
+            background: var(--secondary-color);
+            transform: translateY(-1px);
+        }
 
-        // Clean up and unique filter sets
-        filters.departureTime.early = [...new Set(filters.departureTime.early)].filter(Boolean);
-        filters.departureTime.late = [...new Set(filters.departureTime.late)].filter(Boolean);
-        filters.flightDurations = [...new Set(filters.flightDurations)];
+        .btn-secondary {
+            background: #90caf9;
+            border: none;
+            color: #1565c0;
+        }
 
-        return filters;
-    }
+        .btn-secondary:hover {
+            background: #64b5f6;
+        }
 
-    // Dynamically create filter sections
-    function createFilterSections(filters) {
-        filtersContainer.innerHTML = `
-            ${createFilterSection('Airlines', 'airlines', filters.airlines)}
-            ${createFilterSection('Stops', 'stops', filters.stops)}
-            ${createPriceRangeFilter(filters.priceRange)}
-            ${createFilterSection('Departure Time', 'departure-time', 
-                [...filters.departureTime.early, ...filters.departureTime.late])}
-            ${createFilterSection('Cabin Class', 'cabin-class', filters.cabinClasses)}
-            ${createFilterSection('Baggage', 'baggage', filters.baggageOptions)}
-            ${createFilterSection('Flight Duration', 'flight-duration', filters.flightDurations)}
-        `;
+        .option-selection {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
 
-        // Add event listeners to new filter inputs
-        document.querySelectorAll('input[type="checkbox"], input[type="radio"]').forEach(input => {
-            input.addEventListener('change', applyFilters);
-        });
-    }
+        #options-container {
+            background: #f5f5f5;
+            border-radius: 8px;
+            padding: 1.5rem;
+        }
 
-    // Create filter section HTML
-    function createFilterSection(title, name, options) {
-        const optionsHTML = Array.from(options).map(option => `
-            <label class="flex items-center mb-2">
-                <input type="checkbox" name="${name}" value="${option}" class="mr-2">
-                ${option}
-            </label>
-        `).join('');
+        .meal-options-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+        }
 
-        return `
-            <div class="mb-4">
-                <h4 class="font-semibold mb-2">${title}</h4>
-                <div class="space-y-2">${optionsHTML}</div>
-            </div>
-        `;
-    }
+        .meal-option {
+            background: white;
+            padding: 1rem;
+            border-radius: 8px;
+            border: 2px solid #e0e0e0;
+            transition: all 0.3s ease;
+        }
 
-    // Create price range filter
-    function createPriceRangeFilter(priceRange) {
-        return `
-            <div class="mb-4">
-                <h4 class="font-semibold mb-2">Price Range</h4>
-                <div class="flex space-x-2 mb-2">
-                    <input type="number" id="min-price" placeholder="Min" 
-                           min="${Math.floor(priceRange.min)}" 
-                           max="${Math.ceil(priceRange.max)}" 
-                           value="${Math.floor(priceRange.min)}" 
-                           class="w-1/2 p-2 border rounded">
-                    <input type="number" id="max-price" placeholder="Max" 
-                           min="${Math.floor(priceRange.min)}" 
-                           max="${Math.ceil(priceRange.max)}" 
-                           value="${Math.ceil(priceRange.max)}" 
-                           class="w-1/2 p-2 border rounded">
-                </div>
-                <button id="apply-price-filter" class="w-full bg-blue-500 text-white py-2 rounded">
-                    Apply Price Filter
-                </button>
-            </div>
-        `;
-    }
+        .meal-option:hover {
+            border-color: var(--accent-color);
+            transform: translateY(-2px);
+        }
 
-    // Apply filters
-    function applyFilters() {
-    const selectedFilters = {
-        airlines: getSelectedValues('airlines'),
-        stops: getSelectedValues('stops'),
-        departureTime: getSelectedValues('departure-time'),
-        cabinClass: getSelectedValues('cabin-class'),
-        baggage: getSelectedValues('baggage'),
-        flightDuration: getSelectedValues('flight-duration'),
-        minPrice: parseFloat(document.getElementById('min-price').value) || 0,
-        maxPrice: parseFloat(document.getElementById('max-price').value) || Infinity
-    };
+        .plane {
+            max-width: 400px;
+            background: #f5f5f5;
+            border-radius: 10px;
+            padding: 1.5rem;
+        }
 
-    const filteredResults = results.map(resultGroup => 
-        resultGroup.filter(result => {
-            // Check if ANY of the fare data entries match the filters
-            return result.FareDataMultiple.some(fareData => {
-                const segment = result.Segments[0][0];
-                const fareSegment = fareData.FareSegments[0];
-                const departureTime = new Date(segment.DepTime);
-                const duration = segment.Duration;
+        .cockpit {
+            background: linear-gradient(135deg, #1565c0, #0d47a1);
+            padding: 1rem;
+            border-radius: 10px 10px 0 0;
+        }
 
-                const airlineMatch = selectedFilters.airlines.length === 0 || 
-                    selectedFilters.airlines.includes(fareSegment.AirlineName);
+        .seat {
+            width: 45px;
+            height: 45px;
+            background: var(--primary-color);
+            border-radius: 8px;
+            margin: 0.5rem;
+            font-weight: 600;
+        }
 
-                const priceMatch = fareData.Fare.OfferedFare >= selectedFilters.minPrice && 
-                    fareData.Fare.OfferedFare <= selectedFilters.maxPrice;
+        .seat:hover {
+            background: var(--secondary-color);
+            transform: scale(1.05);
+        }
 
-                const stopMatch = selectedFilters.stops.length === 0 || 
-                    selectedFilters.stops.some(stop => 
-                        (stop === 'Non-stop' && result.Segments[0].length === 1) ||
-                        (stop !== 'Non-stop' && result.Segments[0].length > 1)
-                    );
+        .seat.selected {
+            background: #f44336;
+        }
 
-                const departureTimeMatch = selectedFilters.departureTime.length === 0 || 
-                    (departureTime.getHours() < 12 && selectedFilters.departureTime.includes('Morning (Before 12 PM)')) ||
-                    (departureTime.getHours() >= 12 && selectedFilters.departureTime.includes('Evening (After 12 PM)'));
+        @media (max-width: 768px) {
+            .container {
+                margin: 1rem;
+                padding: 0;
+            }
 
-                const cabinClassMatch = selectedFilters.cabinClass.length === 0 || 
-                    selectedFilters.cabinClass.includes(fareSegment.CabinClassName);
+            .booking-header {
+                padding: 1.5rem;
+            }
 
-                const baggageMatch = selectedFilters.baggage.length === 0 || 
-                    selectedFilters.baggage.includes(fareSegment.Baggage);
+            .card-body {
+                padding: 1rem;
+            }
 
-                const durationMatch = selectedFilters.flightDuration.length === 0 || 
-                    selectedFilters.flightDuration.includes(
-                        duration <= 60 ? 'Short (≤ 1 hour)' :
-                        duration <= 120 ? 'Medium (1-2 hours)' :
-                        'Long (> 2 hours)'
-                    );
+            .option-selection {
+                flex-direction: column;
+            }
 
-                return airlineMatch && priceMatch && stopMatch && 
-                       departureTimeMatch && cabinClassMatch && 
-                       baggageMatch && durationMatch;
-            });
-        })
-    );
+            .btn {
+                width: 100%;
+            }
+        }
 
-    renderFilteredResults(filteredResults);
+        .table {
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .table th {
+            background: #e3f2fd;
+            color: var(--secondary-color);
+        }
+
+        #submitButton {
+            width: 100%;
+            max-width: 300px;
+            margin: 2rem auto;
+            display: block;
+            font-size: 1.2rem;
+            padding: 1rem;
+        }
+        .seat-map-modal {
+    z-index: 1060;
 }
 
-    // Helper to get selected filter values
-    function getSelectedValues(name) {
-        return Array.from(
-            document.querySelectorAll(`input[name="${name}"]:checked`)
-        ).map(input => input.value);
-    }
+.seat-map-popup {
+    max-width: 1200px !important;
+}
 
-    // Render results (existing implementation)
-    function renderFilteredResults(filteredResults) {
-        resultsContainer.innerHTML = '';
+.seat-map-content {
+    padding: 0;
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+@media (max-width: 768px) {
+    .seat-map-popup {
+        margin: 0.5rem !important;
+    }
+}
+    </style>
+</head>
+<body class="bg-light">
+    <div class="container py-5">
+        <div class="card">
+            <div class="card-header">
+                <h4 class="mb-0">Flight Booking Form</h4>
+            </div>
+            <div class="card-body">
+                <form id="bookingForm">
+                    <!-- Personal Details Section -->
+                    <div class="card mb-3">
+                        <div class="card-header">
+                            <h6 class="mb-0">Personal Details</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-3 mb-3">
+                                    <label for="title" class="form-label">Title</label>
+                                    <select class="form-select" id="title" name="Title" required>
+                                        <option value="Mr">Mr</option>
+                                        <option value="Mrs">Mrs</option>
+                                        <option value="Ms">Ms</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-3 mb-3">
+                                    <label for="firstName" class="form-label">First Name</label>
+                                    <input type="text" class="form-control" id="firstName" name="FirstName" required>
+                                </div>
+                                <div class="col-md-3 mb-3">
+                                    <label for="lastName" class="form-label">Last Name</label>
+                                    <input type="text" class="form-control" id="lastName" name="LastName" required>
+                                </div>
+                                <div class="col-md-3 mb-3">
+                                    <label for="gender" class="form-label">Gender</label>
+                                    <select class="form-select" id="gender" name="Gender" required>
+                                        <option value="1">Male</option>
+                                        <option value="2">Female</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-3 mb-3">
+                                    <label for="passengerType" class="form-label">Passenger Type</label>
+                                    <select class="form-select" id="passengerType" name="PassengerType" required>
+                                        <option value="1">Adult</option>
+                                        <option value="2">Child</option>
+                                        <option value="3">Infant</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="email" class="form-label">Email</label>
+                                    <input type="email" class="form-control" id="email" name="Email" required>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="contactNo" class="form-label">Contact Number</label>
+                                    <input type="tel" class="form-control" id="contactNo" name="ContactNo" required>
+                                </div>
+                                <div class="col-md-12 mb-3">
+                                    <label for="addressLine1" class="form-label">Address</label>
+                                    <input type="text" class="form-control" id="addressLine1" name="AddressLine1" required>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Passport Details Section -->
+                    <div class="card mb-3">
+                        <div class="card-header">
+                            <h6 class="mb-0">Passport Details</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-4 mb-3">
+                                    <label for="passportNo" class="form-label">Passport Number</label>
+                                    <input type="text" class="form-control" id="passportNo" name="PassportNo">
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <label for="passportExpiry" class="form-label">Passport Expiry</label>
+                                    <input type="date" class="form-control" id="passportExpiry" name="PassportExpiry">
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <label for="passportIssueDate" class="form-label">Passport Issue Date</label>
+                                    <input type="date" class="form-control" id="passportIssueDate" name="PassportIssueDate">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Options Section -->
+                    <div class="card mb-3">
+                        <div class="card-header">
+                            <h6 class="mb-0">Additional Options</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="option-selection">
+                                <button type="button" class="btn btn-primary" id="baggage-btn">Baggage Options</button>
+                                <button type="button" class="btn btn-secondary" id="meal-btn">Meal Options</button>
+                            </div>
+                            <div id="options-container">
+                                <p>Please select an option to view details.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Seat Selection Section -->
+                    <div class="card mb-3">
+                        <div class="card-header">
+                            <h6 class="mb-0">Seat Selection</h6>
+                        </div>
+                        <div class="card-body">
+                            <button type="button" class="btn btn-secondary" id="selectSeatBtn">Select Seat</button>
+                            <span id="seatInfo" class="ms-2" style="font-size: 14px;"></span>
+                            <div id="seatMapContainer" class="mt-3" style="display: none;"></div>
+                        </div>
+                    </div>
+
+                    <!-- Fare Details -->
+                    <div class="card mb-3">
+                        <div class="card-header">
+                            <h6 class="mb-0">Fare Details</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-3 mb-3">
+                                    <label for="totalFare" class="form-label">Total Fare</label>
+                                    <input type="text" class="form-control" id="totalFare" readonly>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Submit Button -->
+                    <button type="button" id="submitButton" class="btn btn-primary">Submit Booking</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Required JavaScript -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.1.3/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/limonte-sweetalert2/11.4.8/sweetalert2.min.js"></script>
+    <script>
+        // Your existing JavaScript code here (unchanged)
+        document.addEventListener('DOMContentLoaded', function() {
+            const urlParams = new URLSearchParams(window.location.search);
+    const traceId = urlParams.get('traceId');
+    const resultIndex = urlParams.get('resultIndex');
+    const encodedDetails = urlParams.get('details');
+
+   
+
+    const fareQuoteData = JSON.parse(sessionStorage.getItem('fareQuoteData'));
+
+    // Log fare details for verification
+    if (fareQuoteData && fareQuoteData.Fare) {
+        console.log('Fare Details Successfully Fetched:', fareQuoteData.Fare);
         
-        if (filteredResults.length === 0) {
-            resultsContainer.innerHTML = `
-                <div class="text-center py-10">
-                    <p class="text-gray-600">No flight results found matching your filters.</p>
-                </div>`;
-            resultsCountDisplay.textContent = '0 results';
-            return;
+        // Optional: Set total fare in a hidden input for later use
+        const totalFareInput = document.getElementById('totalFare');
+        if (totalFareInput) {
+            totalFareInput.value = fareQuoteData.Fare.OfferedFare || 0;
         }
-
-        filteredResults.forEach(resultGroup => {
-            resultGroup.forEach(result => {
-                if (result.FareDataMultiple && Array.isArray(result.FareDataMultiple)) {
-                    result.FareDataMultiple.forEach(fareData => {
-                        const segment = result.Segments?.[0]?.[0];
-                        
-                        const flightCard = document.createElement('div');
-                        flightCard.classList.add('bg-white', 'shadow-md', 'rounded-lg', 'p-4', 'mb-4');
-                        flightCard.innerHTML = `
-                            <div class="flex justify-between items-center mb-4">
-                                <div>
-                                    <h2 class="font-semibold">${fareData.FareSegments[0]?.AirlineName || 'Airline'}</h2>
-                                    <p class="text-sm text-gray-600">Flight No: ${fareData.FareSegments[0]?.FlightNumber || 'N/A'}</p>
-                                </div>
-                                <div class="text-right">
-                                    <p class="text-xl font-bold text-blue-600">₹${fareData.Fare?.OfferedFare?.toLocaleString() || 'N/A'}</p>
-                                </div>
-                            </div>
-                            
-                            <div class="flex justify-between items-center mb-4">
-                                <div>
-                                    <p class="font-semibold">${segment?.DepTime ? new Date(segment.DepTime).toLocaleTimeString() : 'N/A'}</p>
-                                    <p class="text-sm text-gray-600">${segment?.Origin?.AirportName || 'N/A'} (${segment?.Origin?.AirportCode || 'N/A'})</p>
-                                </div>
-                                <div class="text-center">
-                                    <p class="text-sm text-gray-600">${segment?.Duration || 'N/A'} mins</p>
-                                </div>
-                                <div class="text-right">
-                                    <p class="font-semibold">${segment?.ArrTime ? new Date(segment.ArrTime).toLocaleTimeString() : 'N/A'}</p>
-                                    <p class="text-sm text-gray-600">${segment?.Destination?.AirportName || 'N/A'} (${segment?.Destination?.AirportCode || 'N/A'})</p>
-                                </div>
-                            </div>
-                            
-                            <div class="border-t pt-3 flex justify-between items-center">
-                                <div class="flex space-x-2">
-                                    <span class="bg-green-100 text-green-800 px-2 py-1 rounded text-xs">
-                                        ${fareData.FareSegments[0]?.Baggage || 'N/A'} Baggage
-                                    </span>
-                                    <span class="bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs">
-                                        ${fareData.FareSegments[0]?.CabinClassName || 'N/A'}
-                                    </span>
-                                </div>
-                                <div class="flex space-x-2">
-                                    <button onclick="viewFlightDetails('${fareData.ResultIndex}')" 
-                                            class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
-                                        View Details
-                                    </button>
-                                    <button onclick="fetchFareRules('${fareData.ResultIndex}')" 
-                                            class="bg-gray-200 text-gray-700 px-4 py-2 rounded hover:bg-gray-300">
-                                        Fare Rules
-                                    </button>
-                                </div>
-                            </div>
-                        `;
-
-                        resultsContainer.appendChild(flightCard);
-                    });
-                }
-            });
-        });
-
-        resultsCountDisplay.textContent = `${filteredResults.length} results`;
-    
+    } else {
+        console.error('Fare Quote Data Not Found in Session Storage');
     }
 
-    // Sorting functionality (existing implementation)
-    function sortResults(option) {
-        const sortedResults = JSON.parse(JSON.stringify(results)); // Deep clone to avoid mutating original
+    // Correctly parse details
+    let flightDetails = {};
+    if (encodedDetails) {
+        try {
+            flightDetails = JSON.parse(decodeURIComponent(encodedDetails));
+            console.log('Parsed Flight Details:', flightDetails);
+            console.log('IsLCC:', flightDetails.isLCC);
 
-    sortedResults.forEach(resultGroup => {
-    resultGroup.sort((a, b) => {
-        const fareA = a.FareDataMultiple[0].Fare.OfferedFare;
-        const fareB = b.FareDataMultiple[0].Fare.OfferedFare;
-        const depTimeA = new Date(a.Segments[0][0].DepTime);
-        const depTimeB = new Date(b.Segments[0][0].DepTime);
+            // Use the isLCC directly from parsed details
+            const isLCC = flightDetails.isLCC;
 
-        switch(option) {
-            case 'price-low-high':
-                return fareA - fareB;
-            case 'price-high-low':
-                return fareB - fareA;
-            case 'departure-early':
-                return depTimeA - depTimeB;
-            case 'departure-late':
-                return depTimeB - depTimeA;
+            if (isLCC) {
+                console.log('This is a Low-Cost Carrier flight');
+            } else {
+                console.log('This is a Full-Service Carrier flight');
+            }
+        } catch (error) {
+            console.error('Error parsing flight details:', error);
         }
-    });
-});
-
-renderFilteredResults(sortedResults);
     }
 
-    // Initialize
-    const filters = extractAdvancedFilters(results);
-    createFilterSections(filters);
-    renderFilteredResults(results);
 
-    // Event Listeners for sorting
-    sortOptions.addEventListener('change', (e) => {
-        sortResults(e.target.value);
-    });
-});
-
-function viewFlightDetails(resultIndex) {
-    const traceId = sessionStorage.getItem('flightTraceId');
+    // Retrieve stored flight search results
     const results = JSON.parse(sessionStorage.getItem('flightSearchResults')) || [];
 
-    if (!traceId) {
-        console.error('TraceId is not found in sessionStorage');
-        return;
-    }
-
-    // Find the SrdvIndex for the specific resultIndex
+    // Find SrdvIndex
     let srdvIndex = null;
     results.forEach(resultGroup => {
         resultGroup.forEach(result => {
@@ -414,258 +437,423 @@ function viewFlightDetails(resultIndex) {
                 result.FareDataMultiple.forEach(fareData => {
                     if (fareData.ResultIndex === resultIndex) {
                         srdvIndex = fareData.SrdvIndex;
+                        console.log('SRDV INDEX', srdvIndex);
                     }
                 });
             }
         });
     });
 
-    // Ensure we have a valid SrdvIndex before making the API call
-    if (!srdvIndex) {
-        console.error('Unable to find SrdvIndex for the selected flight');
-        alert('Error: Could not retrieve fare details for the selected flight.');
+    // Add event listeners
+    if (srdvIndex) {
+        document.getElementById('baggage-btn').addEventListener('click', () => fetchSSRData('baggage'));
+        document.getElementById('meal-btn').addEventListener('click', () => fetchSSRData('meal'));
+    } else {
+        console.error('SrdvIndex not found for ResultIndex:', resultIndex);
+    }
+
+    function fetchSSRData(displayType) {
+        fetch("{{ route('fetch.ssr.data') }}", {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': "{{ csrf_token() }}"
+            },
+            body: JSON.stringify({
+                EndUserIp: '1.1.1.1',
+                ClientId: '180133',
+                UserName: 'MakeMy91',
+                Password: 'MakeMy@910',
+                SrdvType: "MixAPI",
+                SrdvIndex: srdvIndex, // Ensure this is correctly set
+                TraceId: traceId,
+                ResultIndex: resultIndex
+            })
+        })
+    .then(response => response.json())
+    .then(data => {
+        const container = document.getElementById('options-container');
+        container.innerHTML = '';
+
+        // Check if SSR data is available
+        if (!data.success) {
+            container.innerHTML = `<p>This flight does not provide SSR services: ${data.message || 'No details available'}</p>`;
+            return;
+        }
+
+        // Check if specific SSR type has options
+        if (displayType === 'baggage' && data.Baggage && data.Baggage[0] && data.Baggage[0].length > 0) {
+            renderBaggageOptions(data.Baggage[0], container);
+        } else if (displayType === 'meal' && data.MealDynamic && data.MealDynamic[0] && data.MealDynamic[0].length > 0) {
+            renderMealOptions(data.MealDynamic[0], container);
+        } else {
+            container.innerHTML = `<p>No ${displayType} options available for this flight.</p>`;
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        document.getElementById('options-container').innerHTML =
+            '<p>Error fetching SSR data. Please try again.</p>';
+    });
+}
+function renderBaggageOptions(baggageData, container) {
+    if (!baggageData.length) {
+        container.innerHTML = '<p>No baggage options available.</p>';
         return;
     }
 
-    // Prepare payload for fareQuote API
-    const payload = {
-        EndUserIp: '1.1.1.1', // Replace with actual IP
-        ClientId: '180133',
-        UserName: 'MakeMy91',
-        Password: 'MakeMy@910',
-        SrdvType: 'MixAPI',
-        SrdvIndex: srdvIndex,
-        TraceId: traceId,
-        ResultIndex: resultIndex
-    };
+    container.innerHTML = `
+        <h6 class="mb-4">Baggage Options</h6>
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>Weight</th>
+                    <th>Price (INR)</th>
+                    <th>Route</th>
+                    <th>Select</th>
+                </tr>
+            </thead>
+            <tbody>
+                ${baggageData.map(option => `
+                    <tr>
+                        <td>${option.Weight > 0 ? option.Weight + ' kg' : 'No Baggage'}</td>
+                        <td>${option.Price > 0 ? option.Price + ' INR' : 'Free'}</td>
+                        <td>${option.Origin} → ${option.Destination}</td>
+                        <td>
+                            <input 
+                                type="radio" 
+                                name="baggage_option" 
+                                value="${option.Code}" 
+                                data-weight="${option.Weight}" 
+                                data-price="${option.Price}"
+                                data-description="${option.Description}"
+                                data-wayType="${option.WayType}"
+                                data-currency="${option.Currency}"
+                                data-origin="${option.Origin}"
+                                data-destination="${option.Destination}"
+                                ${option.Code === 'NoBaggage' ? 'checked' : ''}
+                                onchange="updateBaggageSelection(this)"
+                            >
+                        </td>
+                    </tr>
+                `).join('')}
+            </tbody>
+        </table>
+    `;
+}
 
-    // Call the FareQuote API
-    fetch('/flight/fareQutes', {
+window.updateBaggageSelection = function(radio) {
+    showBaggageAlert(radio);
+    window.selectedBaggageOption = {
+        Code: radio.value,
+        Weight: radio.getAttribute('data-weight'),
+        Price: radio.getAttribute('data-price'),
+        Origin: radio.getAttribute('data-origin'),
+        Destination: radio.getAttribute('data-destination'),
+        Description: radio.getAttribute('data-description'),
+        WayType: radio.getAttribute('data-wayType'),
+        Currency: radio.getAttribute('data-currency')
+    };
+};
+
+function renderMealOptions(mealData, container) {
+    // Similar modification for meal options
+    container.innerHTML = `
+        <div class="meal-options-container">
+            ${mealData.map(meal => `
+                <div class="meal-option">
+                    <input 
+                        type="radio" 
+                        name="meal_option" 
+                        value="${meal.Code}" 
+                        data-wayType="${meal.WayType}"
+                        data-descript="${meal.Description || 'No Description'}"
+                        data-description="${meal.AirlineDescription || 'No Description'}"
+                        data-origin="${meal.Origin}"
+                        data-quantity="${meal.Quantity}"
+                        data-currency="${meal.Currency}"
+                        data-destination="${meal.Destination}"
+                        data-price="${meal.Price}"
+                        ${meal.Code === 'NoMeal' ? 'checked' : ''}
+                        onchange="updateMealSelection(this)"
+                    >
+                    <label>${meal.AirlineDescription || 'No Meal'}</label>
+                </div>
+            `).join('')}
+        </div>
+    `;
+}
+
+window.updateMealSelection = function(radio) {
+    showMealAlert(radio);
+    window.selectedMealOption = {
+        Code: radio.value,
+        AirlineDescription: radio.getAttribute('data-description'),
+        Origin: radio.getAttribute('data-origin'),
+        Destination: radio.getAttribute('data-destination'),
+        Price: radio.getAttribute('data-price'),
+        Waytype:radio.getAttribute('data-wayType'),
+        Quantity:radio.getAttribute('data-quantity'),
+        Currency: radio.getAttribute('data-currency'),
+        Description: radio.getAttribute('data-descript')
+    };
+};
+
+
+// Add these global functions to show alerts
+function showBaggageAlert(radio) {
+    const weight = radio.getAttribute('data-weight');
+    const price = radio.getAttribute('data-price');
+    
+    if (window.Swal) {
+        window.Swal.fire({
+            icon: 'info',
+            title: 'Baggage Option Selected',
+            text: `${weight > 0 ? weight + ' kg' : 'No Baggage'} - ${price > 0 ? '₹' + price : 'Free'}`,
+            showConfirmButton: false,
+            timer: 1500
+        });
+    } else {
+        alert(`Baggage: ${weight > 0 ? weight + ' kg' : 'No Baggage'} - ${price > 0 ? '₹' + price : 'Free'}`);
+    }
+}
+
+window.showMealAlert = function(radio) {
+    const description = radio.getAttribute('data-description') || 'No Description';
+    
+    if (window.Swal) {
+        window.Swal.fire({
+            icon: 'info',
+            title: 'Meal Option Selected',
+            text: description,
+            showConfirmButton: false,
+            timer: 1500
+        });
+    } else {
+        alert(`Meal: ${description}`);
+    }
+};
+
+window.showBaggageAlert = function(radio) {
+    const weight = radio.getAttribute('data-weight');
+    const price = radio.getAttribute('data-price');
+    
+    if (window.Swal) {
+        window.Swal.fire({
+            icon: 'info',
+            title: 'Baggage Option Selected',
+            text: `${weight > 0 ? weight + ' kg' : 'No Baggage'} - ${price > 0 ? '₹' + price : 'Free'}`,
+            showConfirmButton: false,
+            timer: 1500
+        });
+    } else {
+        alert(`Baggage: ${weight > 0 ? weight + ' kg' : 'No Baggage'} - ${price > 0 ? '₹' + price : 'Free'}`);
+    }
+};
+
+    // Seat Selection
+// Replace your existing selectSeatBtn click handler with this:
+document.getElementById('selectSeatBtn').addEventListener('click', function() {
+    const button = this;
+    
+    button.disabled = true;
+    button.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Loading...';
+
+    fetch('{{ route('flight.getSeatMap') }}', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
-            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+            'X-CSRF-TOKEN': "{{ csrf_token() }}",
+            'X-Requested-With': 'XMLHttpRequest',
+            'Accept': 'application/json'
+        },
+        body: JSON.stringify({
+            EndUserIp: '1.1.1.1',
+            ClientId: '180133',
+            UserName: 'MakeMy91',
+            Password: 'MakeMy@910',
+            SrdvType: "MixAPI",
+            SrdvIndex: srdvIndex,
+            TraceId: traceId,
+            ResultIndex: resultIndex
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        // Use SweetAlert2 to show the seat map
+        Swal.fire({
+            title: 'Select Your Seat',
+            html: data.html,
+            width: '90%',
+            padding: '0',
+            background: '#f8f9fa',
+            showCloseButton: true,
+            showConfirmButton: false,
+            customClass: {
+                container: 'seat-map-modal',
+                popup: 'seat-map-popup',
+                content: 'seat-map-content'
+            }
+        });
+
+        button.disabled = false;
+        button.innerHTML = 'Select Seat';
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: 'Failed to load seat map. Please try again.'
+        });
+
+        button.disabled = false;
+        button.innerHTML = 'Select Seat';
+    });
+});
+
+// Keep your original selectSeat function unchanged, just add this line at the end:
+function selectSeat(code, seatNumber, amount, airlineName, airlineCode, airlineNumber) {
+    console.log('Selecting seat:', { code, seatNumber, amount, airlineName, airlineCode, airlineNumber });
+
+    // Remove any previously created seat radio buttons
+    const existingRadios = document.querySelectorAll('input[name="seat_option"]');
+    existingRadios.forEach(radio => radio.remove());
+
+    // Create new seat radio button
+    const seatRadio = document.createElement('input');
+    seatRadio.type = 'radio';
+    seatRadio.name = 'seat_option';
+    seatRadio.value = code;
+    seatRadio.setAttribute('data-seat-number', seatNumber);
+    seatRadio.setAttribute('data-amount', amount);
+    seatRadio.setAttribute('data-airlineName', airlineName);
+    seatRadio.setAttribute('data-airlineCode', airlineCode);
+    seatRadio.setAttribute('data-airlineNumber', airlineNumber);
+    seatRadio.checked = true;
+    
+    // Append to body or a specific container
+    document.body.appendChild(seatRadio);
+    
+    // Update seat info display
+    const seatInfoElement = document.getElementById('seatInfo');
+    if (seatInfoElement) {
+        seatInfoElement.textContent = `Selected Seat: ${seatNumber} (₹${amount})`;
+    } else {
+        console.error('Seat info element not found');
+    }
+    
+    // Show SweetAlert notification
+    if (window.Swal) {
+        window.Swal.fire({
+            icon: 'success',
+            title: 'Seat Selected!',
+            text: `You have selected Seat ${seatNumber} (₹${amount})`,
+            showConfirmButton: false,
+            timer: 1500
+        });
+    } else {
+        alert(`Seat ${seatNumber} selected for ₹${amount}`);
+        console.warn('SweetAlert not loaded, using standard alert');
+    }
+
+    // Close the seat map modal
+    Swal.close();  // Add this line
+}
+
+// Make sure selectSeat is available globally
+window.selectSeat = selectSeat;
+
+
+
+document.getElementById('submitButton').addEventListener('click', function(event) {
+    event.preventDefault(); // Prevent default action
+    
+    // Call bookLCC function directly
+    bookLCC();
+    
+    return false; // Prevent form submission
+});
+
+    
+    // Collect seat data
+    function bookLCC() {
+    // Collect seat data
+    const selectedSeat = document.querySelector('input[name="seat_option"]:checked');
+    const seatData = selectedSeat ? [{
+        Code: selectedSeat.value,
+        SeatNumber: selectedSeat.getAttribute('data-seat-number'),
+        Amount: selectedSeat.getAttribute('data-amount'),
+        AirlineName: selectedSeat.getAttribute('data-airlineName'),
+        AirlineCode: selectedSeat.getAttribute('data-airlineCode'),
+        AirlineNumber: selectedSeat.getAttribute('data-airlineNumber')
+    }] : [];
+
+    const baggageData = window.selectedBaggageOption ? [window.selectedBaggageOption] : [];
+    const mealData = window.selectedMealOption ? [window.selectedMealOption] : [];
+
+    // Prepare payload
+    const payload = {
+        srdvIndex: srdvIndex,
+        traceId: traceId,
+        resultIndex: resultIndex,
+        passenger: {
+            title: document.getElementById('title').value,
+            firstName: document.getElementById('firstName').value,
+            lastName: document.getElementById('lastName').value,
+            gender: document.getElementById('gender').value,
+            contactNo: document.getElementById('contactNo').value,
+            email: document.getElementById('email').value,
+            paxType:document.getElementById('passengerType').value,
+            dateOfBirth: "12/01/1998",
+            passportNo: "",
+            passportExpiry: "",
+            passportIssueDate: "",
+            countryCode: "IN",
+            countryName: "INDIA",
+            baggage: baggageData,
+            mealDynamic: mealData,
+            seat: seatData // Correctly formatted seat data
+
+        },
+        fare: {
+            baseFare: fareQuoteData.Fare.BaseFare,
+            tax: fareQuoteData.Fare.Tax,
+            yqTax: fareQuoteData.Fare.YQTax,
+            transactionFee: parseFloat(fareQuoteData.Fare.TransactionFee),
+            additionalTxnFeeOfrd: fareQuoteData.Fare.AdditionalTxnFeeOfrd,
+            additionalTxnFeePub: fareQuoteData.Fare.AdditionalTxnFeePub,
+            airTransFee: parseFloat(fareQuoteData.Fare.AirTransFee)
+        }
+    };
+
+    console.log('Payload:', payload); // For debugging purposes
+
+    // Send booking request
+    fetch('/flight/bookLcc', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': "{{ csrf_token() }}"
         },
         body: JSON.stringify(payload)
     })
     .then(response => response.json())
     .then(data => {
-        if (data.success) {
-            // Store fare quote data in sessionStorage
-            sessionStorage.setItem('fareQuoteData', JSON.stringify(data.fareQuote));
-            sessionStorage.setItem('selectedFlightResultIndex', resultIndex);
-            sessionStorage.setItem('selectedFlightTraceId', traceId);
-            window.location.href = '/flight/fareQutesResult';
-
-            // Redirect to the fare quote result page
-            // window.location.href = `/flight-info?traceId=${traceId}&resultIndex=${resultIndex}`;
-        } else {
-            // Handle API error
-            console.error('Fare Quote API Error:', data.message);
-            alert(`Error fetching fare details: ${data.message}`);
-        }
-    })
-    .catch(error => {
-        console.error('Error fetching fare quote:', error);
-        alert('An error occurred while fetching flight details.');
-    });
-}
-     
-
-        function fetchFareRules(resultIndex) {
-    const results = JSON.parse(sessionStorage.getItem('flightSearchResults')) || [];
-    const traceId = sessionStorage.getItem('flightTraceId');
-    const fareRulesModal = document.getElementById('fareRulesModal');
-    const fareRulesDetails = document.getElementById('fareRulesDetails');
-
-    // Find the SrdvIndex for the specific resultIndex
-    let srdvIndex = null;
-    results.forEach(resultGroup => {
-        resultGroup.forEach(result => {
-            if (result.FareDataMultiple) {
-                result.FareDataMultiple.forEach(fareData => {
-                    if (fareData.ResultIndex === resultIndex) {
-                        srdvIndex = fareData.SrdvIndex;
-                    }
-                });
-            }
-        });
-    });
-
-    // Show loading state
-    fareRulesDetails.innerHTML = '<p>Loading fare rules...</p>';
-    fareRulesModal.style.display = 'block';
-
-    // Ensure we have a valid SrdvIndex before making the API call
-    if (!srdvIndex) {
-        fareRulesDetails.innerHTML = '<p>Unable to find SrdvIndex for the selected flight.</p>';
-        return;
+        if (data.status === 'success') {
+        alert('Booking successful! Booking ID: ' + data.booking_details.booking_id);
+        // Additional actions with booking details if needed
+        console.log(data.booking_details);
+    } else {
+        alert('Booking failed: ' + (data.message || 'Unknown error'));
     }
-
-    // Prepare payload for fare rules API
-    const payload = {
-        EndUserIp: '1.1.1.1', // Replace with actual IP
-        ClientId: '180133',
-        UserName: 'MakeMy91',
-        Password: 'MakeMy@910',
-        SrdvType: 'MixAPI', // This can also be dynamically extracted if needed
-        SrdvIndex: srdvIndex,
-        TraceId: traceId,
-        ResultIndex: resultIndex
-    };
-
-
-            // Make API call to fetch fare rules
-            fetch('flight/farerule', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-                },
-                body: JSON.stringify(payload)
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success && data.fareRules) {
-                    // Format and display fare rules
-                    fareRulesDetails.innerHTML = `
-                        <h2>Fare Rules for Flight</h2>
-                        <p><strong>Airline:</strong> ${data.fareRules.Airline}</p>
-                        <p><strong>Route:</strong> ${data.fareRules.Origin} to ${data.fareRules.Destination}</p>
-                        <p><strong>Fare Basis Code:</strong> ${data.fareRules.FareBasisCode}</p>
-                        <div class="fare-rule-details">
-                            <h3>Fare Rule Details</h3>
-                            <pre>${data.fareRules.FareRuleDetail}</pre>
-                        </div>
-                    `;
-                } else {
-                    fareRulesDetails.innerHTML = `<p>Unable to fetch fare rules: ${data.message || 'Unknown error'}</p>`;
-                }
-            })
-            .catch(error => {
-                console.error('Error fetching fare rules:', error);
-                fareRulesDetails.innerHTML = `<p>Error fetching fare rules: ${error.message}</p>`;
-            });
-        }
-
-    
-                    document.addEventListener('DOMContentLoaded', function() {
-                        const urlParams = new URLSearchParams(window.location.search);
-                        const from = urlParams.get('from').split('(')[0].trim();
-                        const to = urlParams.get('to').split('(')[0].trim();
-                        const fromCode = urlParams.get('fromCode');
-                        const toCode = urlParams.get('toCode');
-                        const departureDate = urlParams.get('departureDate');
-                        const adults = urlParams.get('adults');
-                        const cabinClass = urlParams.get('cabinClass');
-
-                        // Mapping cabin class
-                        const cabinClassMap = {
-                            '1': 'Economy',
-                            '2': 'Premium Economy',
-                            '3': 'Business',
-                            '4': 'First Class'
-                        };
-
-                        document.getElementById('flight-header').innerHTML = `
-                            <h1 class="text-3xl font-bold text-white mb-2">
-                                ${from} (${fromCode}) <i class="fas fa-arrow-right text-xl mx-3 text-white"></i> ${to} (${toCode})
-                            </h1>
-                            <div class="text-white text-opacity-90 space-y-1">
-                                <p class="flex items-center">
-                                    <i class="fas fa-calendar-alt mr-2"></i>
-                                    ${new Date(departureDate).toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
-                                </p>
-                                <div class="flex space-x-4">
-                                    <p class="flex items-center">
-                                        <i class="fas fa-users mr-2"></i>
-                                        ${adults} Passenger${adults > 1 ? 's' : ''}
-                                    </p>
-                                    <p class="flex items-center">
-                                        <i class="fas fa-chair mr-2"></i>
-                                        ${cabinClassMap[cabinClass] || 'Economy'} Class
-                                    </p>
-                                </div>
-                            </div>
-                        `;
-                    });
-      
-                    
-//     document.addEventListener('DOMContentLoaded', function() {
-//     const urlParams = new URLSearchParams(window.location.search);
-//     const from = urlParams.get('from').split('(')[0].trim();
-//     const to = urlParams.get('to').split('(')[0].trim();
-//     const fromCode = urlParams.get('fromCode');
-//     const toCode = urlParams.get('toCode');
-//     const departureDate = urlParams.get('departureDate');
-//     const adults = urlParams.get('adults');
-//     const cabinClass = urlParams.get('cabinClass');
-
-//     // Function to fetch calendar fares
-//     function fetchCalendarFares() {
-//         const payload = {
-//             EndUserIp: '1.1.1.1', // Replace with actual IP
-//             ClientId: '180133',
-//             UserName: 'MakeMy91',
-//             Password: 'MakeMy@910',
-//             JourneyType: '1', // One-way
-//             FareType: 'All',
-//             Segments: [{
-//                 Origin: fromCode,
-//                 Destination: toCode,
-//                 FlightCabinClass: cabinClass,
-//                 PreferredDepartureTime: departureDate,
-//                 PreferredArrivalTime: departureDate
-//             }]
-//         };
-
-//         fetch('/flight/calendarFares', {
-//             method: 'POST',
-//             headers: {
-//                 'Content-Type': 'application/json',
-//                 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-//             },
-//             body: JSON.stringify(payload)
-//         })
-//         .then(response => response.json())
-//         .then(data => {
-//             if (data.success && data.results) {
-//                 displayCalendarFares(data.results);
-//             }
-//         })
-//         .catch(error => {
-//             console.error('Error fetching calendar fares:', error);
-//         });
-//     }
-
-//     // Function to display calendar fares in the header
-//     function displayCalendarFares(results) {
-//         const calendarFareContainer = document.createElement('div');
-//         calendarFareContainer.classList.add('mt-2', 'bg-white', 'bg-opacity-10', 'p-3', 'rounded-lg');
-        
-//         const lowestFare = results.reduce((min, result) => 
-//             result.Fare < min ? result.Fare : min, Infinity
-//         );
-
-//         const lowestFareDate = results.find(result => result.Fare === lowestFare);
-
-//         calendarFareContainer.innerHTML = `
-//             <div class="flex items-center text-white space-x-2">
-//                 <i class="fas fa-calendar-alt"></i>
-//                 <span class="font-medium">Lowest Fare:</span>
-//                 <span class="font-bold">₹${lowestFare.toLocaleString()}</span>
-//                 <span class="text-sm">(${new Date(lowestFareDate.DepartureDate).toLocaleDateString()})</span>
-//             </div>
-//         `;
-
-//         // Append to flight header
-//         const flightHeader = document.getElementById('flight-header');
-//         flightHeader.appendChild(calendarFareContainer);
-//     }
-
-//     // Call fetch calendar fares
-//     fetchCalendarFares();
-// });
-               
+})
+.catch(error => {
+    console.error('Error:', error);
+    alert('An error occurred during booking');
+});
+}
+});
     </script>
- @endsection
+</body>
+</html>

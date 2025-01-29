@@ -79,7 +79,7 @@
                            class="btn btn-warning btn-sm rounded-0 fw-bold" 
                            style="padding: 6px 15px; font-size: 13px;">
                             <i class="fa-regular fa-user"></i>
-                            <span class="d-none d-sm-inline ms-1">LOGIN</span>
+                            <span >LOGIN</span>
                         </a>
                     @else
                         <form action="{{ route('logout') }}" method="POST" style="display: inline-block;">
@@ -88,7 +88,7 @@
                                     class="btn btn-warning btn-sm rounded-0 fw-bold" 
                                     style="padding: 6px 15px; font-size: 13px;">
                                 <i class="fa-solid fa-sign-out-alt"></i>
-                                <span class="d-none d-sm-inline ms-1">LOGOUT</span>
+                                <span>LOGOUT</span>
                             </button>
                         </form>
                     @endguest

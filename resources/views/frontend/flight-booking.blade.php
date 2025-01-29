@@ -1,10 +1,6 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Flight Booking Form</title>
-    
+@extends('frontend.layouts.master')
+@section('title', 'flight booking')
+@section('styles')
     <!-- Bootstrap CSS -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.1.3/css/bootstrap.min.css" rel="stylesheet">
     
@@ -12,111 +8,232 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/limonte-sweetalert2/11.4.8/sweetalert2.min.css" rel="stylesheet">
     
     <style>
+        :root {
+            --primary-color: #2196f3;
+            --secondary-color: #1976d2;
+            --accent-color: #64b5f6;
+            --background-color: #f8f9fa;
+        }
+
+        .container {
+            max-width: 1200px;
+        }
+
+        .booking-header {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 2rem;
+            border-radius: 10px 10px 0 0;
+            margin-bottom: 0;
+        }
+
+        .booking-header h4 {
+            margin: 0;
+            font-size: 1.8rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .booking-header h4:before {
+            content: '✈️';
+            font-size: 2rem;
+        }
+
+        .card {
+            border: none;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+            margin-bottom: 2rem;
+            background: white;
+        }
+
+        .card-header {
+            background: white;
+            border-bottom: 2px solid #e0e0e0;
+            padding: 1.5rem;
+        }
+
+        .card-header h6 {
+            color: var(--secondary-color);
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .form-label {
+            font-weight: 500;
+            color: #424242;
+        }
+
+        .form-control, .form-select {
+            border-radius: 8px;
+            padding: 0.75rem;
+            border: 2px solid #e0e0e0;
+            transition: all 0.3s ease;
+        }
+
+        .form-control:focus, .form-select:focus {
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 0.2rem rgba(33, 150, 243, 0.25);
+        }
+
+        .btn-primary {
+            background: var(--primary-color);
+            border: none;
+            padding: 0.75rem 2rem;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary:hover {
+            background: var(--secondary-color);
+            transform: translateY(-1px);
+        }
+
+        .btn-secondary {
+            background: #90caf9;
+            border: none;
+            color: #1565c0;
+        }
+
+        .btn-secondary:hover {
+            background: #64b5f6;
+        }
+
+        .option-selection {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        #options-container {
+            background: #f5f5f5;
+            border-radius: 8px;
+            padding: 1.5rem;
+        }
+
         .meal-options-container {
             display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
             gap: 1rem;
         }
 
         .meal-option {
-            background: #fff;
+            background: white;
             padding: 1rem;
-            border: 1px solid #ddd;
-            border-radius: 4px;
+            border-radius: 8px;
+            border: 2px solid #e0e0e0;
             transition: all 0.3s ease;
         }
 
         .meal-option:hover {
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        }
-
-        .table th,
-        .table td {
-            vertical-align: middle;
+            border-color: var(--accent-color);
+            transform: translateY(-2px);
         }
 
         .plane {
-            margin: auto;
-            max-width: 300px;
-            background: #f0f0f0;
-            padding: 10px;
-            border-radius: 5px;
-            text-align: center;
+            max-width: 400px;
+            background: #f5f5f5;
+            border-radius: 10px;
+            padding: 1.5rem;
         }
 
         .cockpit {
-            padding: 10px 0;
-            background: #333;
-            color: white;
-            font-weight: bold;
-            border-radius: 5px 5px 0 0;
-        }
-
-        .cabin {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: 15px;
-        }
-
-        .row {
-            display: flex;
-            justify-content: center;
-            margin: 5px 0;
+            background: linear-gradient(135deg, #1565c0, #0d47a1);
+            padding: 1rem;
+            border-radius: 10px 10px 0 0;
         }
 
         .seat {
-            width: 40px;
-            height: 40px;
-            background: #4caf50;
-            margin: 5px;
-            line-height: 40px;
-            text-align: center;
-            border-radius: 5px;
-            color: white;
-            cursor: pointer;
-            transition: background-color 0.3s;
+            width: 45px;
+            height: 45px;
+            background: var(--primary-color);
+            border-radius: 8px;
+            margin: 0.5rem;
+            font-weight: 600;
         }
 
         .seat:hover {
-            background: #45a049;
+            background: var(--secondary-color);
+            transform: scale(1.05);
         }
 
         .seat.selected {
-            background: #ff5722;
+            background: #f44336;
         }
 
-        .modal-xl {
-            max-width: 1140px;
+        @media (max-width: 768px) {
+            .container {
+                padding: 0 10px;
+            }
+
+            .booking-header {
+                padding: 1.5rem;
+            }
+
+            .card-body {
+                padding: 1rem;
+            }
+
+            .option-selection {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+            }
         }
 
-        .card {
-            margin-bottom: 1.5rem;
-            box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+        .table {
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
         }
 
-        .card-header {
-            background-color: #f8f9fa;
-            border-bottom: 1px solid rgba(0,0,0,.125);
+        .table th {
+            background: #e3f2fd;
+            color: var(--secondary-color);
         }
 
-        .option-selection {
-            margin-bottom: 1rem;
-        }
-
-        .option-selection button {
-            margin-right: 0.5rem;
-        }
-
-        #options-container {
-            margin-top: 1rem;
+        #submitButton {
+            width: 100%;
+            max-width: 300px;
+            margin: 2rem auto;
+            display: block;
+            font-size: 1.2rem;
             padding: 1rem;
-            border: 1px solid #dee2e6;
-            border-radius: 0.25rem;
+        }
+        
+        .seat-map-modal {
+            z-index: 1060;
+        }
+
+        .seat-map-popup {
+            max-width: 1200px !important;
+        }
+
+        .seat-map-content {
+            padding: 0;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        @media (max-width: 768px) {
+            .seat-map-popup {
+                margin: 0.5rem !important;
+            }
         }
     </style>
-</head>
-<body class="bg-light">
-    <div class="container py-5">
+@endsection
+
+{{-- In @section('content') --}}
+@section('content')
+    <div class="container py-4">
         <div class="card">
             <div class="card-header">
                 <h4 class="mb-0">Flight Booking Form</h4>
@@ -249,14 +366,16 @@
             </div>
         </div>
     </div>
+@endsection
 
+{{-- In @section('scripts') --}}
+@section('scripts')
     <!-- Required JavaScript -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.1.3/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/limonte-sweetalert2/11.4.8/sweetalert2.min.js"></script>
     <script>
-        // Your existing JavaScript code here (unchanged)
-        document.addEventListener('DOMContentLoaded', function() {
+          document.addEventListener('DOMContentLoaded', function() {
             const urlParams = new URLSearchParams(window.location.search);
     const traceId = urlParams.get('traceId');
     const resultIndex = urlParams.get('resultIndex');
@@ -527,61 +646,69 @@ window.showBaggageAlert = function(radio) {
 };
 
     // Seat Selection
-    document.getElementById('selectSeatBtn').addEventListener('click', function() {
-    const seatMapContainer = document.getElementById('seatMapContainer');
+// Replace your existing selectSeatBtn click handler with this:
+document.getElementById('selectSeatBtn').addEventListener('click', function() {
     const button = this;
-
+    
     button.disabled = true;
     button.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Loading...';
 
     fetch('{{ route('flight.getSeatMap') }}', {
-    method: 'POST',
-    headers: {
-        'Content-Type': 'application/json', // Add this header
-        'X-CSRF-TOKEN': '{{ csrf_token() }}', // Add CSRF token
-        'X-Requested-With': 'XMLHttpRequest',
-        'Accept': 'application/json' // Change to JSON
-    },
-    body: JSON.stringify({
-        EndUserIp: '1.1.1.1',
-        ClientId: '180133',
-        UserName: 'MakeMy91',
-        Password: 'MakeMy@910',
-        SrdvType: "MixAPI",
-        SrdvIndex: srdvIndex, // Ensure these are defined
-        TraceId: traceId,
-        ResultIndex: resultIndex
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': "{{ csrf_token() }}",
+            'X-Requested-With': 'XMLHttpRequest',
+            'Accept': 'application/json'
+        },
+        body: JSON.stringify({
+            EndUserIp: '1.1.1.1',
+            ClientId: '180133',
+            UserName: 'MakeMy91',
+            Password: 'MakeMy@910',
+            SrdvType: "MixAPI",
+            SrdvIndex: srdvIndex,
+            TraceId: traceId,
+            ResultIndex: resultIndex
+        })
     })
-})
-    .then(response => {
-        if (!response.ok) {
-            throw new Error('Network response was not ok');
-        }
-        return response.json(); // Changed from text() to json()
-    })
+    .then(response => response.json())
     .then(data => {
-        seatMapContainer.innerHTML = data.html; // Assuming controller returns HTML in data.html
-        seatMapContainer.style.display = 'block';
+        // Use SweetAlert2 to show the seat map
+        Swal.fire({
+            title: 'Select Your Seat',
+            html: data.html,
+            width: '90%',
+            padding: '0',
+            background: '#f8f9fa',
+            showCloseButton: true,
+            showConfirmButton: false,
+            customClass: {
+                container: 'seat-map-modal',
+                popup: 'seat-map-popup',
+                content: 'seat-map-content'
+            }
+        });
 
         button.disabled = false;
         button.innerHTML = 'Select Seat';
-
-        initializeBootstrapComponents();
     })
     .catch(error => {
         console.error('Error:', error);
-        alert('Failed to load seat map. Please try again.');
+        Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: 'Failed to load seat map. Please try again.'
+        });
 
         button.disabled = false;
         button.innerHTML = 'Select Seat';
     });
 });
-    function initializeBootstrapComponents() {
-        // Initialize any Bootstrap components here if needed
-    }
 
-    function selectSeat(code, seatNumber, amount,airlineName,airlineCode,airlineNumber) {
-    console.log('Selecting seat:', { code, seatNumber, amount,airlineName,airlineCode , airlineNumber});
+// Keep your original selectSeat function unchanged, just add this line at the end:
+function selectSeat(code, seatNumber, amount, airlineName, airlineCode, airlineNumber) {
+    console.log('Selecting seat:', { code, seatNumber, amount, airlineName, airlineCode, airlineNumber });
 
     // Remove any previously created seat radio buttons
     const existingRadios = document.querySelectorAll('input[name="seat_option"]');
@@ -610,7 +737,7 @@ window.showBaggageAlert = function(radio) {
         console.error('Seat info element not found');
     }
     
-    // Ensure SweetAlert is properly loaded
+    // Show SweetAlert notification
     if (window.Swal) {
         window.Swal.fire({
             icon: 'success',
@@ -620,13 +747,15 @@ window.showBaggageAlert = function(radio) {
             timer: 1500
         });
     } else {
-        // Fallback alert if SweetAlert is not available
         alert(`Seat ${seatNumber} selected for ₹${amount}`);
         console.warn('SweetAlert not loaded, using standard alert');
     }
+
+    // Close the seat map modal
+    Swal.close();  // Add this line
 }
 
-// Ensure the function is globally accessible
+// Make sure selectSeat is available globally
 window.selectSeat = selectSeat;
 
 
@@ -719,6 +848,5 @@ document.getElementById('submitButton').addEventListener('click', function(event
 });
 }
 });
-    </script>
-</body>
-</html>
+</script>
+@endsection
