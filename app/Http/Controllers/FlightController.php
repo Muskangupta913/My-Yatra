@@ -705,29 +705,26 @@ public function bookLCC(Request $request)
 }
 
 
-public function bookHold (Request $request){
+public function bookHold(Request $request) {
     try {
         // Validate the request
         $validatedData = $request->validate([
             'srdvIndex' => 'required|string',
             'traceId' => 'required|string',
             'resultIndex' => 'required|string',
+            'passenger' => 'required|array',
             'passenger.title' => 'required|string',
             'passenger.firstName' => 'required|string',
             'passenger.lastName' => 'required|string',
-            'passenger.gender' => 'required|integer', // Assuming 1 for male, 2 for female
+            'passenger.gender' => 'required|integer',
             'passenger.contactNo' => 'required|string',
             'passenger.email' => 'required|email',
             'passenger.paxType' => 'required|string',
-            'passenger.dateOfBirth' => 'nullable|string',
-            'passenger.passportNo' => 'nullable|string',
-            'passenger.passportExpiry' => 'nullable|string',
-            'passenger.passportIssueDate' => 'nullable|string',
-            'passenger.countryCode' => 'nullable|string',
-            'passenger.countryName' => 'nullable|string',
-            'passenger.baggage' => 'nullable|array',
-            'passenger.mealDynamic' => 'nullable|array',
-            'passenger.seat' => 'nullable|array',
+            'passenger.countryCode' => 'required|string|size:2',
+            'passenger.countryName' => 'required|string',
+            'passenger.addressLine1' => 'required|string',
+            'passenger.isLeadPax' => 'required|boolean',
+            'fare' => 'required|array',
             'fare.baseFare' => 'required|numeric',
             'fare.tax' => 'required|numeric',
             'fare.yqTax' => 'nullable|numeric',
@@ -735,16 +732,16 @@ public function bookHold (Request $request){
             'fare.additionalTxnFeeOfrd' => 'nullable|numeric',
             'fare.additionalTxnFeePub' => 'nullable|numeric',
             'fare.airTransFee' => 'nullable|numeric',
+            'gst' => 'nullable|array',
+            'gst.companyAddress' => 'nullable|string',
+            'gst.companyContactNumber' => 'nullable|string',
+            'gst.companyName' => 'nullable|string',
+            'gst.number' => 'nullable|string',
+            'gst.companyEmail' => 'nullable|email',
         ]);
-
-        // Default empty arrays for optional fields if not provided
-        $baggage = $validatedData['passenger']['baggage'] ?? [];
-        $mealDynamic = $validatedData['passenger']['mealDynamic'] ?? [];
-        $seat = $validatedData['passenger']['seat'] ?? [];
-
-        // Prepare the payload for the API request
+        
         $payload = [
-            'EndUserIp' => '1.1.1.1', // Replace with actual user IP or dynamic source
+           'EndUserIp' => '1.1.1.1', // Replace with actual user IP or dynamic source
             'ClientId' => '180133',
             'UserName' => 'MakeMy91',
             'Password' => 'MakeMy@910',
@@ -759,14 +756,12 @@ public function bookHold (Request $request){
                     'LastName' => $validatedData['passenger']['lastName'],
                     'PaxType' => $validatedData['passenger']['paxType'],
                     'Gender' => $validatedData['passenger']['gender'],
+                    'AddressLine1' => $validatedData['passenger']['addressLine1'],
+                    'CountryCode' => $validatedData['passenger']['countryCode'],
+                    'CountryName' => $validatedData['passenger']['countryName'],
                     'ContactNo' => $validatedData['passenger']['contactNo'],
                     'Email' => $validatedData['passenger']['email'],
-                    'DateOfBirth' => $validatedData['passenger']['dateOfBirth'] ?? '12/01/1998',
-                    'PassportNo' => $validatedData['passenger']['passportNo'] ?? '',
-                    'PassportExpiry' => $validatedData['passenger']['passportExpiry'] ?? '',
-                    'PassportIssueDate' => $validatedData['passenger']['passportIssueDate'] ?? '',
-                    'CountryCode' => $validatedData['passenger']['countryCode'] ?? 'IN',
-                    'CountryName' => $validatedData['passenger']['countryName'] ?? 'INDIA',
+                    'IsLeadPax' => $validatedData['passenger']['isLeadPax'],
                     'Fare' => [
                         'BaseFare' => $validatedData['fare']['baseFare'],
                         'Tax' => $validatedData['fare']['tax'],
@@ -776,51 +771,77 @@ public function bookHold (Request $request){
                         'AdditionalTxnFeePub' => $validatedData['fare']['additionalTxnFeePub'] ?? 0,
                         'AirTransFee' => $validatedData['fare']['airTransFee'] ?? 0,
                     ],
-                    'Baggage' => $baggage,
-                    'MealDynamic' => $mealDynamic,
-                    'Seat' => $seat,
+                    'GSTCompanyAddress' => $validatedData['gst']['companyAddress'] ?? '',
+                    'GSTCompanyContactNumber' => $validatedData['gst']['companyContactNumber'] ?? '',
+                    'GSTCompanyName' => $validatedData['gst']['companyName'] ?? '',
+                    'GSTNumber' => $validatedData['gst']['number'] ?? '',
+                    'GSTCompanyEmail' => $validatedData['gst']['companyEmail'] ?? '',
                 ]
             ]
         ];
 
-        // Send payload to third-party API
+        // Add optional service data if present
+     
+
         $response = Http::withHeaders([
             'API-Token' => 'MakeMy@910@23',
             'Content-Type' => 'application/json',
-        ])->post('https://flight.srdvtest.com/v8/rest/TicketLCC', $payload);
+        ])->post('https://flight.srdvtest.com/v8/rest/Hold', $payload);
 
         if ($response->successful()) {
             $apiResponse = $response->json();
+            
+            // Check for API-level errors
+            if (isset($apiResponse['Error']) && $apiResponse['Error']['ErrorCode'] !== '0') {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => $apiResponse['Error']['ErrorMessage']
+                ], 422);
+            }
 
-            // Extract relevant data for client response
+            // Format successful response
             $formattedResponse = [
-                'TraceId' => $apiResponse['TraceId'] ?? null,
-                'PNR' => $apiResponse['Response']['PNR'] ?? null,
-                'BookingId' => $apiResponse['Response']['BookingId'] ?? null,
-                'TicketStatus' => $apiResponse['Response']['TicketStatus'] ?? null,
-                'FareDetails' => $apiResponse['Response']['FlightItinerary']['Fare'] ?? [],
-                'Segments' => $apiResponse['Response']['FlightItinerary']['Segments'] ?? [],
+                'status' => 'success',
+                'booking_details' => [
+                    'booking_id' => $apiResponse['Response']['BookingId'],
+                    'pnr' => $apiResponse['Response']['PNR'],
+                    'trace_id' => $apiResponse['TraceId'],
+                    'fare' => $apiResponse['Response']['FlightItinerary']['Fare'],
+                    'is_price_changed' => $apiResponse['Response']['IsPriceChanged'],
+                    'is_time_changed' => $apiResponse['Response']['IsTimeChanged'],
+                    'last_ticket_date' => $apiResponse['Response']['FlightItinerary']['LastTicketDate']
+                ]
             ];
 
-            return response()->json(['success' => true, 'data' => $formattedResponse]);
+            return response()->json($formattedResponse);
         }
 
         // Handle API error responses
         return response()->json([
-            'error' => 'Failed to book flight',
-            'details' => $response->json(),
+            'status' => 'error',
+            'message' => 'Failed to book flight',
+            'details' => $response->json()
         ], $response->status());
 
-    } catch (\Exception $e) {
-        // Handle unexpected errors
+    } catch (ValidationException $e) {
         return response()->json([
-            'error' => 'System error',
-            'message' => $e->getMessage()
+            'status' => 'error',
+            'message' => 'Validation failed',
+            'errors' => $e->errors()
+        ], 422);
+    }catch (\Exception $e) {
+        \Log::error('Flight booking error: ' . $e->getMessage(), [
+            'trace' => $e->getTraceAsString(),
+            'request' => $request->all(),
+            'payload' => $payload ?? null
+        ]);
+        
+        return response()->json([
+            'status' => 'error',
+            'message' => 'System error occurred: ' . $e->getMessage(),
         ], 500);
-    
-    } 
+    }
 }
-
 
 
 

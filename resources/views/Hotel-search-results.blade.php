@@ -193,7 +193,7 @@ body {
     background: #555;
 }
 </style>
-    @endsection
+ @endsection
     <div style="
     position: sticky; 
     top: 0; 

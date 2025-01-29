@@ -237,15 +237,22 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Correctly parse details
     let flightDetails = {};
-    let isLCC;
     if (encodedDetails) {
         try {
             flightDetails = JSON.parse(decodeURIComponent(encodedDetails));
-            isLCC = flightDetails.isLCC;  // Get the exact value from flight details
-            console.log('Is LCC flight:', isLCC);
+            console.log('Parsed Flight Details:', flightDetails);
+            console.log('IsLCC:', flightDetails.isLCC);
+
+            // Use the isLCC directly from parsed details
+            const isLCC = flightDetails.isLCC;
+
+            if (isLCC) {
+                console.log('This is a Low-Cost Carrier flight');
+            } else {
+                console.log('This is a Full-Service Carrier flight');
+            }
         } catch (error) {
             console.error('Error parsing flight details:', error);
-            return;  // Exit if we can't determine the flight type
         }
     }
 
@@ -320,6 +327,7 @@ document.addEventListener('DOMContentLoaded', function() {
             '<p>Error fetching SSR data. Please try again.</p>';
     });
 }
+
 function renderBaggageOptions(baggageData, container) {
     if (!baggageData.length) {
         container.innerHTML = '<p>No baggage options available.</p>';
@@ -580,218 +588,184 @@ window.selectSeat = selectSeat;
 
 
 
-document.getElementById('submitButton').addEventListener('click', function(event) {
-    event.preventDefault(); // Prevent default action
+
+  document.getElementById('submitButton').addEventListener('click', function(event) {
+    event.preventDefault();
     
-    if (isLCC === undefined) {
-            console.error('Flight type (LCC/GDS) not determined');
+    // Get isLCC value from flightDetails
+    const isLCC = flightDetails.isLCC;
+    console.log('Checking isLCC status:', isLCC);
+
+    if (isLCC) {
+        console.log('Processing LCC booking...');
+        // Prepare payload for LCC booking
+        const bookingDetails = {
+        resultIndex: resultIndex,
+        srdvIndex: srdvIndex,
+        traceId: traceId,
+        totalFare: fareQuoteData.Fare.OfferedFare || 0
+    };
+
+    // Add seat details if selected
+    const selectedSeatRadio = document.querySelector('input[name="seat_option"]:checked');
+    if (selectedSeatRadio) {
+        bookingDetails.seat = {
+            code: selectedSeatRadio.value,
+            seatNumber: selectedSeatRadio.getAttribute('data-seat-number'),
+            amount: selectedSeatRadio.getAttribute('data-amount'),
+            airlineName: selectedSeatRadio.getAttribute('data-airlineName'),
+            airlineCode: selectedSeatRadio.getAttribute('data-airlineCode'),
+            airlineNumber: selectedSeatRadio.getAttribute('data-airlineNumber')
+        };
+    }
+
+    // Add baggage details if selected
+    if (window.selectedBaggageOption) {
+        bookingDetails.baggage = {
+            code: window.selectedBaggageOption.Code,
+            weight: window.selectedBaggageOption.Weight,
+            price: window.selectedBaggageOption.Price,
+            origin: window.selectedBaggageOption.Origin,
+            destination: window.selectedBaggageOption.Destination,
+            wayType: window.selectedBaggageOption.WayType,
+            currency: window.selectedBaggageOption.Currency
+        };
+    }
+
+    // Add meal details if selected
+    if (window.selectedMealOption) {
+        bookingDetails.meal = {
+            code: window.selectedMealOption.Code,
+            description: window.selectedMealOption.AirlineDescription,
+            price: window.selectedMealOption.Price,
+            origin: window.selectedMealOption.Origin,
+            destination: window.selectedMealOption.Destination,
+            wayType: window.selectedMealOption.Waytype,
+            quantity: window.selectedMealOption.Quantity,
+            currency: window.selectedMealOption.Currency
+        };
+    }
+
+    // Add passenger details
+    bookingDetails.passenger = {
+        title: document.getElementById('title').value.trim(),
+        firstName: document.getElementById('firstName').value.trim(),
+        lastName: document.getElementById('lastName').value.trim(),
+        gender: parseInt(document.getElementById('gender').value),
+        contactNo: document.getElementById('contactNo').value.trim(),
+        email: document.getElementById('email').value.trim(),
+        paxType: document.getElementById('passengerType').value,
+        addressLine1: document.getElementById('addressLine1').value.trim()
+    };
+
+    // Add fare details
+    bookingDetails.fare = {
+        baseFare: fareQuoteData.Fare.BaseFare,
+        tax: fareQuoteData.Fare.Tax,
+        yqTax: fareQuoteData.Fare.YQTax,
+        transactionFee: fareQuoteData.Fare.TransactionFee,
+        additionalTxnFeeOfrd: fareQuoteData.Fare.AdditionalTxnFeeOfrd,
+        additionalTxnFeePub: fareQuoteData.Fare.AdditionalTxnFeePub,
+        airTransFee: fareQuoteData.Fare.AirTransFee
+    };
+
+    // Encode all details as a single compressed parameter
+    const encodedDetails = encodeURIComponent(JSON.stringify(bookingDetails));
+
+    // Redirect to payment page with all details
+    window.location.href = `/payment?details=${encodedDetails}`;
+
+    console.log('Redirecting with booking details:', bookingDetails);
+} else {
+    console.log('Non-LCC flight, redirecting to payment...');
+    
+    // Create an object to hold all booking details
+    // Prepare payload for LCC booking
+    const payload = {
+            srdvIndex: srdvIndex,
+            traceId: traceId,
+            resultIndex: resultIndex,
+            passenger: {
+                title: document.getElementById('title').value.trim(),
+                firstName: document.getElementById('firstName').value.trim(),
+                lastName: document.getElementById('lastName').value.trim(),
+                gender: parseInt(document.getElementById('gender').value),
+                contactNo: document.getElementById('contactNo').value.trim(),
+                email: document.getElementById('email').value.trim(),
+                paxType: document.getElementById('passengerType').value,
+                countryCode: "IN",
+                countryName: "INDIA",
+                addressLine1: document.getElementById('addressLine1').value.trim(),
+                isLeadPax: true,
+            },
+            fare: {
+                baseFare: fareQuoteData.Fare.BaseFare,
+                tax: fareQuoteData.Fare.Tax,
+                yqTax: fareQuoteData.Fare.YQTax,
+                transactionFee: parseFloat(fareQuoteData.Fare.TransactionFee),
+                additionalTxnFeeOfrd: fareQuoteData.Fare.AdditionalTxnFeeOfrd,
+                additionalTxnFeePub: fareQuoteData.Fare.AdditionalTxnFeePub,
+                airTransFee: parseFloat(fareQuoteData.Fare.AirTransFee)
+            },
+            gst: {
+                companyAddress: '',
+                companyContactNumber: '',
+                companyName: '',
+                number: '',
+                companyEmail: ''
+            }
+        };
+
+      
+
+        // Disable submit button to prevent double submission
+        const submitButton = event.target;
+        submitButton.disabled = true;
+
+        // Make API call for LCC booking
+        fetch('/flight/bookHold', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+            },
+            body: JSON.stringify(payload)
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                console.log('LCC Booking successful!', data.booking_details);
+                // Redirect to payment page with booking details
+                const queryParams = new URLSearchParams({
+                    resultIndex: resultIndex,
+                    bookingId: data.booking_details.booking_id,
+                    pnr: data.booking_details.pnr,
+                    traceId: data.booking_details.trace_id
+                });
+                window.location.href = `/payment?${queryParams.toString()}`;
+            } else {
+                throw new Error(data.message || 'Booking failed');
+            }
+        })
+        .catch(error => {
+            console.error('Error during LCC booking:', error);
             if (window.Swal) {
                 Swal.fire({
                     icon: 'error',
-                    title: 'Error',
-                    text: 'Unable to determine flight type. Please try again.'
+                    title: 'Booking Failed',
+                    text: error.message || 'An error occurred during booking'
                 });
             } else {
-                alert('Unable to determine flight type. Please try again.');
+                alert('Booking failed: ' + (error.message || 'An error occurred'));
             }
-            return false;
-        }
-
-        // Show loading state
-        const button = this;
-        const originalText = button.innerHTML;
-        button.disabled = true;
-        button.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Processing...';
-
-        try {
-            // Call appropriate booking function based on isLCC value
-            if (isLCC === true) {  // Explicitly check for true
-                console.log('Processing LCC booking...');
-                bookLCC();
-            } else if (isLCC === false) {  // Explicitly check for false
-                console.log('Processing GDS booking...');
-                bookGDS();
-            }
-        } catch (error) {
-            console.error('Booking error:', error);
-            if (window.Swal) {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Booking Error',
-                    text: 'An error occurred while processing your booking. Please try again.'
-                });
-            } else {
-                alert('An error occurred while processing your booking. Please try again.');
-            }
-        } finally {
-            // Reset button state
-            button.disabled = false;
-            button.innerHTML = originalText;
-        }
-
-        return false;
-});
-
-    
-    // Collect seat data
-    function bookLCC() {
-    // Collect seat data
-    const selectedSeat = document.querySelector('input[name="seat_option"]:checked');
-    const seatData = selectedSeat ? [{
-        Code: selectedSeat.value,
-        SeatNumber: selectedSeat.getAttribute('data-seat-number'),
-        Amount: selectedSeat.getAttribute('data-amount'),
-        AirlineName: selectedSeat.getAttribute('data-airlineName'),
-        AirlineCode: selectedSeat.getAttribute('data-airlineCode'),
-        AirlineNumber: selectedSeat.getAttribute('data-airlineNumber')
-    }] : [];
-
-    const baggageData = window.selectedBaggageOption ? [window.selectedBaggageOption] : [];
-    const mealData = window.selectedMealOption ? [window.selectedMealOption] : [];
-
-    // Prepare payload
-    const payload = {
-        srdvIndex: srdvIndex,
-        traceId: traceId,
-        resultIndex: resultIndex,
-        passenger: {
-            title: document.getElementById('title').value,
-            firstName: document.getElementById('firstName').value,
-            lastName: document.getElementById('lastName').value,
-            gender: document.getElementById('gender').value,
-            contactNo: document.getElementById('contactNo').value,
-            email: document.getElementById('email').value,
-            paxType:document.getElementById('passengerType').value,
-            dateOfBirth: "12/01/1998",
-            passportNo: "",
-            passportExpiry: "",
-            passportIssueDate: "",
-            countryCode: "IN",
-            countryName: "INDIA",
-            baggage: baggageData,
-            mealDynamic: mealData,
-            seat: seatData // Correctly formatted seat data
-
-        },
-        fare: {
-            baseFare: fareQuoteData.Fare.BaseFare,
-            tax: fareQuoteData.Fare.Tax,
-            yqTax: fareQuoteData.Fare.YQTax,
-            transactionFee: parseFloat(fareQuoteData.Fare.TransactionFee),
-            additionalTxnFeeOfrd: fareQuoteData.Fare.AdditionalTxnFeeOfrd,
-            additionalTxnFeePub: fareQuoteData.Fare.AdditionalTxnFeePub,
-            airTransFee: parseFloat(fareQuoteData.Fare.AirTransFee)
-        }
-    };
-
-    console.log('Payload:', payload); // For debugging purposes
-
-    // Send booking request
-    fetch('/flight/bookLcc', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-CSRF-TOKEN': "{{ csrf_token() }}"
-        },
-        body: JSON.stringify(payload)
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.status === 'success') {
-        alert('Booking successful! Booking ID: ' + data.booking_details.booking_id);
-        // Additional actions with booking details if needed
-        console.log(data.booking_details);
-    } else {
-        alert('Booking failed: ' + (data.message || 'Unknown error'));
+        })
+        .finally(() => {
+            submitButton.disabled = false;
+        });
     }
-})
-.catch(error => {
-    console.error('Error:', error);
-    alert('An error occurred during booking');
+  });
+
 });
-}
-
-
-
-function bookLGDS() {
-    // Collect seat data
-    const selectedSeat = document.querySelector('input[name="seat_option"]:checked');
-    const seatData = selectedSeat ? [{
-        Code: selectedSeat.value,
-        SeatNumber: selectedSeat.getAttribute('data-seat-number'),
-        Amount: selectedSeat.getAttribute('data-amount'),
-        AirlineName: selectedSeat.getAttribute('data-airlineName'),
-        AirlineCode: selectedSeat.getAttribute('data-airlineCode'),
-        AirlineNumber: selectedSeat.getAttribute('data-airlineNumber')
-    }] : [];
-
-    const baggageData = window.selectedBaggageOption ? [window.selectedBaggageOption] : [];
-    const mealData = window.selectedMealOption ? [window.selectedMealOption] : [];
-
-    // Prepare payload
-    const payload = {
-        srdvIndex: srdvIndex,
-        traceId: traceId,
-        resultIndex: resultIndex,
-        passenger: {
-            title: document.getElementById('title').value,
-            firstName: document.getElementById('firstName').value,
-            lastName: document.getElementById('lastName').value,
-            gender: document.getElementById('gender').value,
-            contactNo: document.getElementById('contactNo').value,
-            email: document.getElementById('email').value,
-            paxType:document.getElementById('passengerType').value,
-            dateOfBirth: "12/01/1998",
-            passportNo: "",
-            passportExpiry: "",
-            passportIssueDate: "",
-            countryCode: "IN",
-            countryName: "INDIA",
-            baggage: baggageData,
-            mealDynamic: mealData,
-            seat: seatData // Correctly formatted seat data
-
-        },
-        fare: {
-            baseFare: fareQuoteData.Fare.BaseFare,
-            tax: fareQuoteData.Fare.Tax,
-            yqTax: fareQuoteData.Fare.YQTax,
-            transactionFee: parseFloat(fareQuoteData.Fare.TransactionFee),
-            additionalTxnFeeOfrd: fareQuoteData.Fare.AdditionalTxnFeeOfrd,
-            additionalTxnFeePub: fareQuoteData.Fare.AdditionalTxnFeePub,
-            airTransFee: parseFloat(fareQuoteData.Fare.AirTransFee)
-        }
-    };
-
-    console.log('Payload:', payload); // For debugging purposes
-
-    // Send booking request
-    fetch('/flight/bookLcc', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-CSRF-TOKEN': "{{ csrf_token() }}"
-        },
-        body: JSON.stringify(payload)
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.status === 'success') {
-        alert('Booking successful! Booking ID: ' + data.booking_details.booking_id);
-        // Additional actions with booking details if needed
-        console.log(data.booking_details);
-    } else {
-        alert('Booking failed: ' + (data.message || 'Unknown error'));
-    }
-})
-.catch(error => {
-    console.error('Error:', error);
-    alert('An error occurred during booking');
-});
-}
-});
-
-
 </script>
 
 @endsection

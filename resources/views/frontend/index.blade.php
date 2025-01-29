@@ -1,10 +1,10 @@
+@extends('frontend.layouts.master')
 <!-- Include jQuery from CDN -->
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <!-- Include Flatpickr CSS -->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
 <!-- Include Flatpickr JS -->
 <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-@extends('frontend.layouts.master')
 @section('content')
 <div id="loadingSpinner" style="
     display: none; 
@@ -15,7 +15,6 @@
     height: 100%; 
     background-color: rgba(255, 255, 255, 0.8); 
     z-index: 9999; 
-    display: none; 
     align-items: center; 
     justify-content: center;">
     <img src="{{ asset('assets/loading.gif') }}" alt="Loading..." style="width: 10vw; height: 10vw; max-width: 150px; max-height: 150px;" />
@@ -44,6 +43,7 @@
 }
 </style>
 @endsection
+
 <section class="hero">
   <div class="container">
     <div class="row">
@@ -86,6 +86,7 @@
             </button>
           </li>
         </ul>
+        
         <div class="tab-content" id="myTabContent">
           <!-- <div class="tab-pane fade" id="home" role="tabpanel" aria-labelledby="home-tab">
             <p>Comming Soon!</p>
@@ -304,6 +305,29 @@
                 <button type="submit" id="flightSearch" class="btn btn-warning w-100 rounded-0 py-3 fw-bold">Search Flights</button>
             </div>
         </div>
+                  <!-- Fare Type Selection -->
+                  <div class="row mt-3">
+    <div class="col-md-12">
+        <label class="fw-bold">Fare Type:</label>
+        <div class="form-check form-check-inline">
+            <input class="form-check-input" type="radio" name="fareType" id="normalFare" value="1" checked>
+            <label class="form-check-label" for="normalFare">Normal Fare</label>
+        </div>
+        <div class="form-check form-check-inline">
+            <input class="form-check-input" type="radio" name="fareType" id="studentFare" value="2">
+            <label class="form-check-label" for="studentFare">Student Fare</label>
+        </div>
+        <div class="form-check form-check-inline">
+            <input class="form-check-input" type="radio" name="fareType" id="seniorCitizenFare" value="3">
+            <label class="form-check-label" for="seniorCitizenFare">Senior Citizen Fare</label>
+        </div>
+        <div class="form-check form-check-inline">
+            <input class="form-check-input" type="radio" name="fareType" id="armedForceFare" value="4">
+            <label class="form-check-label" for="armedForceFare">Armed Force Fare</label>
+        </div>
+    </div>
+</div>
+
 
       
     </form>
@@ -1053,7 +1077,6 @@ function fetchHotelAllCities(inputField, listId) {
     });
 }
 
-// Function to fetch cities based on user input (autocomplete)
 function fetchHotelCities(inputField, listId) {
     // Trim the input and remove multiple spaces
     const query = $(inputField).val()
@@ -1074,7 +1097,7 @@ function fetchHotelCities(inputField, listId) {
                     response.data.forEach(city => {
                         list.append(
                             `<div class="list-group-item city-option" data-cityid="${city.cityid}">
-                                ${city.Destination} (${city.country})
+                                ${city.Destination}
                             </div>`
                         );
                     });
@@ -1120,24 +1143,13 @@ cityInputConfig.forEach(config => {
 
     // Handle city selection from the dropdown
     $(document).on('click', `${config.list} .city-option`, function () {
-        const cityName = $(this).data('cityname');
-        const countryCode = $(this).data('countrycode');
+        const cityName = $(this).text().trim(); // Ensure trim on selection
         const cityId = $(this).data('cityid');
-        
-        // Set the display value with city and country
-        $(config.input).val(`${cityName} (${countryCode})`);
-        $(config.hidden).val(cityId);
-        $(config.list).hide();
-    });
-});
 
-$(document).on('click', '.city-option', function() {
-    const cityId = $(this).data('cityid');
-    const cityText = $(this).text().trim();
-    
-    $('#hotelSearchCity').val(cityText);
-    $('#cityIdInput').val(cityId);
-    $('#hotelSearchCityList').hide();
+        $(config.input).val(cityName); // Update input field
+        $(config.hidden).val(cityId); // Update hidden field
+        $(config.list).hide(); // Hide dropdown
+    });
 });
 
 // Hide dropdowns on outside click or Escape key
@@ -1356,7 +1368,9 @@ console.log('Cookies:', document.cookie);
 
 
 
-
+  //  ****************************************************
+  //                    FLIGHT SEARCH
+  //  ****************************************************
 
 
 
@@ -1512,6 +1526,8 @@ $(document).ready(function () {
         startDate: new Date()
     });
 
+    
+
     // Airport search functionality
     function initializeAirportSearch() {
         const searchConfig = [
@@ -1652,7 +1668,9 @@ $(document).ready(function () {
     const adultCount = $('input[name="adultCount"]').val() || "1";
     const childCount = $('input[name="childCount"]').val() || "0";
     const infantCount = $('input[name="infantCount"]').val() || "0";
+    const fareType = $('input[name="fareType"]:checked').val() || "1"; // Default to Normal Fare (1)
 
+    
     const departureDate = convertToISODate($('#flightDepartureDate').val());
         const segments = [{
             Origin: $('#flightFromCityCode').val().toUpperCase(),
@@ -1671,6 +1689,7 @@ $(document).ready(function () {
         adults: adultCount,
         children: childCount,
         infants: infantCount,
+        fareType: fareType,
         cabinClass: $('#flightCabinClass').val() || "1"
     });
         if ($('input[name="journeyType"]:checked').val() === '2') {
@@ -1693,8 +1712,9 @@ $(document).ready(function () {
         ChildCount: childCount.toString(),
         InfantCount: infantCount.toString(),
             JourneyType: $('input[name="journeyType"]:checked').val(),
-            FareType: "1",
+            FareType: fareType,
             Segments: segments
+            
         };
 
         $.ajax({

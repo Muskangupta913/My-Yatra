@@ -858,12 +858,6 @@ function toggleSection(sectionId) {
     }
 }
 
-// Block Room Function (implement according to your needs)
-function blockRoom(roomId) {
-    // Implement your room booking logic here
-    console.log('Blocking room:', roomId);
-}
-
 // Call the function when the page loads
 document.addEventListener('DOMContentLoaded', function() {
     fetchRoomDetails();
@@ -905,7 +899,9 @@ function blockRoom(roomId) {
     const traceId = urlParams.get('traceId');
     const resultIndex = urlParams.get('resultIndex');
     const hotelCode = urlParams.get('hotelCode');
-    const hotelName = document.querySelector('.hotel-name').textContent;
+    const hotelName = document.querySelector('.hotel-name')?.textContent || 
+                      document.querySelector('h1')?.textContent || 
+                      'Unknown Hotel';
 
     // Get room details from the data attributes
     const roomDetails = {

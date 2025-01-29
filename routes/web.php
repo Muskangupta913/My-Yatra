@@ -498,6 +498,7 @@ Route::post('/store-seat', [FlightController::class, 'storeSeat'])->name('flight
 
 //updated flight Routes
 Route::post('/flight/search', [FlightController::class, 'searchFlights'])->name('flight.search');
+Route::post('/calendar-fares', [FlightController::class, 'calendarFares']);
 Route::post('/flight/farerule', [FlightController::class, 'fareRules']);
 Route::post('/flight/fareQutes', [FlightController::class, 'fareQutes']);
 Route::get('/flight/fareQutesResult', [FlightController::class, 'fareQutesResult']);
@@ -509,4 +510,5 @@ Route::get('/flight-booking', function () {
 Route::post('/fetch-options', [FlightController::class, 'fetchOptions'])->name('fetch.options');
 Route::post('/fetch-ssr-data', [FlightController::class, 'fetchSSRData'])->name('fetch.ssr.data');
 Route::post('/flight/get-seat-map', [FlightController::class, 'getSeatMap'])->name('flight.getSeatMap');
-Route::post('/flight/bookLcc', [FlightController::class, 'bookLCC']);
+Route::post('/flight/bookHold', [FlightController::class, 'bookHold']);
+Route::post('/flight/bookLCC', [FlightController::class, 'bookLCC']);

@@ -1,199 +1,496 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
+@extends('frontend.layouts.master')
+@section('title', 'flight search')
+@section('content')
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Flight Search Results</title>
+@section('styles')
      <!-- Tailwind CSS -->
-     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
     
+    
     <style>
+        .flight-card {
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        
+        }
+        .flight-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px rgba(0,0,0,0.15);
+         
+        }
+        .gradient-header {
+            background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+        }
+        .filter-section {
+            background-color: #ffffff;
+            border: 1px solid #e0e0e0;
+        }
         .modal {
             background-color: rgba(0,0,0,0.5);
             z-index: 1000;
         }
     </style>
-</head>
-<body class="bg-gray-100">
-    <div class="container mx-auto px-4 py-8">
-      <!-- Search Summary Header -->
-<div class="bg-gradient-to-r from-indigo-600 via-purple-700 to-pink-600 shadow-2xl rounded-xl p-6 mb-6 relative overflow-hidden">
-    <div class="absolute inset-0 bg-white bg-opacity-10 backdrop-blur-sm"></div>
-    <div class="relative z-10 flex justify-between items-center">
-        <div class="flex items-center space-x-6">
-            <div class="bg-white bg-opacity-20 p-4 rounded-full">
-                <i class="fas fa-plane text-3xl text-white"></i>
-            </div>
-            <div>
-                <script>
-                    document.addEventListener('DOMContentLoaded', function() {
-                        const urlParams = new URLSearchParams(window.location.search);
-                        const from = urlParams.get('from').split('(')[0].trim();
-                        const to = urlParams.get('to').split('(')[0].trim();
-                        const fromCode = urlParams.get('fromCode');
-                        const toCode = urlParams.get('toCode');
-                        const departureDate = urlParams.get('departureDate');
-                        const adults = urlParams.get('adults');
-                        const cabinClass = urlParams.get('cabinClass');
-
-                        // Mapping cabin class
-                        const cabinClassMap = {
-                            '1': 'Economy',
-                            '2': 'Premium Economy',
-                            '3': 'Business',
-                            '4': 'First Class'
-                        };
-
-                        document.getElementById('flight-header').innerHTML = `
-                            <h1 class="text-3xl font-bold text-white mb-2">
-                                ${from} (${fromCode}) <i class="fas fa-arrow-right text-xl mx-3 text-white"></i> ${to} (${toCode})
-                            </h1>
-                            <div class="text-white text-opacity-90 space-y-1">
-                                <p class="flex items-center">
-                                    <i class="fas fa-calendar-alt mr-2"></i>
-                                    ${new Date(departureDate).toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
-                                </p>
-                                <div class="flex space-x-4">
-                                    <p class="flex items-center">
-                                        <i class="fas fa-users mr-2"></i>
-                                        ${adults} Passenger${adults > 1 ? 's' : ''}
-                                    </p>
-                                    <p class="flex items-center">
-                                        <i class="fas fa-chair mr-2"></i>
-                                        ${cabinClassMap[cabinClass] || 'Economy'} Class
-                                    </p>
-                                </div>
-                            </div>
-                        `;
-                    });
-                </script>
-                <div id="flight-header"></div>
+ @endsection 
+ <div class="container mx-auto px-4 py-8">
+        <!-- Search Summary Header -->
+        <div class="gradient-header rounded-xl p-6 mb-8 shadow-md">
+            <div class="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
+                <div class="flex items-center space-x-6">
+                <div class="p-4">
+                   <i class="fas fa-plane text-3xl md:text-4xl text-white"></i>
+                </div>
+                    <div id="flight-header" class="text-white">
+                        <!-- Dynamic flight header content -->
+                    </div>
+                </div>
             </div>
         </div>
-    </div>
-</div>
-        <div class="flex">
+
+        <!-- Main Content Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
             <!-- Filters Sidebar -->
-            <div id="airline-filter" class="mb-4">
-    <!-- Airline filters will be dynamically generated here -->
-</div>
+            <div class="md:col-span-1 filter-section rounded-lg shadow-md p-6">
+                <h3 class="font-bold text-2xl mb-6 text-gray-800 border-b pb-4">
+                    <i class="fas fa-filter mr-3 text-blue-600"></i>Advanced Filters
+                </h3>
+                <div id="filters-container" class="space-y-6">
+                    <!-- Dynamically populated filters -->
+                </div>
+            </div>
 
-<div class="mb-4">
-    <h3 class="font-medium mb-2">Price Range</h3>
-    <div class="flex items-center">
-        <input type="number" id="min-price" placeholder="Min" class="w-1/2 mr-2 p-2 border rounded">
-        <input type="number" id="max-price" placeholder="Max" class="w-1/2 p-2 border rounded">
-    </div>
-    <button id="apply-price-filter" class="mt-2 w-full bg-blue-500 text-white py-2 rounded">
-        Apply Price Filter
-    </button>
-</div>
             <!-- Flight Results -->
-            <div class="w-3/4">
-                <!-- Flight Cards -->
-                <div id="results-container"></div>
+            <div class="md:col-span-3">
+                <!-- Sorting and Results Count -->
+                <div class="flex flex-col md:flex-row justify-between items-center mb-6 space-y-4 md:space-y-0">
+                    <div class="flex items-center space-x-4">
+                        <span class="text-gray-600">Sort by:</span>
+                        <select id="sort-options" class="bg-white border border-gray-300 rounded-lg p-2">
+                            <option value="price-low-high">Price: Low to High</option>
+                            <option value="price-high-low">Price: High to Low</option>
+                            <option value="departure-early">Departure: Early</option>
+                            <option value="departure-late">Departure: Late</option>
+                        </select>
+                    </div>
+                    <div id="results-count" class="text-gray-600 font-medium"></div>
+                </div>
+
+                <!-- Flight Results Container -->
+                <div id="results-container" class="space-y-6">
+                    <!-- Dynamic flight cards will be inserted here -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Fare Rules Modal -->
+        <div id="fareRulesModal" class="modal fixed inset-0 hidden items-center justify-center p-4">
+            <div class="bg-white rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl">
+                <div class="p-6">
+                    <div id="fareRulesDetails" class="text-gray-800"></div>
+                </div>
             </div>
         </div>
     </div>
-
-    <!-- Fare Rules Modal -->
-    <div id="fareRulesModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
-        <div class="bg-white rounded-lg p-6 max-w-2xl w-full">
-            <div class="flex justify-between items-center mb-4">
-                <h2 class="text-xl font-semibold">Fare Rules</h2>
-                <button onclick="closeFareRulesModal()" class="text-gray-600 hover:text-gray-900">
-                    <i class="fas fa-times"></i>
-                </button>
-            </div>
-            <div id="fareRulesDetails" class="max-h-96 overflow-y-auto">
-                <!-- Fare rules content will be dynamically loaded here -->
-            </div>
-        </div>
-    </div>
-
+@endsection
+    @section('scripts')
     <script>
         document.addEventListener('DOMContentLoaded', function () {
-            const results = JSON.parse(sessionStorage.getItem('flightSearchResults')) || [];
-            const resultsContainer = document.getElementById('results-container');
-            const fareRulesModal = document.getElementById('fareRulesModal');
-            const fareRulesDetails = document.getElementById('fareRulesDetails');
-            const closeFareRules = document.querySelector('.close-fare-rules');
+    const results = JSON.parse(sessionStorage.getItem('flightSearchResults')) || [];
+    const resultsContainer = document.getElementById('results-container');
+    const filtersContainer = document.getElementById('filters-container');
+    const resultsCountDisplay = document.getElementById('results-count');
+    const sortOptions = document.getElementById('sort-options');
 
-            if (results.length === 0) {
-                resultsContainer.innerHTML = `
-                    <div class="text-center py-10">
-                        <p class="text-gray-600">No flight results found.</p>
-                    </div>`;
-                return;
-            }
+    // Advanced filter extraction
+    function extractAdvancedFilters(results) {
+        const filters = {
+            airlines: new Set(),
+            stops: new Set(),
+            priceRange: { min: Infinity, max: -Infinity },
+            departureTime: { early: [], late: [] },
+            cabinClasses: new Set(),
+            baggageOptions: new Set(),
+            flightDurations: []
+        };
 
-            // Iterate over the results and create flight cards
-            results.forEach(resultGroup => {
-                resultGroup.forEach(result => {
-                    if (result.FareDataMultiple && Array.isArray(result.FareDataMultiple)) {
-                        result.FareDataMultiple.forEach(fareData => {
-                            const segment = result.Segments?.[0]?.[0];
-                            
-                            const flightCard = document.createElement('div');
-                            flightCard.classList.add('bg-white', 'shadow-md', 'rounded-lg', 'p-4', 'mb-4');
-                            flightCard.innerHTML = `
-                                <div class="flex justify-between items-center mb-4">
-                                    <div>
-                                        <h2 class="font-semibold">${fareData.FareSegments[0]?.AirlineName || 'Airline'}</h2>
-                                        <p class="text-sm text-gray-600">Flight No: ${fareData.FareSegments[0]?.FlightNumber || 'N/A'}</p>
-                                    </div>
-                                    <div class="text-right">
-                                        <p class="text-xl font-bold text-blue-600">₹${fareData.Fare?.OfferedFare?.toLocaleString() || 'N/A'}</p>
-                                    </div>
-                                </div>
-                                
-                                <div class="flex justify-between items-center mb-4">
-                                    <div>
-                                        <p class="font-semibold">${segment?.DepTime ? new Date(segment.DepTime).toLocaleTimeString() : 'N/A'}</p>
-                                        <p class="text-sm text-gray-600">${segment?.Origin?.AirportName || 'N/A'} (${segment?.Origin?.AirportCode || 'N/A'})</p>
-                                    </div>
-                                    <div class="text-center">
-                                        <p class="text-sm text-gray-600">${segment?.Duration || 'N/A'} mins</p>
-                                    </div>
-                                    <div class="text-right">
-                                        <p class="font-semibold">${segment?.ArrTime ? new Date(segment.ArrTime).toLocaleTimeString() : 'N/A'}</p>
-                                        <p class="text-sm text-gray-600">${segment?.Destination?.AirportName || 'N/A'} (${segment?.Destination?.AirportCode || 'N/A'})</p>
-                                    </div>
-                                </div>
-                                
-                                <div class="border-t pt-3 flex justify-between items-center">
-                                    <div class="flex space-x-2">
-                                        <span class="bg-green-100 text-green-800 px-2 py-1 rounded text-xs">
-                                            ${fareData.FareSegments[0]?.Baggage || 'N/A'} Baggage
-                                        </span>
-                                        <span class="bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs">
-                                            ${fareData.FareSegments[0]?.CabinClassName || 'N/A'}
-                                        </span>
-                                    </div>
-                                    <div class="flex space-x-2">
-                                        <button onclick="viewFlightDetails('${fareData.ResultIndex}')" 
-                                                class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
-                                            View Details
-                                        </button>
-                                        <button onclick="fetchFareRules('${fareData.ResultIndex}')" 
-                                                class="bg-gray-200 text-gray-700 px-4 py-2 rounded hover:bg-gray-300">
-                                            Fare Rules
-                                        </button>
-                                    </div>
-                                </div>
-                            `;
+        results.forEach(resultGroup => {
+            resultGroup.forEach(result => {
+                if (result.FareDataMultiple) {
+                    result.FareDataMultiple.forEach(fareData => {
+                        const segment = result.Segments[0][0];
+                        const fareSegment = fareData.FareSegments[0];
 
-                            resultsContainer.appendChild(flightCard);
-                        });
-                    }
-                });
+                        // Airlines
+                        filters.airlines.add(fareSegment.AirlineName || 'Unknown');
+
+                        // Stops
+                        const stops = result.Segments[0].length === 1 ? 'Non-stop' : `${result.Segments[0].length - 1} Stop`;
+                        filters.stops.add(stops);
+
+                        // Price Range
+                        const fare = fareData.Fare.OfferedFare;
+                        filters.priceRange.min = Math.min(filters.priceRange.min, fare);
+                        filters.priceRange.max = Math.max(filters.priceRange.max, fare);
+
+                        // Departure Times
+                        const departureTime = new Date(segment.DepTime);
+                        const hours = departureTime.getHours();
+                        filters.departureTime.early.push(hours < 12 ? 'Morning (Before 12 PM)' : '');
+                        filters.departureTime.late.push(hours >= 12 ? 'Evening (After 12 PM)' : '');
+
+                        // Cabin Classes
+                        filters.cabinClasses.add(fareSegment.CabinClassName || 'Unknown');
+
+                        // Baggage Options
+                        filters.baggageOptions.add(fareSegment.Baggage || 'Unknown');
+
+                        // Flight Durations
+                        const duration = segment.Duration;
+                        if (duration) {
+                            filters.flightDurations.push(
+                                duration <= 60 ? 'Short (≤ 1 hour)' :
+                                duration <= 120 ? 'Medium (1-2 hours)' :
+                                'Long (> 2 hours)'
+                            );
+                        }
+                    });
+                }
             });
         });
 
+        // Clean up and unique filter sets
+        filters.departureTime.early = [...new Set(filters.departureTime.early)].filter(Boolean);
+        filters.departureTime.late = [...new Set(filters.departureTime.late)].filter(Boolean);
+        filters.flightDurations = [...new Set(filters.flightDurations)];
+
+        return filters;
+    }
+
+    // Dynamically create filter sections
+    function createFilterSections(filters) {
+        filtersContainer.innerHTML = `
+            ${createFilterSection('Airlines', 'airlines', filters.airlines)}
+            ${createFilterSection('Stops', 'stops', filters.stops)}
+            ${createPriceRangeFilter(filters.priceRange)}
+            ${createFilterSection('Departure Time', 'departure-time', 
+                [...filters.departureTime.early, ...filters.departureTime.late])}
+            ${createFilterSection('Cabin Class', 'cabin-class', filters.cabinClasses)}
+            ${createFilterSection('Baggage', 'baggage', filters.baggageOptions)}
+            ${createFilterSection('Flight Duration', 'flight-duration', filters.flightDurations)}
+        `;
+
+        // Add event listeners to new filter inputs
+        document.querySelectorAll('input[type="checkbox"], input[type="radio"]').forEach(input => {
+            input.addEventListener('change', applyFilters);
+        });
+    }
+
+    // Create filter section HTML
+    function createFilterSection(title, name, options) {
+        if (name === 'airlines') {
+        const optionsHTML = Array.from(options).map(airlineName => {
+            // Find the airline code from the results data
+            let airlineCode = '';
+            for (const resultGroup of results) {
+                for (const result of resultGroup) {
+                    if (result.FareDataMultiple) {
+                        for (const fareData of result.FareDataMultiple) {
+                            if (fareData.FareSegments[0]?.AirlineName === airlineName) {
+                                airlineCode = fareData.FareSegments[0].AirlineCode;
+                                break;
+                            }
+                        }
+                    }
+                    if (airlineCode) break;
+                }
+                if (airlineCode) break;
+            }
+
+            return `
+                <label class="flex items-center mb-3 hover:bg-gray-50 p-2 rounded">
+                    <input type="checkbox" name="${name}" value="${airlineName}" class="mr-3">
+                    <img src="${getAirlineLogo(airlineCode)}" 
+                         alt="${airlineName}" 
+                         class="w-8 h-8 mr-3 object-contain"
+                         onerror="this.onerror=null; this.src='/assets/images/airlines/airlines/48_48/default-airline.png'; this.classList.add('grayscale', 'opacity-70');">
+                    <span class="text-sm">${airlineName}</span>
+                </label>
+            `;
+        }).join('');
+
+        return `
+            <div class="mb-6">
+                <h4 class="font-semibold mb-3 text-gray-700">${title}</h4>
+                <div class="space-y-1">${optionsHTML}</div>
+            </div>
+        `;
+    } else {
+        // Original handling for other filter sections
+        const optionsHTML = Array.from(options).map(option => `
+            <label class="flex items-center mb-2">
+                <input type="checkbox" name="${name}" value="${option}" class="mr-2">
+                ${option}
+            </label>
+        `).join('');
+
+        return `
+            <div class="mb-4">
+                <h4 class="font-semibold mb-2">${title}</h4>
+                <div class="space-y-2">${optionsHTML}</div>
+            </div>
+        `;
+    }
+}
+    // Create price range filter
+    function createPriceRangeFilter(priceRange) {
+        return `
+            <div class="mb-4">
+                <h4 class="font-semibold mb-2">Price Range</h4>
+                <div class="flex space-x-2 mb-2">
+                    <input type="number" id="min-price" placeholder="Min" 
+                           min="${Math.floor(priceRange.min)}" 
+                           max="${Math.ceil(priceRange.max)}" 
+                           value="${Math.floor(priceRange.min)}" 
+                           class="w-1/2 p-2 border rounded">
+                    <input type="number" id="max-price" placeholder="Max" 
+                           min="${Math.floor(priceRange.min)}" 
+                           max="${Math.ceil(priceRange.max)}" 
+                           value="${Math.ceil(priceRange.max)}" 
+                           class="w-1/2 p-2 border rounded">
+                </div>
+                <button id="apply-price-filter" class="w-full bg-blue-500 text-white py-2 rounded">
+                    Apply Price Filter
+                </button>
+            </div>
+        `;
+    }
+
+    // Apply filters
+    function applyFilters() {
+    const selectedFilters = {
+        airlines: getSelectedValues('airlines'),
+        stops: getSelectedValues('stops'),
+        departureTime: getSelectedValues('departure-time'),
+        cabinClass: getSelectedValues('cabin-class'),
+        baggage: getSelectedValues('baggage'),
+        flightDuration: getSelectedValues('flight-duration'),
+        minPrice: parseFloat(document.getElementById('min-price').value) || 0,
+        maxPrice: parseFloat(document.getElementById('max-price').value) || Infinity
+    };
+
+    const filteredResults = results.map(resultGroup => 
+        resultGroup.filter(result => {
+            // Check if ANY of the fare data entries match the filters
+            return result.FareDataMultiple.some(fareData => {
+                const segment = result.Segments[0][0];
+                const fareSegment = fareData.FareSegments[0];
+                const departureTime = new Date(segment.DepTime);
+                const duration = segment.Duration;
+
+                const airlineMatch = selectedFilters.airlines.length === 0 || 
+                    selectedFilters.airlines.includes(fareSegment.AirlineName);
+
+                const priceMatch = fareData.Fare.OfferedFare >= selectedFilters.minPrice && 
+                    fareData.Fare.OfferedFare <= selectedFilters.maxPrice;
+
+                const stopMatch = selectedFilters.stops.length === 0 || 
+                    selectedFilters.stops.some(stop => 
+                        (stop === 'Non-stop' && result.Segments[0].length === 1) ||
+                        (stop !== 'Non-stop' && result.Segments[0].length > 1)
+                    );
+
+                const departureTimeMatch = selectedFilters.departureTime.length === 0 || 
+                    (departureTime.getHours() < 12 && selectedFilters.departureTime.includes('Morning (Before 12 PM)')) ||
+                    (departureTime.getHours() >= 12 && selectedFilters.departureTime.includes('Evening (After 12 PM)'));
+
+                const cabinClassMatch = selectedFilters.cabinClass.length === 0 || 
+                    selectedFilters.cabinClass.includes(fareSegment.CabinClassName);
+
+                const baggageMatch = selectedFilters.baggage.length === 0 || 
+                    selectedFilters.baggage.includes(fareSegment.Baggage);
+
+                const durationMatch = selectedFilters.flightDuration.length === 0 || 
+                    selectedFilters.flightDuration.includes(
+                        duration <= 60 ? 'Short (≤ 1 hour)' :
+                        duration <= 120 ? 'Medium (1-2 hours)' :
+                        'Long (> 2 hours)'
+                    );
+
+                return airlineMatch && priceMatch && stopMatch && 
+                       departureTimeMatch && cabinClassMatch && 
+                       baggageMatch && durationMatch;
+            });
+        })
+    );
+
+    renderFilteredResults(filteredResults);
+}
+
+    // Helper to get selected filter values
+    function getSelectedValues(name) {
+        return Array.from(
+            document.querySelectorAll(`input[name="${name}"]:checked`)
+        ).map(input => input.value);
+    }
+    function getAirlineLogo(airlineCode) {
+    // Normalize the airline code (uppercase and trim)
+    const normalizedCode = (airlineCode || '').toUpperCase().trim();
+    
+    // Define an array of possible image extensions
+    const extensions = ['.png', '.jpg', '.jpeg', '.svg', '.webp'];
+    
+    // Default fallback logo path
+    const defaultLogoPath = '/assets/images/airlines/airlines/48_48/6E.png';
+    
+    // Try to construct the logo path based on airline code
+    const logoPath = `/assets/images/airlines/airlines/48_48/${normalizedCode || '6E'}${extensions[0]}`;
+    
+    return logoPath || defaultLogoPath;
+}
+    // Render results (existing implementation)
+    function renderFilteredResults(filteredResults) {
+        resultsContainer.innerHTML = '';
+        
+        if (filteredResults.length === 0) {
+            resultsContainer.innerHTML = `
+                <div class="text-center py-10">
+                    <p class="text-gray-600">No flight results found matching your filters.</p>
+                </div>`;
+            resultsCountDisplay.textContent = '0 results';
+            return;
+        }
+
+        filteredResults.forEach(resultGroup => {
+            resultGroup.forEach(result => {
+                if (result.FareDataMultiple && Array.isArray(result.FareDataMultiple)) {
+                    result.FareDataMultiple.forEach(fareData => {
+                        const segment = result.Segments?.[0]?.[0];
+                        
+                        const flightCard = document.createElement('div');
+                        flightCard.classList.add(
+                        'flight-card',  // Keep existing flight-card class
+                        'border-2',     // Add border thickness
+                        'border-blue-500', // Add border color
+                        'rounded-lg',   // Keep rounded corners
+                        'mb-4'          // Margin between cards
+                    );
+                        flightCard.innerHTML = `
+                <div class="flight-card bg-white border border-gray-200 rounded-lg p-6 shadow-md">
+        <div class="flex justify-between items-center mb-6">
+            <div class="flex items-center">
+                <img src="${getAirlineLogo(fareData.FareSegments[0]?.AirlineCode)}" 
+                     alt="${fareData.FareSegments[0]?.AirlineName || 'Airline'}" 
+                     class="w-12 h-12 mr-4 object-contain"
+                     onerror="this.onerror=null; this.src='/assets/images/airlines/airlines/48_48/default-airline.png'; this.classList.add('grayscale opacity-70');">
+                <div>
+                    <h2 class="text-xl font-bold text-blue-700">${fareData.FareSegments[0]?.AirlineName || 'Airline'}</h2>
+                    <p class="text-sm text-gray-500">${fareData.FareSegments[0]?.AirlineCode || ''} - ${fareData.FareSegments[0]?.FlightNumber || 'N/A'}</p>
+                </div>
+            </div>
+            <div class="text-right">
+                <p class="text-2xl font-bold text-green-600">₹${fareData.Fare?.OfferedFare?.toLocaleString() || 'N/A'}</p>
+            </div>
+        </div>
+                            
+                            <div class="flex justify-between items-center mb-4">
+                                <div>
+                                    <p class="font-semibold">${segment?.DepTime ? new Date(segment.DepTime).toLocaleTimeString() : 'N/A'}</p>
+                                    <p class="text-sm text-gray-600">${segment?.Origin?.AirportName || 'N/A'} (${segment?.Origin?.AirportCode || 'N/A'})</p>
+                                </div>
+        <div class="flex items-center space-x-3">
+            <div class="text-center">
+                <div class="flex items-center">
+                    <div class="w-3 h-3 bg-blue-500 rounded-full mr-2"></div>
+                    <div class="w-24 h-0.5 bg-gray-300 relative">
+                        <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-xs text-gray-500">
+                            ${segment?.Duration || 'N/A'} mins
+                        </div>
+                    </div>
+                    <div class="w-3 h-3 bg-blue-500 rounded-full ml-2"></div>
+                </div>
+                <i class="fas fa-plane text-gray-500 mt-1"></i>
+            </div>
+        </div>
+                                <div class="text-right">
+                                    <p class="font-semibold">${segment?.ArrTime ? new Date(segment.ArrTime).toLocaleTimeString() : 'N/A'}</p>
+                                    <p class="text-sm text-gray-600">${segment?.Destination?.AirportName || 'N/A'} (${segment?.Destination?.AirportCode || 'N/A'})</p>
+                                </div>
+                            </div>
+                            
+                            <div class="border-t pt-3 flex justify-between items-center">
+                                <div class="flex space-x-2">
+                                    <span class="bg-green-100 text-green-800 px-2 py-1 rounded text-xs">
+                                        ${fareData.FareSegments[0]?.Baggage || 'N/A'} Baggage
+                                    </span>
+                                    <span class="bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs">
+                                        ${fareData.FareSegments[0]?.CabinClassName || 'N/A'}
+                                    </span>
+                                </div>
+                                <div class="flex space-x-2">
+                                    <button onclick="viewFlightDetails('${fareData.ResultIndex}')" 
+                                            class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
+                                        View Details
+                                    </button>
+                                    <button onclick="fetchFareRules('${fareData.ResultIndex}')" 
+                                            class="bg-gray-200 text-gray-700 px-4 py-2 rounded hover:bg-gray-300">
+                                        Fare Rules
+                                    </button>
+                                </div>
+                            </div>
+                        `;
+
+                        resultsContainer.appendChild(flightCard);
+                    });
+                }
+            });
+        });
+
+        resultsCountDisplay.textContent = `${filteredResults.length} results`;
+    
+    }
+
+    // Sorting functionality (existing implementation)
+    function sortResults(option) {
+        const sortedResults = JSON.parse(JSON.stringify(results)); // Deep clone to avoid mutating original
+
+    sortedResults.forEach(resultGroup => {
+    resultGroup.sort((a, b) => {
+        const fareA = a.FareDataMultiple[0].Fare.OfferedFare;
+        const fareB = b.FareDataMultiple[0].Fare.OfferedFare;
+        const depTimeA = new Date(a.Segments[0][0].DepTime);
+        const depTimeB = new Date(b.Segments[0][0].DepTime);
+
+        switch(option) {
+            case 'price-low-high':
+                return fareA - fareB;
+            case 'price-high-low':
+                return fareB - fareA;
+            case 'departure-early':
+                return depTimeA - depTimeB;
+            case 'departure-late':
+                return depTimeB - depTimeA;
+        }
+    });
+});
+
+renderFilteredResults(sortedResults);
+    }
+
+    // Initialize
+    const filters = extractAdvancedFilters(results);
+    createFilterSections(filters);
+    renderFilteredResults(results);
+
+    // Event Listeners for sorting
+    sortOptions.addEventListener('change', (e) => {
+        sortResults(e.target.value);
+    });
+});
 function viewFlightDetails(resultIndex) {
     const traceId = sessionStorage.getItem('flightTraceId');
     const results = JSON.parse(sessionStorage.getItem('flightSearchResults')) || [];
@@ -287,7 +584,7 @@ function viewFlightDetails(resultIndex) {
 
 
          
-            window.location.href = `/flight-booking?traceId=${traceId}&resultIndex=${resultIndex}&details=${encodeURIComponent(JSON.stringify({
+    window.location.href = `/flight-booking?traceId=${traceId}&resultIndex=${resultIndex}&details=${encodeURIComponent(JSON.stringify({
     airlineName: selectedFlight.airlineName,
     flightNumber: selectedFlight.flightNumber,
     cabinClass: selectedFlight.cabinClass,
@@ -313,7 +610,7 @@ function viewFlightDetails(resultIndex) {
 }
      
 
-        function fetchFareRules(resultIndex) {
+function fetchFareRules(resultIndex) {
     const results = JSON.parse(sessionStorage.getItem('flightSearchResults')) || [];
     const traceId = sessionStorage.getItem('flightTraceId');
     const fareRulesModal = document.getElementById('fareRulesModal');
@@ -369,17 +666,26 @@ function viewFlightDetails(resultIndex) {
             .then(data => {
                 if (data.success && data.fareRules) {
                     // Format and display fare rules
-                    fareRulesDetails.innerHTML = `
-                        <h2>Fare Rules for Flight</h2>
-                        <p><strong>Airline:</strong> ${data.fareRules.Airline}</p>
-                        <p><strong>Route:</strong> ${data.fareRules.Origin} to ${data.fareRules.Destination}</p>
-                        <p><strong>Fare Basis Code:</strong> ${data.fareRules.FareBasisCode}</p>
-                        <div class="fare-rule-details">
-                            <h3>Fare Rule Details</h3>
-                            <pre>${data.fareRules.FareRuleDetail}</pre>
-                        </div>
-                    `;
-                } else {
+            fareRulesDetails.innerHTML = `
+                <div class="fare-rules-content">
+                    <h2>Fare Rules for Flight</h2>
+                    <p><strong>Airline:</strong> ${data.fareRules.Airline}</p>
+                    <p><strong>Route:</strong> ${data.fareRules.Origin} to ${data.fareRules.Destination}</p>
+                    <p><strong>Fare Basis Code:</strong> ${data.fareRules.FareBasisCode}</p>
+                    <div class="fare-rule-details">
+                        <h3>Fare Rule Details</h3>
+                        <pre>${data.fareRules.FareRuleDetail}</pre>
+                    </div>
+                </div>
+                <div class="modal-actions mt-4">
+                    <button onclick="document.getElementById('fareRulesModal').style.display = 'none'" 
+                            class="bg-gray-200 text-gray-700 px-4 py-2 rounded hover:bg-gray-300">
+                        Close
+                    </button>
+                </div>
+            `;
+                } 
+                else {
                     fareRulesDetails.innerHTML = `<p>Unable to fetch fare rules: ${data.message || 'Unknown error'}</p>`;
                 }
             })
@@ -387,7 +693,57 @@ function viewFlightDetails(resultIndex) {
                 console.error('Error fetching fare rules:', error);
                 fareRulesDetails.innerHTML = `<p>Error fetching fare rules: ${error.message}</p>`;
             });
-        }
+            fareRulesModal.classList.remove('hidden');
+            fareRulesModal.classList.add('flex');
+ }
+  // Close modal functionality
+  document.addEventListener('click', function(event) {
+            const fareRulesModal = document.getElementById('fareRulesModal');
+            if (event.target === fareRulesModal) {
+                fareRulesModal.classList.add('hidden');
+                fareRulesModal.classList.remove('flex');
+            }
+        });
+document.addEventListener('DOMContentLoaded', function() {
+                        const urlParams = new URLSearchParams(window.location.search);
+                        const from = urlParams.get('from').split('(')[0].trim();
+                        const to = urlParams.get('to').split('(')[0].trim();
+                        const fromCode = urlParams.get('fromCode');
+                        const toCode = urlParams.get('toCode');
+                        const departureDate = urlParams.get('departureDate');
+                        const adults = urlParams.get('adults');
+                        const cabinClass = urlParams.get('cabinClass');
+
+                        // Mapping cabin class
+                        const cabinClassMap = {
+                            '1': 'Economy',
+                            '2': 'Premium Economy',
+                            '3': 'Business',
+                            '4': 'First Class'
+                        };
+
+     document.getElementById('flight-header').innerHTML = `
+                            <h1 class="text-3xl font-bold text-white mb-2">
+                                ${from} (${fromCode}) <i class="fas fa-arrow-right text-xl mx-3 text-white"></i> ${to} (${toCode})
+                            </h1>
+                            <div class="text-white text-opacity-90 space-y-1">
+                                <p class="flex items-center">
+                                    <i class="fas fa-calendar-alt mr-2"></i>
+                                    ${new Date(departureDate).toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
+                                </p>
+                                <div class="flex space-x-4">
+                                    <p class="flex items-center">
+                                        <i class="fas fa-users mr-2"></i>
+                                        ${adults} Passenger${adults > 1 ? 's' : ''}
+                                    </p>
+                                    <p class="flex items-center">
+                                        <i class="fas fa-chair mr-2"></i>
+                                        ${cabinClassMap[cabinClass] || 'Economy'} Class
+                                    </p>
+                                </div>
+                            </div>
+                        `;
+                    });
+
     </script>
-</body>
-</html>
+ @endsection
