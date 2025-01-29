@@ -1,143 +1,299 @@
-<!-- Include Bootstrap JS and jQuery -->
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
-<meta name="csrf-token" content="{{ csrf_token() }}">
-
-<style>
-    .meal-options-container {
-        display: grid;
-        gap: 1rem;
-    }
-
-    .meal-option {
-        background: #fff;
-        transition: all 0.3s ease;
-    }
-
-    .meal-option:hover {
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    }
-
-    .table th,
-    .table td {
-        vertical-align: middle;
-    }
-
-    .plane {
-        margin: auto;
-        max-width: 300px;
-        background: #f0f0f0;
-        padding: 10px;
-        border-radius: 5px;
-        text-align: center;
-    }
-
-    .cockpit {
-        padding: 10px 0;
-        background: #333;
-        color: white;
-        font-weight: bold;
-    }
-
-    .cabin {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-    }
-
-    .row {
-        display: flex;
-        justify-content: center;
-        margin: 5px 0;
-    }
-
-    .seat {
-        width: 40px;
-        height: 40px;
-        background: #4caf50;
-        margin: 5px;
-        line-height: 40px;
-        text-align: center;
-        border-radius: 5px;
-        color: white;
-        cursor: pointer;
-    }
-
-    .seat.selected {
-        background: #ff5722;
-    }
-</style>
 @extends('frontend.layouts.master')
+@section('title', 'flight booking')
+@section('styles')
+    <!-- Bootstrap CSS -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.1.3/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- SweetAlert2 CSS -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/limonte-sweetalert2/11.4.8/sweetalert2.min.css" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary-color: #2196f3;
+            --secondary-color: #1976d2;
+            --accent-color: #64b5f6;
+            --background-color: #f8f9fa;
+        }
 
+        .container {
+            max-width: 1200px;
+        }
+
+        .booking-header {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 2rem;
+            border-radius: 10px 10px 0 0;
+            margin-bottom: 0;
+        }
+
+        .booking-header h4 {
+            margin: 0;
+            font-size: 1.8rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .booking-header h4:before {
+            content: '✈️';
+            font-size: 2rem;
+        }
+
+        .card {
+            border: none;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+            margin-bottom: 2rem;
+            background: white;
+        }
+
+        .card-header {
+            background: white;
+            border-bottom: 2px solid #e0e0e0;
+            padding: 1.5rem;
+        }
+
+        .card-header h6 {
+            color: var(--secondary-color);
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .form-label {
+            font-weight: 500;
+            color: #424242;
+        }
+
+        .form-control, .form-select {
+            border-radius: 8px;
+            padding: 0.75rem;
+            border: 2px solid #e0e0e0;
+            transition: all 0.3s ease;
+        }
+
+        .form-control:focus, .form-select:focus {
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 0.2rem rgba(33, 150, 243, 0.25);
+        }
+
+        .btn-primary {
+            background: var(--primary-color);
+            border: none;
+            padding: 0.75rem 2rem;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary:hover {
+            background: var(--secondary-color);
+            transform: translateY(-1px);
+        }
+
+        .btn-secondary {
+            background: #90caf9;
+            border: none;
+            color: #1565c0;
+        }
+
+        .btn-secondary:hover {
+            background: #64b5f6;
+        }
+
+        .option-selection {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        #options-container {
+            background: #f5f5f5;
+            border-radius: 8px;
+            padding: 1.5rem;
+        }
+
+        .meal-options-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+        }
+
+        .meal-option {
+            background: white;
+            padding: 1rem;
+            border-radius: 8px;
+            border: 2px solid #e0e0e0;
+            transition: all 0.3s ease;
+        }
+
+        .meal-option:hover {
+            border-color: var(--accent-color);
+            transform: translateY(-2px);
+        }
+
+        .plane {
+            max-width: 400px;
+            background: #f5f5f5;
+            border-radius: 10px;
+            padding: 1.5rem;
+        }
+
+        .cockpit {
+            background: linear-gradient(135deg, #1565c0, #0d47a1);
+            padding: 1rem;
+            border-radius: 10px 10px 0 0;
+        }
+
+        .seat {
+            width: 45px;
+            height: 45px;
+            background: var(--primary-color);
+            border-radius: 8px;
+            margin: 0.5rem;
+            font-weight: 600;
+        }
+
+        .seat:hover {
+            background: var(--secondary-color);
+            transform: scale(1.05);
+        }
+
+        .seat.selected {
+            background: #f44336;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 0 10px;
+            }
+
+            .booking-header {
+                padding: 1.5rem;
+            }
+
+            .card-body {
+                padding: 1rem;
+            }
+
+            .option-selection {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+            }
+        }
+
+        .table {
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .table th {
+            background: #e3f2fd;
+            color: var(--secondary-color);
+        }
+
+        #submitButton {
+            width: 100%;
+            max-width: 300px;
+            margin: 2rem auto;
+            display: block;
+            font-size: 1.2rem;
+            padding: 1rem;
+        }
+        
+        .seat-map-modal {
+            z-index: 1060;
+        }
+
+        .seat-map-popup {
+            max-width: 1200px !important;
+        }
+
+        .seat-map-content {
+            padding: 0;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        @media (max-width: 768px) {
+            .seat-map-popup {
+                margin: 0.5rem !important;
+            }
+        }
+    </style>
+@endsection
+
+{{-- In @section('content') --}}
 @section('content')
-    <!-- Booking Form Modal -->
-    <div class="modal fade show" id="bookingFormModal" tabindex="-1" aria-labelledby="bookingFormModalLabel" aria-hidden="true" style="display: block;">
-        <div class="modal-dialog modal-xl">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="bookingFormModalLabel">Booking Form</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <form id="bookingForm">
-                        <!-- Personal Details Section -->
-                        <div class="card mb-3">
-                            <div class="card-header">
-                                <h6 class="mb-0">Personal Details</h6>
-                            </div>
-                            <div class="card-body">
-                                <div class="row">
-                                    <!-- Title -->
-                                    <div class="col-md-3 mb-3">
-                                        <label for="title" class="form-label">Title</label>
-                                        <select class="form-select" id="title" name="Title" required>
-                                            <option value="Mr">Mr</option>
-                                            <option value="Mrs">Mrs</option>
-                                            <option value="Ms">Ms</option>
-                                        </select>
-                                    </div>
-                                    <!-- First Name -->
-                                    <div class="col-md-3 mb-3">
-                                        <label for="firstName" class="form-label">First Name</label>
-                                        <input type="text" class="form-control" id="firstName" name="FirstName" required>
-                                    </div>
-                                    <!-- Last Name -->
-                                    <div class="col-md-3 mb-3">
-                                        <label for="lastName" class="form-label">Last Name</label>
-                                        <input type="text" class="form-control" id="lastName" name="LastName" required>
-                                    </div>
-                                    <!-- Gender -->
-                                    <div class="col-md-3 mb-3">
-                                        <label for="gender" class="form-label">Gender</label>
-                                        <select class="form-select" id="gender" name="Gender" required>
-                                            <option value="1">Male</option>
-                                            <option value="2">Female</option>
-                                        </select>
-                                    </div>
-                                      <!-- Passenger Type -->
-                                    <div class="col-md-3 mb-3">
-                                        <label for="gender" class="form-label">PassengerType</label>
-                                        <select class="form-select" id="passengerType" name="PassengerType" required>
-                                            <option value="1">Adult</option>
-                                            <option value="2">Child</option>
-                                            <option value="3">Infant</option>
-                                        </select>
-                                    </div>
-                                    <!-- Email -->
-                                    <div class="col-md-6 mb-3">
-                                        <label for="email" class="form-label">Email</label>
-                                        <input type="email" class="form-control" id="email" name="Email" required>
-                                    </div>
-                                    <!-- Contact Number -->
-                                    <div class="col-md-6 mb-3">
-                                        <label for="contactNo" class="form-label">Contact Number</label>
-                                        <input type="tel" class="form-control" id="contactNo" name="ContactNo" required>
-                                    </div>
-                                    <!-- Address -->
-                                    <div class="col-md-12 mb-3">
-                                        <label for="addressLine1" class="form-label">Address</label>
-                                        <input type="text" class="form-control" id="addressLine1" name="AddressLine1" required>
-                                    </div>
+    <div class="container py-4">
+        <div class="card">
+            <div class="card-header">
+                <h4 class="mb-0">Flight Booking Form</h4>
+            </div>
+            <div class="card-body">
+                <form id="bookingForm">
+                    <!-- Personal Details Section -->
+                    <div class="card mb-3">
+                        <div class="card-header">
+                            <h6 class="mb-0">Personal Details</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-3 mb-3">
+                                    <label for="title" class="form-label">Title</label>
+                                    <select class="form-select" id="title" name="Title" required>
+                                        <option value="Mr">Mr</option>
+                                        <option value="Mrs">Mrs</option>
+                                        <option value="Ms">Ms</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-3 mb-3">
+                                    <label for="firstName" class="form-label">First Name</label>
+                                    <input type="text" class="form-control" id="firstName" name="FirstName" required>
+                                </div>
+                                <div class="col-md-3 mb-3">
+                                    <label for="lastName" class="form-label">Last Name</label>
+                                    <input type="text" class="form-control" id="lastName" name="LastName" required>
+                                </div>
+                                <div class="col-md-3 mb-3">
+                                    <label for="gender" class="form-label">Gender</label>
+                                    <select class="form-select" id="gender" name="Gender" required>
+                                        <option value="1">Male</option>
+                                        <option value="2">Female</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-4 mb-3">
+    <label for="dateOfBirth" class="form-label">Date of Birth</label>
+    <input type="date" class="form-control" id="dateOfBirth" name="DateOfBirth">
+</div>
+                                
+                                <div class="col-md-3 mb-3">
+                                    <label for="passengerType" class="form-label">Passenger Type</label>
+                                    <select class="form-select" id="passengerType" name="PassengerType" required>
+                                        <option value="1">Adult</option>
+                                        <option value="2">Child</option>
+                                        <option value="3">Infant</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="email" class="form-label">Email</label>
+                                    <input type="email" class="form-control" id="email" name="Email" required>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="contactNo" class="form-label">Contact Number</label>
+                                    <input type="tel" class="form-control" id="contactNo" name="ContactNo" required>
+                                </div>
+                                <div class="col-md-12 mb-3">
+                                    <label for="addressLine1" class="form-label">Address</label>
+                                    <input type="text" class="form-control" id="addressLine1" name="AddressLine1" required>
                                 </div>
                             </div>
                         </div>
@@ -210,10 +366,17 @@
             </div>
         </div>
     </div>
+@endsection
 
+{{-- In @section('scripts') --}}
+@section('scripts')
+    <!-- Required JavaScript -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.1.3/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/limonte-sweetalert2/11.4.8/sweetalert2.min.js"></script>
     <script>
-document.addEventListener('DOMContentLoaded', function() {
-    const urlParams = new URLSearchParams(window.location.search);
+          document.addEventListener('DOMContentLoaded', function() {
+            const urlParams = new URLSearchParams(window.location.search);
     const traceId = urlParams.get('traceId');
     const resultIndex = urlParams.get('resultIndex');
     const encodedDetails = urlParams.get('details');
@@ -484,61 +647,69 @@ window.showBaggageAlert = function(radio) {
 };
 
     // Seat Selection
-    document.getElementById('selectSeatBtn').addEventListener('click', function() {
-    const seatMapContainer = document.getElementById('seatMapContainer');
+// Replace your existing selectSeatBtn click handler with this:
+document.getElementById('selectSeatBtn').addEventListener('click', function() {
     const button = this;
-
+    
     button.disabled = true;
     button.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Loading...';
 
     fetch('{{ route('flight.getSeatMap') }}', {
-    method: 'POST',
-    headers: {
-        'Content-Type': 'application/json', // Add this header
-        'X-CSRF-TOKEN': '{{ csrf_token() }}', // Add CSRF token
-        'X-Requested-With': 'XMLHttpRequest',
-        'Accept': 'application/json' // Change to JSON
-    },
-    body: JSON.stringify({
-        EndUserIp: '1.1.1.1',
-        ClientId: '180133',
-        UserName: 'MakeMy91',
-        Password: 'MakeMy@910',
-        SrdvType: "MixAPI",
-        SrdvIndex: srdvIndex, // Ensure these are defined
-        TraceId: traceId,
-        ResultIndex: resultIndex
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': "{{ csrf_token() }}",
+            'X-Requested-With': 'XMLHttpRequest',
+            'Accept': 'application/json'
+        },
+        body: JSON.stringify({
+            EndUserIp: '1.1.1.1',
+            ClientId: '180133',
+            UserName: 'MakeMy91',
+            Password: 'MakeMy@910',
+            SrdvType: "MixAPI",
+            SrdvIndex: srdvIndex,
+            TraceId: traceId,
+            ResultIndex: resultIndex
+        })
     })
-})
-    .then(response => {
-        if (!response.ok) {
-            throw new Error('Network response was not ok');
-        }
-        return response.json(); // Changed from text() to json()
-    })
+    .then(response => response.json())
     .then(data => {
-        seatMapContainer.innerHTML = data.html; // Assuming controller returns HTML in data.html
-        seatMapContainer.style.display = 'block';
+        // Use SweetAlert2 to show the seat map
+        Swal.fire({
+            title: 'Select Your Seat',
+            html: data.html,
+            width: '90%',
+            padding: '0',
+            background: '#f8f9fa',
+            showCloseButton: true,
+            showConfirmButton: false,
+            customClass: {
+                container: 'seat-map-modal',
+                popup: 'seat-map-popup',
+                content: 'seat-map-content'
+            }
+        });
 
         button.disabled = false;
         button.innerHTML = 'Select Seat';
-
-        initializeBootstrapComponents();
     })
     .catch(error => {
         console.error('Error:', error);
-        alert('Failed to load seat map. Please try again.');
+        Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: 'Failed to load seat map. Please try again.'
+        });
 
         button.disabled = false;
         button.innerHTML = 'Select Seat';
     });
 });
-    function initializeBootstrapComponents() {
-        // Initialize any Bootstrap components here if needed
-    }
 
-    function selectSeat(code, seatNumber, amount,airlineName,airlineCode,airlineNumber) {
-    console.log('Selecting seat:', { code, seatNumber, amount,airlineName,airlineCode , airlineNumber});
+// Keep your original selectSeat function unchanged, just add this line at the end:
+function selectSeat(code, seatNumber, amount, airlineName, airlineCode, airlineNumber) {
+    console.log('Selecting seat:', { code, seatNumber, amount, airlineName, airlineCode, airlineNumber });
 
     // Remove any previously created seat radio buttons
     const existingRadios = document.querySelectorAll('input[name="seat_option"]');
@@ -567,7 +738,7 @@ window.showBaggageAlert = function(radio) {
         console.error('Seat info element not found');
     }
     
-    // Ensure SweetAlert is properly loaded
+    // Show SweetAlert notification
     if (window.Swal) {
         window.Swal.fire({
             icon: 'success',
@@ -577,13 +748,15 @@ window.showBaggageAlert = function(radio) {
             timer: 1500
         });
     } else {
-        // Fallback alert if SweetAlert is not available
         alert(`Seat ${seatNumber} selected for ₹${amount}`);
         console.warn('SweetAlert not loaded, using standard alert');
     }
+
+    // Close the seat map modal
+    Swal.close();  // Add this line
 }
 
-// Ensure the function is globally accessible
+// Make sure selectSeat is available globally
 window.selectSeat = selectSeat;
 
 
@@ -679,43 +852,76 @@ window.selectSeat = selectSeat;
 } else {
     console.log('Non-LCC flight, redirecting to payment...');
     
+
+    function convertToISODateTime(dateString) {
+    if (!dateString) return ''; // Return empty if no date is provided
+    return `${dateString}T00:00:00`;
+}
+
+
+function convertToISODate(dateString) {
+        if (!dateString) return '';
+        return dateString.split('T')[0]; // Remove time part if exists
+    }
+
+    function validateEmail(email) {
+        return email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/);
+    }
+
+    function validatePassenger(passengerData) {
+        const errors = [];
+        
+        if (!passengerData.firstName.trim()) errors.push('First name is required');
+        if (!passengerData.lastName.trim()) errors.push('Last name is required');
+        if (!passengerData.passportNo.trim()) errors.push('Passport number is required');
+        if (!passengerData.passportExpiry) errors.push('Passport expiry date is required');
+        if (!passengerData.dateOfBirth) errors.push('Date of birth is required');
+        if (!validateEmail(passengerData.email)) errors.push('Valid email is required');
+        if (!passengerData.contactNo.trim()) errors.push('Contact number is required');
+        
+        return errors;
+    }
+
+
+
+
     // Create an object to hold all booking details
     // Prepare payload for LCC booking
     const payload = {
-            srdvIndex: srdvIndex,
-            traceId: traceId,
-            resultIndex: resultIndex,
-            passenger: {
-                title: document.getElementById('title').value.trim(),
-                firstName: document.getElementById('firstName').value.trim(),
-                lastName: document.getElementById('lastName').value.trim(),
-                gender: parseInt(document.getElementById('gender').value),
-                contactNo: document.getElementById('contactNo').value.trim(),
-                email: document.getElementById('email').value.trim(),
-                paxType: document.getElementById('passengerType').value,
-                countryCode: "IN",
-                countryName: "INDIA",
-                addressLine1: document.getElementById('addressLine1').value.trim(),
-                isLeadPax: true,
-            },
-            fare: {
-                baseFare: fareQuoteData.Fare.BaseFare,
-                tax: fareQuoteData.Fare.Tax,
-                yqTax: fareQuoteData.Fare.YQTax,
-                transactionFee: parseFloat(fareQuoteData.Fare.TransactionFee),
-                additionalTxnFeeOfrd: fareQuoteData.Fare.AdditionalTxnFeeOfrd,
-                additionalTxnFeePub: fareQuoteData.Fare.AdditionalTxnFeePub,
-                airTransFee: parseFloat(fareQuoteData.Fare.AirTransFee)
-            },
-            gst: {
-                companyAddress: '',
-                companyContactNumber: '',
-                companyName: '',
-                number: '',
-                companyEmail: ''
-            }
-        };
-
+    srdvIndex: srdvIndex,
+    traceId: traceId,
+    resultIndex: resultIndex,
+    passengers: [{
+        title: document.getElementById('title').value.trim(),
+        firstName: document.getElementById('firstName').value.trim(),
+        lastName: document.getElementById('lastName').value.trim(),
+        gender: document.getElementById('gender').value,
+        contactNo: document.getElementById('contactNo').value.trim(),
+        email: document.getElementById('email').value.trim(),
+        paxType: parseInt(document.getElementById('passengerType').value),
+        passportNo: document.getElementById('passportNo').value,
+        passportExpiry: convertToISODateTime(document.getElementById('passportExpiry').value),
+        dateOfBirth: convertToISODateTime(document.getElementById('dateOfBirth').value),
+        countryCode: "IN",
+        countryName: "INDIA",
+        addressLine1: document.getElementById('addressLine1').value.trim(),
+        isLeadPax: true,
+        fare: {
+                    baseFare: parseFloat(fareQuoteData.Fare.BaseFare),
+                    tax: parseFloat(fareQuoteData.Fare.Tax),
+                    yqTax: parseFloat(fareQuoteData.Fare.YQTax || 0),
+                    transactionFee: parseFloat(fareQuoteData.Fare.TransactionFee || 0),
+                    additionalTxnFeeOfrd: parseFloat(fareQuoteData.Fare.AdditionalTxnFeeOfrd || 0),
+                    additionalTxnFeePub: parseFloat(fareQuoteData.Fare.AdditionalTxnFeePub || 0),
+                    airTransFee: parseFloat(fareQuoteData.Fare.AirTransFee || 0)
+                },
+        GSTCompanyAddress: '',
+        GSTCompanyContactNumber: '',
+        GSTCompanyName: '',
+        GSTNumber: '',
+        GSTCompanyEmail: ''
+    }]
+};
       
 
         // Disable submit button to prevent double submission
@@ -767,5 +973,4 @@ window.selectSeat = selectSeat;
 
 });
 </script>
-
 @endsection
