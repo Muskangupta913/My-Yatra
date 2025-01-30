@@ -876,7 +876,6 @@ function generateAgeOptions() {
             });
         }
     });
-
     // Autocomplete functionality when typing in source and destination city inputs
     function fetchCities(input, list) {
         let city = $(input).val();
@@ -1350,151 +1349,6 @@ console.log('Cookies:', document.cookie);
   //  ****************************************************
 
 
-
-
-
-
-
-
-        $(document).ready(function() {
-    // Airport search functionality
-    function initializeAirportSearch() {
-        const searchConfig = [
-            { inputId: '#flightFromCity', listId: '#flightFromCityList' },
-            { inputId: '#flightToCity', listId: '#flightToCityList' }
-        ];
-
-        searchConfig.forEach(config => {
-            const input = $(config.inputId);
-            const list = $(config.listId);
-            let searchTimeout;
-
-            // Input event handler with debounce
-            input.on('input', function() {
-                clearTimeout(searchTimeout);
-                const query = $(this).val();
-                
-                if (query.length < 2) {
-                    list.fadeOut().empty();
-                    return;
-                }
-
-                searchTimeout = setTimeout(() => {
-                    fetchAirports(query, list, input);
-                }, 300);
-            });
-
-            // Close dropdown when clicking outside
-            $(document).on('click', function(e) {
-                if (!$(e.target).closest(config.inputId).length && 
-                    !$(e.target).closest(config.listId).length) {
-                    list.fadeOut().empty();
-                }
-            });
-        });
-    }
-
-    // Function to fetch airports from the server
-    function fetchAirports(query, listElement, inputElement) {
-        $.ajax({
-            url: '/fetch-airports',
-            method: 'GET',
-            data: { query: query },
-            beforeSend: function() {
-                listElement.html('<div class="p-2">Loading...</div>').show();
-            },
-            success: function(response) {
-                if (!response.length) {
-                    listElement.html('<div class="p-2">No airports found</div>');
-                    return;
-                }
-
-                const suggestions = response.map(airport => `
-                    <a href="#" class="dropdown-item airport-option py-2" 
-                       data-code="${airport.airport_code}"
-                       data-name="${airport.airport_city_name} (${airport.airport_name}) (${airport.airport_code})">
-                        <div class="d-flex align-items-center">
-                            <div>
-                                <div class="font-weight-bold">${airport.airport_city_name}</div>
-                                <div class="small text-muted">${airport.airport_name}</div>
-                            </div>
-                            <div class="ml-auto">
-                                <span class="badge badge-light">${airport.airport_code}</span>
-                            </div>
-                        </div>
-                    </a>
-                `).join('');
-
-                listElement.html(suggestions).show();
-
-                // Handle airport selection
-                listElement.find('.airport-option').on('click', function(e) {
-                    e.preventDefault();
-                    const code = $(this).data('code');
-                    const name = $(this).data('name');
-                    
-                    inputElement.val(name);
-                    inputElement.attr('data-code', code);
-                    listElement.fadeOut().empty();
-
-                    // Trigger validation if needed
-                    validateForm();
-                });
-            },
-            error: function() {
-                listElement.html('<div class="p-2 text-danger">Error fetching airports</div>');
-            }
-        });
-    }
-
-    // Form validation
-    function validateForm() {
-        const fromCity = $('#flightFromCity');
-        const toCity = $('#flightToCity');
-        
-        // Basic validation
-        if (fromCity.val() === toCity.val() && fromCity.val() !== '') {
-            toCity.addClass('is-invalid');
-            $('#sameCityError').show();
-            return false;
-        }
-        
-        toCity.removeClass('is-invalid');
-        $('#sameCityError').hide();
-        return true;
-    }
-
-    // Trip type handling
-    function handleTripTypeChange() {
-        const tripType = $('input[name="journeyType"]:checked').val();
-        const returnDateField = $('#flightReturnDate');
-        
-        if (tripType === '1') { // One way
-            returnDateField.prop('disabled', true).val('');
-            returnDateField.closest('.mb-2').fadeOut();
-        } else { // Round trip
-            returnDateField.prop('disabled', false);
-            returnDateField.closest('.mb-2').fadeIn();
-        }
-    }
-
-    // Initialize all components
-    initializeAirportSearch();
-    
-    // Set up event listeners
-    $('input[name="journeyType"]').on('change', handleTripTypeChange);
-    
-    // Initialize trip type on page load
-    handleTripTypeChange();
-
-    // Form submission
-    $('#flightSearchForm').on('submit', function(e) {
-        if (!validateForm()) {
-            e.preventDefault();
-        }
-    });
-});
-
 $(document).ready(function () {
     // Initialize datepicker with the correct format
     $('.datepicker').datepicker({
@@ -1505,51 +1359,59 @@ $(document).ready(function () {
 
     
 
-    // Airport search functionality
     function initializeAirportSearch() {
-        const searchConfig = [
-            {
-                inputId: '#flightFromCity',
-                codeInputId: '#flightFromCityCode',
-                listId: '#flightFromCityList'
-            },
-            {
-                inputId: '#flightToCity',
-                codeInputId: '#flightToCityCode',
-                listId: '#flightToCityList'
+    const searchConfig = [
+        {
+            inputId: '#flightFromCity',
+            codeInputId: '#flightFromCityCode',
+            listId: '#flightFromCityList'
+        },
+        {
+            inputId: '#flightToCity',
+            codeInputId: '#flightToCityCode',
+            listId: '#flightToCityList'
+        }
+    ];
+
+    // Add a single document click handler
+    $(document).on('mouseup', function(e) {
+        const fromList = $('#flightFromCityList');
+        const toList = $('#flightToCityList');
+        const fromInput = $('#flightFromCity');
+        const toInput = $('#flightToCity');
+
+        // For "From" field
+        if (!fromInput.is(e.target) && !fromList.is(e.target) && fromList.has(e.target).length === 0) {
+            fromList.hide();
+        }
+
+        // For "To" field
+        if (!toInput.is(e.target) && !toList.is(e.target) && toList.has(e.target).length === 0) {
+            toList.hide();
+        }
+    });
+
+    searchConfig.forEach(config => {
+        const input = $(config.inputId);
+        const codeInput = $(config.codeInputId);
+        const list = $(config.listId);
+        let searchTimeout;
+
+        input.on('input', function() {
+            clearTimeout(searchTimeout);
+            const query = $(this).val();
+
+            if (query.length < 2) {
+                list.hide();
+                return;
             }
-        ];
 
-        searchConfig.forEach(config => {
-            const input = $(config.inputId);
-            const codeInput = $(config.codeInputId);
-            const list = $(config.listId);
-            let searchTimeout;
-
-            // Input event handler with debounce
-            input.on('input', function () {
-                clearTimeout(searchTimeout);
-                const query = $(this).val();
-
-                if (query.length < 2) {
-                    list.fadeOut().empty();
-                    return;
-                }
-
-                searchTimeout = setTimeout(() => {
-                    fetchAirports(query, list, input, codeInput);
-                }, 300);
-            });
-
-            // Close dropdown when clicking outside
-            $(document).on('click', function (e) {
-                if (!$(e.target).closest(config.inputId).length &&
-                    !$(e.target).closest(config.listId).length) {
-                    list.fadeOut().empty();
-                }
-            });
+            searchTimeout = setTimeout(() => {
+                fetchAirports(query, list, input, codeInput);
+            }, 300);
         });
-    }
+    });
+}
 
     // Function to fetch airports from the server
     function fetchAirports(query, listElement, inputElement, codeInputElement) {

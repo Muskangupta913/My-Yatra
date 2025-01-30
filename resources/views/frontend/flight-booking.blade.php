@@ -3,10 +3,8 @@
 @section('styles')
     <!-- Bootstrap CSS -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.1.3/css/bootstrap.min.css" rel="stylesheet">
-    
     <!-- SweetAlert2 CSS -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/limonte-sweetalert2/11.4.8/sweetalert2.min.css" rel="stylesheet">
-    
     <style>
         :root {
             --primary-color: #2196f3;
@@ -674,6 +672,15 @@ document.getElementById('selectSeatBtn').addEventListener('click', function() {
     })
     .then(response => response.json())
     .then(data => {
+        if (!data.html || data.html.trim() === '' || data.html.includes('No seats available')) {
+            Swal.fire({
+                icon: 'info',
+                title: 'No Seats Available',
+                text: 'Unfortunately, no seats are available for selection on this flight. The flight might be fully booked or seat selection may not be available at this time.',
+                confirmButtonText: 'OK',
+                confirmButtonColor: '#2196f3'
+            });
+        } else {
         // Use SweetAlert2 to show the seat map
         Swal.fire({
             title: 'Select Your Seat',
@@ -689,7 +696,7 @@ document.getElementById('selectSeatBtn').addEventListener('click', function() {
                 content: 'seat-map-content'
             }
         });
-
+    }
         button.disabled = false;
         button.innerHTML = 'Select Seat';
     })

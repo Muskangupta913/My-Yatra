@@ -1,18 +1,11 @@
 @extends('frontend.layouts.master')
 @section('title', 'flight search')
 @section('content')
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>Flight Search Results</title>
 @section('styles')
      <!-- Tailwind CSS -->
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-    
     <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
-    
-    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"> 
     <style>
         .flight-card {
             transition: all 0.3s ease;
@@ -25,8 +18,67 @@
          
         }
         .gradient-header {
-            background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
-        }
+    background-image: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url('/assets/images/flight.jpg');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    position: relative;
+}
+
+.container {
+    position: relative;
+    z-index: 1;
+}
+
+body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: url('/assets/images/flight.jpg');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    opacity: 0.7;  /* Increased opacity for more visible background */
+    z-index: -1;
+}
+
+.filter-section {
+    background-image: linear-gradient(rgba(255, 255, 255, 0.6), rgba(255, 255, 255, 0.6)), url('/assets/images/flight.jpg');
+    background-size: cover;
+    background-position: center;
+    backdrop-filter: blur(3px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.flight-card {
+    background-image: linear-gradient(rgba(255, 255, 255, 0.65), rgba(255, 255, 255, 0.65)), url('/assets/images/flight.jpg');
+    background-size: cover;
+    background-position: center;
+    backdrop-filter: blur(3px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.flight-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 15px rgba(0, 0, 0, 0.2);
+}
+
+/* Additional styles to ensure text readability */
+.flight-card p, 
+.flight-card h2, 
+.flight-card span,
+.filter-section p,
+.filter-section h3,
+.filter-section h4 {
+    text-shadow: 0 0 1px rgba(255, 255, 255, 0.8);
+    position: relative;
+}
         .filter-section {
             background-color: #ffffff;
             border: 1px solid #e0e0e0;
@@ -37,14 +89,18 @@
         }
     </style>
  @endsection 
- <div class="container mx-auto px-4 py-8">
-        <!-- Search Summary Header -->
-        <div class="gradient-header rounded-xl p-6 mb-8 shadow-md">
+ @section('content')
+<!-- Root wrapper for full width -->
+<div class="min-h-screen w-full">
+    <!-- Main content container -->
+    <div class="max-w-[1440px] mx-auto px-6 py-8">
+        <!-- Search Summary Header with gradient -->
+        <div class="gradient-header rounded-xl p-6 mb-8 shadow-md bg-gradient-to-r from-blue-600/60 to-blue-800/60">
             <div class="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
                 <div class="flex items-center space-x-6">
-                <div class="p-4">
-                   <i class="fas fa-plane text-3xl md:text-4xl text-white"></i>
-                </div>
+                    <div class="p-4 bg-blue-600/20 rounded-full">
+                        <i class="fas fa-plane text-3xl md:text-4xl text-white transform rotate-45"></i>
+                    </div>
                     <div id="flight-header" class="text-white">
                         <!-- Dynamic flight header content -->
                     </div>
@@ -52,54 +108,69 @@
             </div>
         </div>
 
-        <!-- Main Content Grid -->
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
-            <!-- Filters Sidebar -->
-            <div class="md:col-span-1 filter-section rounded-lg shadow-md p-6">
-                <h3 class="font-bold text-2xl mb-6 text-gray-800 border-b pb-4">
-                    <i class="fas fa-filter mr-3 text-blue-600"></i>Advanced Filters
-                </h3>
-                <div id="filters-container" class="space-y-6">
-                    <!-- Dynamically populated filters -->
+        <!-- Main Content Grid with improved spacing -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+            <!-- Filters Sidebar with consistent styling -->
+            <div class="md:col-span-1">
+                <div class="filter-section rounded-lg shadow-md p-6 bg-white/95 backdrop-blur-sm">
+                    <h3 class="font-bold text-2xl mb-6 text-gray-800 border-b pb-4 flex items-center">
+                        <i class="fas fa-filter mr-3 text-blue-600"></i>
+                        Advanced Filters
+                    </h3>
+                    <div id="filters-container" class="space-y-6">
+                        <!-- Dynamically populated filters -->
+                    </div>
                 </div>
             </div>
 
-            <!-- Flight Results -->
+            <!-- Flight Results Section -->
             <div class="md:col-span-3">
-                <!-- Sorting and Results Count -->
-                <div class="flex flex-col md:flex-row justify-between items-center mb-6 space-y-4 md:space-y-0">
+                <!-- Sorting Controls with improved alignment -->
+                <div class="flex flex-col md:flex-row justify-between items-center mb-6 bg-white/90 p-4 rounded-lg shadow-sm">
                     <div class="flex items-center space-x-4">
-                        <span class="text-gray-600">Sort by:</span>
-                        <select id="sort-options" class="bg-white border border-gray-300 rounded-lg p-2">
+                        <span class="text-gray-900 font-medium">Sort by:</span>
+                        <select id="sort-options" class="bg-white border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
                             <option value="price-low-high">Price: Low to High</option>
                             <option value="price-high-low">Price: High to Low</option>
                             <option value="departure-early">Departure: Early</option>
                             <option value="departure-late">Departure: Late</option>
                         </select>
                     </div>
-                    <div id="results-count" class="text-gray-600 font-medium"></div>
+                    <div id="results-count" class="text-gray-900 font-medium mt-4 md:mt-0"></div>
                 </div>
 
-                <!-- Flight Results Container -->
+                <!-- Results Container -->
                 <div id="results-container" class="space-y-6">
-                    <!-- Dynamic flight cards will be inserted here -->
-                </div>
-            </div>
-        </div>
-
-        <!-- Fare Rules Modal -->
-        <div id="fareRulesModal" class="modal fixed inset-0 hidden items-center justify-center p-4">
-            <div class="bg-white rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl">
-                <div class="p-6">
-                    <div id="fareRulesDetails" class="text-gray-800"></div>
+                    <!-- Dynamic flight cards -->
                 </div>
             </div>
         </div>
     </div>
+</div>
+
+<!-- Modal (positioned outside main container for proper stacking) -->
+<div id="fareRulesModal" class="modal fixed inset-0 hidden items-center justify-center p-4 z-50">
+    <!-- Semi-transparent backdrop -->
+    <div class="absolute inset-0 bg-black/50 backdrop-blur-sm"></div>
+    
+    <!-- Modal Content -->
+    <div class="bg-white rounded-xl w-full max-w-3xl mx-auto relative shadow-2xl">
+        <div class="bg-blue-600 p-4 rounded-t-xl">
+            <h2 class="text-xl font-bold text-white">Fare Rules</h2>
+        </div>
+        
+        <div class="p-6 max-h-[70vh] overflow-y-auto">
+            <div id="fareRulesDetails" class="text-gray-800 space-y-4">
+                <!-- Content will be dynamically inserted here -->
+            </div>
+        </div>
+    </div>
+</div>
 @endsection
-    @section('scripts')
+@section('scripts')
+    
     <script>
-        document.addEventListener('DOMContentLoaded', function () {
+    document.addEventListener('DOMContentLoaded', function () {
     const results = JSON.parse(sessionStorage.getItem('flightSearchResults')) || [];
     const resultsContainer = document.getElementById('results-container');
     const filtersContainer = document.getElementById('filters-container');
@@ -390,7 +461,7 @@
                      onerror="this.onerror=null; this.src='/assets/images/airlines/airlines/48_48/default-airline.png'; this.classList.add('grayscale opacity-70');">
                 <div>
                     <h2 class="text-xl font-bold text-blue-700">${fareData.FareSegments[0]?.AirlineName || 'Airline'}</h2>
-                    <p class="text-sm text-gray-500">${fareData.FareSegments[0]?.AirlineCode || ''} - ${fareData.FareSegments[0]?.FlightNumber || 'N/A'}</p>
+                    <p class="text-sm text-gray-900">${fareData.FareSegments[0]?.AirlineCode || ''} - ${fareData.FareSegments[0]?.FlightNumber || 'N/A'}</p>
                 </div>
             </div>
             <div class="text-right">
@@ -401,25 +472,25 @@
                             <div class="flex justify-between items-center mb-4">
                                 <div>
                                     <p class="font-semibold">${segment?.DepTime ? new Date(segment.DepTime).toLocaleTimeString() : 'N/A'}</p>
-                                    <p class="text-sm text-gray-600">${segment?.Origin?.AirportName || 'N/A'} (${segment?.Origin?.AirportCode || 'N/A'})</p>
+                                    <p class="text-sm text-gray-900">${segment?.Origin?.AirportName || 'N/A'} (${segment?.Origin?.AirportCode || 'N/A'})</p>
                                 </div>
         <div class="flex items-center space-x-3">
             <div class="text-center">
                 <div class="flex items-center">
                     <div class="w-3 h-3 bg-blue-500 rounded-full mr-2"></div>
                     <div class="w-24 h-0.5 bg-gray-300 relative">
-                        <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-xs text-gray-500">
+                        <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-xs text-gray-900">
                             ${segment?.Duration || 'N/A'} mins
                         </div>
                     </div>
                     <div class="w-3 h-3 bg-blue-500 rounded-full ml-2"></div>
                 </div>
-                <i class="fas fa-plane text-gray-500 mt-1"></i>
+                <i class="fas fa-plane text-gray-700 mt-1"></i>
             </div>
         </div>
                                 <div class="text-right">
                                     <p class="font-semibold">${segment?.ArrTime ? new Date(segment.ArrTime).toLocaleTimeString() : 'N/A'}</p>
-                                    <p class="text-sm text-gray-600">${segment?.Destination?.AirportName || 'N/A'} (${segment?.Destination?.AirportCode || 'N/A'})</p>
+                                    <p class="text-sm text-gray-900">${segment?.Destination?.AirportName || 'N/A'} (${segment?.Destination?.AirportCode || 'N/A'})</p>
                                 </div>
                             </div>
                             
@@ -514,8 +585,6 @@ function viewFlightDetails(resultIndex) {
             }
         });
     });
-
-
      // Find the detailed flight information for the specific resultIndex
      let selectedFlight = null;
     results.forEach(resultGroup => {
@@ -747,4 +816,4 @@ document.addEventListener('DOMContentLoaded', function() {
                     });
 
     </script>
- @endsection
+    @endsection
