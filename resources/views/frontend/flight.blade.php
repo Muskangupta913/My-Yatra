@@ -586,10 +586,10 @@ function viewFlightDetails(resultIndex) {
 
          
     window.location.href = `/flight-booking?traceId=${traceId}&resultIndex=${resultIndex}&details=${encodeURIComponent(JSON.stringify({
+    isLCC: selectedFlight.isLCC,
     airlineName: selectedFlight.airlineName,
     flightNumber: selectedFlight.flightNumber,
     cabinClass: selectedFlight.cabinClass,
-    isLCC: selectedFlight.isLCC,
     fare: selectedFlight.fare,
     origin: selectedFlight.origin,
     destination: selectedFlight.destination
