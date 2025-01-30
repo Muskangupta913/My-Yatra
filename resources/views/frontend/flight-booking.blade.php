@@ -268,6 +268,11 @@
                                         <option value="2">Female</option>
                                     </select>
                                 </div>
+                                <div class="col-md-4 mb-3">
+    <label for="dateOfBirth" class="form-label">Date of Birth</label>
+    <input type="date" class="form-control" id="dateOfBirth" name="DateOfBirth">
+</div>
+                                
                                 <div class="col-md-3 mb-3">
                                     <label for="passengerType" class="form-label">Passenger Type</label>
                                     <select class="form-select" id="passengerType" name="PassengerType" required>
@@ -290,77 +295,72 @@
                                 </div>
                             </div>
                         </div>
-                    </div>
 
-                    <!-- Passport Details Section -->
-                    <div class="card mb-3">
-                        <div class="card-header">
-                            <h6 class="mb-0">Passport Details</h6>
-                        </div>
-                        <div class="card-body">
-                            <div class="row">
-                                <div class="col-md-4 mb-3">
-                                    <label for="passportNo" class="form-label">Passport Number</label>
-                                    <input type="text" class="form-control" id="passportNo" name="PassportNo">
-                                </div>
-                                <div class="col-md-4 mb-3">
-                                    <label for="passportExpiry" class="form-label">Passport Expiry</label>
-                                    <input type="date" class="form-control" id="passportExpiry" name="PassportExpiry">
-                                </div>
-                                <div class="col-md-4 mb-3">
-                                    <label for="passportIssueDate" class="form-label">Passport Issue Date</label>
-                                    <input type="date" class="form-control" id="passportIssueDate" name="PassportIssueDate">
+                        <!-- Passport Details Section -->
+                        <div class="card mb-3">
+                            <div class="card-header">
+                                <h6 class="mb-0">Passport Details</h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <!-- Passport Number -->
+                                    <div class="col-md-4 mb-3">
+                                        <label for="passportNo" class="form-label">Passport Number</label>
+                                        <input type="text" class="form-control" id="passportNo" name="PassportNo">
+                                    </div>
+                                    <!-- Passport Expiry -->
+                                    <div class="col-md-4 mb-3">
+                                        <label for="passportExpiry" class="form-label">Passport Expiry</label>
+                                        <input type="date" class="form-control" id="passportExpiry" name="PassportExpiry">
+                                    </div>
+                                    <!-- Passport Issue Date -->
+                                    <div class="col-md-4 mb-3">
+                                        <label for="passportIssueDate" class="form-label">Passport Issue Date</label>
+                                        <input type="date" class="form-control" id="passportIssueDate" name="PassportIssueDate">
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
 
-                    <!-- Options Section -->
-                    <div class="card mb-3">
-                        <div class="card-header">
-                            <h6 class="mb-0">Additional Options</h6>
-                        </div>
-                        <div class="card-body">
-                            <div class="option-selection">
-                                <button type="button" class="btn btn-primary" id="baggage-btn">Baggage Options</button>
-                                <button type="button" class="btn btn-secondary" id="meal-btn">Meal Options</button>
-                            </div>
-                            <div id="options-container">
-                                <p>Please select an option to view details.</p>
-                            </div>
-                        </div>
-                    </div>
+                        <!-- Dynamic Sections -->
+                        <div id="dynamicSections"></div>
 
-                    <!-- Seat Selection Section -->
-                    <div class="card mb-3">
-                        <div class="card-header">
-                            <h6 class="mb-0">Seat Selection</h6>
+                        <!-- Options -->
+                        <div class="option-selection">
+                            <button type="button" class="btn btn-primary" id="baggage-btn">Baggage Options</button>
+                            <button type="button" class="btn btn-secondary" id="meal-btn">Meal Options</button>
                         </div>
-                        <div class="card-body">
+                        <div id="options-container">
+                            <p>Please select an option to view details.</p>
+                        </div>
+
+                        <!-- Seat Selection -->
+                        <div class="seat-selection-section mb-3">
+                            <h6>Seat Selection</h6>
                             <button type="button" class="btn btn-secondary" id="selectSeatBtn">Select Seat</button>
                             <span id="seatInfo" class="ms-2" style="font-size: 14px;"></span>
-                            <div id="seatMapContainer" class="mt-3" style="display: none;"></div>
                         </div>
-                    </div>
+                        <div id="seatMapContainer" class="mt-3" style="display: none;"></div>
 
-                    <!-- Fare Details -->
-                    <div class="card mb-3">
-                        <div class="card-header">
-                            <h6 class="mb-0">Fare Details</h6>
-                        </div>
-                        <div class="card-body">
-                            <div class="row">
-                                <div class="col-md-3 mb-3">
-                                    <label for="totalFare" class="form-label">Total Fare</label>
-                                    <input type="text" class="form-control" id="totalFare" readonly>
+                        <!-- Fare Details -->
+                        <div class="card mb-3">
+                            <div class="card-header">
+                                <h6 class="mb-0">Fare Details</h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-3 mb-3">
+                                        <label for="totalFare" class="form-label">Total Fare</label>
+                                        <input type="text" class="form-control" id="totalFare" readonly>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
 
-                    <!-- Submit Button -->
-                    <button type="button" id="submitButton" class="btn btn-primary">Submit Booking</button>
-                </form>
+                        <!-- Submit Button -->
+                        <button  type="button" id="submitButton" class="btn btn-primary">Submit Booking</button>
+                    </form>
+                </div>
             </div>
         </div>
     </div>
@@ -488,6 +488,7 @@
             '<p>Error fetching SSR data. Please try again.</p>';
     });
 }
+
 function renderBaggageOptions(baggageData, container) {
     if (!baggageData.length) {
         container.innerHTML = '<p>No baggage options available.</p>';
@@ -767,93 +768,216 @@ window.selectSeat = selectSeat;
 
 
 
-document.getElementById('submitButton').addEventListener('click', function(event) {
-    event.preventDefault(); // Prevent default action
-    
-    // Call bookLCC function directly
-    bookLCC();
-    
-    return false; // Prevent form submission
-});
 
+  document.getElementById('submitButton').addEventListener('click', function(event) {
+    event.preventDefault();
     
-    // Collect seat data
-    function bookLCC() {
-    // Collect seat data
-    const selectedSeat = document.querySelector('input[name="seat_option"]:checked');
-    const seatData = selectedSeat ? [{
-        Code: selectedSeat.value,
-        SeatNumber: selectedSeat.getAttribute('data-seat-number'),
-        Amount: selectedSeat.getAttribute('data-amount'),
-        AirlineName: selectedSeat.getAttribute('data-airlineName'),
-        AirlineCode: selectedSeat.getAttribute('data-airlineCode'),
-        AirlineNumber: selectedSeat.getAttribute('data-airlineNumber')
-    }] : [];
+    // Get isLCC value from flightDetails
+    const isLCC = flightDetails.isLCC;
+    console.log('Checking isLCC status:', isLCC);
 
-    const baggageData = window.selectedBaggageOption ? [window.selectedBaggageOption] : [];
-    const mealData = window.selectedMealOption ? [window.selectedMealOption] : [];
-
-    // Prepare payload
-    const payload = {
+    if (isLCC) {
+        console.log('Processing LCC booking...');
+        // Prepare payload for LCC booking
+        const bookingDetails = {
+        resultIndex: resultIndex,
         srdvIndex: srdvIndex,
         traceId: traceId,
-        resultIndex: resultIndex,
-        passenger: {
-            title: document.getElementById('title').value,
-            firstName: document.getElementById('firstName').value,
-            lastName: document.getElementById('lastName').value,
-            gender: document.getElementById('gender').value,
-            contactNo: document.getElementById('contactNo').value,
-            email: document.getElementById('email').value,
-            paxType:document.getElementById('passengerType').value,
-            dateOfBirth: "12/01/1998",
-            passportNo: "",
-            passportExpiry: "",
-            passportIssueDate: "",
-            countryCode: "IN",
-            countryName: "INDIA",
-            baggage: baggageData,
-            mealDynamic: mealData,
-            seat: seatData // Correctly formatted seat data
-
-        },
-        fare: {
-            baseFare: fareQuoteData.Fare.BaseFare,
-            tax: fareQuoteData.Fare.Tax,
-            yqTax: fareQuoteData.Fare.YQTax,
-            transactionFee: parseFloat(fareQuoteData.Fare.TransactionFee),
-            additionalTxnFeeOfrd: fareQuoteData.Fare.AdditionalTxnFeeOfrd,
-            additionalTxnFeePub: fareQuoteData.Fare.AdditionalTxnFeePub,
-            airTransFee: parseFloat(fareQuoteData.Fare.AirTransFee)
-        }
+        totalFare: fareQuoteData.Fare.OfferedFare || 0
     };
 
-    console.log('Payload:', payload); // For debugging purposes
-
-    // Send booking request
-    fetch('/flight/bookLcc', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-CSRF-TOKEN': "{{ csrf_token() }}"
-        },
-        body: JSON.stringify(payload)
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.status === 'success') {
-        alert('Booking successful! Booking ID: ' + data.booking_details.booking_id);
-        // Additional actions with booking details if needed
-        console.log(data.booking_details);
-    } else {
-        alert('Booking failed: ' + (data.message || 'Unknown error'));
+    // Add seat details if selected
+    const selectedSeatRadio = document.querySelector('input[name="seat_option"]:checked');
+    if (selectedSeatRadio) {
+        bookingDetails.seat = {
+            code: selectedSeatRadio.value,
+            seatNumber: selectedSeatRadio.getAttribute('data-seat-number'),
+            amount: selectedSeatRadio.getAttribute('data-amount'),
+            airlineName: selectedSeatRadio.getAttribute('data-airlineName'),
+            airlineCode: selectedSeatRadio.getAttribute('data-airlineCode'),
+            airlineNumber: selectedSeatRadio.getAttribute('data-airlineNumber')
+        };
     }
-})
-.catch(error => {
-    console.error('Error:', error);
-    alert('An error occurred during booking');
-});
+
+    // Add baggage details if selected
+    if (window.selectedBaggageOption) {
+        bookingDetails.baggage = {
+            code: window.selectedBaggageOption.Code,
+            weight: window.selectedBaggageOption.Weight,
+            price: window.selectedBaggageOption.Price,
+            origin: window.selectedBaggageOption.Origin,
+            destination: window.selectedBaggageOption.Destination,
+            wayType: window.selectedBaggageOption.WayType,
+            currency: window.selectedBaggageOption.Currency
+        };
+    }
+
+    // Add meal details if selected
+    if (window.selectedMealOption) {
+        bookingDetails.meal = {
+            code: window.selectedMealOption.Code,
+            description: window.selectedMealOption.AirlineDescription,
+            price: window.selectedMealOption.Price,
+            origin: window.selectedMealOption.Origin,
+            destination: window.selectedMealOption.Destination,
+            wayType: window.selectedMealOption.Waytype,
+            quantity: window.selectedMealOption.Quantity,
+            currency: window.selectedMealOption.Currency
+        };
+    }
+
+    // Add passenger details
+    bookingDetails.passenger = {
+        title: document.getElementById('title').value.trim(),
+        firstName: document.getElementById('firstName').value.trim(),
+        lastName: document.getElementById('lastName').value.trim(),
+        gender: parseInt(document.getElementById('gender').value),
+        contactNo: document.getElementById('contactNo').value.trim(),
+        email: document.getElementById('email').value.trim(),
+        paxType: document.getElementById('passengerType').value,
+        addressLine1: document.getElementById('addressLine1').value.trim()
+    };
+
+    // Add fare details
+    bookingDetails.fare = {
+        baseFare: fareQuoteData.Fare.BaseFare,
+        tax: fareQuoteData.Fare.Tax,
+        yqTax: fareQuoteData.Fare.YQTax,
+        transactionFee: fareQuoteData.Fare.TransactionFee,
+        additionalTxnFeeOfrd: fareQuoteData.Fare.AdditionalTxnFeeOfrd,
+        additionalTxnFeePub: fareQuoteData.Fare.AdditionalTxnFeePub,
+        airTransFee: fareQuoteData.Fare.AirTransFee
+    };
+
+    // Encode all details as a single compressed parameter
+    const encodedDetails = encodeURIComponent(JSON.stringify(bookingDetails));
+
+    // Redirect to payment page with all details
+    window.location.href = `/payment?details=${encodedDetails}`;
+
+    console.log('Redirecting with booking details:', bookingDetails);
+} else {
+    console.log('Non-LCC flight, redirecting to payment...');
+    
+
+    function convertToISODateTime(dateString) {
+    if (!dateString) return ''; // Return empty if no date is provided
+    return `${dateString}T00:00:00`;
 }
+
+
+function convertToISODate(dateString) {
+        if (!dateString) return '';
+        return dateString.split('T')[0]; // Remove time part if exists
+    }
+
+    function validateEmail(email) {
+        return email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/);
+    }
+
+    function validatePassenger(passengerData) {
+        const errors = [];
+        
+        if (!passengerData.firstName.trim()) errors.push('First name is required');
+        if (!passengerData.lastName.trim()) errors.push('Last name is required');
+        if (!passengerData.passportNo.trim()) errors.push('Passport number is required');
+        if (!passengerData.passportExpiry) errors.push('Passport expiry date is required');
+        if (!passengerData.dateOfBirth) errors.push('Date of birth is required');
+        if (!validateEmail(passengerData.email)) errors.push('Valid email is required');
+        if (!passengerData.contactNo.trim()) errors.push('Contact number is required');
+        
+        return errors;
+    }
+
+
+
+
+    // Create an object to hold all booking details
+    // Prepare payload for LCC booking
+    const payload = {
+    srdvIndex: srdvIndex,
+    traceId: traceId,
+    resultIndex: resultIndex,
+    passengers: [{
+        title: document.getElementById('title').value.trim(),
+        firstName: document.getElementById('firstName').value.trim(),
+        lastName: document.getElementById('lastName').value.trim(),
+        gender: document.getElementById('gender').value,
+        contactNo: document.getElementById('contactNo').value.trim(),
+        email: document.getElementById('email').value.trim(),
+        paxType: parseInt(document.getElementById('passengerType').value),
+        passportNo: document.getElementById('passportNo').value,
+        passportExpiry: convertToISODateTime(document.getElementById('passportExpiry').value),
+        dateOfBirth: convertToISODateTime(document.getElementById('dateOfBirth').value),
+        countryCode: "IN",
+        countryName: "INDIA",
+        addressLine1: document.getElementById('addressLine1').value.trim(),
+        isLeadPax: true,
+        fare: {
+                    baseFare: parseFloat(fareQuoteData.Fare.BaseFare),
+                    tax: parseFloat(fareQuoteData.Fare.Tax),
+                    yqTax: parseFloat(fareQuoteData.Fare.YQTax || 0),
+                    transactionFee: parseFloat(fareQuoteData.Fare.TransactionFee || 0),
+                    additionalTxnFeeOfrd: parseFloat(fareQuoteData.Fare.AdditionalTxnFeeOfrd || 0),
+                    additionalTxnFeePub: parseFloat(fareQuoteData.Fare.AdditionalTxnFeePub || 0),
+                    airTransFee: parseFloat(fareQuoteData.Fare.AirTransFee || 0)
+                },
+        GSTCompanyAddress: '',
+        GSTCompanyContactNumber: '',
+        GSTCompanyName: '',
+        GSTNumber: '',
+        GSTCompanyEmail: ''
+    }]
+};
+      
+
+        // Disable submit button to prevent double submission
+        const submitButton = event.target;
+        submitButton.disabled = true;
+
+        // Make API call for LCC booking
+        fetch('/flight/bookHold', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+            },
+            body: JSON.stringify(payload)
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                console.log('LCC Booking successful!', data.booking_details);
+                // Redirect to payment page with booking details
+                const queryParams = new URLSearchParams({
+                    resultIndex: resultIndex,
+                    bookingId: data.booking_details.booking_id,
+                    pnr: data.booking_details.pnr,
+                    traceId: data.booking_details.trace_id
+                });
+                window.location.href = `/payment?${queryParams.toString()}`;
+            } else {
+                throw new Error(data.message || 'Booking failed');
+            }
+        })
+        .catch(error => {
+            console.error('Error during LCC booking:', error);
+            if (window.Swal) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Booking Failed',
+                    text: error.message || 'An error occurred during booking'
+                });
+            } else {
+                alert('Booking failed: ' + (error.message || 'An error occurred'));
+            }
+        })
+        .finally(() => {
+            submitButton.disabled = false;
+        });
+    }
+  });
+
 });
 </script>
 @endsection

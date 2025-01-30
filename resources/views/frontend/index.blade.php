@@ -305,6 +305,29 @@
                 <button type="submit" id="flightSearch" class="btn btn-warning w-100 rounded-0 py-3 fw-bold">Search Flights</button>
             </div>
         </div>
+                  <!-- Fare Type Selection -->
+                  <div class="row mt-3">
+    <div class="col-md-12">
+        <label class="fw-bold">Fare Type:</label>
+        <div class="form-check form-check-inline">
+            <input class="form-check-input" type="radio" name="fareType" id="normalFare" value="1" checked>
+            <label class="form-check-label" for="normalFare">Normal Fare</label>
+        </div>
+        <div class="form-check form-check-inline">
+            <input class="form-check-input" type="radio" name="fareType" id="studentFare" value="2">
+            <label class="form-check-label" for="studentFare">Student Fare</label>
+        </div>
+        <div class="form-check form-check-inline">
+            <input class="form-check-input" type="radio" name="fareType" id="seniorCitizenFare" value="3">
+            <label class="form-check-label" for="seniorCitizenFare">Senior Citizen Fare</label>
+        </div>
+        <div class="form-check form-check-inline">
+            <input class="form-check-input" type="radio" name="fareType" id="armedForceFare" value="4">
+            <label class="form-check-label" for="armedForceFare">Armed Force Fare</label>
+        </div>
+    </div>
+</div>
+
 
       
     </form>
@@ -1483,40 +1506,44 @@ $(document).ready(function () {
 
     // Trip type handling
     function handleTripTypeChange() {
-        const tripType = $('input[name="journeyType"]:checked').val();
-        const returnDateField = $('#flightReturnDate');
+    const tripType = $('input[name="journeyType"]:checked').val();
+    const returnDateField = $('#flightReturnDate');
 
-        if (tripType === '1') { // One way
-            returnDateField.prop('disabled', true).val('');
-            returnDateField.closest('.mb-2').fadeOut();
-        } else { // Round trip
-            returnDateField.prop('disabled', false);
-            returnDateField.closest('.mb-2').fadeIn();
-        }
+    if (tripType === '1') { // One way
+        returnDateField.prop('disabled', true).val('');
+        returnDateField.closest('.mb-2').fadeOut();
+    } else { // Round trip
+        returnDateField.prop('disabled', false);
+        returnDateField.closest('.mb-2').fadeIn();
     }
+}
 
-    // Form submission
-    $('#flightSearchForm').on('submit', function (e) {
-        e.preventDefault();
+// Convert date from MM/DD/YYYY to YYYY-MM-DD
+function convertToISODate(dateString) {
+    if (!dateString) return ''; // Return empty if no date is provided
+    const [month, day, year] = dateString.split('/');
+    return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
+}
 
-        function convertToISODate(dateString) {
-        const [month, day, year] = dateString.split('/');
-        return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
-    }
+// Form submission
+$('#flightSearchForm').on('submit', function (e) {
+    e.preventDefault();
 
     const adultCount = $('input[name="adultCount"]').val() || "1";
     const childCount = $('input[name="childCount"]').val() || "0";
     const infantCount = $('input[name="infantCount"]').val() || "0";
+    const fareType = $('input[name="fareType"]:checked').val() || "1"; // Default to Normal Fare (1)
 
     const departureDate = convertToISODate($('#flightDepartureDate').val());
-        const segments = [{
-            Origin: $('#flightFromCityCode').val().toUpperCase(),
-            Destination: $('#flightToCityCode').val().toUpperCase(),
-            FlightCabinClass: parseInt($('#flightCabinClass').val()) || 1,
-            PreferredDepartureTime: `${departureDate}T00:00:00`,
-            PreferredArrivalTime: `${departureDate}T00:00:00`
-        }];
-        const searchParams = new URLSearchParams({
+    const segments = [{
+        Origin: $('#flightFromCityCode').val().toUpperCase(),
+        Destination: $('#flightToCityCode').val().toUpperCase(),
+        FlightCabinClass: parseInt($('#flightCabinClass').val()) || 1,
+        PreferredDepartureTime: `${departureDate}T00:00:00`,
+        PreferredArrivalTime: `${departureDate}T00:00:00`
+    }];
+
+    const searchParams = new URLSearchParams({
         from: $('#flightFromCity').val(),
         fromCode: $('#flightFromCityCode').val(),
         to: $('#flightToCity').val(),
@@ -1526,31 +1553,34 @@ $(document).ready(function () {
         adults: adultCount,
         children: childCount,
         infants: infantCount,
+        fareType: fareType,
         cabinClass: $('#flightCabinClass').val() || "1"
     });
-        if ($('input[name="journeyType"]:checked').val() === '2') {
-            const returnDate = $('#flightReturnDate').val();
-            segments.push({
-                Origin: $('#flightToCityCode').val().toUpperCase(),
-                Destination: $('#flightFromCityCode').val().toUpperCase(),
-                FlightCabinClass: parseInt($('#flightCabinClass').val()) || 1,
-                PreferredDepartureTime: `${returnDate}T00:00:00`,
-                PreferredArrivalTime: `${returnDate}T00:00:00`
-            });
-        }
 
-        const payload = {
-            EndUserIp: "1.1.1.1",
-            ClientId: "180133",
-            UserName: "MakeMy91",
-            Password: "MakeMy@910",
-            AdultCount: adultCount.toString(),
+    if ($('input[name="journeyType"]:checked').val() === '2') {
+        const returnDate = convertToISODate($('#flightReturnDate').val()); // Convert return date format
+        segments.push({
+            Origin: $('#flightToCityCode').val().toUpperCase(),
+            Destination: $('#flightFromCityCode').val().toUpperCase(),
+            FlightCabinClass: parseInt($('#flightCabinClass').val()) || 1,
+            PreferredDepartureTime: `${returnDate}T00:00:00`,
+            PreferredArrivalTime: `${returnDate}T00:00:00`
+        });
+    }
+
+    const payload = {
+        EndUserIp: "1.1.1.1",
+        ClientId: "180133",
+        UserName: "MakeMy91",
+        Password: "MakeMy@910",
+        AdultCount: adultCount.toString(),
         ChildCount: childCount.toString(),
         InfantCount: infantCount.toString(),
-            JourneyType: $('input[name="journeyType"]:checked').val(),
-            FareType: "1",
-            Segments: segments
-        };
+        JourneyType: $('input[name="journeyType"]:checked').val(),
+        FareType: fareType,
+        Segments: segments
+    };
+
 
         $.ajax({
     url: '/flight/search',
