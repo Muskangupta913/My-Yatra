@@ -909,24 +909,27 @@ function convertToISODate(dateString) {
         passportNo: document.getElementById('passportNo').value,
         passportExpiry: convertToISODateTime(document.getElementById('passportExpiry').value),
         dateOfBirth: convertToISODateTime(document.getElementById('dateOfBirth').value),
+        city: "Noida",
         countryCode: "IN",
         countryName: "INDIA",
         addressLine1: document.getElementById('addressLine1').value.trim(),
         isLeadPax: true,
-        fare: {
-                    baseFare: parseFloat(fareQuoteData.Fare.BaseFare),
-                    tax: parseFloat(fareQuoteData.Fare.Tax),
-                    yqTax: parseFloat(fareQuoteData.Fare.YQTax || 0),
-                    transactionFee: parseFloat(fareQuoteData.Fare.TransactionFee || 0),
-                    additionalTxnFeeOfrd: parseFloat(fareQuoteData.Fare.AdditionalTxnFeeOfrd || 0),
-                    additionalTxnFeePub: parseFloat(fareQuoteData.Fare.AdditionalTxnFeePub || 0),
-                    airTransFee: parseFloat(fareQuoteData.Fare.AirTransFee || 0)
-                },
-        GSTCompanyAddress: '',
-        GSTCompanyContactNumber: '',
-        GSTCompanyName: '',
-        GSTNumber: '',
-        GSTCompanyEmail: ''
+        fare: [{  // Changed to array
+            baseFare: parseFloat(fareQuoteData.Fare.BaseFare),
+            tax: parseFloat(fareQuoteData.Fare.Tax),
+            yqTax: parseFloat(fareQuoteData.Fare.YQTax || 0),
+            transactionFee: (fareQuoteData.Fare.TransactionFee || '0').toString(), // Ensure string
+            additionalTxnFeeOfrd: parseFloat(fareQuoteData.Fare.AdditionalTxnFeeOfrd || 0),
+            additionalTxnFeePub: parseFloat(fareQuoteData.Fare.AdditionalTxnFeePub || 0),
+            airTransFee: (fareQuoteData.Fare.AirTransFee || '0').toString() // Ensure string
+        }],
+        gst: {  // Restructured GST fields
+            companyAddress: '',
+            companyContactNumber: '',
+            companyName: '',
+            number: '',
+            companyEmail: ''
+        }
     }]
 };
       
@@ -953,6 +956,7 @@ function convertToISODate(dateString) {
                     resultIndex: resultIndex,
                     bookingId: data.booking_details.booking_id,
                     pnr: data.booking_details.pnr,
+                    srdvIndex: data.booking_details.srdvIndex,
                     traceId: data.booking_details.trace_id
                 });
                 window.location.href = `/payment?${queryParams.toString()}`;

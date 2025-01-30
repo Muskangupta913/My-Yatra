@@ -1,4 +1,5 @@
 <<<<<<< HEAD
+<<<<<<< HEAD
 function initializeAirportSearch() {
     const searchConfig = [
         {
@@ -25,6 +26,8 @@ function initializeAirportSearch() {
             fromList.hide();
 =======
 <<<<<<< HEAD
+=======
+>>>>>>> b09602bdab1ffb765d2284a6beb3fe605840f7a5
 <!-- Include Bootstrap JS and jQuery -->
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
@@ -249,6 +252,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     const fareQuoteData = JSON.parse(sessionStorage.getItem('fareQuoteData'));
 
+<<<<<<< HEAD
 =======
 <!DOCTYPE html>
 <html lang="en">
@@ -647,6 +651,8 @@ document.addEventListener('DOMContentLoaded', function() {
     const fareQuoteData = JSON.parse(sessionStorage.getItem('fareQuoteData'));
 
 >>>>>>> d69d4f2227409b389adad3e087804a3ddf18b4f3
+=======
+>>>>>>> b09602bdab1ffb765d2284a6beb3fe605840f7a5
     // Log fare details for verification
     if (fareQuoteData && fareQuoteData.Fare) {
         console.log('Fare Details Successfully Fetched:', fareQuoteData.Fare);
@@ -782,7 +788,6 @@ function renderBaggageOptions(baggageData, container) {
         </table>
     `;
 }
-<<<<<<< HEAD
 
 window.updateBaggageSelection = function(radio) {
     showBaggageAlert(radio);
@@ -1066,6 +1071,7 @@ document.getElementById('submitButton').addEventListener('click', function(event
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
+<<<<<<< HEAD
 =======
 
 window.updateBaggageSelection = function(radio) {
@@ -1355,6 +1361,8 @@ document.getElementById('submitButton').addEventListener('click', function(event
         headers: {
             'Content-Type': 'application/json',
 >>>>>>> d69d4f2227409b389adad3e087804a3ddf18b4f3
+=======
+>>>>>>> b09602bdab1ffb765d2284a6beb3fe605840f7a5
             'X-CSRF-TOKEN': "{{ csrf_token() }}"
         },
         body: JSON.stringify(payload)

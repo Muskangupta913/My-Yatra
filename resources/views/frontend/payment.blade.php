@@ -971,15 +971,100 @@ function bookLCC(bookingDetails) {
     });
 }
 
-// Single event listener for Pay Now button
+
+
+function BookGdsTickte() {
+    const queryParams = new URLSearchParams(window.location.search);
+    const traceId = queryParams.get("traceId");
+    const resultIndex = queryParams.get("resultIndex");
+    const bookingId = queryParams.get("bookingId");
+    const pnr = queryParams.get("pnr");
+    const srdvIndex = queryParams.get("srdvIndex");
+
+    console.log("Result Index:", resultIndex);
+    console.log("Booking ID:", bookingId);
+    console.log("PNR:", pnr);
+    console.log("SRDV Index:", srdvIndex);
+    console.log("Trace ID:", traceId);
+
+    if (traceId && resultIndex && bookingId && pnr && srdvIndex) {
+        return { resultIndex, bookingId, pnr, srdvIndex, traceId };
+    } else {
+        return null; // Return null if any required parameter is missing
+    }
+}
+
+// Function to process the GDS Ticket booking
+function processGdsTicket() {
+    const gdsTicketDetails = BookGdsTickte();
+
+    if (!gdsTicketDetails) {
+        console.error("Missing required parameters for GDS ticket booking.");
+        return;
+    }
+
+    const payload = {
+        EndUserIp: "1.1.1.1",
+        ClientId: "180133",
+        UserName: "MakeMy91",
+        Password: "MakeMy@910",
+        srdvType: "MixAPI",
+        srdvIndex: gdsTicketDetails.srdvIndex,
+        traceId: gdsTicketDetails.traceId,
+        pnr: gdsTicketDetails.pnr,
+        bookingId: gdsTicketDetails.bookingId
+    };
+
+    console.log("Sending payload:", payload);
+
+    fetch("/flight/bookGdsTicket", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').content
+        },
+        body: JSON.stringify(payload)
+    })
+    .then(response => response.json())
+    .then(data => {
+        console.log("API Response:", data);
+        if (data.status === "success") {
+            console.log("Booking successful:", {
+                bookingId: data.data.bookingId,
+                pnr: data.data.pnr,
+                ticketStatus: data.data.ticketStatus,
+                passengers: data.data.passengers
+            });
+        } else {
+            console.error("Booking failed:", data.message);
+        }
+    })
+    .catch(error => {
+        console.error("API Error:", error);
+    });
+}
+
+
+
+
+// Event listener for the "Pay Now" button
 document.getElementById("payNowButton").addEventListener("click", async function (event) {
     event.preventDefault();
 
     const urlParams = new URLSearchParams(window.location.search);
-    const flightDetailsStr = urlParams.get('details');
-    const roomDetailsStr = urlParams.get('roomDetails');
+    const flightDetailsStr = urlParams.get("details");
+    const roomDetailsStr = urlParams.get("roomDetails");
 
     try {
+        // Check for GDS ticket details and process if found
+        const gdsTicketDetails = BookGdsTickte();
+        if (gdsTicketDetails) {
+            console.log("Processing GDS ticket booking...");
+            processGdsTicket();
+            return; // Exit the function if GDS booking is found
+        }
+
+        // Process flight booking if applicable
         if (flightDetailsStr) {
             console.log("Processing flight booking...");
             const bookingDetails = getBookingDetailsFromURL();
@@ -988,15 +1073,18 @@ document.getElementById("payNowButton").addEventListener("click", async function
             } else {
                 throw new Error("Invalid or missing flight booking details.");
             }
-        } else if (roomDetailsStr) {
+        } 
+        // Process hotel booking if applicable
+        else if (roomDetailsStr) {
             console.log("Processing hotel booking...");
             const bookingData = getUrlParameters(); // Use existing hotel-related function
             if (!bookingData.roomDetails || !bookingData.passengerDetails) {
                 throw new Error("Missing hotel booking details. Please check and try again.");
             }
-
             await processHotelBooking(bookingData);
-        } else {
+        } 
+        // If no valid booking details are found
+        else {
             throw new Error("Unable to determine booking type. Missing required parameters.");
         }
     } catch (error) {
@@ -1004,6 +1092,8 @@ document.getElementById("payNowButton").addEventListener("click", async function
         alert(`Error: ${error.message}`);
     }
 });
+
+
 
 
 
