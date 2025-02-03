@@ -789,8 +789,8 @@ function getCookie(name) {
                 contactNo: pax.contactNo || "",
                 email: pax.email || "",
                 paxType: pax.paxType,
-                addressLine1: pax.addressLine1 || "",
-                city: pax.city || "",
+                addressLine1: origin,
+                city: origin,
                 passportNo: pax.passportNo || "",
                 passportExpiry: pax.passportExpiry || "",
                 passportIssueDate: pax.passportIssueDate || "",
@@ -853,8 +853,9 @@ function bookLCC() {
         srdvIndex: bookingDetails.srdvIndex,
         traceId: bookingDetails.traceId,
         resultIndex: bookingDetails.resultIndex,
+        totalFare: bookingDetails.totalFare,
 
-        // Map each passenger correctly
+        // Map each passenger with all available details
         passenger: bookingDetails.passengers.map(pax => ({
             title: pax.title,
             firstName: pax.firstName,
@@ -865,15 +866,15 @@ function bookLCC() {
             paxType: pax.paxType,
             dateOfBirth: pax.dateOfBirth,
             passportNo: pax.passportNo,
-            addressLine1: pax.addressLine1 || "",
-            city: pax.city || "",
-            passportExpiry: pax.passportExpiry || "",
-            passportIssueDate: pax.passportIssueDate || "",
-            countryCode: pax.countryCode || "IN",
-            countryName: pax.countryName || "INDIA",
+            passportExpiry: pax.passportExpiry,
+            passportIssueDate: pax.passportIssueDate,
+            addressLine1: pax.addressLine1,
+            city: pax.city,
+            countryCode: pax.countryCode,
+            countryName: pax.countryName,
 
-            // Assign baggage per passenger (if applicable)
-            baggage: pax.selectedServices.baggage ? [{
+            // Handle baggage with null check
+            baggage: pax.selectedServices?.baggage ? [{
                 Code: pax.selectedServices.baggage.Code,
                 Weight: pax.selectedServices.baggage.Weight,
                 Price: pax.selectedServices.baggage.Price,
@@ -883,8 +884,8 @@ function bookLCC() {
                 Currency: pax.selectedServices.baggage.Currency
             }] : [],
 
-            // Assign meals per passenger (if applicable)
-            mealDynamic: pax.selectedServices.meals ? pax.selectedServices.meals.map(meal => ({
+            // Handle meals with null check
+            mealDynamic: pax.selectedServices?.meals ? pax.selectedServices.meals.map(meal => ({
                 Code: meal.Code,
                 AirlineDescription: meal.AirlineDescription,
                 Price: meal.Price,
@@ -895,8 +896,8 @@ function bookLCC() {
                 Currency: meal.Currency
             })) : [],
 
-            // Assign seats per passenger (if applicable)
-            seat: pax.selectedServices.seat ? [{
+            // Handle seat with null check
+            seat: pax.selectedServices?.seat ? [{
                 Code: pax.selectedServices.seat.code,
                 SeatNumber: pax.selectedServices.seat.seatNumber,
                 Amount: pax.selectedServices.seat.amount,
@@ -906,15 +907,15 @@ function bookLCC() {
             }] : []
         })),
 
-        // Fare details
+        // Complete fare details
         fare: {
-            baseFare: bookingDetails.fare.baseFare,
-            tax: bookingDetails.fare.tax,
-            yqTax: bookingDetails.fare.yqTax,
-            transactionFee: parseFloat(bookingDetails.fare.transactionFee || 0),
-            additionalTxnFeeOfrd: bookingDetails.fare.additionalTxnFeeOfrd,
-            additionalTxnFeePub: bookingDetails.fare.additionalTxnFeePub,
-            airTransFee: parseFloat(bookingDetails.fare.airTransFee || 0)
+            baseFare: bookingDetails.baseFare,
+            tax: bookingDetails.tax,
+            yqTax: bookingDetails.yqTax,
+            transactionFee: parseFloat(bookingDetails.transactionFee || 0),
+            additionalTxnFeeOfrd: bookingDetails.additionalTxnFeeOfrd,
+            additionalTxnFeePub: bookingDetails.additionalTxnFeePub,
+            airTransFee: parseFloat(bookingDetails.airTransFee || 0)
         }
     };
 

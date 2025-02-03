@@ -1235,55 +1235,85 @@ function convertToISODate(dateString) {
     }
 
 
+    let passengers = [];
+        
+        // Get all passenger forms
+        document.querySelectorAll("#dynamicSections .card").forEach((card, index) => {
+            const form = card.querySelector('.card-body');
+            
+            // Extract passenger type from the card header text
+            const headerText = card.querySelector('.card-header h6').textContent;
+            const passengerTypeMatch = headerText.match(/(Adult|Child|Infant)/);
+            const passengerTypeString = passengerTypeMatch ? passengerTypeMatch[1] : 'Unknown';
+            
+            // Map passenger type string to numeric value
+            const typeMapping = {'Adult': 1, 'Child': 2, 'Infant': 3};
+            const passengerType = typeMapping[passengerTypeString];
 
+            // Create passenger object with form data
+            let passenger = {
+                title: form.querySelector('[name$="[Title]"]').value.trim(),
+                firstName: form.querySelector('[name$="[FirstName]"]').value.trim(),
+                lastName: form.querySelector('[name$="[LastName]"]').value.trim(),
+                gender: parseInt(form.querySelector('[name$="[Gender]"]').value),
+                contactNo: form.querySelector('[name$="[ContactNo]"]')?.value.trim() || "",
+                email: form.querySelector('[name$="[Email]"]')?.value.trim() || "",
+                paxType: passengerType,
+                passportNo: form.querySelector('[name$="[PassportNo]"]')?.value.trim() || "",
+                passportExpiry: convertToISODateTime(form.querySelector('[name$="[PassportExpiry]"]')?.value || ""),
+                passportIssueDate: convertToISODateTime(form.querySelector('[name$="[PassportIssueDate]"]')?.value || ""),
+                dateOfBirth: convertToISODateTime(form.querySelector('[name$="[DateOfBirth]"]')?.value || ""),
+                addressLine1: form.querySelector('[name$="[AddressLine1]"]')?.value.trim() || "",
+                city: "Noida",
+                countryCode: "IN",
+                countryName: "INDIA",
+                isLeadPax: index === 0, // First passenger is lead passenger
+                
+                // Add fare details for each passenger
+                fare: [{
+                    baseFare: parseFloat(fareQuoteData.Fare.BaseFare),
+                    tax: parseFloat(fareQuoteData.Fare.Tax),
+                    yqTax: parseFloat(fareQuoteData.Fare.YQTax || 0),
+                    transactionFee: (fareQuoteData.Fare.TransactionFee || '0').toString(),
+                    additionalTxnFeeOfrd: parseFloat(fareQuoteData.Fare.AdditionalTxnFeeOfrd || 0),
+                    additionalTxnFeePub: parseFloat(fareQuoteData.Fare.AdditionalTxnFeePub || 0),
+                    airTransFee: (fareQuoteData.Fare.AirTransFee || '0').toString()
+                }],
+                
+                // Add GST details
+                gst: {
+                    companyAddress: '',
+                    companyContactNumber: '',
+                    companyName: '',
+                    number: '',
+                    companyEmail: ''
+                }
+            };
 
-    // Create an object to hold all booking details
-    // Prepare payload for LCC booking
-    const payload = {
-    srdvIndex: srdvIndex,
-    traceId: traceId,
-    resultIndex: resultIndex,
-    passengers: [{
-        title: document.getElementById('title').value.trim(),
-        firstName: document.getElementById('firstName').value.trim(),
-        lastName: document.getElementById('lastName').value.trim(),
-        gender: document.getElementById('gender').value,
-        contactNo: document.getElementById('contactNo').value.trim(),
-        email: document.getElementById('email').value.trim(),
-        paxType: parseInt(document.getElementById('passengerType').value),
-        passportNo: document.getElementById('passportNo').value,
-        passportExpiry: convertToISODateTime(document.getElementById('passportExpiry').value),
-        dateOfBirth: convertToISODateTime(document.getElementById('dateOfBirth').value),
-        city: "Noida",
-        countryCode: "IN",
-        countryName: "INDIA",
-        addressLine1: document.getElementById('addressLine1').value.trim(),
-        isLeadPax: true,
-        fare: [{  // Changed to array
-            baseFare: parseFloat(fareQuoteData.Fare.BaseFare),
-            tax: parseFloat(fareQuoteData.Fare.Tax),
-            yqTax: parseFloat(fareQuoteData.Fare.YQTax || 0),
-            transactionFee: (fareQuoteData.Fare.TransactionFee || '0').toString(), // Ensure string
-            additionalTxnFeeOfrd: parseFloat(fareQuoteData.Fare.AdditionalTxnFeeOfrd || 0),
-            additionalTxnFeePub: parseFloat(fareQuoteData.Fare.AdditionalTxnFeePub || 0),
-            airTransFee: (fareQuoteData.Fare.AirTransFee || '0').toString() // Ensure string
-        }],
-        gst: {  // Restructured GST fields
-            companyAddress: '',
-            companyContactNumber: '',
-            companyName: '',
-            number: '',
-            companyEmail: ''
-        }
-    }]
-};
-      
+            // Validate passenger data
+            const validationErrors = validatePassenger(passenger);
+            if (validationErrors.length > 0) {
+                throw new Error(`Validation failed for ${passengerTypeString}: ${validationErrors.join(', ')}`);
+            }
+
+            passengers.push(passenger);
+        });
+
+        // Create the final payload
+        const payload = {
+            srdvIndex: srdvIndex,
+            traceId: traceId,
+            resultIndex: resultIndex,
+            passengers: passengers
+        };
+
+        console.log('Final payload for bookHold:', payload);
 
         // Disable submit button to prevent double submission
         const submitButton = event.target;
         submitButton.disabled = true;
 
-        // Make API call for LCC booking
+        // Make API call for bookHold
         fetch('/flight/bookHold', {
             method: 'POST',
             headers: {
@@ -1295,7 +1325,7 @@ function convertToISODate(dateString) {
         .then(response => response.json())
         .then(data => {
             if (data.status === 'success') {
-                console.log('LCC Booking successful!', data.booking_details);
+                console.log('Non-LCC Booking successful!', data.booking_details);
                 // Redirect to payment page with booking details
                 const queryParams = new URLSearchParams({
                     resultIndex: resultIndex,
@@ -1310,7 +1340,7 @@ function convertToISODate(dateString) {
             }
         })
         .catch(error => {
-            console.error('Error during LCC booking:', error);
+            console.error('Error during Non-LCC booking:', error);
             if (window.Swal) {
                 Swal.fire({
                     icon: 'error',
@@ -1325,8 +1355,163 @@ function convertToISODate(dateString) {
             submitButton.disabled = false;
         });
     }
-  });
-
 });
+          });
+
+          console.log('Non-LCC flight, redirecting to payment...');
+    
+
+    function convertToISODateTime(dateString) {
+    if (!dateString) return ''; // Return empty if no date is provided
+    return `${dateString}T00:00:00`;
+}
+
+
+function convertToISODate(dateString) {
+        if (!dateString) return '';
+        return dateString.split('T')[0]; // Remove time part if exists
+    }
+
+    function validateEmail(email) {
+        return email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/);
+    }
+
+    function validatePassenger(passengerData) {
+        const errors = [];
+        
+        if (!passengerData.firstName.trim()) errors.push('First name is required');
+        if (!passengerData.lastName.trim()) errors.push('Last name is required');
+        if (!passengerData.passportNo.trim()) errors.push('Passport number is required');
+        if (!passengerData.passportExpiry) errors.push('Passport expiry date is required');
+        if (!passengerData.dateOfBirth) errors.push('Date of birth is required');
+        if (!validateEmail(passengerData.email)) errors.push('Valid email is required');
+        if (!passengerData.contactNo.trim()) errors.push('Contact number is required');
+        
+        return errors;
+    }
+
+
+    let passengers = [];
+        
+        // Get all passenger forms
+        document.querySelectorAll("#dynamicSections .card").forEach((card, index) => {
+            const form = card.querySelector('.card-body');
+            
+            // Extract passenger type from the card header text
+            const headerText = card.querySelector('.card-header h6').textContent;
+            const passengerTypeMatch = headerText.match(/(Adult|Child|Infant)/);
+            const passengerTypeString = passengerTypeMatch ? passengerTypeMatch[1] : 'Unknown';
+            
+            // Map passenger type string to numeric value
+            const typeMapping = {'Adult': 1, 'Child': 2, 'Infant': 3};
+            const passengerType = typeMapping[passengerTypeString];
+
+            // Create passenger object with form data
+            let passenger = {
+                title: form.querySelector('[name$="[Title]"]').value.trim(),
+                firstName: form.querySelector('[name$="[FirstName]"]').value.trim(),
+                lastName: form.querySelector('[name$="[LastName]"]').value.trim(),
+                gender: parseInt(form.querySelector('[name$="[Gender]"]').value),
+                contactNo: form.querySelector('[name$="[ContactNo]"]')?.value.trim() || "",
+                email: form.querySelector('[name$="[Email]"]')?.value.trim() || "",
+                paxType: passengerType,
+                passportNo: form.querySelector('[name$="[PassportNo]"]')?.value.trim() || "",
+                passportExpiry: convertToISODateTime(form.querySelector('[name$="[PassportExpiry]"]')?.value || ""),
+                passportIssueDate: convertToISODateTime(form.querySelector('[name$="[PassportIssueDate]"]')?.value || ""),
+                dateOfBirth: convertToISODateTime(form.querySelector('[name$="[DateOfBirth]"]')?.value || ""),
+                addressLine1: form.querySelector('[name$="[AddressLine1]"]')?.value.trim() || "",
+                city: "Noida",
+                countryCode: "IN",
+                countryName: "INDIA",
+                isLeadPax: index === 0, // First passenger is lead passenger
+                
+                // Add fare details for each passenger
+                fare: [{
+                    baseFare: parseFloat(fareQuoteData.Fare.BaseFare),
+                    tax: parseFloat(fareQuoteData.Fare.Tax),
+                    yqTax: parseFloat(fareQuoteData.Fare.YQTax || 0),
+                    transactionFee: (fareQuoteData.Fare.TransactionFee || '0').toString(),
+                    additionalTxnFeeOfrd: parseFloat(fareQuoteData.Fare.AdditionalTxnFeeOfrd || 0),
+                    additionalTxnFeePub: parseFloat(fareQuoteData.Fare.AdditionalTxnFeePub || 0),
+                    airTransFee: (fareQuoteData.Fare.AirTransFee || '0').toString()
+                }],
+                
+                // Add GST details
+                gst: {
+                    companyAddress: '',
+                    companyContactNumber: '',
+                    companyName: '',
+                    number: '',
+                    companyEmail: ''
+                }
+            };
+
+            // Validate passenger data
+            const validationErrors = validatePassenger(passenger);
+            if (validationErrors.length > 0) {
+                throw new Error(`Validation failed for ${passengerTypeString}: ${validationErrors.join(', ')}`);
+            }
+
+            passengers.push(passenger);
+        });
+
+        // Create the final payload
+        const payload = {
+            srdvIndex: srdvIndex,
+            traceId: traceId,
+            resultIndex: resultIndex,
+            passengers: passengers
+        };
+
+        console.log('Final payload for bookHold:', payload);
+
+        // Disable submit button to prevent double submission
+        const submitButton = event.target;
+        submitButton.disabled = true;
+
+        // Make API call for bookHold
+        fetch('/flight/bookHold', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+            },
+            body: JSON.stringify(payload)
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                console.log('Non-LCC Booking successful!', data.booking_details);
+                // Redirect to payment page with booking details
+                const queryParams = new URLSearchParams({
+                    resultIndex: resultIndex,
+                    bookingId: data.booking_details.booking_id,
+                    pnr: data.booking_details.pnr,
+                    srdvIndex: data.booking_details.srdvIndex,
+                    traceId: data.booking_details.trace_id
+                });
+                window.location.href = `/payment?${queryParams.toString()}`;
+            } else {
+                throw new Error(data.message || 'Booking failed');
+            }
+        })
+        .catch(error => {
+            console.error('Error during Non-LCC booking:', error);
+            if (window.Swal) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Booking Failed',
+                    text: error.message || 'An error occurred during booking'
+                });
+            } else {
+                alert('Booking failed: ' + (error.message || 'An error occurred'));
+            }
+        })
+        .finally(() => {
+            submitButton.disabled = false;
+        });
+
+
+
 </script>
 @endsection
