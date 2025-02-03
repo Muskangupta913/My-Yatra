@@ -26,7 +26,7 @@
                         <option value="Mrs">Mrs</option>
                         <option value="Ms">Ms</option>
                         <option value="Miss">Miss</option>
-                        <option value="Master">Miss</option>
+                        <option value="Master">Mstr</option>
                     </select>
                     
                     <input type="text" name="FirstName" placeholder="First Name" required 

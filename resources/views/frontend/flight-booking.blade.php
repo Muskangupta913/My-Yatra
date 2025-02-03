@@ -378,7 +378,135 @@
     const traceId = urlParams.get('traceId');
     const resultIndex = urlParams.get('resultIndex');
     const encodedDetails = urlParams.get('details');
+         
 
+    function getCookie(name) {
+            let nameEQ = name + "=";
+            let ca = document.cookie.split(';');
+            for(let i = 0; i < ca.length; i++) {
+                let c = ca[i].trim();
+                if (c.indexOf(nameEQ) === 0) {
+                    return c.substring(nameEQ.length);
+                }
+            }
+            return null;
+        }
+
+        // Get passenger counts from cookies with default values
+        const adultCount = getCookie('adultCount') ;
+        const childCount = getCookie('childCount') ;
+        const infantCount = getCookie('infantCount') ;
+
+        // Log the values
+        console.log('Payment Page - Passenger Details:');
+        console.log('Adults:', adultCount);
+        console.log('Children:', childCount);
+        console.log('Infants:', infantCount);
+
+
+
+        function createPassengerForm(passengerType, count, typeValue) {
+    for (let i = 1; i <= count; i++) {
+        let titleOptions = (typeValue === 1) // Check if passenger is an Adult
+            ? `<option value="Mr">Mr</option>
+               <option value="Mrs">Mrs</option>
+               <option value="Ms">Ms</option>`
+            : `<option value="Miss">Miss</option>
+               <option value="Master">Mstr</option>`;
+
+        let ssrOptions = '';
+        
+        // Add SSR options based on passenger type
+        if (typeValue === 1 || typeValue === 2) { // Adult
+            ssrOptions = `
+                <div class="ssr-options mt-4">
+                    <h6 class="mb-3">Additional Services</h6>
+                    <div class="row">
+                        <div class="col-md-4">
+                            <button type="button" class="btn btn-outline-primary w-100 mb-2" 
+                                onclick="fetchSeatMap('seat', ${i}, '${passengerType}')" 
+                                id="selectSeatBtn-${passengerType}-${i}">
+                                Select Seat
+                            </button>
+                            <div id="seatInfo-${passengerType}-${i}" class="small text-muted"></div>
+                        </div>
+                        <div class="col-md-4">
+                            <button type="button" class="btn btn-outline-primary w-100 mb-2" 
+                                onclick="fetchSSRData('meal', ${i}, '${passengerType}')" 
+                                id="meal-btn-${passengerType}-${i}">
+                                Select Meal
+                            </button>
+                            <div id="mealInfo-${passengerType}-${i}" class="small text-muted"></div>
+                        </div>
+                        <div class="col-md-4">
+                            <button type="button" class="btn btn-outline-primary w-100 mb-2" 
+                                onclick="fetchSSRData('baggage', ${i}, '${passengerType}')" 
+                                id="baggage-btn-${passengerType}-${i}">
+                                Select Baggage
+                            </button>
+                            <div id="baggageInfo-${passengerType}-${i}" class="small text-muted"></div>
+                        </div>
+                    </div>
+                    <div id="options-container-${passengerType}-${i}" class="mt-3"></div>
+                </div>`;
+        } 
+
+        let passengerForm = `
+            <div class="card mb-3">
+                <div class="card-header">
+                    <h6 class="mb-0">${passengerType} ${i} Details</h6>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-3 mb-3">
+                            <label class="form-label">Title</label>
+                            <select class="form-select" name="${passengerType}[${i}][Title]" required>
+                                ${titleOptions}
+                            </select>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <label class="form-label">First Name</label>
+                            <input type="text" class="form-control" name="${passengerType}[${i}][FirstName]" required>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <label class="form-label">Last Name</label>
+                            <input type="text" class="form-control" name="${passengerType}[${i}][LastName]" required>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <label class="form-label">Gender</label>
+                            <select class="form-select" name="${passengerType}[${i}][Gender]" required>
+                                <option value="1">Male</option>
+                                <option value="2">Female</option>
+                            </select>
+                        </div>
+                        
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label">Date of Birth</label>
+                            <input type="date" class="form-control" name="${passengerType}[${i}][DateOfBirth]" required>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label">Contact Number</label>
+                            <input type="text" class="form-control" name="${passengerType}[${i}][ContactNo]" required>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label">Email</label>
+                            <input type="email" class="form-control" name="${passengerType}[${i}][Email]" required>
+                        </div>
+
+                        <input type="hidden" name="${passengerType}[${i}][PassengerType]" value="${typeValue}">
+                    </div>
+                    ${ssrOptions}
+                </div>
+            </div>
+        `;
+        dynamicSections.insertAdjacentHTML('beforeend', passengerForm);
+    }
+}
+
+// Generate Passenger Forms with automatic PassengerType
+createPassengerForm("Adult", adultCount, 1);
+createPassengerForm("Child", childCount, 2);
+createPassengerForm("Infant", infantCount, 3);
    
 
     const fareQuoteData = JSON.parse(sessionStorage.getItem('fareQuoteData'));
@@ -436,6 +564,11 @@
         });
     });
 
+    window.passengerSelections = {
+    seats: {},    // Format: {passengerType-index: {seatNumber, code, amount}}
+    meals: {},    // Format: {passengerType-index: [{meal details}]}
+    baggage: {}   // Format: {passengerType-index: {baggageDetails}}
+};
     // Add event listeners
     if (srdvIndex) {
         document.getElementById('baggage-btn').addEventListener('click', () => fetchSSRData('baggage'));
@@ -444,52 +577,64 @@
         console.error('SrdvIndex not found for ResultIndex:', resultIndex);
     }
 
-    function fetchSSRData(displayType) {
-        fetch("{{ route('fetch.ssr.data') }}", {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': "{{ csrf_token() }}"
-            },
-            body: JSON.stringify({
-                EndUserIp: '1.1.1.1',
-                ClientId: '180133',
-                UserName: 'MakeMy91',
-                Password: 'MakeMy@910',
-                SrdvType: "MixAPI",
-                SrdvIndex: srdvIndex, // Ensure this is correctly set
-                TraceId: traceId,
-                ResultIndex: resultIndex
-            })
+    function fetchSSRData(type, index, passengerType) {
+
+        if (!type || !index || !passengerType) {
+        console.error('Missing required parameters:', { type, index, passengerType });
+        return;
+    }
+
+    const passengerId = `${passengerType}-${index}`;
+    fetch("{{ route('fetch.ssr.data') }}", {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': "{{ csrf_token() }}"
+        },
+        body: JSON.stringify({
+            EndUserIp: '1.1.1.1',
+            ClientId: '180133',
+            UserName: 'MakeMy91',
+            Password: 'MakeMy@910',
+            SrdvType: "MixAPI",
+            SrdvIndex: srdvIndex,
+            TraceId: traceId,
+            ResultIndex: resultIndex
         })
+    })
     .then(response => response.json())
     .then(data => {
-        const container = document.getElementById('options-container');
-        container.innerHTML = '';
-
-        // Check if SSR data is available
+        const container = document.getElementById(`options-container-${passengerType}-${index}`);
+        
         if (!data.success) {
             container.innerHTML = `<p>This flight does not provide SSR services: ${data.message || 'No details available'}</p>`;
             return;
         }
 
-        // Check if specific SSR type has options
-        if (displayType === 'baggage' && data.Baggage && data.Baggage[0] && data.Baggage[0].length > 0) {
-            renderBaggageOptions(data.Baggage[0], container);
-        } else if (displayType === 'meal' && data.MealDynamic && data.MealDynamic[0] && data.MealDynamic[0].length > 0) {
-            renderMealOptions(data.MealDynamic[0], container);
+        if (type === 'baggage' && data.Baggage && data.Baggage[0] && data.Baggage[0].length > 0) {
+            renderBaggageOptions(data.Baggage[0], container, passengerId);
+        } else if (type === 'meal' && data.MealDynamic && data.MealDynamic[0] && data.MealDynamic[0].length > 0) {
+            renderMealOptions(data.MealDynamic[0], container, passengerId);
         } else {
-            container.innerHTML = `<p>No ${displayType} options available for this flight.</p>`;
+            container.innerHTML = `<p>No ${type} options available for this flight.</p>`;
         }
     })
     .catch(error => {
         console.error('Error:', error);
-        document.getElementById('options-container').innerHTML =
-            '<p>Error fetching SSR data. Please try again.</p>';
+        Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: `Failed to load ${type} options. Please try again.`
+        });
     });
 }
 
-function renderBaggageOptions(baggageData, container) {
+// Make sure selectSeat is available globally
+if (typeof window !== 'undefined') {
+        window.fetchSSRData = fetchSSRData;
+    }
+
+    function renderBaggageOptions(baggageData, container, passengerId) {
     if (!baggageData.length) {
         container.innerHTML = '<p>No baggage options available.</p>';
         return;
@@ -515,7 +660,7 @@ function renderBaggageOptions(baggageData, container) {
                         <td>
                             <input 
                                 type="radio" 
-                                name="baggage_option" 
+                                name="baggage_option_${passengerId}" 
                                 value="${option.Code}" 
                                 data-weight="${option.Weight}" 
                                 data-price="${option.Price}"
@@ -525,7 +670,7 @@ function renderBaggageOptions(baggageData, container) {
                                 data-origin="${option.Origin}"
                                 data-destination="${option.Destination}"
                                 ${option.Code === 'NoBaggage' ? 'checked' : ''}
-                                onchange="updateBaggageSelection(this)"
+                                onchange="updateBaggageSelection(this, '${passengerId}')"
                             >
                         </td>
                     </tr>
@@ -535,9 +680,8 @@ function renderBaggageOptions(baggageData, container) {
     `;
 }
 
-window.updateBaggageSelection = function(radio) {
-    showBaggageAlert(radio);
-    window.selectedBaggageOption = {
+window.updateBaggageSelection = function(radio, passengerId) {
+    const baggageOption = {
         Code: radio.value,
         Weight: radio.getAttribute('data-weight'),
         Price: radio.getAttribute('data-price'),
@@ -547,17 +691,27 @@ window.updateBaggageSelection = function(radio) {
         WayType: radio.getAttribute('data-wayType'),
         Currency: radio.getAttribute('data-currency')
     };
+    
+    window.passengerSelections.baggage[passengerId] = baggageOption;
+    showBaggageAlert(radio, passengerId);
 };
 
-function renderMealOptions(mealData, container) {
-    // Similar modification for meal options
+
+function renderMealOptions(mealData, container, passengerId) {
     container.innerHTML = `
         <div class="meal-options-container">
+            <h6 class="mb-4">Meal Options (Select Multiple)</h6>
+            <div class="selected-meals-summary mb-3">
+                <strong>Selected Meals: </strong>
+                <div id="selectedMealsDisplay_${passengerId}" class="mt-2">
+                    <em class="text-muted">No meals selected</em>
+                </div>
+            </div>
             ${mealData.map(meal => `
                 <div class="meal-option">
                     <input 
-                        type="radio" 
-                        name="meal_option" 
+                        type="checkbox" 
+                        name="meal_option_${passengerId}" 
                         value="${meal.Code}" 
                         data-wayType="${meal.WayType}"
                         data-descript="${meal.Description || 'No Description'}"
@@ -567,31 +721,172 @@ function renderMealOptions(mealData, container) {
                         data-currency="${meal.Currency}"
                         data-destination="${meal.Destination}"
                         data-price="${meal.Price}"
-                        ${meal.Code === 'NoMeal' ? 'checked' : ''}
-                        onchange="updateMealSelection(this)"
+                        onchange="updateMealSelections(this, '${passengerId}')"
                     >
-                    <label>${meal.AirlineDescription || 'No Meal'}</label>
+                    <label>
+                        ${meal.AirlineDescription || 'No Meal'} 
+                        (₹${meal.Price || 0})
+                        <div class="meal-quantity">
+                            <button type="button" class="quantity-btn" onclick="adjustQuantity(this, -1, '${passengerId}')" ${meal.Price ? '' : 'disabled'}>-</button>
+                            <input type="number" min="1" max="5" value="1" class="quantity-input" 
+                                onchange="updateMealQuantity(this, '${passengerId}')" ${meal.Price ? '' : 'disabled'}>
+                            <button type="button" class="quantity-btn" onclick="adjustQuantity(this, 1, '${passengerId}')" ${meal.Price ? '' : 'disabled'}>+</button>
+                        </div>
+                    </label>
                 </div>
             `).join('')}
         </div>
     `;
+
+    // Add some styling for the selected meals display
+    const style = document.createElement('style');
+    style.textContent = `
+        .selected-meals-display-item {
+            background-color: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            padding: 4px 8px;
+            margin: 2px 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .selected-meals-total {
+            font-weight: bold;
+            margin-top: 8px;
+            padding-top: 8px;
+            border-top: 1px solid #dee2e6;
+        }
+    `;
+    document.head.appendChild(style);
 }
 
-window.updateMealSelection = function(radio) {
-    showMealAlert(radio);
-    window.selectedMealOption = {
-        Code: radio.value,
-        AirlineDescription: radio.getAttribute('data-description'),
-        Origin: radio.getAttribute('data-origin'),
-        Destination: radio.getAttribute('data-destination'),
-        Price: radio.getAttribute('data-price'),
-        Waytype:radio.getAttribute('data-wayType'),
-        Quantity:radio.getAttribute('data-quantity'),
-        Currency: radio.getAttribute('data-currency'),
-        Description: radio.getAttribute('data-descript')
+// Store selected meals in an array
+window.selectedMealOptions = [];
+
+window.updateMealSelections = function(checkbox, passengerId) {
+    if (!window.passengerSelections.meals[passengerId]) {
+        window.passengerSelections.meals[passengerId] = [];
+    }
+
+    const mealData = {
+        Code: checkbox.value,
+        AirlineDescription: checkbox.getAttribute('data-description'),
+        Origin: checkbox.getAttribute('data-origin'),
+        Destination: checkbox.getAttribute('data-destination'),
+        Price: parseFloat(checkbox.getAttribute('data-price')) || 0,
+        WayType: checkbox.getAttribute('data-wayType'),
+        Quantity: parseInt(checkbox.closest('.meal-option').querySelector('.quantity-input').value),
+        Currency: checkbox.getAttribute('data-currency'),
+        Description: checkbox.getAttribute('data-descript')
     };
+
+    if (checkbox.checked) {
+        window.passengerSelections.meals[passengerId].push(mealData);
+    } else {
+        window.passengerSelections.meals[passengerId] = 
+            window.passengerSelections.meals[passengerId].filter(meal => meal.Code !== mealData.Code);
+    }
+
+    updateMealDisplay(passengerId);
+    updateTotalFare();
+    showMealSelectionAlert(passengerId);
+};
+// Function to adjust quantity
+window.adjustQuantity = function(button, change) {
+    const input = button.parentElement.querySelector('.quantity-input');
+    const newValue = parseInt(input.value) + change;
+    if (newValue >= 1 && newValue <= 5) {
+        input.value = newValue;
+        updateMealQuantity(input);
+    }
 };
 
+// Function to update meal quantity
+window.updateMealQuantity = function(input) {
+    const checkbox = input.closest('.meal-option').querySelector('input[type="checkbox"]');
+    if (checkbox.checked) {
+        const mealIndex = window.selectedMealOptions.findIndex(meal => meal.Code === checkbox.value);
+        if (mealIndex !== -1) {
+            window.selectedMealOptions[mealIndex].Quantity = parseInt(input.value);
+          
+            showMealSelectionAlert();
+        }
+    }
+};
+
+function updateMealDisplay(passengerId) {
+    const displayElement = document.getElementById(`selectedMealsDisplay_${passengerId}`);
+    if (!displayElement) return;
+
+    const selectedMeals = window.passengerSelections.meals[passengerId] || [];
+    
+    if (selectedMeals.length === 0) {
+        displayElement.innerHTML = '<em class="text-muted">No meals selected</em>';
+        return;
+    }
+
+    let totalPrice = 0;
+    let mealsHtml = selectedMeals.map(meal => {
+        const mealTotal = meal.Price * meal.Quantity;
+        totalPrice += mealTotal;
+        return `
+            <div class="selected-meals-display-item">
+                <span>${meal.AirlineDescription} (Qty: ${meal.Quantity})</span>
+                <span>₹${mealTotal.toFixed(2)}</span>
+            </div>
+        `;
+    }).join('');
+
+    // Add total at the bottom
+    mealsHtml += `
+        <div class="selected-meals-total">
+            Total: ₹${totalPrice.toFixed(2)}
+        </div>
+    `;
+
+    displayElement.innerHTML = mealsHtml;
+}
+
+// Update quantity handling to refresh the display
+window.updateMealQuantity = function(input, passengerId) {
+    const checkbox = input.closest('.meal-option').querySelector(`input[name="meal_option_${passengerId}"]`);
+    if (checkbox.checked) {
+        const selectedMeals = window.passengerSelections.meals[passengerId] || [];
+        const mealIndex = selectedMeals.findIndex(meal => meal.Code === checkbox.value);
+        if (mealIndex !== -1) {
+            selectedMeals[mealIndex].Quantity = parseInt(input.value);
+            updateMealDisplay(passengerId);
+            updateTotalFare();
+        }
+    }
+};
+
+window.adjustQuantity = function(button, change, passengerId) {
+    const input = button.parentElement.querySelector('.quantity-input');
+    const newValue = parseInt(input.value) + change;
+    if (newValue >= 1 && newValue <= 5) {
+        input.value = newValue;
+        updateMealQuantity(input, passengerId);
+    }
+};
+
+// Function to show meal selection alert
+function showMealSelectionAlert() {
+    if (window.Swal && window.selectedMealOptions.length > 0) {
+        const mealSummary = window.selectedMealOptions.map(meal => 
+            `${meal.AirlineDescription} (Qty: ${meal.Quantity}) - ₹${(meal.Price * meal.Quantity).toFixed(2)}`
+        ).join('\n');
+
+        window.Swal.fire({
+            icon: 'info',
+            title: 'Selected Meals',
+            text: mealSummary,
+            showConfirmButton: false,
+            timer: 2000
+        });
+    }
+}
 
 // Add these global functions to show alerts
 function showBaggageAlert(radio) {
@@ -611,21 +906,7 @@ function showBaggageAlert(radio) {
     }
 }
 
-window.showMealAlert = function(radio) {
-    const description = radio.getAttribute('data-description') || 'No Description';
-    
-    if (window.Swal) {
-        window.Swal.fire({
-            icon: 'info',
-            title: 'Meal Option Selected',
-            text: description,
-            showConfirmButton: false,
-            timer: 1500
-        });
-    } else {
-        alert(`Meal: ${description}`);
-    }
-};
+
 
 window.showBaggageAlert = function(radio) {
     const weight = radio.getAttribute('data-weight');
@@ -646,13 +927,25 @@ window.showBaggageAlert = function(radio) {
 
     // Seat Selection
 // Replace your existing selectSeatBtn click handler with this:
-document.getElementById('selectSeatBtn').addEventListener('click', function() {
-    const button = this;
-    
-    button.disabled = true;
-    button.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Loading...';
 
-    fetch('{{ route('flight.getSeatMap') }}', {
+
+    if (srdvIndex) {
+        document.getElementById('selectSeatBtn').addEventListener('click', () => fetchSSRData('baggage'));
+     
+    } else {
+        console.error('SrdvIndex not found for ResultIndex:', resultIndex);
+    }
+
+    function fetchSeatMap(type, index, passengerType) {
+    const passengerId = `${passengerType}-${index}`;
+    const button = document.getElementById(`selectSeatBtn-${passengerId}`);
+    
+    if (button) {
+        button.disabled = true;
+        button.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Loading...';
+    }
+
+    fetch('{{ route("flight.getSeatMap") }}', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -677,29 +970,36 @@ document.getElementById('selectSeatBtn').addEventListener('click', function() {
             Swal.fire({
                 icon: 'info',
                 title: 'No Seats Available',
-                text: 'Unfortunately, no seats are available for selection on this flight. The flight might be fully booked or seat selection may not be available at this time.',
+                text: 'Unfortunately, no seats are available for selection on this flight.',
                 confirmButtonText: 'OK',
                 confirmButtonColor: '#2196f3'
             });
         } else {
-        // Use SweetAlert2 to show the seat map
-        Swal.fire({
-            title: 'Select Your Seat',
-            html: data.html,
-            width: '90%',
-            padding: '0',
-            background: '#f8f9fa',
-            showCloseButton: true,
-            showConfirmButton: false,
-            customClass: {
-                container: 'seat-map-modal',
-                popup: 'seat-map-popup',
-                content: 'seat-map-content'
-            }
-        });
-    }
-        button.disabled = false;
-        button.innerHTML = 'Select Seat';
+            Swal.fire({
+                title: `Select Seat for ${passengerType} ${index}`,
+                html: data.html,
+                width: '90%',
+                padding: '0',
+                background: '#f8f9fa',
+                showCloseButton: true,
+                showConfirmButton: false,
+                customClass: {
+                    container: 'seat-map-modal',
+                    popup: 'seat-map-popup',
+                    content: 'seat-map-content'
+                },
+                didOpen: () => {
+                    // Add current passenger ID to the modal for reference
+                    const modal = Swal.getPopup();
+                    modal.setAttribute('data-passenger-id', passengerId);
+                }
+            });
+        }
+        
+        if (button) {
+            button.disabled = false;
+            button.innerHTML = 'Select Seat';
+        }
     })
     .catch(error => {
         console.error('Error:', error);
@@ -709,63 +1009,57 @@ document.getElementById('selectSeatBtn').addEventListener('click', function() {
             text: 'Failed to load seat map. Please try again.'
         });
 
-        button.disabled = false;
-        button.innerHTML = 'Select Seat';
+        if (button) {
+            button.disabled = false;
+            button.innerHTML = 'Select Seat';
+        }
     });
-});
+}
 
+    if (typeof window !== 'undefined') {
+        window.fetchSeatMap = fetchSeatMap;
+    }
 // Keep your original selectSeat function unchanged, just add this line at the end:
 function selectSeat(code, seatNumber, amount, airlineName, airlineCode, airlineNumber) {
-    console.log('Selecting seat:', { code, seatNumber, amount, airlineName, airlineCode, airlineNumber });
-
-    // Remove any previously created seat radio buttons
-    const existingRadios = document.querySelectorAll('input[name="seat_option"]');
-    existingRadios.forEach(radio => radio.remove());
-
-    // Create new seat radio button
-    const seatRadio = document.createElement('input');
-    seatRadio.type = 'radio';
-    seatRadio.name = 'seat_option';
-    seatRadio.value = code;
-    seatRadio.setAttribute('data-seat-number', seatNumber);
-    seatRadio.setAttribute('data-amount', amount);
-    seatRadio.setAttribute('data-airlineName', airlineName);
-    seatRadio.setAttribute('data-airlineCode', airlineCode);
-    seatRadio.setAttribute('data-airlineNumber', airlineNumber);
-    seatRadio.checked = true;
+    const modal = Swal.getPopup();
+    const passengerId = modal.getAttribute('data-passenger-id');
     
-    // Append to body or a specific container
-    document.body.appendChild(seatRadio);
-    
-    // Update seat info display
-    const seatInfoElement = document.getElementById('seatInfo');
+    window.passengerSelections.seats[passengerId] = {
+        code,
+        seatNumber,
+        amount,
+        airlineName,
+        airlineCode,
+        airlineNumber
+    };
+
+    // Update seat info display for the specific passenger
+    const seatInfoElement = document.getElementById(`seatInfo-${passengerId}`);
     if (seatInfoElement) {
         seatInfoElement.textContent = `Selected Seat: ${seatNumber} (₹${amount})`;
-    } else {
-        console.error('Seat info element not found');
-    }
-    
-    // Show SweetAlert notification
-    if (window.Swal) {
-        window.Swal.fire({
-            icon: 'success',
-            title: 'Seat Selected!',
-            text: `You have selected Seat ${seatNumber} (₹${amount})`,
-            showConfirmButton: false,
-            timer: 1500
-        });
-    } else {
-        alert(`Seat ${seatNumber} selected for ₹${amount}`);
-        console.warn('SweetAlert not loaded, using standard alert');
     }
 
-    // Close the seat map modal
-    Swal.close();  // Add this line
+    // Show confirmation
+    Swal.fire({
+        icon: 'success',
+        title: 'Seat Selected!',
+        text: `Seat ${seatNumber} (₹${amount}) selected for ${passengerId}`,
+        showConfirmButton: false,
+        timer: 1500
+    });
 }
+
 
 // Make sure selectSeat is available globally
 window.selectSeat = selectSeat;
 
+
+// Make functions available globally
+if (typeof window !== 'undefined') {
+    window.fetchSSRData = fetchSSRData;
+    window.fetchSeatMap = fetchSeatMap;
+    window.selectSeat = selectSeat;
+}
 
 
 
@@ -775,85 +1069,136 @@ window.selectSeat = selectSeat;
     // Get isLCC value from flightDetails
     const isLCC = flightDetails.isLCC;
     console.log('Checking isLCC status:', isLCC);
-
+    
     if (isLCC) {
         console.log('Processing LCC booking...');
         // Prepare payload for LCC booking
         const bookingDetails = {
-        resultIndex: resultIndex,
-        srdvIndex: srdvIndex,
-        traceId: traceId,
-        totalFare: fareQuoteData.Fare.OfferedFare || 0
-    };
-
-    // Add seat details if selected
-    const selectedSeatRadio = document.querySelector('input[name="seat_option"]:checked');
-    if (selectedSeatRadio) {
-        bookingDetails.seat = {
-            code: selectedSeatRadio.value,
-            seatNumber: selectedSeatRadio.getAttribute('data-seat-number'),
-            amount: selectedSeatRadio.getAttribute('data-amount'),
-            airlineName: selectedSeatRadio.getAttribute('data-airlineName'),
-            airlineCode: selectedSeatRadio.getAttribute('data-airlineCode'),
-            airlineNumber: selectedSeatRadio.getAttribute('data-airlineNumber')
+            resultIndex: resultIndex,
+            srdvIndex: srdvIndex,
+            traceId: traceId,
+            totalFare: fareQuoteData.Fare.OfferedFare || 0
         };
-    }
 
-    // Add baggage details if selected
-    if (window.selectedBaggageOption) {
-        bookingDetails.baggage = {
-            code: window.selectedBaggageOption.Code,
-            weight: window.selectedBaggageOption.Weight,
-            price: window.selectedBaggageOption.Price,
-            origin: window.selectedBaggageOption.Origin,
-            destination: window.selectedBaggageOption.Destination,
-            wayType: window.selectedBaggageOption.WayType,
-            currency: window.selectedBaggageOption.Currency
+        // Initialize passengers array
+        let passengers = [];
+        
+        // Log current selections for debugging
+        console.log('Current passenger selections:', window.passengerSelections);
+        
+        // Get all passenger forms
+        document.querySelectorAll("#dynamicSections .card").forEach((card, index) => {
+            const form = card.querySelector('.card-body');
+            
+            // Extract passenger type from the card header text
+            const headerText = card.querySelector('.card-header h6').textContent;
+            const passengerTypeMatch = headerText.match(/(Adult|Child|Infant)/);
+            const passengerTypeString = passengerTypeMatch ? passengerTypeMatch[1] : 'Unknown';
+            const passengerIndex = (headerText.match(/\d+/) || [1])[0];
+            const passengerId = `${passengerTypeString}-${passengerIndex}`;
+
+            console.log('Processing passenger:', passengerId);
+
+            // Map passenger type string to numeric value
+            const typeMapping = {'Adult': 1, 'Child': 2, 'Infant': 3};
+            const passengerType = typeMapping[passengerTypeString];
+
+            // Create passenger object with basic details
+            let passenger = {
+                title: form.querySelector('[name$="[Title]"]').value.trim(),
+                firstName: form.querySelector('[name$="[FirstName]"]').value.trim(),
+                lastName: form.querySelector('[name$="[LastName]"]').value.trim(),
+                gender: parseInt(form.querySelector('[name$="[Gender]"]').value),
+                contactNo: form.querySelector('[name$="[ContactNo]"]')?.value.trim() || "",
+                email: form.querySelector('[name$="[Email]"]')?.value.trim() || "",
+                dateOfBirth: form.querySelector('[name$="[DateOfBirth]"]').value,
+                paxType: passengerType,
+                addressLine1: form.querySelector('[name$="[AddressLine1]"]')?.value.trim() || "",
+                passportNo: form.querySelector('[name$="[PassportNo]"]')?.value.trim() || "",
+                passportExpiry: form.querySelector('[name$="[PassportExpiry]"]')?.value || "",
+                passportIssueDate: form.querySelector('[name$="[PassportIssueDate]"]')?.value || ""
+            };
+
+            // Get selected services for this passenger
+            const selectedSeat = window.passengerSelections.seats[passengerId];
+            const selectedBaggage = window.passengerSelections.baggage[passengerId];
+            const selectedMeals = window.passengerSelections.meals[passengerId];
+
+            console.log(`Selected services for ${passengerId}:`, {
+                seat: selectedSeat,
+                baggage: selectedBaggage,
+                meals: selectedMeals
+            });
+
+            // Add selected services
+            passenger.selectedServices = {
+                seat: selectedSeat || null,
+                baggage: selectedBaggage || null,
+                meals: selectedMeals || []
+            };
+
+            // Calculate total SSR cost for this passenger
+            let ssrCost = 0;
+            
+            // Add seat cost if selected
+            if (selectedSeat) {
+                ssrCost += parseFloat(selectedSeat.amount) || 0;
+            }
+            
+            // Add baggage cost if selected
+            if (selectedBaggage) {
+                ssrCost += parseFloat(selectedBaggage.Price) || 0;
+            }
+            
+            // Add meals cost if selected
+            if (selectedMeals && selectedMeals.length > 0) {
+                selectedMeals.forEach(meal => {
+                    ssrCost += (parseFloat(meal.Price) || 0) * (parseInt(meal.Quantity) || 1);
+                });
+            }
+            
+            passenger.totalSSRCost = ssrCost;
+            
+            // Log the final passenger object
+            console.log(`Final passenger object for ${passengerId}:`, passenger);
+            
+            passengers.push(passenger);
+        });
+
+        // Add passengers to booking details
+        bookingDetails.passengers = passengers;
+
+        // Add fare details
+        bookingDetails.fare = {
+            baseFare: fareQuoteData.Fare.BaseFare,
+            tax: fareQuoteData.Fare.Tax,
+            yqTax: fareQuoteData.Fare.YQTax,
+            transactionFee: fareQuoteData.Fare.TransactionFee,
+            additionalTxnFeeOfrd: fareQuoteData.Fare.AdditionalTxnFeeOfrd,
+            additionalTxnFeePub: fareQuoteData.Fare.AdditionalTxnFeePub,
+            airTransFee: fareQuoteData.Fare.AirTransFee
         };
-    }
 
-    // Add meal details if selected
-    if (window.selectedMealOption) {
-        bookingDetails.meal = {
-            code: window.selectedMealOption.Code,
-            description: window.selectedMealOption.AirlineDescription,
-            price: window.selectedMealOption.Price,
-            origin: window.selectedMealOption.Origin,
-            destination: window.selectedMealOption.Destination,
-            wayType: window.selectedMealOption.Waytype,
-            quantity: window.selectedMealOption.Quantity,
-            currency: window.selectedMealOption.Currency
-        };
-    }
+        // Calculate total SSR cost across all passengers
+        const totalSSRCost = passengers.reduce((total, passenger) => total + passenger.totalSSRCost, 0);
+        bookingDetails.totalSSRCost = totalSSRCost;
+        
+        // Calculate grand total
+        bookingDetails.grandTotal = (parseFloat(bookingDetails.totalFare) || 0) + totalSSRCost;
 
-    // Add passenger details
-    bookingDetails.passenger = {
-        title: document.getElementById('title').value.trim(),
-        firstName: document.getElementById('firstName').value.trim(),
-        lastName: document.getElementById('lastName').value.trim(),
-        gender: parseInt(document.getElementById('gender').value),
-        contactNo: document.getElementById('contactNo').value.trim(),
-        email: document.getElementById('email').value.trim(),
-        paxType: document.getElementById('passengerType').value,
-        addressLine1: document.getElementById('addressLine1').value.trim()
-    };
+        // Log final booking details before encoding
+        console.log('Final booking details:', bookingDetails);
 
-    // Add fare details
-    bookingDetails.fare = {
-        baseFare: fareQuoteData.Fare.BaseFare,
-        tax: fareQuoteData.Fare.Tax,
-        yqTax: fareQuoteData.Fare.YQTax,
-        transactionFee: fareQuoteData.Fare.TransactionFee,
-        additionalTxnFeeOfrd: fareQuoteData.Fare.AdditionalTxnFeeOfrd,
-        additionalTxnFeePub: fareQuoteData.Fare.AdditionalTxnFeePub,
-        airTransFee: fareQuoteData.Fare.AirTransFee
-    };
-
-    // Encode all details as a single compressed parameter
-    const encodedDetails = encodeURIComponent(JSON.stringify(bookingDetails));
-
-    // Redirect to payment page with all details
-    window.location.href = `/payment?details=${encodedDetails}`;
+        // Encode booking details for URL
+        const encodedDetails = encodeURIComponent(JSON.stringify(bookingDetails));
+        
+        // Check URL length and redirect
+        const baseUrl = '/payment?details=';
+        const finalUrl = baseUrl + encodedDetails;
+        
+        console.log('Redirecting to:', finalUrl);
+        window.location.href = finalUrl;
+        // window.location.href = finalUrl;
 
     console.log('Redirecting with booking details:', bookingDetails);
 } else {

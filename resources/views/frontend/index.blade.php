@@ -1525,13 +1525,71 @@ function convertToISODate(dateString) {
     return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
 }
 
+
+// Cookie handling functions
+function setCookie(name, value, days) {
+    let expires = "";
+    if (days) {
+        let date = new Date();
+        date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+        expires = "; expires=" + date.toUTCString();
+    }
+    document.cookie = name + "=" + (value || "") + expires + "; path=/";
+}
+
+
+function getCookie(name) {
+    let nameEQ = name + "=";
+    let ca = document.cookie.split(';');
+    for(let i = 0; i < ca.length; i++) {
+        let c = ca[i].trim(); // Trim whitespace immediately
+        if (c.indexOf(nameEQ) === 0) {
+            return c.substring(nameEQ.length);
+        }
+    }
+    return null;
+}
+
+function initializeFormWithCookies() {
+    const adultCount = getCookie('adultCount') || "1";
+    const childCount = getCookie('childCount') || "0";
+    const infantCount = getCookie('infantCount') || "0";
+    
+    $('#adultCount').val(adultCount);
+    $('#childCount').val(childCount);
+    $('#infantCount').val(infantCount);
+}
+
+
+
+
 // Form submission
 $('#flightSearchForm').on('submit', function (e) {
     e.preventDefault();
 
-    const adultCount = $('input[name="adultCount"]').val() || "1";
-    const childCount = $('input[name="childCount"]').val() || "0";
-    const infantCount = $('input[name="infantCount"]').val() || "0";
+
+ // Save passenger counts before submission
+ const adultCount = $('#adultCount').val() || "1";
+    const childCount = $('#childCount').val() || "0";
+    const infantCount = $('#infantCount').val() || "0";
+    const originCityCode = $('#flightFromCity').val().toUpperCase();
+    const destinationCityCode = $('#flightToCity').val().toUpperCase();
+    
+    setCookie('adultCount', adultCount, 7);
+    setCookie('childCount', childCount, 7);
+    setCookie('infantCount', infantCount, 7);
+   
+
+     setCookie('origin', originCityCode, 7);
+     setCookie('destination', destinationCityCode, 7);
+    
+    // Log cookie values after setting them
+    console.log('Cookies after setting:');
+    console.log('Adults:', getCookie('adultCount'));
+    console.log('Children:', getCookie('childCount'));
+    console.log('Infants:', getCookie('infantCount'))
+    console.log('Origin:', getCookie('origin'));
+console.log('Destination:', getCookie('destination'));
     const fareType = $('input[name="fareType"]:checked').val() || "1"; // Default to Normal Fare (1)
 
     const departureDate = convertToISODate($('#flightDepartureDate').val());

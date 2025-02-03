@@ -599,22 +599,29 @@ public function bookLCC(Request $request)
             'srdvIndex' => 'required|string',
             'traceId' => 'required|string',
             'resultIndex' => 'required|string',
-            'passenger.title' => 'required|string',
-            'passenger.firstName' => 'required|string',
-            'passenger.lastName' => 'required|string',
-            'passenger.gender' => 'required|integer', // Assuming 1 for male, 2 for female
-            'passenger.contactNo' => 'required|string',
-            'passenger.email' => 'required|email',
-            'passenger.paxType' => 'required|string',
-            'passenger.dateOfBirth' => 'nullable|string',
-            'passenger.passportNo' => 'nullable|string',
-            'passenger.passportExpiry' => 'nullable|string',
-            'passenger.passportIssueDate' => 'nullable|string',
-            'passenger.countryCode' => 'nullable|string',
-            'passenger.countryName' => 'nullable|string',
-            'passenger.baggage' => 'nullable|array',
-            'passenger.mealDynamic' => 'nullable|array',
-            'passenger.seat' => 'nullable|array',
+
+            // Validate each passenger in the array
+            'passenger' => 'required|array|min:1',
+            'passenger.*.title' => 'required|string',
+            'passenger.*.firstName' => 'required|string',
+            'passenger.*.lastName' => 'required|string',
+            'passenger.*.gender' => 'required|integer', // Assuming 1 for male, 2 for female
+            'passenger.*.contactNo' => 'required|string',
+            'passenger.*.email' => 'required|email',
+            'passenger.*.paxType' => 'required|integer',
+            'passenger.*.dateOfBirth' => 'nullable|string',
+            'passenger.*.passportNo' => 'nullable|string',
+            'passenger.*.passportExpiry' => 'nullable|string',
+            'passenger.*.passportIssueDate' => 'nullable|string',
+            'passenger.*.countryCode' => 'nullable|string',
+            'passenger.*.addressLine1' => 'nullable|string',
+            'passenger.*.city' => 'nullable|string',
+            'passenger.*.countryName' => 'nullable|string',
+            'passenger.*.baggage' => 'nullable|array',
+            'passenger.*.mealDynamic' => 'nullable|array',
+            'passenger.*.seat' => 'nullable|array',
+
+            // Fare validation
             'fare.baseFare' => 'required|numeric',
             'fare.tax' => 'required|numeric',
             'fare.yqTax' => 'nullable|numeric',
@@ -623,7 +630,6 @@ public function bookLCC(Request $request)
             'fare.additionalTxnFeePub' => 'nullable|numeric',
             'fare.airTransFee' => 'nullable|numeric',
         ]);
-
         // Default empty arrays for optional fields if not provided
         $baggage = $validatedData['passenger']['baggage'] ?? [];
         $mealDynamic = $validatedData['passenger']['mealDynamic'] ?? [];
@@ -631,7 +637,7 @@ public function bookLCC(Request $request)
 
         // Prepare the payload for the API request
         $payload = [
-            'EndUserIp' => '1.1.1.1', // Replace with actual user IP or dynamic source
+            'EndUserIp' => '1.1.1.1', // Replace with actual user IP
             'ClientId' => '180133',
             'UserName' => 'MakeMy91',
             'Password' => 'MakeMy@910',
@@ -639,35 +645,47 @@ public function bookLCC(Request $request)
             'SrdvIndex' => $validatedData['srdvIndex'],
             'TraceId' => $validatedData['traceId'],
             'ResultIndex' => $validatedData['resultIndex'],
-            'Passengers' => [
-                [
-                    'Title' => $validatedData['passenger']['title'],
-                    'FirstName' => $validatedData['passenger']['firstName'],
-                    'LastName' => $validatedData['passenger']['lastName'],
-                    'PaxType' => $validatedData['passenger']['paxType'],
-                    'Gender' => $validatedData['passenger']['gender'],
-                    'ContactNo' => $validatedData['passenger']['contactNo'],
-                    'Email' => $validatedData['passenger']['email'],
-                    'DateOfBirth' => $validatedData['passenger']['dateOfBirth'] ?? '12/01/1998',
-                    'PassportNo' => $validatedData['passenger']['passportNo'] ?? '',
-                    'PassportExpiry' => $validatedData['passenger']['passportExpiry'] ?? '',
-                    'PassportIssueDate' => $validatedData['passenger']['passportIssueDate'] ?? '',
-                    'CountryCode' => $validatedData['passenger']['countryCode'] ?? 'IN',
-                    'CountryName' => $validatedData['passenger']['countryName'] ?? 'INDIA',
-                    'Fare' => [
-                        'BaseFare' => $validatedData['fare']['baseFare'],
-                        'Tax' => $validatedData['fare']['tax'],
-                        'YQTax' => $validatedData['fare']['yqTax'] ?? 0,
-                        'TransactionFee' => $validatedData['fare']['transactionFee'] ?? 0,
-                        'AdditionalTxnFeeOfrd' => $validatedData['fare']['additionalTxnFeeOfrd'] ?? 0,
-                        'AdditionalTxnFeePub' => $validatedData['fare']['additionalTxnFeePub'] ?? 0,
-                        'AirTransFee' => $validatedData['fare']['airTransFee'] ?? 0,
-                    ],
-                    'Baggage' => $baggage,
-                    'MealDynamic' => $mealDynamic,
-                    'Seat' => $seat,
-                ]
-            ]
+
+            // Map multiple passengers correctly
+            'Passengers' => array_map(function ($pax) {
+                return [
+                    'Title' => $pax['title'],
+                    'FirstName' => $pax['firstName'],
+                    'LastName' => $pax['lastName'],
+                    'PaxType' => $pax['paxType'],
+                    'Gender' => $pax['gender'],
+                    'ContactNo' => $pax['contactNo'],
+                    'Email' => $pax['email'],
+                    'DateOfBirth' => $pax['dateOfBirth'] ?? '',
+                    'PassportNo' => $pax['passportNo'] ?? '',
+                    'PassportExpiry' => $pax['passportExpiry'] ?? '',
+                    'PassportIssueDate' => $pax['passportIssueDate'] ?? '',
+                    'CountryCode' => $pax['countryCode'] ?? 'IN',
+                    'CountryName' => $pax['countryName'] ?? 'INDIA',
+                    'AddressLine1' => $pax['addressLine1'],
+                    'City' => $pax['city'],
+
+                    // Assign baggage per passenger (if applicable)
+                    'Baggage' => $pax['baggage'] ?? [],
+
+                    // Assign meals per passenger (if applicable)
+                    'MealDynamic' => $pax['mealDynamic'] ?? [],
+
+                    // Assign seats per passenger (if applicable)
+                    'Seat' => $pax['seat'] ?? [],
+                ];
+            }, $validatedData['passenger']),
+
+            // Fare details
+            'Fare' => [
+                'BaseFare' => $validatedData['fare']['baseFare'],
+                'Tax' => $validatedData['fare']['tax'],
+                'YQTax' => $validatedData['fare']['yqTax'] ?? 0,
+                'TransactionFee' => $validatedData['fare']['transactionFee'] ?? 0,
+                'AdditionalTxnFeeOfrd' => $validatedData['fare']['additionalTxnFeeOfrd'] ?? 0,
+                'AdditionalTxnFeePub' => $validatedData['fare']['additionalTxnFeePub'] ?? 0,
+                'AirTransFee' => $validatedData['fare']['airTransFee'] ?? 0,
+            ],
         ];
 
         // Send payload to third-party API
@@ -680,17 +698,14 @@ public function bookLCC(Request $request)
             $apiResponse = $response->json();
 
             // Extract relevant data for client response
-            $formattedResponse = [
-                'TraceId' => $apiResponse['TraceId'] ?? null,
-                'PNR' => $apiResponse['Response']['PNR'] ?? null,
-                'BookingId' => $apiResponse['Response']['BookingId'] ?? null,
-                'TicketStatus' => $apiResponse['Response']['TicketStatus'] ?? null,
-                'FareDetails' => $apiResponse['Response']['FlightItinerary']['Fare'] ?? [],
-                'Segments' => $apiResponse['Response']['FlightItinerary']['Segments'] ?? [],
-            ];
-
-            return response()->json(['success' => true, 'data' => $formattedResponse]);
+        }else {
+            return response()->json([
+                'success' => false,
+                'message' => $apiResponse['Error']['ErrorMessage'] ?? 'Unknown API error',
+                'errorCode' => $apiResponse['Error']['ErrorCode'] ?? null
+            ], 400);
         }
+    
 
         // Handle API error responses
         return response()->json([

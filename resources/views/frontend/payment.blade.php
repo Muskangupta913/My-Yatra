@@ -721,12 +721,30 @@ async function processHotelBooking(bookingData) {
 
 
 //FLIGHT RELATED FUNCTION
+function getCookie(name) {
+            let nameEQ = name + "=";
+            let ca = document.cookie.split(';');
+            for(let i = 0; i < ca.length; i++) {
+                let c = ca[i].trim();
+                if (c.indexOf(nameEQ) === 0) {
+                    return c.substring(nameEQ.length);
+                }
+            }
+            return null;
+        }
 
-function getBookingDetailsFromURL() {
-    // Get the URL parameters
+        // Get passenger counts from cookies with default values
+        const origin = getCookie('origin') ;
+
+        // Log the values
+        console.log('Payment Page - ORIGIN Details:');
+        console.log('ORIGIN:', origin);
+      
+
+        function getBookingDetailsFromURL() {
     const urlParams = new URLSearchParams(window.location.search);
     const encodedDetails = urlParams.get('details');
-    
+
     console.log('1. Raw encoded details from URL:', encodedDetails);
 
     if (!encodedDetails) {
@@ -735,67 +753,63 @@ function getBookingDetailsFromURL() {
     }
 
     try {
-        // Decode and parse the JSON string
         const flightDetails = JSON.parse(decodeURIComponent(encodedDetails));
         console.log('2. Decoded booking details:', flightDetails);
-        
-        // Extract individual details
+
+        // Extract main booking details
         const {
             resultIndex,
             srdvIndex,
             traceId,
             totalFare,
-            seat,
-            baggage,
-            meal,
-            passenger,
             fare
         } = flightDetails;
 
-        // Create extracted details object
+        // Extract passengers correctly
+        const passengers = flightDetails.passengers || [];
+
+        // Log each passenger's details
+        passengers.forEach((pax, index) => {
+            console.log(`3.${index + 1} Passenger Details:`, pax);
+        });
+
+        // Construct extracted details
         const extractedDetails = {
-            // Basic booking info
             resultIndex,
             srdvIndex,
             traceId,
             totalFare,
 
-            // Seat details (if selected)
-            seatCode: seat?.code,
-            seatNumber: seat?.seatNumber,
-            seatAmount: seat?.amount,
-            airlineName: seat?.airlineName,
-            airlineCode: seat?.airlineCode,
-            airlineNumber: seat?.airlineNumber,
+            // Passenger details as an array
+            passengers: passengers.map((pax, index) => ({
+                title: pax.title,
+                firstName: pax.firstName,
+                lastName: pax.lastName,
+                gender: pax.gender,
+                contactNo: pax.contactNo || "",
+                email: pax.email || "",
+                paxType: pax.paxType,
+                addressLine1: pax.addressLine1 || "",
+                city: pax.city || "",
+                passportNo: pax.passportNo || "",
+                passportExpiry: pax.passportExpiry || "",
+                passportIssueDate: pax.passportIssueDate || "",
+                dateOfBirth: pax.dateOfBirth || "",
+                countryCode: "IN",
+                countryName: "INDIA",
 
-            // Baggage details (if selected)
-            baggageCode: baggage?.code,
-            baggageWeight: baggage?.weight,
-            baggagePrice: baggage?.price,
-            baggageOrigin: baggage?.origin,
-            baggageDestination: baggage?.destination,
-            baggageWayType: baggage?.wayType,
-            baggageCurrency: baggage?.currency,
+                // Selected services
+                selectedServices: {
+                    seat: pax.selectedServices?.seat || null,
+                    baggage: pax.selectedServices?.baggage || null,
+                    meals: pax.selectedServices?.meals || []
+                },
 
-            // Meal details (if selected)
-            mealCode: meal?.code,
-            mealDescription: meal?.description,
-            mealPrice: meal?.price,
-            mealOrigin: meal?.origin,
-            mealDestination: meal?.destination,
-            mealWayType: meal?.wayType,
-            mealQuantity: meal?.quantity,
-            mealCurrency: meal?.currency,
-
-            // Passenger details
-            passengerTitle: passenger?.title,
-            passengerFirstName: passenger?.firstName,
-            passengerLastName: passenger?.lastName,
-            passengerGender: passenger?.gender,
-            passengerContactNo: passenger?.contactNo,
-            passengerEmail: passenger?.email,
-            passengerType: passenger?.paxType,
-            passengerAddress: passenger?.addressLine1,
+                // Log selected services
+                seatDetails: pax.selectedServices?.seat || null,
+                baggageDetails: pax.selectedServices?.baggage || null,
+                mealDetails: pax.selectedServices?.meals || []
+            })),
 
             // Fare details
             baseFare: fare?.baseFare,
@@ -807,65 +821,16 @@ function getBookingDetailsFromURL() {
             airTransFee: fare?.airTransFee
         };
 
-        // Log all sections separately for better visibility
-        console.log('3. Basic Details:', {
-            resultIndex: extractedDetails.resultIndex,
-            traceId: extractedDetails.traceId,
-            totalFare: extractedDetails.totalFare
+        // Log each passenger's extracted services separately
+        extractedDetails.passengers.forEach((pax, index) => {
+            console.log(`4.${index + 1} Passenger Selected Services:`, {
+                seat: pax.seatDetails,
+                baggage: pax.baggageDetails,
+                meals: pax.mealDetails
+            });
         });
 
-        console.log('4. Seat Details:', {
-            code: extractedDetails.seatCode,
-            number: extractedDetails.seatNumber,
-            amount: extractedDetails.seatAmount,
-            airline: {
-                name: extractedDetails.airlineName,
-                code: extractedDetails.airlineCode,
-                number: extractedDetails.airlineNumber
-            }
-        });
-
-        console.log('5. Baggage Details:', {
-            code: extractedDetails.baggageCode,
-            weight: extractedDetails.baggageWeight,
-            price: extractedDetails.baggagePrice,
-            origin: extractedDetails.baggageOrigin,
-            destination: extractedDetails.baggageDestination,
-            wayType: extractedDetails.baggageWayType,
-            currency: extractedDetails.baggageCurrency
-        });
-
-        console.log('6. Meal Details:', {
-            code: extractedDetails.mealCode,
-            description: extractedDetails.mealDescription,
-            price: extractedDetails.mealPrice,
-            origin: extractedDetails.mealOrigin,
-            destination: extractedDetails.mealDestination,
-            wayType: extractedDetails.mealWayType,
-            quantity: extractedDetails.mealQuantity,
-            currency: extractedDetails.mealCurrency
-        });
-
-        console.log('7. Passenger Details:', {
-            title: extractedDetails.passengerTitle,
-            firstName: extractedDetails.passengerFirstName,
-            lastName: extractedDetails.passengerLastName,
-            gender: extractedDetails.passengerGender,
-            contactNo: extractedDetails.passengerContactNo,
-            email: extractedDetails.passengerEmail,
-            type: extractedDetails.passengerType,
-            address: extractedDetails.passengerAddress
-        });
-
-        console.log('8. Fare Details:', {
-            baseFare: extractedDetails.baseFare,
-            tax: extractedDetails.tax,
-            yqTax: extractedDetails.yqTax,
-            transactionFee: extractedDetails.transactionFee,
-            additionalTxnFeeOfrd: extractedDetails.additionalTxnFeeOfrd,
-            additionalTxnFeePub: extractedDetails.additionalTxnFeePub,
-            airTransFee: extractedDetails.airTransFee
-        });
+        console.log('5. Final Extracted Booking Details:', extractedDetails);
 
         return extractedDetails;
     } catch (error) {
@@ -873,79 +838,87 @@ function getBookingDetailsFromURL() {
         return null;
     }
 }
+function bookLCC() {
+    const bookingDetails = getBookingDetailsFromURL(); // Fetch data from URL
 
+    if (!bookingDetails || !bookingDetails.passengers || !Array.isArray(bookingDetails.passengers)) {
+        console.error("❌ Passenger details are missing or not in array format!");
+        return;
+    }
 
-    
-    // Define bookLCC in the global scope
-function bookLCC(bookingDetails) {
-    // Format seat data from URL
-    const seatData = bookingDetails.seatCode ? [{
-        Code: bookingDetails.seatCode,
-        SeatNumber: bookingDetails.seatNumber,
-        Amount: bookingDetails.seatAmount,
-        AirlineName: bookingDetails.airlineName,
-        AirlineCode: bookingDetails.airlineCode,
-        AirlineNumber: bookingDetails.airlineNumber
-    }] : [];
+    console.log("🚀 Booking Details Extracted:", bookingDetails);
 
-    // Format baggage data from URL
-    const baggageData = bookingDetails.baggageCode ? [{
-        Code: bookingDetails.baggageCode,
-        Weight: bookingDetails.baggageWeight,
-        Price: bookingDetails.baggagePrice,
-        Origin: bookingDetails.baggageOrigin,
-        Destination: bookingDetails.baggageDestination,
-        WayType: bookingDetails.baggageWayType,
-        Currency: bookingDetails.baggageCurrency
-    }] : [];
-
-    // Format meal data from URL
-    const mealData = bookingDetails.mealCode ? [{
-        Code: bookingDetails.mealCode,
-        AirlineDescription: bookingDetails.mealDescription,
-        Price: bookingDetails.mealPrice,
-        Origin: bookingDetails.mealOrigin,
-        Destination: bookingDetails.mealDestination,
-        Waytype: bookingDetails.mealWayType,
-        Quantity: bookingDetails.mealQuantity,
-        Currency: bookingDetails.mealCurrency
-    }] : [];
-
-    // Prepare payload using URL data
+    // Prepare payload using extracted data
     const payload = {
         srdvIndex: bookingDetails.srdvIndex,
         traceId: bookingDetails.traceId,
         resultIndex: bookingDetails.resultIndex,
-        passenger: {
-            title: bookingDetails.passengerTitle,
-            firstName: bookingDetails.passengerFirstName,
-            lastName: bookingDetails.passengerLastName,
-            gender: bookingDetails.passengerGender,
-            contactNo: bookingDetails.passengerContactNo,
-            email: bookingDetails.passengerEmail,
-            paxType: bookingDetails.passengerType,
-            dateOfBirth: "12/01/1998",
-            passportNo: "",
-            passportExpiry: "",
-            passportIssueDate: "",
-            countryCode: "IN",
-            countryName: "INDIA",
-            baggage: baggageData,
-            mealDynamic: mealData,
-            seat: seatData
-        },
+
+        // Map each passenger correctly
+        passenger: bookingDetails.passengers.map(pax => ({
+            title: pax.title,
+            firstName: pax.firstName,
+            lastName: pax.lastName,
+            gender: pax.gender,
+            contactNo: pax.contactNo,
+            email: pax.email,
+            paxType: pax.paxType,
+            dateOfBirth: pax.dateOfBirth,
+            passportNo: pax.passportNo,
+            addressLine1: pax.addressLine1 || "",
+            city: pax.city || "",
+            passportExpiry: pax.passportExpiry || "",
+            passportIssueDate: pax.passportIssueDate || "",
+            countryCode: pax.countryCode || "IN",
+            countryName: pax.countryName || "INDIA",
+
+            // Assign baggage per passenger (if applicable)
+            baggage: pax.selectedServices.baggage ? [{
+                Code: pax.selectedServices.baggage.Code,
+                Weight: pax.selectedServices.baggage.Weight,
+                Price: pax.selectedServices.baggage.Price,
+                Origin: pax.selectedServices.baggage.Origin,
+                Destination: pax.selectedServices.baggage.Destination,
+                WayType: pax.selectedServices.baggage.WayType,
+                Currency: pax.selectedServices.baggage.Currency
+            }] : [],
+
+            // Assign meals per passenger (if applicable)
+            mealDynamic: pax.selectedServices.meals ? pax.selectedServices.meals.map(meal => ({
+                Code: meal.Code,
+                AirlineDescription: meal.AirlineDescription,
+                Price: meal.Price,
+                Origin: meal.Origin,
+                Destination: meal.Destination,
+                WayType: meal.WayType,
+                Quantity: meal.Quantity,
+                Currency: meal.Currency
+            })) : [],
+
+            // Assign seats per passenger (if applicable)
+            seat: pax.selectedServices.seat ? [{
+                Code: pax.selectedServices.seat.code,
+                SeatNumber: pax.selectedServices.seat.seatNumber,
+                Amount: pax.selectedServices.seat.amount,
+                AirlineName: pax.selectedServices.seat.airlineName,
+                AirlineCode: pax.selectedServices.seat.airlineCode,
+                AirlineNumber: pax.selectedServices.seat.airlineNumber
+            }] : []
+        })),
+
+        // Fare details
         fare: {
-            baseFare: bookingDetails.baseFare,
-            tax: bookingDetails.tax,
-            yqTax: bookingDetails.yqTax,
-            transactionFee: parseFloat(bookingDetails.transactionFee),
-            additionalTxnFeeOfrd: bookingDetails.additionalTxnFeeOfrd,
-            additionalTxnFeePub: bookingDetails.additionalTxnFeePub,
-            airTransFee: parseFloat(bookingDetails.airTransFee)
+            baseFare: bookingDetails.fare.baseFare,
+            tax: bookingDetails.fare.tax,
+            yqTax: bookingDetails.fare.yqTax,
+            transactionFee: parseFloat(bookingDetails.fare.transactionFee || 0),
+            additionalTxnFeeOfrd: bookingDetails.fare.additionalTxnFeeOfrd,
+            additionalTxnFeePub: bookingDetails.fare.additionalTxnFeePub,
+            airTransFee: parseFloat(bookingDetails.fare.airTransFee || 0)
         }
     };
 
-    console.log('Payload prepared from URL data:', payload);
+    console.log("✅ Final Payload Ready for Booking:", payload);
 
     // Send booking request
     fetch('/flight/bookLCC', {
@@ -959,19 +932,18 @@ function bookLCC(bookingDetails) {
     .then(response => response.json())
     .then(data => {
         if (data.status === 'success') {
-            alert('Booking successful! Booking ID: ' + data.booking_details.booking_id);
-            console.log(data.booking_details);
+            alert('✅ Booking successful! Booking ID: ' + data.booking_details.booking_id);
+            console.log("🎉 Booking Details:", data.booking_details);
         } else {
-            alert('Booking failed: ' + (data.message || 'Unknown error'));
+            alert('❌ Booking failed: ' + (data.message || 'Unknown error'));
+            console.error("❌ Booking Failure:", data);
         }
     })
     .catch(error => {
-        console.error('Error:', error);
+        console.error('❌ Error:', error);
         alert('An error occurred during booking');
     });
 }
-
-
 
 function BookGdsTickte() {
     const queryParams = new URLSearchParams(window.location.search);
