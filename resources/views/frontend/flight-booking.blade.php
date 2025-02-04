@@ -378,10 +378,6 @@
     const traceId = urlParams.get('traceId');
     const resultIndex = urlParams.get('resultIndex');
     const encodedDetails = urlParams.get('details');
-    const origin = getCookie('origin') ;
-    console.log(' ORIGIN Details:');
-        console.log('ORIGIN:', origin);
-      
          
 
     function getCookie(name) {
@@ -409,7 +405,7 @@
 
 
 
-       function createPassengerForm(passengerType, count, typeValue) {
+        function createPassengerForm(passengerType, count, typeValue) {
     for (let i = 1; i <= count; i++) {
         let titleOptions = (typeValue === 1) // Check if passenger is an Adult
             ? `<option value="Mr">Mr</option>
@@ -418,30 +414,10 @@
             : `<option value="Miss">Miss</option>
                <option value="Master">Mstr</option>`;
 
-        // Create passport details section only for Adult and Child
-        let passportSection = (typeValue === 1 || typeValue === 2) ? `
-            <div class="passport-details mt-3">
-                <h6 class="mb-3">Passport Details</h6>
-                <div class="row">
-                    <div class="col-md-4 mb-3">
-                        <label class="form-label">Passport Number</label>
-                        <input type="text" class="form-control" name="${passengerType}[${i}][PassportNo]" required>
-                    </div>
-                    <div class="col-md-4 mb-3">
-                        <label class="form-label">Passport Expiry</label>
-                        <input type="date" class="form-control" name="${passengerType}[${i}][PassportExpiry]" required>
-                    </div>
-                    <div class="col-md-4 mb-3">
-                        <label class="form-label">Passport Issue Date</label>
-                        <input type="date" class="form-control" name="${passengerType}[${i}][PassportIssueDate]" required>
-                    </div>
-                </div>
-            </div>` : '';
-
         let ssrOptions = '';
         
         // Add SSR options based on passenger type
-        if (typeValue === 1 || typeValue === 2) { // Adult or Child
+        if (typeValue === 1 || typeValue === 2) { // Adult
             ssrOptions = `
                 <div class="ssr-options mt-4">
                     <h6 class="mb-3">Additional Services</h6>
@@ -519,7 +495,6 @@
 
                         <input type="hidden" name="${passengerType}[${i}][PassengerType]" value="${typeValue}">
                     </div>
-                    ${passportSection}
                     ${ssrOptions}
                 </div>
             </div>
@@ -527,6 +502,7 @@
         dynamicSections.insertAdjacentHTML('beforeend', passengerForm);
     }
 }
+
 // Generate Passenger Forms with automatic PassengerType
 createPassengerForm("Adult", adultCount, 1);
 createPassengerForm("Child", childCount, 2);
@@ -1226,11 +1202,7 @@ if (typeof window !== 'undefined') {
 
     console.log('Redirecting with booking details:', bookingDetails);
 } else {
-   
-    
-
-
- console.log('Non-LCC flight, redirecting to payment...');
+    console.log('Non-LCC flight, redirecting to payment...');
     
 
     function convertToISODateTime(dateString) {
@@ -1283,7 +1255,7 @@ function convertToISODate(dateString) {
                 title: form.querySelector('[name$="[Title]"]').value.trim(),
                 firstName: form.querySelector('[name$="[FirstName]"]').value.trim(),
                 lastName: form.querySelector('[name$="[LastName]"]').value.trim(),
-                gender:(form.querySelector('[name$="[Gender]"]').value),
+                gender: parseInt(form.querySelector('[name$="[Gender]"]').value),
                 contactNo: form.querySelector('[name$="[ContactNo]"]')?.value.trim() || "",
                 email: form.querySelector('[name$="[Email]"]')?.value.trim() || "",
                 paxType: passengerType,
@@ -1291,8 +1263,8 @@ function convertToISODate(dateString) {
                 passportExpiry: convertToISODateTime(form.querySelector('[name$="[PassportExpiry]"]')?.value || ""),
                 passportIssueDate: convertToISODateTime(form.querySelector('[name$="[PassportIssueDate]"]')?.value || ""),
                 dateOfBirth: convertToISODateTime(form.querySelector('[name$="[DateOfBirth]"]')?.value || ""),
-                addressLine1: origin,
-                city:origin,
+                addressLine1: form.querySelector('[name$="[AddressLine1]"]')?.value.trim() || "",
+                city: "Noida",
                 countryCode: "IN",
                 countryName: "INDIA",
                 isLeadPax: index === 0, // First passenger is lead passenger
@@ -1384,9 +1356,162 @@ function convertToISODate(dateString) {
         });
     }
 });
+          });
+
+          console.log('Non-LCC flight, redirecting to payment...');
     
 
-    });
+    function convertToISODateTime(dateString) {
+    if (!dateString) return ''; // Return empty if no date is provided
+    return `${dateString}T00:00:00`;
+}
+
+
+function convertToISODate(dateString) {
+        if (!dateString) return '';
+        return dateString.split('T')[0]; // Remove time part if exists
+    }
+
+    function validateEmail(email) {
+        return email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/);
+    }
+
+    function validatePassenger(passengerData) {
+        const errors = [];
+        
+        if (!passengerData.firstName.trim()) errors.push('First name is required');
+        if (!passengerData.lastName.trim()) errors.push('Last name is required');
+        if (!passengerData.passportNo.trim()) errors.push('Passport number is required');
+        if (!passengerData.passportExpiry) errors.push('Passport expiry date is required');
+        if (!passengerData.dateOfBirth) errors.push('Date of birth is required');
+        if (!validateEmail(passengerData.email)) errors.push('Valid email is required');
+        if (!passengerData.contactNo.trim()) errors.push('Contact number is required');
+        
+        return errors;
+    }
+
+
+    let passengers = [];
+        
+        // Get all passenger forms
+        document.querySelectorAll("#dynamicSections .card").forEach((card, index) => {
+            const form = card.querySelector('.card-body');
+            
+            // Extract passenger type from the card header text
+            const headerText = card.querySelector('.card-header h6').textContent;
+            const passengerTypeMatch = headerText.match(/(Adult|Child|Infant)/);
+            const passengerTypeString = passengerTypeMatch ? passengerTypeMatch[1] : 'Unknown';
+            
+            // Map passenger type string to numeric value
+            const typeMapping = {'Adult': 1, 'Child': 2, 'Infant': 3};
+            const passengerType = typeMapping[passengerTypeString];
+
+            // Create passenger object with form data
+            let passenger = {
+                title: form.querySelector('[name$="[Title]"]').value.trim(),
+                firstName: form.querySelector('[name$="[FirstName]"]').value.trim(),
+                lastName: form.querySelector('[name$="[LastName]"]').value.trim(),
+                gender: parseInt(form.querySelector('[name$="[Gender]"]').value),
+                contactNo: form.querySelector('[name$="[ContactNo]"]')?.value.trim() || "",
+                email: form.querySelector('[name$="[Email]"]')?.value.trim() || "",
+                paxType: passengerType,
+                passportNo: form.querySelector('[name$="[PassportNo]"]')?.value.trim() || "",
+                passportExpiry: convertToISODateTime(form.querySelector('[name$="[PassportExpiry]"]')?.value || ""),
+                passportIssueDate: convertToISODateTime(form.querySelector('[name$="[PassportIssueDate]"]')?.value || ""),
+                dateOfBirth: convertToISODateTime(form.querySelector('[name$="[DateOfBirth]"]')?.value || ""),
+                addressLine1: form.querySelector('[name$="[AddressLine1]"]')?.value.trim() || "",
+                city: "Noida",
+                countryCode: "IN",
+                countryName: "INDIA",
+                isLeadPax: index === 0, // First passenger is lead passenger
+                
+                // Add fare details for each passenger
+                fare: [{
+                    baseFare: parseFloat(fareQuoteData.Fare.BaseFare),
+                    tax: parseFloat(fareQuoteData.Fare.Tax),
+                    yqTax: parseFloat(fareQuoteData.Fare.YQTax || 0),
+                    transactionFee: (fareQuoteData.Fare.TransactionFee || '0').toString(),
+                    additionalTxnFeeOfrd: parseFloat(fareQuoteData.Fare.AdditionalTxnFeeOfrd || 0),
+                    additionalTxnFeePub: parseFloat(fareQuoteData.Fare.AdditionalTxnFeePub || 0),
+                    airTransFee: (fareQuoteData.Fare.AirTransFee || '0').toString()
+                }],
+                
+                // Add GST details
+                gst: {
+                    companyAddress: '',
+                    companyContactNumber: '',
+                    companyName: '',
+                    number: '',
+                    companyEmail: ''
+                }
+            };
+
+            // Validate passenger data
+            const validationErrors = validatePassenger(passenger);
+            if (validationErrors.length > 0) {
+                throw new Error(`Validation failed for ${passengerTypeString}: ${validationErrors.join(', ')}`);
+            }
+
+            passengers.push(passenger);
+        });
+
+        // Create the final payload
+        const payload = {
+            srdvIndex: srdvIndex,
+            traceId: traceId,
+            resultIndex: resultIndex,
+            passengers: passengers
+        };
+
+        console.log('Final payload for bookHold:', payload);
+
+        // Disable submit button to prevent double submission
+        const submitButton = event.target;
+        submitButton.disabled = true;
+
+        // Make API call for bookHold
+        fetch('/flight/bookHold', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+            },
+            body: JSON.stringify(payload)
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                console.log('Non-LCC Booking successful!', data.booking_details);
+                // Redirect to payment page with booking details
+                const queryParams = new URLSearchParams({
+                    resultIndex: resultIndex,
+                    bookingId: data.booking_details.booking_id,
+                    pnr: data.booking_details.pnr,
+                    srdvIndex: data.booking_details.srdvIndex,
+                    traceId: data.booking_details.trace_id
+                });
+                window.location.href = `/payment?${queryParams.toString()}`;
+            } else {
+                throw new Error(data.message || 'Booking failed');
+            }
+        })
+        .catch(error => {
+            console.error('Error during Non-LCC booking:', error);
+            if (window.Swal) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Booking Failed',
+                    text: error.message || 'An error occurred during booking'
+                });
+            } else {
+                alert('Booking failed: ' + (error.message || 'An error occurred'));
+            }
+        })
+        .finally(() => {
+            submitButton.disabled = false;
+        });
+
+
 
 </script>
 @endsection

@@ -1000,17 +1000,48 @@ public function bookGdsTicket(Request $request) {
 
     public function getCalendarFare(Request $request)
     {
-        $validated = $request->validate([
-            'flightFromCity' => 'required|string',
-            'flightToCity' => 'required|string',
-            'flightDepartureDate' => 'required|date_format:d-m-Y',
-        ]);
+        try {
+            $selectedDate = now()->format('Y-m-d'); // Default to current date
+            $origin = "LKO";
+            $destination = "DEL";
 
-        $result = $this->flightApiService->getCalendarFare($validated);
+            $formattedDate = date('Y-m-d\T00:00:00', strtotime($selectedDate));
 
-        return response()->json($result);
+            $payload = [
+                "EndUserIp" => "1.1.1.1",
+                "ClientId" => "180133",
+                "UserName" => "MakeMy91",
+                "Password" => "MakeMy@910",
+                "JourneyType" => "1",
+                "Sources" => null,
+                "FareType" => 1,
+                "Segments" => [
+                    [
+                        "Origin" => strtoupper($origin),
+                        "Destination" => strtoupper($destination),
+                        "FlightCabinClass" => "1",
+                        "PreferredDepartureTime" => $formattedDate,
+                        "PreferredArrivalTime" => $formattedDate
+                    ]
+                ]
+            ];
+
+            $response = Http::withHeaders([
+                'Content-Type' => 'application/json',
+                'API-Token' => 'MakeMy@910@23',
+                'Accept' => 'application/json',
+            ])->post('https://flight.srdvtest.com/v8/rest/GetCalendarFare', $payload);
+
+            return response()->json($response->json());
+        } catch (\Exception $e) {
+            return response()->json([
+                'Error' => [
+                    'ErrorCode' => 1,
+                    'ErrorMessage' => $e->getMessage()
+                ]
+            ], 500);
+        }
     }
-
     public function showBookingForm()
     {
         // Example baggage options
