@@ -782,7 +782,7 @@ public function bookHold(Request $request) {
                     'Gender' => $passenger['gender'],
                     'PassportNo' => $passenger['passportNo'],
                     'PassportExpiry' => $passenger['passportExpiry'],  // Already in correct format
-                    'AddressLine1' => $passenger['addressLine1'],
+                    'AddressLine1' => $passenger['addressLine1'] ?? 'Noida',
                     'City' => $passenger['city'] ?? 'Noida',
                     'CountryCode' => $passenger['countryCode'],
                     'CountryName' => $passenger['countryName'],
