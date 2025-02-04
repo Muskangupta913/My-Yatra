@@ -419,7 +419,7 @@
                <option value="Master">Mstr</option>`;
 
         // Create passport details section only for Adult and Child
-        let passportSection = (typeValue === 1 || typeValue === 2) ? `
+        let passportSection = (typeValue === 1 || typeValue === 2 ||typeValue === 3 ) ? `
             <div class="passport-details mt-3">
                 <h6 class="mb-3">Passport Details</h6>
                 <div class="row">
@@ -1087,306 +1087,379 @@ if (typeof window !== 'undefined') {
 
 
 
-  document.getElementById('submitButton').addEventListener('click', function(event) {
-    event.preventDefault();
-    
-    // Get isLCC value from flightDetails
-    const isLCC = flightDetails.isLCC;
-    console.log('Checking isLCC status:', isLCC);
-    
-    if (isLCC) {
-        console.log('Processing LCC booking...');
-        // Prepare payload for LCC booking
-        const bookingDetails = {
-            resultIndex: resultIndex,
-            srdvIndex: srdvIndex,
-            traceId: traceId,
-            totalFare: fareQuoteData.Fare.OfferedFare || 0
-        };
 
-        // Initialize passengers array
-        let passengers = [];
-        
-        // Log current selections for debugging
-        console.log('Current passenger selections:', window.passengerSelections);
-        
-        // Get all passenger forms
-        document.querySelectorAll("#dynamicSections .card").forEach((card, index) => {
-            const form = card.querySelector('.card-body');
-            
-            // Extract passenger type from the card header text
-            const headerText = card.querySelector('.card-header h6').textContent;
-            const passengerTypeMatch = headerText.match(/(Adult|Child|Infant)/);
-            const passengerTypeString = passengerTypeMatch ? passengerTypeMatch[1] : 'Unknown';
-            const passengerIndex = (headerText.match(/\d+/) || [1])[0];
-            const passengerId = `${passengerTypeString}-${passengerIndex}`;
+// Function to check flight balance
+function checkFlightBalance() {
+    return new Promise((resolve, reject) => {
+        // Create loading overlay
+        const loadingOverlay = document.createElement('div');
+        loadingOverlay.style.position = 'fixed';
+        loadingOverlay.style.top = '0';
+        loadingOverlay.style.left = '0';
+        loadingOverlay.style.width = '100%';
+        loadingOverlay.style.height = '100%';
+        loadingOverlay.style.backgroundColor = 'rgba(0, 0, 0, 0.5)';
+        loadingOverlay.style.display = 'flex';
+        loadingOverlay.style.justifyContent = 'center';
+        loadingOverlay.style.alignItems = 'center';
+        loadingOverlay.style.zIndex = '9999';
+        loadingOverlay.innerHTML = '<div style="background: white; padding: 20px; border-radius: 5px;">Checking balance...</div>';
+        document.body.appendChild(loadingOverlay);
 
-            console.log('Processing passenger:', passengerId);
-
-            // Map passenger type string to numeric value
-            const typeMapping = {'Adult': 1, 'Child': 2, 'Infant': 3};
-            const passengerType = typeMapping[passengerTypeString];
-
-            // Create passenger object with basic details
-            let passenger = {
-                title: form.querySelector('[name$="[Title]"]').value.trim(),
-                firstName: form.querySelector('[name$="[FirstName]"]').value.trim(),
-                lastName: form.querySelector('[name$="[LastName]"]').value.trim(),
-                gender: parseInt(form.querySelector('[name$="[Gender]"]').value),
-                contactNo: form.querySelector('[name$="[ContactNo]"]')?.value.trim() || "",
-                email: form.querySelector('[name$="[Email]"]')?.value.trim() || "",
-                dateOfBirth: form.querySelector('[name$="[DateOfBirth]"]').value,
-                paxType: passengerType,
-                addressLine1: form.querySelector('[name$="[AddressLine1]"]')?.value.trim() || "",
-                passportNo: form.querySelector('[name$="[PassportNo]"]')?.value.trim() || "",
-                passportExpiry: form.querySelector('[name$="[PassportExpiry]"]')?.value || "",
-                passportIssueDate: form.querySelector('[name$="[PassportIssueDate]"]')?.value || ""
-            };
-
-            // Get selected services for this passenger
-            const selectedSeat = window.passengerSelections.seats[passengerId];
-            const selectedBaggage = window.passengerSelections.baggage[passengerId];
-            const selectedMeals = window.passengerSelections.meals[passengerId];
-
-            console.log(`Selected services for ${passengerId}:`, {
-                seat: selectedSeat,
-                baggage: selectedBaggage,
-                meals: selectedMeals
-            });
-
-            // Add selected services
-            passenger.selectedServices = {
-                seat: selectedSeat || null,
-                baggage: selectedBaggage || null,
-                meals: selectedMeals || []
-            };
-
-            // Calculate total SSR cost for this passenger
-            let ssrCost = 0;
-            
-            // Add seat cost if selected
-            if (selectedSeat) {
-                ssrCost += parseFloat(selectedSeat.amount) || 0;
-            }
-            
-            // Add baggage cost if selected
-            if (selectedBaggage) {
-                ssrCost += parseFloat(selectedBaggage.Price) || 0;
-            }
-            
-            // Add meals cost if selected
-            if (selectedMeals && selectedMeals.length > 0) {
-                selectedMeals.forEach(meal => {
-                    ssrCost += (parseFloat(meal.Price) || 0) * (parseInt(meal.Quantity) || 1);
-                });
-            }
-            
-            passenger.totalSSRCost = ssrCost;
-            
-            // Log the final passenger object
-            console.log(`Final passenger object for ${passengerId}:`, passenger);
-            
-            passengers.push(passenger);
-        });
-
-        // Add passengers to booking details
-        bookingDetails.passengers = passengers;
-
-        // Add fare details
-        bookingDetails.fare = {
-            baseFare: fareQuoteData.Fare.BaseFare,
-            tax: fareQuoteData.Fare.Tax,
-            yqTax: fareQuoteData.Fare.YQTax,
-            transactionFee: fareQuoteData.Fare.TransactionFee,
-            additionalTxnFeeOfrd: fareQuoteData.Fare.AdditionalTxnFeeOfrd,
-            additionalTxnFeePub: fareQuoteData.Fare.AdditionalTxnFeePub,
-            airTransFee: fareQuoteData.Fare.AirTransFee
-        };
-
-        // Calculate total SSR cost across all passengers
-        const totalSSRCost = passengers.reduce((total, passenger) => total + passenger.totalSSRCost, 0);
-        bookingDetails.totalSSRCost = totalSSRCost;
-        
-        // Calculate grand total
-        bookingDetails.grandTotal = (parseFloat(bookingDetails.totalFare) || 0) + totalSSRCost;
-
-        // Log final booking details before encoding
-        console.log('Final booking details:', bookingDetails);
-
-        // Encode booking details for URL
-        const encodedDetails = encodeURIComponent(JSON.stringify(bookingDetails));
-        
-        // Check URL length and redirect
-        const baseUrl = '/payment?details=';
-        const finalUrl = baseUrl + encodedDetails;
-        
-        console.log('Redirecting to:', finalUrl);
-        window.location.href = finalUrl;
-        // window.location.href = finalUrl;
-
-    console.log('Redirecting with booking details:', bookingDetails);
-} else {
-   
-    
-
-
- console.log('Non-LCC flight, redirecting to payment...');
-    
-
-    function convertToISODateTime(dateString) {
-    if (!dateString) return ''; // Return empty if no date is provided
-    return `${dateString}T00:00:00`;
-}
-
-
-function convertToISODate(dateString) {
-        if (!dateString) return '';
-        return dateString.split('T')[0]; // Remove time part if exists
-    }
-
-    function validateEmail(email) {
-        return email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/);
-    }
-
-    function validatePassenger(passengerData) {
-        const errors = [];
-        
-        if (!passengerData.firstName.trim()) errors.push('First name is required');
-        if (!passengerData.lastName.trim()) errors.push('Last name is required');
-        if (!passengerData.passportNo.trim()) errors.push('Passport number is required');
-        if (!passengerData.passportExpiry) errors.push('Passport expiry date is required');
-        if (!passengerData.dateOfBirth) errors.push('Date of birth is required');
-        if (!validateEmail(passengerData.email)) errors.push('Valid email is required');
-        if (!passengerData.contactNo.trim()) errors.push('Contact number is required');
-        
-        return errors;
-    }
-
-
-    let passengers = [];
-        
-        // Get all passenger forms
-        document.querySelectorAll("#dynamicSections .card").forEach((card, index) => {
-            const form = card.querySelector('.card-body');
-            
-            // Extract passenger type from the card header text
-            const headerText = card.querySelector('.card-header h6').textContent;
-            const passengerTypeMatch = headerText.match(/(Adult|Child|Infant)/);
-            const passengerTypeString = passengerTypeMatch ? passengerTypeMatch[1] : 'Unknown';
-            
-            // Map passenger type string to numeric value
-            const typeMapping = {'Adult': 1, 'Child': 2, 'Infant': 3};
-            const passengerType = typeMapping[passengerTypeString];
-
-            // Create passenger object with form data
-            let passenger = {
-                title: form.querySelector('[name$="[Title]"]').value.trim(),
-                firstName: form.querySelector('[name$="[FirstName]"]').value.trim(),
-                lastName: form.querySelector('[name$="[LastName]"]').value.trim(),
-                gender:(form.querySelector('[name$="[Gender]"]').value),
-                contactNo: form.querySelector('[name$="[ContactNo]"]')?.value.trim() || "",
-                email: form.querySelector('[name$="[Email]"]')?.value.trim() || "",
-                paxType: passengerType,
-                passportNo: form.querySelector('[name$="[PassportNo]"]')?.value.trim() || "",
-                passportExpiry: convertToISODateTime(form.querySelector('[name$="[PassportExpiry]"]')?.value || ""),
-                passportIssueDate: convertToISODateTime(form.querySelector('[name$="[PassportIssueDate]"]')?.value || ""),
-                dateOfBirth: convertToISODateTime(form.querySelector('[name$="[DateOfBirth]"]')?.value || ""),
-                addressLine1: origin,
-                city:origin,
-                countryCode: "IN",
-                countryName: "INDIA",
-                isLeadPax: index === 0, // First passenger is lead passenger
-                
-                // Add fare details for each passenger
-                fare: [{
-                    baseFare: parseFloat(fareQuoteData.Fare.BaseFare),
-                    tax: parseFloat(fareQuoteData.Fare.Tax),
-                    yqTax: parseFloat(fareQuoteData.Fare.YQTax || 0),
-                    transactionFee: (fareQuoteData.Fare.TransactionFee || '0').toString(),
-                    additionalTxnFeeOfrd: parseFloat(fareQuoteData.Fare.AdditionalTxnFeeOfrd || 0),
-                    additionalTxnFeePub: parseFloat(fareQuoteData.Fare.AdditionalTxnFeePub || 0),
-                    airTransFee: (fareQuoteData.Fare.AirTransFee || '0').toString()
-                }],
-                
-                // Add GST details
-                gst: {
-                    companyAddress: '',
-                    companyContactNumber: '',
-                    companyName: '',
-                    number: '',
-                    companyEmail: ''
-                }
-            };
-
-            // Validate passenger data
-            const validationErrors = validatePassenger(passenger);
-            if (validationErrors.length > 0) {
-                throw new Error(`Validation failed for ${passengerTypeString}: ${validationErrors.join(', ')}`);
-            }
-
-            passengers.push(passenger);
-        });
-
-        // Create the final payload
-        const payload = {
-            srdvIndex: srdvIndex,
-            traceId: traceId,
-            resultIndex: resultIndex,
-            passengers: passengers
-        };
-
-        console.log('Final payload for bookHold:', payload);
-
-        // Disable submit button to prevent double submission
-        const submitButton = event.target;
-        submitButton.disabled = true;
-
-        // Make API call for bookHold
-        fetch('/flight/bookHold', {
+        // Make API call to check balance
+        fetch('/flight/balance', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
                 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
             },
-            body: JSON.stringify(payload)
+            body: JSON.stringify({
+                EndUserIp: '1.1.1.1',
+                ClientId: '180133',
+                UserName: 'MakeMy91',
+                Password: 'MakeMy@910'
+            })
         })
         .then(response => response.json())
         .then(data => {
-            if (data.status === 'success') {
-                console.log('Non-LCC Booking successful!', data.booking_details);
-                // Redirect to payment page with booking details
-                const queryParams = new URLSearchParams({
-                    resultIndex: resultIndex,
-                    bookingId: data.booking_details.booking_id,
-                    pnr: data.booking_details.pnr,
-                    srdvIndex: data.booking_details.srdvIndex,
-                    traceId: data.booking_details.trace_id
-                });
-                window.location.href = `/payment?${queryParams.toString()}`;
-            } else {
-                throw new Error(data.message || 'Booking failed');
+            // Remove loading overlay
+            document.body.removeChild(loadingOverlay);
+
+            if (data.status !== 'success') {
+                throw new Error(data.message || 'Failed to check balance');
             }
-        })
-        .catch(error => {
-            console.error('Error during Non-LCC booking:', error);
-            if (window.Swal) {
+
+            const totalFare = fareQuoteData.Fare.OfferedFare || 0;
+
+            // Check if balance is sufficient
+            if (data.balance < totalFare) {
                 Swal.fire({
                     icon: 'error',
-                    title: 'Booking Failed',
-                    text: error.message || 'An error occurred during booking'
+                    title: 'Insufficient Balance',
+                    text: `Your balance (₹${data.balance}) is insufficient for this booking (₹${totalFare})`
                 });
-            } else {
-                alert('Booking failed: ' + (error.message || 'An error occurred'));
+                reject(new Error('Insufficient balance'));
+                return;
             }
+
+            resolve(data);
         })
-        .finally(() => {
-            submitButton.disabled = false;
+        .catch(error => {
+            // Remove loading overlay
+            if (document.body.contains(loadingOverlay)) {
+                document.body.removeChild(loadingOverlay);
+            }
+
+            Swal.fire({
+                icon: 'error',
+                title: 'Balance Check Failed',
+                text: error.message || 'Failed to check balance'
+            });
+
+            reject(error);
         });
+    });
+}
+
+document.getElementById('submitButton').addEventListener('click', async function(event) {
+    event.preventDefault();
+    
+    try {
+        await checkFlightBalance();
+        const isLCC = flightDetails.isLCC;
+        console.log('Checking isLCC status:', isLCC);
+        
+        if (isLCC) {
+            console.log('Processing LCC booking...');
+            // Prepare payload for LCC booking
+            const bookingDetails = {
+                resultIndex: resultIndex,
+                srdvIndex: srdvIndex,
+                traceId: traceId,
+                totalFare: fareQuoteData.Fare.OfferedFare || 0
+            };
+
+            // Initialize passengers array
+            let passengers = [];
+            
+            // Log current selections for debugging
+            console.log('Current passenger selections:', window.passengerSelections);
+            
+            // Get all passenger forms
+            document.querySelectorAll("#dynamicSections .card").forEach((card, index) => {
+                const form = card.querySelector('.card-body');
+                
+                // Extract passenger type from the card header text
+                const headerText = card.querySelector('.card-header h6').textContent;
+                const passengerTypeMatch = headerText.match(/(Adult|Child|Infant)/);
+                const passengerTypeString = passengerTypeMatch ? passengerTypeMatch[1] : 'Unknown';
+                const passengerIndex = (headerText.match(/\d+/) || [1])[0];
+                const passengerId = `${passengerTypeString}-${passengerIndex}`;
+
+                console.log('Processing passenger:', passengerId);
+
+                // Map passenger type string to numeric value
+                const typeMapping = {'Adult': 1, 'Child': 2, 'Infant': 3};
+                const passengerType = typeMapping[passengerTypeString];
+
+                // Create passenger object with basic details
+                let passenger = {
+                    title: form.querySelector('[name$="[Title]"]').value.trim(),
+                    firstName: form.querySelector('[name$="[FirstName]"]').value.trim(),
+                    lastName: form.querySelector('[name$="[LastName]"]').value.trim(),
+                    gender: parseInt(form.querySelector('[name$="[Gender]"]').value),
+                    contactNo: form.querySelector('[name$="[ContactNo]"]')?.value.trim() || "",
+                    email: form.querySelector('[name$="[Email]"]')?.value.trim() || "",
+                    dateOfBirth: form.querySelector('[name$="[DateOfBirth]"]').value,
+                    paxType: passengerType,
+                    addressLine1: form.querySelector('[name$="[AddressLine1]"]')?.value.trim() || "",
+                    passportNo: form.querySelector('[name$="[PassportNo]"]')?.value.trim() || "",
+                    passportExpiry: form.querySelector('[name$="[PassportExpiry]"]')?.value || "",
+                    passportIssueDate: form.querySelector('[name$="[PassportIssueDate]"]')?.value || ""
+                };
+
+                // Get selected services for this passenger
+                const selectedSeat = window.passengerSelections.seats[passengerId];
+                const selectedBaggage = window.passengerSelections.baggage[passengerId];
+                const selectedMeals = window.passengerSelections.meals[passengerId];
+
+                console.log(`Selected services for ${passengerId}:`, {
+                    seat: selectedSeat,
+                    baggage: selectedBaggage,
+                    meals: selectedMeals
+                });
+
+                // Add selected services
+                passenger.selectedServices = {
+                    seat: selectedSeat || null,
+                    baggage: selectedBaggage || null,
+                    meals: selectedMeals || []
+                };
+
+                // Calculate total SSR cost for this passenger
+                let ssrCost = 0;
+                
+                // Add seat cost if selected
+                if (selectedSeat) {
+                    ssrCost += parseFloat(selectedSeat.amount) || 0;
+                }
+                
+                // Add baggage cost if selected
+                if (selectedBaggage) {
+                    ssrCost += parseFloat(selectedBaggage.Price) || 0;
+                }
+                
+                // Add meals cost if selected
+                if (selectedMeals && selectedMeals.length > 0) {
+                    selectedMeals.forEach(meal => {
+                        ssrCost += (parseFloat(meal.Price) || 0) * (parseInt(meal.Quantity) || 1);
+                    });
+                }
+                
+                passenger.totalSSRCost = ssrCost;
+                
+                // Log the final passenger object
+                console.log(`Final passenger object for ${passengerId}:`, passenger);
+                
+                passengers.push(passenger);
+            });
+
+            // Add passengers to booking details
+            bookingDetails.passengers = passengers;
+
+            // Add fare details
+            bookingDetails.fare = {
+                baseFare: fareQuoteData.Fare.BaseFare,
+                tax: fareQuoteData.Fare.Tax,
+                yqTax: fareQuoteData.Fare.YQTax,
+                transactionFee: fareQuoteData.Fare.TransactionFee,
+                additionalTxnFeeOfrd: fareQuoteData.Fare.AdditionalTxnFeeOfrd,
+                additionalTxnFeePub: fareQuoteData.Fare.AdditionalTxnFeePub,
+                airTransFee: fareQuoteData.Fare.AirTransFee
+            };
+
+            // Calculate total SSR cost across all passengers
+            const totalSSRCost = passengers.reduce((total, passenger) => total + passenger.totalSSRCost, 0);
+            bookingDetails.totalSSRCost = totalSSRCost;
+            
+            // Calculate grand total
+            bookingDetails.grandTotal = (parseFloat(bookingDetails.totalFare) || 0) + totalSSRCost;
+
+            // Log final booking details before encoding
+            console.log('Final booking details:', bookingDetails);
+
+            // Encode booking details for URL
+            const encodedDetails = encodeURIComponent(JSON.stringify(bookingDetails));
+            
+            // Check URL length and redirect
+            const baseUrl = '/payment?details=';
+            const finalUrl = baseUrl + encodedDetails;
+            
+            console.log('Redirecting to:', finalUrl);
+            window.location.href = finalUrl;
+
+            console.log('Redirecting with booking details:', bookingDetails);
+        } else {
+            console.log('Non-LCC flight, redirecting to payment...');
+            
+            // Helper functions
+            function convertToISODateTime(dateString) {
+                if (!dateString) return ''; // Return empty if no date is provided
+                return `${dateString}T00:00:00`;
+            }
+
+            function convertToISODate(dateString) {
+                if (!dateString) return '';
+                return dateString.split('T')[0]; // Remove time part if exists
+            }
+
+            function validateEmail(email) {
+                return email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/);
+            }
+
+            function validatePassenger(passengerData) {
+                const errors = [];
+                
+                if (!passengerData.firstName.trim()) errors.push('First name is required');
+                if (!passengerData.lastName.trim()) errors.push('Last name is required');
+                if (!passengerData.passportNo.trim()) errors.push('Passport number is required');
+                if (!passengerData.passportExpiry) errors.push('Passport expiry date is required');
+                if (!passengerData.dateOfBirth) errors.push('Date of birth is required');
+                if (!validateEmail(passengerData.email)) errors.push('Valid email is required');
+                if (!passengerData.contactNo.trim()) errors.push('Contact number is required');
+                
+                return errors;
+            }
+
+            let passengers = [];
+            
+            // Get all passenger forms
+            document.querySelectorAll("#dynamicSections .card").forEach((card, index) => {
+                const form = card.querySelector('.card-body');
+                
+                // Extract passenger type from the card header text
+                const headerText = card.querySelector('.card-header h6').textContent;
+                const passengerTypeMatch = headerText.match(/(Adult|Child|Infant)/);
+                const passengerTypeString = passengerTypeMatch ? passengerTypeMatch[1] : 'Unknown';
+                
+                // Map passenger type string to numeric value
+                const typeMapping = {'Adult': 1, 'Child': 2, 'Infant': 3};
+                const passengerType = typeMapping[passengerTypeString];
+
+                // Create passenger object with form data
+                let passenger = {
+                    title: form.querySelector('[name$="[Title]"]').value.trim(),
+                    firstName: form.querySelector('[name$="[FirstName]"]').value.trim(),
+                    lastName: form.querySelector('[name$="[LastName]"]').value.trim(),
+                    gender: (form.querySelector('[name$="[Gender]"]').value),
+                    contactNo: form.querySelector('[name$="[ContactNo]"]')?.value.trim() || "",
+                    email: form.querySelector('[name$="[Email]"]')?.value.trim() || "",
+                    paxType: passengerType,
+                    passportNo: form.querySelector('[name$="[PassportNo]"]')?.value.trim() || "",
+                    passportExpiry: convertToISODateTime(form.querySelector('[name$="[PassportExpiry]"]')?.value || ""),
+                    passportIssueDate: convertToISODateTime(form.querySelector('[name$="[PassportIssueDate]"]')?.value || ""),
+                    dateOfBirth: convertToISODateTime(form.querySelector('[name$="[DateOfBirth]"]')?.value || ""),
+                    addressLine1: origin,
+                    city: origin,
+                    countryCode: "IN",
+                    countryName: "INDIA",
+                    isLeadPax: index === 0, // First passenger is lead passenger
+                    
+                    // Add fare details for each passenger
+                    fare: [{
+                        baseFare: parseFloat(fareQuoteData.Fare.BaseFare),
+                        tax: parseFloat(fareQuoteData.Fare.Tax),
+                        yqTax: parseFloat(fareQuoteData.Fare.YQTax || 0),
+                        transactionFee: (fareQuoteData.Fare.TransactionFee || '0').toString(),
+                        additionalTxnFeeOfrd: parseFloat(fareQuoteData.Fare.AdditionalTxnFeeOfrd || 0),
+                        additionalTxnFeePub: parseFloat(fareQuoteData.Fare.AdditionalTxnFeePub || 0),
+                        airTransFee: (fareQuoteData.Fare.AirTransFee || '0').toString()
+                    }],
+                    
+                    // Add GST details
+                    gst: {
+                        companyAddress: '',
+                        companyContactNumber: '',
+                        companyName: '',
+                        number: '',
+                        companyEmail: ''
+                    }
+                };
+
+                // Validate passenger data
+                const validationErrors = validatePassenger(passenger);
+                if (validationErrors.length > 0) {
+                    throw new Error(`Validation failed for ${passengerTypeString}: ${validationErrors.join(', ')}`);
+                }
+
+                passengers.push(passenger);
+            });
+
+            // Create the final payload
+            const payload = {
+                srdvIndex: srdvIndex,
+                traceId: traceId,
+                resultIndex: resultIndex,
+                passengers: passengers
+            };
+
+            console.log('Final payload for bookHold:', payload);
+
+            // Disable submit button to prevent double submission
+            const submitButton = event.target;
+            submitButton.disabled = true;
+
+            // Make API call for bookHold
+            try {
+                const response = await fetch('/flight/bookHold', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                    },
+                    body: JSON.stringify(payload)
+                });
+                
+                const data = await response.json();
+                
+                if (data.status === 'success') {
+                    console.log('Non-LCC Booking successful!', data.booking_details);
+                    // Redirect to payment page with booking details
+                    const queryParams = new URLSearchParams({
+                        resultIndex: resultIndex,
+                        bookingId: data.booking_details.booking_id,
+                        pnr: data.booking_details.pnr,
+                        srdvIndex: data.booking_details.srdvIndex,
+                        traceId: data.booking_details.trace_id
+                    });
+                    window.location.href = `/payment?${queryParams.toString()}`;
+                } else {
+                    throw new Error(data.message || 'Booking failed');
+                }
+            } catch (error) {
+                console.error('Error during Non-LCC booking:', error);
+                if (window.Swal) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Booking Failed',
+                        text: error.message || 'An error occurred during booking'
+                    });
+                } else {
+                    alert('Booking failed: ' + (error.message || 'An error occurred'));
+                }
+            } finally {
+                submitButton.disabled = false;
+            }
+        }
+    } catch (error) {
+        console.error('Error during booking process:', error);
+        // Error is already handled in the checkFlightBalance function
     }
 });
-    
 
-    });
+});
+
+
 
 </script>
 @endsection

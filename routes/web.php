@@ -513,3 +513,4 @@ Route::post('/flight/get-seat-map', [FlightController::class, 'getSeatMap'])->na
 Route::post('/flight/bookHold', [FlightController::class, 'bookHold']);
 Route::post('/flight/bookLCC', [FlightController::class, 'bookLCC']);
 Route::post('/flight/bookGdsTicket', [FlightController::class, 'bookGdsTicket']);
+Route::post('/flight/balance', [FlightController::class, 'flightBalance']);
