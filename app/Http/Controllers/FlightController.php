@@ -1258,5 +1258,71 @@ public function bookGdsTicket(Request $request) {
             ], 500);
         }
     }
+
     
+    public function flightBalance(Request $request)
+{
+
+    $request->validate([
+        'EndUserIp' => 'required|string',
+        'ClientId' => 'required|string',
+        'UserName' => 'required|string',
+        'Password' => 'required|string'
+    ]);
+    // Prepare API request payload
+    $payload = [
+                'EndUserIp' => '1.1.1.1',
+                'ClientId' => '180133',
+                'UserName' => 'MakeMy91',
+                'Password' => 'MakeMy@910',
+    ];
+
+    try {
+        // Make the API call
+        $response = Http::withHeaders([
+            'Content-Type' => 'application/json',
+             'Api-Token' => 'MakeMy@910@23'
+        ])->post('https://flight.srdvtest.com/v8/rest/Balance', $payload);
+
+        // Handle the response
+        $balanceData = $response->json();
+
+        // Check for API success
+        if ($response->successful() && isset($balanceData['Error'])) {
+            if ($balanceData['Error']['ErrorCode'] === "0") {
+                return response()->json([
+                    'status' => 'success',
+                    'balance' => $balanceData['Balance'],
+                    'creditLimit' => $balanceData['CreditLimit']
+                ]);
+            } else {
+                // API returned an error
+                return response()->json([
+                    'status' => 'error',
+                    'message' => $balanceData['Error']['ErrorMessage'] ?? 'API Error'
+                ], 400);
+            }
+        }
+
+        // Log unexpected response format
+        \Log::error('Balance API Unexpected Response:', ['response' => $balanceData]);
+        
+        return response()->json([
+            'status' => 'error',
+            'message' => 'Invalid response from balance service'
+        ], 400);
+
+    } catch (\Exception $e) {
+        \Log::error('Balance API Exception:', [
+            'message' => $e->getMessage(),
+            'trace' => $e->getTraceAsString()
+        ]);
+
+        return response()->json([
+            'status' => 'error',
+            'message' => 'An error occurred while fetching balance details'
+        ], 500);
+    }
+}
+
 }
