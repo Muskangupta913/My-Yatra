@@ -203,12 +203,21 @@ body::before {
 @section('scripts')
     <script>
     document.addEventListener('DOMContentLoaded', function () {
+        const outboundFlights = JSON.parse(sessionStorage.getItem('outboundFlights')) || [];
+        const returnFlights = JSON.parse(sessionStorage.getItem('returnFlights')) || [];
     const results = JSON.parse(sessionStorage.getItem('flightSearchResults')) || [];
     const resultsContainer = document.getElementById('results-container');
     const filtersContainer = document.getElementById('filters-container');
     const resultsCountDisplay = document.getElementById('results-count');
     const sortOptions = document.getElementById('sort-options');
+ const journeyType = sessionStorage.getItem('journeyType') || "1"; // Default to One-Way
+    const isRoundTrip = journeyType; // Check if it's round trip
 
+    console.log('journey type is',isRoundTrip);
+     
+
+
+    
     // Advanced filter extraction
     function extractAdvancedFilters(results) {
         const filters = {
@@ -370,6 +379,8 @@ body::before {
     }
     // Apply filters
     function applyFilters() {
+
+        const journeyType = sessionStorage.getItem('journeyType') || "1";
     const selectedFilters = {
         airlines: getSelectedValues('airlines'),
         stops: getSelectedValues('stops'),
@@ -423,7 +434,12 @@ body::before {
             });
         })
     );
+<<<<<<< HEAD
     renderFilteredResults(filteredResults);
+=======
+
+    renderFilteredResults(filteredResults, journeyType);
+>>>>>>> 60d6f4809c6632cd4c59f250c74b5ae005512c4b
 }
     // Helper to get selected filter values
     function getSelectedValues(name) {
@@ -446,6 +462,7 @@ body::before {
     return logoPath || defaultLogoPath;
 }
     // Render results (existing implementation)
+<<<<<<< HEAD
     function renderFilteredResults(filteredResults) {
         resultsContainer.innerHTML = '';
         if (filteredResults.length === 0) {
@@ -456,7 +473,38 @@ body::before {
             resultsCountDisplay.textContent = '0 results';
             return;
         }
+=======
+    function renderFilteredResults(filteredResults, journeyType) {
+    const resultsContainer = document.getElementById('results-container');
+    resultsContainer.innerHTML = '';
+    console.log('Rendering Function', journeyType);
+>>>>>>> 60d6f4809c6632cd4c59f250c74b5ae005512c4b
 
+    let selectedOutbound = null;
+    let selectedReturn = null;
+
+    // Create fixed bottom div for selections
+    const selectionDiv = document.createElement('div');
+    selectionDiv.id = 'selected-flights';
+    selectionDiv.style.display = 'none';
+    selectionDiv.classList.add(
+        'fixed', 'bottom-0', 'left-0', 'right-0',
+        'bg-white', 'shadow-lg', 'border-t',
+        'p-4', 'z-50'
+    );
+    document.body.appendChild(selectionDiv);
+
+    if (filteredResults.length === 0) {
+        resultsContainer.innerHTML = `
+            <div class="text-center py-10">
+                <p class="text-gray-600">No flight results found matching your filters.</p>
+            </div>`;
+        resultsCountDisplay.textContent = '0 results';
+        return;
+    }
+    // Handle One-way flights (journeyType === "1")
+    if (journeyType === "1") {
+        console.log('journeytype inside function value', journeyType);
         filteredResults.forEach(resultGroup => {
             resultGroup.forEach(result => {
                 if (result.FareDataMultiple && Array.isArray(result.FareDataMultiple)) {
@@ -465,55 +513,57 @@ body::before {
                         
                         const flightCard = document.createElement('div');
                         flightCard.classList.add(
-                        'flight-card',  // Keep existing flight-card class
-                        'border-2',     // Add border thickness
-                        'border-blue-500', // Add border color
-                        'rounded-lg',   // Keep rounded corners
-                        'mb-4'          // Margin between cards
-                    );
+                            'flight-card',
+                            'bg-white',
+                            'border',
+                            'border-gray-200',
+                            'rounded-lg',
+                            'p-6',
+                            'shadow-md',
+                            'mb-4'
+                        );
+
                         flightCard.innerHTML = `
-                <div class="flight-card bg-white border border-gray-200 rounded-lg p-6 shadow-md">
-        <div class="flex justify-between items-center mb-6">
-            <div class="flex items-center">
-                <img src="${getAirlineLogo(fareData.FareSegments[0]?.AirlineCode)}" 
-                     alt="${fareData.FareSegments[0]?.AirlineName || 'Airline'}" 
-                     class="w-12 h-12 mr-4 object-contain"
-                     onerror="this.onerror=null; this.src='/assets/images/airlines/airlines/48_48/default-airline.png'; this.classList.add('grayscale opacity-70');">
-                <div>
-                    <h2 class="text-xl font-bold text-blue-700">${fareData.FareSegments[0]?.AirlineName || 'Airline'}</h2>
-                    <p class="text-sm text-gray-900">${fareData.FareSegments[0]?.AirlineCode || ''} - ${fareData.FareSegments[0]?.FlightNumber || 'N/A'}</p>
-                </div>
-            </div>
-            <div class="text-right">
-                <p class="text-2xl font-bold text-green-600">₹${fareData.Fare?.OfferedFare?.toLocaleString() || 'N/A'}</p>
-            </div>
-        </div>
+                            <div class="flex justify-between items-center mb-6">
+                                <div class="flex items-center">
+                                    <img src="${getAirlineLogo(fareData.FareSegments[0]?.AirlineCode)}" 
+                                         alt="${fareData.FareSegments[0]?.AirlineName || 'Airline'}" 
+                                         class="w-12 h-12 mr-4 object-contain"
+                                         onerror="this.onerror=null; this.src='/assets/images/airlines/airlines/48_48/default-airline.png'">
+                                    <div>
+                                        <h2 class="text-xl font-bold text-blue-700">${fareData.FareSegments[0]?.AirlineName || 'Airline'}</h2>
+                                        <p class="text-sm text-gray-900">${fareData.FareSegments[0]?.AirlineCode || ''} - ${fareData.FareSegments[0]?.FlightNumber || 'N/A'}</p>
+                                    </div>
+                                </div>
+                                <div class="text-right">
+                                    <p class="text-2xl font-bold text-green-600">₹${fareData.Fare?.OfferedFare?.toLocaleString() || 'N/A'}</p>
+                                </div>
+                            </div>
                             
                             <div class="flex justify-between items-center mb-4">
                                 <div>
                                     <p class="font-semibold">${segment?.DepTime ? new Date(segment.DepTime).toLocaleTimeString() : 'N/A'}</p>
                                     <p class="text-sm text-gray-900">${segment?.Origin?.AirportName || 'N/A'} (${segment?.Origin?.AirportCode || 'N/A'})</p>
                                 </div>
-        <div class="flex items-center space-x-3">
-            <div class="text-center">
-                <div class="flex items-center">
-                    <div class="w-3 h-3 bg-blue-500 rounded-full mr-2"></div>
-                    <div class="w-24 h-0.5 bg-gray-300 relative">
-                        <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-xs text-gray-900">
-                            ${segment?.Duration || 'N/A'} mins
-                        </div>
-                    </div>
-                    <div class="w-3 h-3 bg-blue-500 rounded-full ml-2"></div>
-                </div>
-                <i class="fas fa-plane text-gray-700 mt-1"></i>
-            </div>
-        </div>
+                                <div class="flex items-center space-x-3">
+                                    <div class="text-center">
+                                        <div class="flex items-center">
+                                            <div class="w-3 h-3 bg-blue-500 rounded-full mr-2"></div>
+                                            <div class="w-24 h-0.5 bg-gray-300 relative">
+                                                <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-xs text-gray-900">
+                                                    ${segment?.Duration || 'N/A'} mins
+                                                </div>
+                                            </div>
+                                            <div class="w-3 h-3 bg-blue-500 rounded-full ml-2"></div>
+                                        </div>
+                                    </div>
+                                </div>
                                 <div class="text-right">
                                     <p class="font-semibold">${segment?.ArrTime ? new Date(segment.ArrTime).toLocaleTimeString() : 'N/A'}</p>
                                     <p class="text-sm text-gray-900">${segment?.Destination?.AirportName || 'N/A'} (${segment?.Destination?.AirportCode || 'N/A'})</p>
                                 </div>
                             </div>
-                            
+
                             <div class="border-t pt-3 flex justify-between items-center">
                                 <div class="flex space-x-2">
                                     <span class="bg-green-100 text-green-800 px-2 py-1 rounded text-xs">
@@ -541,12 +591,226 @@ body::before {
                 }
             });
         });
-
-        resultsCountDisplay.textContent = `${filteredResults.length} results`;
-    
     }
+<<<<<<< HEAD
+=======
+    // Handle Round-trip flights (journeyType === "2")
+    else if (journeyType === "2") {
+        const returnFlights = JSON.parse(sessionStorage.getItem('returnFlights')) || [];
+        const outboundFlights = JSON.parse(sessionStorage.getItem('outboundFlights')) || [];
+
+        // Function to update selection div
+        function updateSelectionDiv() {
+            if (selectedOutbound || selectedReturn) {
+                selectionDiv.style.display = 'block';
+                selectionDiv.innerHTML = `
+                    <div class="container mx-auto max-w-6xl">
+                        <div class="flex justify-between items-center">
+                            <div class="flex gap-4">
+                                ${selectedOutbound ? `
+                                    <div class="flex items-center">
+                                        <div class="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-semibold">
+                                            Outbound: ${selectedOutbound.airline} - ${selectedOutbound.flightNumber}
+                                        </div>
+                                    </div>
+                                ` : ''}
+                                ${selectedReturn ? `
+                                    <div class="flex items-center">
+                                        <div class="bg-purple-100 text-purple-800 px-3 py-1 rounded-full text-sm font-semibold">
+                                            Return: ${selectedReturn.airline} - ${selectedReturn.flightNumber}
+                                        </div>
+                                    </div>
+                                ` : ''}
+                            </div>
+                           ${selectedOutbound && selectedReturn ? `
+    <button onclick="handleRoundTripFareQuotes('${selectedOutbound.resultIndex}', '${selectedReturn.resultIndex}')"
+            class="bg-blue-500 text-white px-6 py-2 rounded hover:bg-blue-600">
+        View Details
+    </button>
+` : ''}
+                            
+                        </div>
+                    </div>
+                `;
+            } else {
+                selectionDiv.style.display = 'none';
+            }
+        }
+
+        // Create sections for outbound and return flights
+        const outboundSection = document.createElement('div');
+        outboundSection.classList.add('mb-8');
+        outboundSection.innerHTML = '<h2 class="text-xl font-bold mb-4">Select Outbound Flight</h2>';
+
+        const returnSection = document.createElement('div');
+        returnSection.classList.add('mb-8');
+        returnSection.innerHTML = '<h2 class="text-xl font-bold mb-4">Select Return Flight</h2>';
+
+        // Render outbound flights
+        outboundFlights.forEach(outbound => {
+            if (!outbound.FareDataMultiple || !Array.isArray(outbound.FareDataMultiple)) return;
+
+            outbound.FareDataMultiple.forEach(outboundFareData => {
+                const outboundSegment = outbound.Segments?.[0]?.[0];
+                if (!outboundSegment) return;
+
+                const flightCard = document.createElement('div');
+                flightCard.classList.add('mb-4', 'relative');
+                
+                // Add radio button for selection
+                const radioContainer = document.createElement('div');
+                radioContainer.classList.add(
+                    'absolute', 'top-4', 'right-4',
+                    'w-6', 'h-6'
+                );
+                radioContainer.innerHTML = `
+                    <input type="radio" 
+                           name="outbound-flight" 
+                           class="w-6 h-6 cursor-pointer"
+                           value="${outboundFareData.ResultIndex}">
+                `;
+
+                flightCard.innerHTML = createFlightCardContent(outboundSegment, outboundFareData);
+                flightCard.appendChild(radioContainer);
+
+                // Add click handler for selection
+                flightCard.querySelector('input[type="radio"]').addEventListener('change', (e) => {
+                    if (e.target.checked) {
+                        selectedOutbound = {
+                            resultIndex: outboundFareData.ResultIndex,
+                            airline: outboundFareData.FareSegments[0]?.AirlineName,
+                            flightNumber: outboundFareData.FareSegments[0]?.FlightNumber
+                        };
+                        updateSelectionDiv();
+                    }
+                });
+
+                outboundSection.appendChild(flightCard);
+            });
+        });
+
+        // Render return flights
+        returnFlights.forEach(returnFlight => {
+            if (!returnFlight.FareDataMultiple || !Array.isArray(returnFlight.FareDataMultiple)) return;
+
+            returnFlight.FareDataMultiple.forEach(returnFareData => {
+                const returnSegment = returnFlight.Segments?.[0]?.[0];
+                if (!returnSegment) return;
+
+                const flightCard = document.createElement('div');
+                flightCard.classList.add('mb-4', 'relative');
+
+                // Add radio button for selection
+                const radioContainer = document.createElement('div');
+                radioContainer.classList.add(
+                    'absolute', 'top-4', 'right-4',
+                    'w-6', 'h-6'
+                );
+                radioContainer.innerHTML = `
+                    <input type="radio" 
+                           name="return-flight" 
+                           class="w-6 h-6 cursor-pointer"
+                           value="${returnFareData.ResultIndex}">
+                `;
+
+                flightCard.innerHTML = createFlightCardContent(returnSegment, returnFareData);
+                flightCard.appendChild(radioContainer);
+
+                // Add click handler for selection
+                flightCard.querySelector('input[type="radio"]').addEventListener('change', (e) => {
+                    if (e.target.checked) {
+                        selectedReturn = {
+                            resultIndex: returnFareData.ResultIndex,
+                            airline: returnFareData.FareSegments[0]?.AirlineName,
+                            flightNumber: returnFareData.FareSegments[0]?.FlightNumber
+                        };
+                        updateSelectionDiv();
+                    }
+                });
+
+                returnSection.appendChild(flightCard);
+            });
+        });
+
+        resultsContainer.appendChild(outboundSection);
+        resultsContainer.appendChild(returnSection);
+    }
+
+    resultsCountDisplay.textContent = `${filteredResults.length} results`;
+}
+
+
+
+
+function createFlightCardContent(segment, fareData) {
+    return `
+        <div class="flight-card bg-white border border-gray-200 rounded-lg p-6 shadow-md">
+            <div class="flex justify-between items-center mb-6">
+                <div class="flex items-center">
+                    <img src="${getAirlineLogo(fareData.FareSegments[0]?.AirlineCode)}" 
+                         alt="${fareData.FareSegments[0]?.AirlineName || 'Airline'}" 
+                         class="w-12 h-12 mr-4 object-contain"
+                         onerror="this.onerror=null; this.src='/assets/images/airlines/airlines/48_48/default-airline.png'">
+                    <div>
+                        <h2 class="text-xl font-bold text-blue-700">${fareData.FareSegments[0]?.AirlineName || 'Airline'}</h2>
+                        <p class="text-sm text-gray-900">${fareData.FareSegments[0]?.AirlineCode || ''} - ${fareData.FareSegments[0]?.FlightNumber || 'N/A'}</p>
+                    </div>
+                </div>
+                <div class="text-right">
+                    <p class="text-2xl font-bold text-green-600">₹${fareData.Fare?.OfferedFare?.toLocaleString() || 'N/A'}</p>
+                </div>
+            </div>
+
+            <div class="flex justify-between items-center mb-4">
+                <div>
+                    <p class="font-semibold">${segment?.DepTime ? new Date(segment.DepTime).toLocaleTimeString() : 'N/A'}</p>
+                    <p class="text-sm text-gray-900">${segment?.Origin?.AirportName || 'N/A'} (${segment?.Origin?.AirportCode || 'N/A'})</p>
+                </div>
+                <div class="flex items-center space-x-3">
+                    <div class="text-center">
+                        <div class="flex items-center">
+                            <div class="w-3 h-3 bg-blue-500 rounded-full mr-2"></div>
+                            <div class="w-24 h-0.5 bg-gray-300 relative">
+                                <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-xs text-gray-900">
+                                    ${segment?.Duration || 'N/A'} mins
+                                </div>
+                            </div>
+                            <div class="w-3 h-3 bg-blue-500 rounded-full ml-2"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="text-right">
+                    <p class="font-semibold">${segment?.ArrTime ? new Date(segment.ArrTime).toLocaleTimeString() : 'N/A'}</p>
+                    <p class="text-sm text-gray-900">${segment?.Destination?.AirportName || 'N/A'} (${segment?.Destination?.AirportCode || 'N/A'})</p>
+                </div>
+            </div>
+
+            <div class="border-t pt-3 flex justify-between items-center">
+                <div class="flex space-x-2">
+                    <span class="bg-green-100 text-green-800 px-2 py-1 rounded text-xs">
+                        ${fareData.FareSegments[0]?.Baggage || 'N/A'} Baggage
+                    </span>
+                    <span class="bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs">
+                        ${fareData.FareSegments[0]?.CabinClassName || 'N/A'}
+                    </span>
+                </div>
+                <div class="flex space-x-2">
+                   
+                    <button onclick="fetchFareRules('${fareData.ResultIndex}')" 
+                            class="bg-gray-200 text-gray-700 px-4 py-2 rounded hover:bg-gray-300">
+                        Fare Rules
+                    </button>
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+
+>>>>>>> 60d6f4809c6632cd4c59f250c74b5ae005512c4b
     // Sorting functionality (existing implementation)
     function sortResults(option) {
+        const journeyType = sessionStorage.getItem('journeyType') || "1";
         const sortedResults = JSON.parse(JSON.stringify(results)); // Deep clone to avoid mutating original
 
     sortedResults.forEach(resultGroup => {
@@ -573,13 +837,184 @@ renderFilteredResults(sortedResults);
     // Initialize
     const filters = extractAdvancedFilters(results);
     createFilterSections(filters);
-    renderFilteredResults(results);
+    renderFilteredResults(results, journeyType);
 
     // Event Listeners for sorting
     sortOptions.addEventListener('change', (e) => {
         sortResults(e.target.value);
     });
 });
+
+
+function handleRoundTripFareQuotes(outboundResultIndex, returnResultIndex) {
+    const traceId = sessionStorage.getItem('flightTraceId');
+    const outboundFlights = JSON.parse(sessionStorage.getItem('outboundFlights')) || [];
+const returnFlights = JSON.parse(sessionStorage.getItem('returnFlights')) || [];
+    if (!traceId) {
+    console.error('TraceId is not found in sessionStorage');
+    return;
+}
+
+// Find SrdvIndex for outbound flight
+let outboundSrdvIndex = null;
+// Find SrdvIndex for return flight
+let returnSrdvIndex = null;
+
+// Find SrdvIndex from outboundFlights
+outboundFlights.forEach(outbound => {
+    if (outbound.FareDataMultiple && Array.isArray(outbound.FareDataMultiple)) {
+        outbound.FareDataMultiple.forEach(fareData => {
+            if (fareData.ResultIndex === outboundResultIndex) {
+                outboundSrdvIndex = fareData.SrdvIndex;
+            }
+        });
+    }
+});
+
+// Find SrdvIndex from returnFlights
+returnFlights.forEach(returnFlight => {
+    if (returnFlight.FareDataMultiple && Array.isArray(returnFlight.FareDataMultiple)) {
+        returnFlight.FareDataMultiple.forEach(fareData => {
+            if (fareData.ResultIndex === returnResultIndex) {
+                returnSrdvIndex = fareData.SrdvIndex;
+            }
+        });
+    }
+});
+
+// Log the found indices for debugging
+console.log('Outbound SrdvIndex:', outboundSrdvIndex);
+console.log('Return SrdvIndex:', returnSrdvIndex);
+    // Create payloads for both flights
+    const outboundPayload = {
+        EndUserIp: '1.1.1.1',
+        ClientId: '180133',
+        UserName: 'MakeMy91',
+        Password: 'MakeMy@910',
+        SrdvType: 'MixAPI',
+        SrdvIndex: outboundSrdvIndex,
+        TraceId: traceId,
+        ResultIndex: outboundResultIndex
+    };
+
+    console.log('outbound payload', outboundPayload);
+
+    const returnPayload = {
+        EndUserIp: '1.1.1.1',
+        ClientId: '180133',
+        UserName: 'MakeMy91',
+        Password: 'MakeMy@910',
+        SrdvType: 'MixAPI',
+        SrdvIndex: returnSrdvIndex,
+        TraceId: traceId,
+        ResultIndex: returnResultIndex
+    };
+    console.log('return payload', returnPayload);
+
+    // First fare quote call for outbound flight
+    fetch('/flight/fareQutes', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+        },
+        body: JSON.stringify(outboundPayload)
+    })
+    .then(response => response.json())
+    .then(outboundData => {
+        if (outboundData.success) {
+            // Store outbound fare quote data
+            sessionStorage.setItem('outboundFareQuoteData', JSON.stringify(outboundData.fareQuote));
+            
+            // Second fare quote call for return flight
+            return fetch('/flight/fareQutes', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                },
+                body: JSON.stringify(returnPayload)
+            });
+        } else {
+            throw new Error('Outbound fare quote failed');
+        }
+    })
+    .then(response => response.json())
+    .then(returnData => {
+        if (returnData.success) {
+            // Store return fare quote data
+            sessionStorage.setItem('returnFareQuoteData', JSON.stringify(returnData.fareQuote));
+
+            // Get flight details for both flights
+            const selectedFlights = {
+                outbound: null,
+                return: null
+            };
+
+           // Find outbound flight details
+outboundFlights.forEach(outbound => {
+    if (outbound.FareDataMultiple && Array.isArray(outbound.FareDataMultiple)) {
+        outbound.FareDataMultiple.forEach(fareData => {
+            if (fareData.ResultIndex === outboundResultIndex) {
+                selectedFlights.outbound = {
+                    isLCC: fareData.IsLCC,
+                    airlineName: fareData.FareSegments[0]?.AirlineName,
+                    flightNumber: fareData.FareSegments[0]?.FlightNumber,
+                    cabinClass: fareData.FareSegments[0]?.CabinClassName,
+                    fare: fareData.Fare?.OfferedFare,
+                    origin: outbound.Segments?.[0]?.[0]?.Origin?.AirportCode,
+                    destination: outbound.Segments?.[0]?.[0]?.Destination?.AirportCode
+                };
+            }
+        });
+    }
+});
+
+// Find return flight details
+returnFlights.forEach(returnFlight => {
+    if (returnFlight.FareDataMultiple && Array.isArray(returnFlight.FareDataMultiple)) {
+        returnFlight.FareDataMultiple.forEach(fareData => {
+            if (fareData.ResultIndex === returnResultIndex) {
+                selectedFlights.return = {
+                    isLCC: fareData.IsLCC,
+                    airlineName: fareData.FareSegments[0]?.AirlineName,
+                    flightNumber: fareData.FareSegments[0]?.FlightNumber,
+                    cabinClass: fareData.FareSegments[0]?.CabinClassName,
+                    fare: fareData.Fare?.OfferedFare,
+                    origin: returnFlight.Segments?.[0]?.[0]?.Origin?.AirportCode,
+                    destination: returnFlight.Segments?.[0]?.[0]?.Destination?.AirportCode
+                };
+            }
+        });
+    }
+});
+
+                // Check if both flight details were found
+if (!selectedFlights.outbound || !selectedFlights.return) {
+    console.error('Could not find details for one or both flights');
+    alert('Error: Could not find complete flight details.');
+    return;
+}
+
+           
+// Store indices
+sessionStorage.setItem('selectedOutboundIndex', outboundResultIndex);
+sessionStorage.setItem('selectedReturnIndex', returnResultIndex);
+
+// Redirect with both flight details
+window.location.href = `/flight-booking?traceId=${traceId}&outboundIndex=${outboundResultIndex}&returnIndex=${returnResultIndex}&details=${encodeURIComponent(JSON.stringify(selectedFlights))}`;
+        } else {
+            throw new Error('Return fare quote failed');
+        }
+    })
+    .catch(error => {
+        console.error('Error in fare quotes:', error);
+        alert('An error occurred while processing flight details.');
+    });
+}
+
+
+
 function viewFlightDetails(resultIndex) {
     const traceId = sessionStorage.getItem('flightTraceId');
     const results = JSON.parse(sessionStorage.getItem('flightSearchResults')) || [];

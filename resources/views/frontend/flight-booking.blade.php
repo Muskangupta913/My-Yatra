@@ -231,136 +231,82 @@
 
 {{-- In @section('content') --}}
 @section('content')
-    <div class="container py-4">
+<div class="container py-4">
+
+
+<div class="container mt-5">
+        <h2 class="text-center mb-4">Flight Segments</h2>
+        <div id="segmentsContainer"></div>
+    </div>
         <div class="card">
             <div class="card-header">
                 <h4 class="mb-0">Flight Booking Form</h4>
             </div>
             <div class="card-body">
                 <form id="bookingForm">
-                    <!-- Personal Details Section -->
+                    <!-- Hidden form elements for API integration -->
+                    <div style="display: none;">
+                        <div class="col-md-3 mb-3">
+                            <label for="title" class="form-label">Title</label>
+                            <select class="form-select" id="title" name="Title">
+                                <option value="Mr">Mr</option>
+                                <option value="Mrs">Mrs</option>
+                                <option value="Ms">Ms</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <input type="hidden" id="firstName" name="FirstName">
+                            <input type="hidden" id="lastName" name="LastName">
+                            <input type="hidden" id="gender" name="Gender">
+                            <input type="hidden" id="dateOfBirth" name="DateOfBirth">
+                            <input type="hidden" id="passengerType" name="PassengerType">
+                            <input type="hidden" id="email" name="Email">
+                            <input type="hidden" id="contactNo" name="ContactNo">
+                            <input type="hidden" id="addressLine1" name="AddressLine1">
+                            <input type="hidden" id="passportNo" name="PassportNo">
+                            <input type="hidden" id="passportExpiry" name="PassportExpiry">
+                            <input type="hidden" id="passportIssueDate" name="PassportIssueDate">
+                        </div>
+                    </div>
+
+                    <!-- Dynamic Sections -->
+                    <div id="dynamicSections"></div>
+
+                    <!-- Options -->
+                    <div class="option-selection">
+                        <button type="button" class="btn btn-primary" id="baggage-btn">Baggage Options</button>
+                        <button type="button" class="btn btn-secondary" id="meal-btn">Meal Options</button>
+                    </div>
+                    <div id="options-container">
+                        <p>Please select an option to view details.</p>
+                    </div>
+
+                    <!-- Seat Selection -->
+                    <div class="seat-selection-section mb-3">
+                        <h6>Seat Selection</h6>
+                        <button type="button" class="btn btn-secondary" id="selectSeatBtn">Select Seat</button>
+                        <span id="seatInfo" class="ms-2" style="font-size: 14px;"></span>
+                    </div>
+                    <div id="seatMapContainer" class="mt-3" style="display: none;"></div>
+
+                    <!-- Fare Details -->
                     <div class="card mb-3">
                         <div class="card-header">
-                            <h6 class="mb-0">Personal Details</h6>
+                            <h6 class="mb-0">Fare Details</h6>
                         </div>
                         <div class="card-body">
                             <div class="row">
                                 <div class="col-md-3 mb-3">
-                                    <label for="title" class="form-label">Title</label>
-                                    <select class="form-select" id="title" name="Title" required>
-                                        <option value="Mr">Mr</option>
-                                        <option value="Mrs">Mrs</option>
-                                        <option value="Ms">Ms</option>
-                                    </select>
-                                </div>
-                                <div class="col-md-3 mb-3">
-                                    <label for="firstName" class="form-label">First Name</label>
-                                    <input type="text" class="form-control" id="firstName" name="FirstName" required>
-                                </div>
-                                <div class="col-md-3 mb-3">
-                                    <label for="lastName" class="form-label">Last Name</label>
-                                    <input type="text" class="form-control" id="lastName" name="LastName" required>
-                                </div>
-                                <div class="col-md-3 mb-3">
-                                    <label for="gender" class="form-label">Gender</label>
-                                    <select class="form-select" id="gender" name="Gender" required>
-                                        <option value="1">Male</option>
-                                        <option value="2">Female</option>
-                                    </select>
-                                </div>
-                                <div class="col-md-4 mb-3">
-    <label for="dateOfBirth" class="form-label">Date of Birth</label>
-    <input type="date" class="form-control" id="dateOfBirth" name="DateOfBirth">
-</div>
-                                
-                                <div class="col-md-3 mb-3">
-                                    <label for="passengerType" class="form-label">Passenger Type</label>
-                                    <select class="form-select" id="passengerType" name="PassengerType" required>
-                                        <option value="1">Adult</option>
-                                        <option value="2">Child</option>
-                                        <option value="3">Infant</option>
-                                    </select>
-                                </div>
-                                <div class="col-md-6 mb-3">
-                                    <label for="email" class="form-label">Email</label>
-                                    <input type="email" class="form-control" id="email" name="Email" required>
-                                </div>
-                                <div class="col-md-6 mb-3">
-                                    <label for="contactNo" class="form-label">Contact Number</label>
-                                    <input type="tel" class="form-control" id="contactNo" name="ContactNo" required>
-                                </div>
-                                <div class="col-md-12 mb-3">
-                                    <label for="addressLine1" class="form-label">Address</label>
-                                    <input type="text" class="form-control" id="addressLine1" name="AddressLine1" required>
+                                    <label for="totalFare" class="form-label">Total Fare</label>
+                                    <input type="text" class="form-control" id="totalFare" readonly>
                                 </div>
                             </div>
                         </div>
+                    </div>
 
-                        <!-- Passport Details Section -->
-                        <div class="card mb-3">
-                            <div class="card-header">
-                                <h6 class="mb-0">Passport Details</h6>
-                            </div>
-                            <div class="card-body">
-                                <div class="row">
-                                    <!-- Passport Number -->
-                                    <div class="col-md-4 mb-3">
-                                        <label for="passportNo" class="form-label">Passport Number</label>
-                                        <input type="text" class="form-control" id="passportNo" name="PassportNo">
-                                    </div>
-                                    <!-- Passport Expiry -->
-                                    <div class="col-md-4 mb-3">
-                                        <label for="passportExpiry" class="form-label">Passport Expiry</label>
-                                        <input type="date" class="form-control" id="passportExpiry" name="PassportExpiry">
-                                    </div>
-                                    <!-- Passport Issue Date -->
-                                    <div class="col-md-4 mb-3">
-                                        <label for="passportIssueDate" class="form-label">Passport Issue Date</label>
-                                        <input type="date" class="form-control" id="passportIssueDate" name="PassportIssueDate">
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Dynamic Sections -->
-                        <div id="dynamicSections"></div>
-
-                        <!-- Options -->
-                        <div class="option-selection">
-                            <button type="button" class="btn btn-primary" id="baggage-btn">Baggage Options</button>
-                            <button type="button" class="btn btn-secondary" id="meal-btn">Meal Options</button>
-                        </div>
-                        <div id="options-container">
-                            <p>Please select an option to view details.</p>
-                        </div>
-
-                        <!-- Seat Selection -->
-                        <div class="seat-selection-section mb-3">
-                            <h6>Seat Selection</h6>
-                            <button type="button" class="btn btn-secondary" id="selectSeatBtn">Select Seat</button>
-                            <span id="seatInfo" class="ms-2" style="font-size: 14px;"></span>
-                        </div>
-                        <div id="seatMapContainer" class="mt-3" style="display: none;"></div>
-
-                        <!-- Fare Details -->
-                        <div class="card mb-3">
-                            <div class="card-header">
-                                <h6 class="mb-0">Fare Details</h6>
-                            </div>
-                            <div class="card-body">
-                                <div class="row">
-                                    <div class="col-md-3 mb-3">
-                                        <label for="totalFare" class="form-label">Total Fare</label>
-                                        <input type="text" class="form-control" id="totalFare" readonly>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Submit Button -->
-                        <button  type="button" id="submitButton" class="btn btn-primary">Submit Booking</button>
-                    </form>
-                </div>
+                    <!-- Submit Button -->
+                    <button type="button" id="submitButton" class="btn btn-primary">Submit Booking</button>
+                </form>
             </div>
         </div>
     </div>
@@ -378,6 +324,17 @@
     const traceId = urlParams.get('traceId');
     const resultIndex = urlParams.get('resultIndex');
     const encodedDetails = urlParams.get('details');
+<<<<<<< HEAD
+=======
+    const origin = getCookie('origin') ;
+    console.log(' ORIGIN Details:');
+        console.log('ORIGIN:', origin);
+        const outboundFareQuoteData = JSON.parse(sessionStorage.getItem('outboundFareQuoteData'));
+        const returnFareQuoteData = JSON.parse(sessionStorage.getItem('returnFareQuoteData'));
+
+        console.log('outbount fetched data ',outboundFareQuoteData);
+        console.log('return fetched data ',returnFareQuoteData);
+>>>>>>> 60d6f4809c6632cd4c59f250c74b5ae005512c4b
          
 
     function getCookie(name) {
@@ -531,7 +488,78 @@ createPassengerForm("Infant", infantCount, 3);
    
 
     const fareQuoteData = JSON.parse(sessionStorage.getItem('fareQuoteData'));
+    console.log('fareqoutes segment',fareQuoteData?.Segments )
 
+    function renderFareQuoteSegments(fareQuoteData) {
+    const segmentsContainer = document.getElementById('segmentsContainer');
+    segmentsContainer.innerHTML = '';
+
+    if (!fareQuoteData?.Segments) {
+        console.log('Missing Segments data:', fareQuoteData);
+        segmentsContainer.innerHTML = `
+            <div class="p-4 bg-red-50 text-red-600 rounded">
+                No segments data available.
+            </div>`;
+        return;
+    }
+
+    fareQuoteData.Segments.forEach((segmentGroup) => {
+        const card = document.createElement('div');
+        card.classList.add(
+            'bg-white',
+            'rounded-lg',
+            'shadow-sm',
+            'border',
+            'border-gray-200',
+            'p-4',
+            'mb-4'
+        );
+
+        let segmentsHtml = '';
+        segmentGroup.forEach((segment, index) => {
+            const departureTime = new Date(segment.DepTime);
+            const arrivalTime = new Date(segment.ArrTime);
+
+            segmentsHtml += `
+                <div class="flex items-center ${index < segmentGroup.length - 1 ? 'mb-2' : ''}">
+                    <div class="w-24 text-center">
+                        <p class="font-bold">${departureTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
+                        <p class="text-sm text-gray-600">${segment.Origin.CityCode}</p>
+                    </div>
+                    
+                    <div class="flex-1 px-4">
+                        <div class="relative flex items-center">
+                            <div class="h-0.5 w-full bg-gray-300"></div>
+                            <div class="absolute w-full text-center">
+                                <span class="bg-white px-2 text-xs text-gray-600">
+                                    ${segment.Airline.AirlineCode} ${segment.Airline.FlightNumber}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="w-24 text-center">
+                        <p class="font-bold">${arrivalTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
+                        <p class="text-sm text-gray-600">${segment.Destination.CityCode}</p>
+                    </div>
+                </div>
+                ${index < segmentGroup.length - 1 ? `
+                    <div class="my-2 px-3 py-1 bg-orange-50 rounded text-sm text-center text-orange-700">
+                        Change planes at ${segment.Destination.CityCode}
+                    </div>
+                ` : ''}
+            `;
+        });
+
+        card.innerHTML = segmentsHtml;
+        segmentsContainer.appendChild(card);
+    });
+}
+
+
+if (fareQuoteData) {
+    renderFareQuoteSegments(fareQuoteData);
+}
     // Log fare details for verification
     if (fareQuoteData && fareQuoteData.Fare) {
         console.log('Fare Details Successfully Fetched:', fareQuoteData.Fare);
