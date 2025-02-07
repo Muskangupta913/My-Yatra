@@ -71,7 +71,6 @@ class FlightController extends Controller
         return response()->json($airports);
     }
   
-
     public function searchFlights(Request $request)
     {
         // Detailed request logging
@@ -104,7 +103,7 @@ class FlightController extends Controller
                 'AdultCount' => 'required',
                 'ChildCount' => 'required',
                 'InfantCount' => 'required',
-                'JourneyType' => 'required',
+                'JourneyType' => 'required|string',
                 'FareType' => 'required',
                 'Segments' => 'required|array',
                 'Segments.*.Origin' => 'required|string|size:3',
@@ -130,10 +129,10 @@ class FlightController extends Controller
     
             // Cast all numeric values to strings
             $payload = [
-                'EndUserIp' => (string) $data['EndUserIp'],
-                'ClientId' => (string) $data['ClientId'],
-                'UserName' => (string) $data['UserName'],
-                'Password' => (string) $data['Password'],
+                'EndUserIp' => '1.1.1.1', // Replace with actual user IP
+            'ClientId' => '180133',
+            'UserName' => 'MakeMy91',
+            'Password' => 'MakeMy@910',
                 'AdultCount' => (string) $data['AdultCount'],
                 'ChildCount' => (string) $data['ChildCount'],
                 'InfantCount' => (string) $data['InfantCount'],
@@ -168,24 +167,33 @@ class FlightController extends Controller
             if ($response->successful()) {
                 $responseData = $response->json();
     
-                // Check if Results array exists and is not empty
                 if (isset($responseData['Results']) && !empty($responseData['Results'])) {
-                    return response()->json([
+                    $formattedResponse = [
                         'success' => true,
                         'traceId' => $responseData['TraceId'] ?? '',
                         'srdvType' => $responseData['SrdvType'] ?? '',
                         'origin' => $responseData['Origin'] ?? '',
                         'destination' => $responseData['Destination'] ?? '',
-                        'results' => $responseData['Results']
-                    ], 200);
+                    ];
+    
+                    // Handle RoundTrip response
+                    if ($data['JourneyType'] === '2' && isset($responseData['Results'][1])) {
+                        $formattedResponse['outbound'] = $responseData['Results'][0];
+                        $formattedResponse['return'] = $responseData['Results'][1];
+                    } 
+                    // Handle OneWay response
+                    else {
+                        $formattedResponse['results'] = $responseData['Results'];
+                    }
+    
+                    return response()->json($formattedResponse, 200);
                 } 
-                // If Results array is empty or doesn't exist
                 else {
                     return response()->json([
                         'success' => false,
                         'message' => 'No flights found',
                         'debug' => $responseData
-                    ], 200);  // Still return 200 as this is a valid response
+                    ], 200);
                 }
             }
     
@@ -197,6 +205,7 @@ class FlightController extends Controller
                     'body' => $response->json(),
                 ]
             ], $response->status());
+    
         } catch (\Exception $e) {
             \Log::error('Flight Search Exception:', [
                 'message' => $e->getMessage(),
@@ -215,106 +224,6 @@ class FlightController extends Controller
             ], 500);
         }
     }
-    public function fareRules(Request $request)
-    {
-        try {
-            $data = $request->all();
-    
-            $validator = Validator::make($data, [
-                'EndUserIp' => 'required',
-                'ClientId' => 'required',
-                'UserName' => 'required',
-                'Password' => 'required',
-                'SrdvType' => 'required',
-                'SrdvIndex' => 'required',
-                'TraceId' => 'required',
-                'ResultIndex' => 'required'
-            ]);
-    
-            if ($validator->fails()) {
-                \Log::error('Fare Rules Validation Failed', [
-                    'errors' => $validator->errors()->toArray(),
-                    'data' => $data
-                ]);
-    
-                return response()->json([
-                    'status' => 'error',
-                    'message' => 'Validation failed',
-                    'errors' => $validator->errors()->toArray()
-                ], 422);
-            }
-    
-            $payload = [
-                'EndUserIp' => $data['EndUserIp'],
-                'ClientId' => $data['ClientId'],
-                'UserName' => $data['UserName'],
-                'Password' => $data['Password'],
-                'SrdvType' => $data['SrdvType'],
-                'SrdvIndex' => $data['SrdvIndex'],
-                'TraceId' => $data['TraceId'],
-                'ResultIndex' => $data['ResultIndex']
-            ];
-    
-            $response = Http::timeout(300)
-                ->connectTimeout(300)
-                ->withHeaders([
-                    'Content-Type' => 'application/json',
-                    'Api-Token' => 'MakeMy@910@23',
-                ])
-                ->post('https://flight.srdvtest.com/v8/rest/FareRule', $payload);
-    
-            if ($response->successful()) {
-                $responseData = $response->json();
-    
-                // Comprehensive error checking and data processing
-                if (isset($responseData['Error']) && $responseData['Error']['ErrorCode'] === 0) {
-                    if (!empty($responseData['Results'])) {
-                        return response()->json([
-                            'success' => true,
-                            'fareRules' => $responseData['Results'][0] // Return first fare rule
-                        ], 200);
-                    } else {
-                        return response()->json([
-                            'success' => false,
-                            'message' => 'No fare rules found',
-                            'debug' => $responseData
-                        ], 200);
-                    }
-                } else {
-                    return response()->json([
-                        'success' => false,
-                        'message' => $responseData['Error']['ErrorMessage'] ?? 'Unknown API error',
-                        'errorCode' => $responseData['Error']['ErrorCode'] ?? null
-                    ], 400);
-                }
-            }
-    
-            return response()->json([
-                'status' => 'error',
-                'message' => 'API request failed',
-                'debug' => [
-                    'status' => $response->status(),
-                    'body' => $response->body()
-                ]
-            ], $response->status());
-    
-        } catch (\Exception $e) {
-            \Log::error('Fare Rules Exception', [
-                'message' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
-            ]);
-    
-            return response()->json([
-                'status' => 'error',
-                'message' => 'An unexpected error occurred',
-                'debug' => [
-                    'exception' => get_class($e),
-                    'message' => $e->getMessage()
-                ]
-            ], 500);
-        }
-    }
-
 
     public function fareQutes(Request $request)
     {
@@ -1294,4 +1203,97 @@ public function bookGdsTicket(Request $request) {
     }
 }
 
+
+public function balanceLog(Request $request)
+{
+    // Extract data from the request body instead of query parameters
+    $requestBody = $request->json()->all();
+    $traceId = $requestBody['TraceId'] ?? null;
+    $amount = $requestBody['amount'] ?? null;
+
+    // Validate required parameters
+    if (!$traceId || !$amount) {
+        return response()->json([
+            'success' => false,
+            'errorMessage' => 'Missing required parameters (TraceId or amount)',
+        ]);
+    }
+
+    // Hotel Balance Log API request data
+    $requestData = [
+        'EndUserIp' => '1.1.1.1',
+                'ClientId' => '180133',
+                'UserName' => 'MakeMy91',
+                'Password' => 'MakeMy@910',
+    ];
+
+    // Make the API call
+    $response = Http::withHeaders([
+        'Content-Type' => 'application/json',
+        'Api-Token' => 'MakeMy@910@23'
+    ])->post('https://flight.srdvtest.com/v8/rest/BalanceLog', $requestData);
+
+    // Parse the API response
+    $data = $response->json();
+
+    // Log the full API response for debugging
+    \Log::info('Hotel Balance API Response:', $data);
+
+    // Check for successful response and ensure the `Result` key exists
+    if (isset($data['Error']) && $data['Error']['ErrorCode'] === '0' && isset($data['Result'])) {
+        $results = $data['Result'];
+        $processedLogs = [];
+
+        foreach ($results as $result) {
+            $currentBalance = ($result['Balance']);
+            $debitAmount = ($amount);
+
+            // Debugging log
+            \Log::info("Processing Hotel Log: Current Balance: {$currentBalance}, Debit Amount: {$debitAmount}");
+
+            // Calculate updated balance
+            $updatedBalance = $currentBalance - $debitAmount;
+
+            // Check for insufficient balance
+            if ($updatedBalance < 0) {
+                \Log::warning("Insufficient Balance for Transaction. TraceID: {$traceId}");
+                return response()->json([
+                    'success' => false,
+                    'errorMessage' => 'Insufficient balance.',
+                ]);
+            }
+
+            // Build the processed log entry
+            $processedLogs[] = [
+                'ID' => $result['ID'],
+                'Date' => $result['Date'],
+                'ClientID' => $result['ClientID'],
+                'ClientName' => $result['ClientName'],
+                'Detail' => $result['Detail'],
+                'Debit' => $debitAmount,
+                'Credit' => floatval($result['Credit']),
+                'Balance' => $updatedBalance,
+                'Module' => $result['Module'],
+                'TraceID' => $traceId,
+                'RefID' => $result['RefID'],
+                'UpdatedBy' => $result['UpdatedBy']
+            ];
+        }
+
+        return response()->json([
+            'success' => true,
+            'balanceLogs' => $processedLogs,
+        ]);
+    }
+
+    return response()->json([
+        'success' => false,
+        'errorMessage' => $data['Error']['ErrorMessage'] ?? 'Unknown error occurred.',
+    ]);
 }
+
+
+}
+
+
+

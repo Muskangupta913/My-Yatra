@@ -1591,6 +1591,11 @@ $('#flightSearchForm').on('submit', function (e) {
     console.log('Origin:', getCookie('origin'));
 console.log('Destination:', getCookie('destination'));
     const fareType = $('input[name="fareType"]:checked').val() || "1"; // Default to Normal Fare (1)
+    const journeyType = $('input[name="journeyType"]:checked').val();
+sessionStorage.setItem('journeyType', journeyType);
+
+
+console.log('journeytypt is this ',journeyType )
 
     const departureDate = convertToISODate($('#flightDepartureDate').val());
     const segments = [{
@@ -1634,7 +1639,7 @@ console.log('Destination:', getCookie('destination'));
         AdultCount: adultCount.toString(),
         ChildCount: childCount.toString(),
         InfantCount: infantCount.toString(),
-        JourneyType: $('input[name="journeyType"]:checked').val(),
+        JourneyType: journeyType,
         FareType: fareType,
         Segments: segments
     };
@@ -1650,26 +1655,33 @@ console.log('Destination:', getCookie('destination'));
     data: JSON.stringify(payload),
     success: function (response) {
         if (response.success) {
-            console.log('Flights:', response.results);
+            console.log('Flight search results:', response);
 
-            console.log('Flight search results:', response.results);
-        console.log('TraceId:', response.traceId);
+            // Store common details
+            sessionStorage.setItem('flightTraceId', response.traceId);
+            sessionStorage.setItem('flightSearchParams', JSON.stringify(payload));
 
-        // Store response data in sessionStorage
-        sessionStorage.setItem('flightSearchResults', JSON.stringify(response.results));
-        sessionStorage.setItem('flightTraceId', response.traceId);
-        sessionStorage.setItem('flightSearchParams', JSON.stringify(payload));
+            // Store flight results based on journey type
+            if (payload.JourneyType === "2") {  // RoundTrip
+                sessionStorage.setItem('outboundFlights', JSON.stringify(response.outbound));
+                sessionStorage.setItem('returnFlights', JSON.stringify(response.return));
+                console.log('RoundTrip Flights stored in sessionStorage');
+            } else {  // OneWay
+                sessionStorage.setItem('flightSearchResults', JSON.stringify(response.results));
+                console.log('OneWay Flights stored in sessionStorage');
+            }
 
-        // Optional: Add a log to confirm data is stored
-        console.log('Stored in sessionStorage:');
-        console.log('flightSearchResults:', sessionStorage.getItem('flightSearchResults'));
-        console.log('flightTraceId:', sessionStorage.getItem('flightTraceId'));
-        console.log('flightSearchParams:', sessionStorage.getItem('flightSearchParams'));
-        window.location.href =  `/flight?${searchParams.toString()}`;
+            // Confirm storage
+            console.log('Stored in sessionStorage:', {
+                traceId: sessionStorage.getItem('flightTraceId'),
+                searchParams: sessionStorage.getItem('flightSearchParams'),
+                outboundFlights: sessionStorage.getItem('outboundFlights'),
+                returnFlights: sessionStorage.getItem('returnFlights'),
+                oneWayFlights: sessionStorage.getItem('flightSearchResults')
+            });
 
- 
-            // Optional: Keep only the last 5 searches
-        
+            // Redirect to results page
+           window.location.href =  `/flight?${searchParams.toString()}`;
         } else {
             alert(response.message || 'No flights found.');
         }
