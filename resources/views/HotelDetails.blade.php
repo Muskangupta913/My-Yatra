@@ -887,23 +887,34 @@ function getRoomDataFromCard(roomId) {
         Currency: roomCard.getAttribute('data-price-currency'),
     };
 }
-
 function blockRoom(roomId) {
+    // Validate required parameters first
     const roomCard = document.querySelector(`[data-room-id="${roomId}"]`);
     if (!roomCard) {
-        alert('Room information not found');
+        showToast('error', 'Room information not found');
         return;
     }
 
     const urlParams = new URLSearchParams(window.location.search);
-    const traceId = urlParams.get('traceId');
-    const resultIndex = urlParams.get('resultIndex');
-    const hotelCode = urlParams.get('hotelCode');
+    const requiredParams = {
+        traceId: urlParams.get('traceId'),
+        resultIndex: urlParams.get('resultIndex'),
+        hotelCode: urlParams.get('hotelCode')
+    };
+
+    // Validate all required URL parameters
+    for (const [key, value] of Object.entries(requiredParams)) {
+        if (!value) {
+            showToast('error', `Missing required parameter: ${key}`);
+            return;
+        }
+    }
+
     const hotelName = document.querySelector('.hotel-name')?.textContent || 
                       document.querySelector('h1')?.textContent || 
                       'Unknown Hotel';
 
-    // Get room details from the data attributes
+    // Get room details and validate required fields
     const roomDetails = {
         RoomId: roomId,
         RoomIndex: roomCard.getAttribute('data-room-index'),
@@ -911,86 +922,264 @@ function blockRoom(roomId) {
         RoomTypeName: roomCard.getAttribute('data-room-type-name'),
         RatePlan: roomCard.getAttribute('data-rate-plan'),
         RatePlanCode: roomCard.getAttribute('data-rate-plan-code'),
-        RoomImages: JSON.parse(roomCard.getAttribute('data-room-images') || '[]'),
+        RoomImages: safeParseJSON(roomCard.getAttribute('data-room-images'), []),
         BedTypes: roomCard.getAttribute('data-bed-types'),
-        Amenities: JSON.parse(roomCard.getAttribute('data-amenities') || '[]'),
-        CancellationPolicies: JSON.parse(roomCard.getAttribute('data-cancellation-policies') || '[]'),
-        RoomImages: JSON.parse(roomCard.getAttribute('data-room-images') || '[]'),
+        Amenities: safeParseJSON(roomCard.getAttribute('data-amenities'), []),
+        CancellationPolicies: safeParseJSON(roomCard.getAttribute('data-cancellation-policies'), []),
         OfferedPrice: roomCard.getAttribute('data-price-offered'),
         PublishedPrice: roomCard.getAttribute('data-price-published'),
         Currency: roomCard.getAttribute('data-price-currency')
     };
 
-    // Serialize room details into a query string
-    const serializedRoomDetails = encodeURIComponent(JSON.stringify(roomDetails));
-
-    // Show confirmation dialog
-    if (!confirm('Are you sure you want to block this room?')) {
-        return;
+    // Validate required room details
+    const requiredRoomFields = ['RoomTypeCode', 'RoomTypeName', 'OfferedPrice', 'Currency'];
+    for (const field of requiredRoomFields) {
+        if (!roomDetails[field]) {
+            showToast('error', `Missing required room information: ${field}`);
+            return;
+        }
     }
 
-    // Show loading state
-    const loadingOverlay = document.createElement('div');
-    loadingOverlay.className = 'loading-overlay';
-    loadingOverlay.innerHTML = '<div class="loading-spinner">Blocking room...</div>';
-    document.body.appendChild(loadingOverlay);
+    // Update button state
+    const submitButton = document.querySelector(`button[onclick*="blockRoom('${roomId}')"]`);
+    if (submitButton) {
+        submitButton.disabled = true;
+        submitButton.innerHTML = '<span class="spinner"></span> Processing...';
+    }
 
     const requestBody = {
-        ResultIndex: resultIndex,
-        HotelCode: hotelCode,
+        ResultIndex: requiredParams.resultIndex,
+        HotelCode: requiredParams.hotelCode,
         HotelName: hotelName,
         GuestNationality: "IN",
         NoOfRooms: "1",
         HotelRoomsDetails: [roomDetails],
         SrdvType: "MixAPI",
         SrdvIndex: "15",
-        TraceId: parseInt(traceId),
+        TraceId: parseInt(requiredParams.traceId),
         IsVoucherBooking: true,
         ClientReferenceNo: 0
     };
+
+    // Show processing toast
+    const processingToastId = showToast('info', 'Processing your request...', false);
 
     fetch('/block-room', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
-            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content
         },
         body: JSON.stringify(requestBody)
     })
     .then(response => response.json())
     .then(data => {
-        if (data.status === 'success' && data.data?.BlockRoomResult) {
+        // Remove processing toast
+        removeToast(processingToastId);
+
+        // Prepare redirect URL params
+        const redirectParams = new URLSearchParams({
+            traceId: requiredParams.traceId,
+            resultIndex: requiredParams.resultIndex,
+            hotelCode: requiredParams.hotelCode,
+            hotelName: hotelName,
+            roomDetails: JSON.stringify(roomDetails)
+        });
+
+        // Check if BlockRoomResult exists in the response
+        if (data.data?.BlockRoomResult) {
             const blockRoomResult = data.data.BlockRoomResult;
-            const roomDetails = blockRoomResult.HotelRoomsDetails[0];
             
-            // Show success message with room details
-            const message = `
-                Room blocked successfully!
-                Hotel: ${blockRoomResult.HotelName}
-                Room Type: ${roomDetails.RoomTypeName}
-                Price: ${roomDetails.Price.CurrencyCode} ${roomDetails.Price.OfferedPriceRoundedOff}
-                
-                Do you want to proceed with booking?
-            `;
+            showToast('success', 'Room blocked successfully!');
             
-            if (confirm(data.message)) {
-                // Redirect to booking page with serialized room details
-                window.location.href = `/room-detail?traceId=${traceId}&resultIndex=${resultIndex}&hotelCode=${hotelCode}&hotelName=${encodeURIComponent(hotelName)}&roomDetails=${serializedRoomDetails}`;
-            }
+            // Redirect after a short delay to allow toast to be seen
+            setTimeout(() => {
+                window.location.href = `/room-detail?${redirectParams.toString()}`;
+            }, 1500);
+        } else if (data.status === 'success') {
+            // Handle case where status is success but no BlockRoomResult
+            showToast('success', data.message || 'Room blocked successfully!');
+            
+            setTimeout(() => {
+                window.location.href = `/room-detail?${redirectParams.toString()}`;
+            }, 1500);
         } else {
-            alert('Status: ' + (data.message || 'Unknown error'));
-            window.location.href = `/room-detail?traceId=${traceId}&resultIndex=${resultIndex}&hotelCode=${hotelCode}&hotelName=${encodeURIComponent(hotelName)}&roomDetails=${serializedRoomDetails}`;
+            // Show error message if neither condition is met
+            showToast('error', data.message || 'Failed to block room');
+            
+            setTimeout(() => {
+                window.location.href = `/room-detail?${redirectParams.toString()}`;
+            }, 2000);
         }
     })
     .catch(error => {
         console.error('Error:', error);
-        alert('An error occurred while blocking the room. Please try again.');
+        removeToast(processingToastId);
+        showToast('error', 'An error occurred while blocking the room');
+        
+        // Redirect to room detail page after error
+        const redirectParams = new URLSearchParams({
+            traceId: requiredParams.traceId,
+            resultIndex: requiredParams.resultIndex,
+            hotelCode: requiredParams.hotelCode,
+            hotelName: hotelName,
+            roomDetails: JSON.stringify(roomDetails)
+        });
+        
+        setTimeout(() => {
+            window.location.href = `/room-detail?${redirectParams.toString()}`;
+        }, 2000);
     })
     .finally(() => {
-        // Remove loading overlay
-        document.body.removeChild(loadingOverlay);
+        // Reset button state
+        if (submitButton) {
+            submitButton.disabled = false;
+            submitButton.textContent = 'Block Room';
+        }
     });
 }
+
+// Helper functions remain the same
+function safeParseJSON(str, defaultValue = null) {
+    try {
+        return str ? JSON.parse(str) : defaultValue;
+    } catch (e) {
+        console.error('JSON Parse Error:', e);
+        return defaultValue;
+    }
+}
+
+// Toast notification system and CSS remain the same
+function showToast(type, message, autoClose = true) {
+    const toast = document.createElement('div');
+    const toastId = 'toast-' + Date.now();
+    toast.id = toastId;
+    toast.className = `toast toast-${type}`;
+    
+    const icons = {
+        success: '✓',
+        error: '✕',
+        info: 'ℹ',
+        warning: '⚠'
+    };
+    
+    toast.innerHTML = `
+        <div class="toast-content">
+            <span class="toast-icon">${icons[type]}</span>
+            <span class="toast-message">${message}</span>
+            ${autoClose ? '<button class="toast-close" onclick="removeToast(\'' + toastId + '\')">×</button>' : ''}
+        </div>
+    `;
+    
+    let toastContainer = document.querySelector('.toast-container');
+    if (!toastContainer) {
+        toastContainer = document.createElement('div');
+        toastContainer.className = 'toast-container';
+        document.body.appendChild(toastContainer);
+    }
+    
+    toastContainer.appendChild(toast);
+    
+    if (autoClose) {
+        setTimeout(() => removeToast(toastId), 3000);
+    }
+    
+    return toastId;
+}
+
+function removeToast(toastId) {
+    const toast = document.getElementById(toastId);
+    if (toast) {
+        toast.remove();
+    }
+    
+    const container = document.querySelector('.toast-container');
+    if (container && !container.hasChildNodes()) {
+        container.remove();
+    }
+}
+
+// Styles remain the same
+const style = document.createElement('style');
+style.textContent = `
+    .toast-container {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 9999;
+    }
+
+    .toast {
+        margin-bottom: 10px;
+        padding: 15px;
+        border-radius: 4px;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        min-width: 300px;
+        max-width: 500px;
+        animation: slideIn 0.3s ease-in-out;
+    }
+
+    .toast-content {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .toast-success {
+        background-color: #4caf50;
+        color: white;
+    }
+
+    .toast-error {
+        background-color: #f44336;
+        color: white;
+    }
+
+    .toast-info {
+        background-color: #2196f3;
+        color: white;
+    }
+
+    .toast-warning {
+        background-color: #ff9800;
+        color: white;
+    }
+
+    .toast-close {
+        background: none;
+        border: none;
+        color: white;
+        cursor: pointer;
+        margin-left: auto;
+    }
+
+    .spinner {
+        display: inline-block;
+        width: 20px;
+        height: 20px;
+        border: 3px solid rgba(255,255,255,0.3);
+        border-radius: 50%;
+        border-top-color: #fff;
+        animation: spin 1s ease-in-out infinite;
+    }
+
+    @keyframes spin {
+        to { transform: rotate(360deg); }
+    }
+
+    @keyframes slideIn {
+        from {
+            transform: translateX(100%);
+            opacity: 0;
+        }
+        to {
+            transform: translateX(0);
+            opacity: 1;
+        }
+    }
+`;
+
+document.head.appendChild(style);
 
     </script>
 </body>

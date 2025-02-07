@@ -513,10 +513,7 @@ Route::post('/flight/get-seat-map', [FlightController::class, 'getSeatMap'])->na
 Route::post('/flight/bookHold', [FlightController::class, 'bookHold']);
 Route::post('/flight/bookLCC', [FlightController::class, 'bookLCC']);
 Route::post('/flight/bookGdsTicket', [FlightController::class, 'bookGdsTicket']);
-<<<<<<< HEAD
+Route::post('/flight/balance', [FlightController::class, 'flightBalance']);
 
 Route::get('/calendar-fare', [FlightController::class, 'index'])->name('calendar.fare');
 Route::post('/get-calendar-fare', [FlightController::class, 'getCalendarFare'])->name('get.calendar.fare');
-=======
-Route::post('/flight/balance', [FlightController::class, 'flightBalance']);
->>>>>>> 265a64aeed3a8e8387a32af770c1ac3ca5624121

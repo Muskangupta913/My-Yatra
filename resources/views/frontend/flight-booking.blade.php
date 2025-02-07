@@ -515,6 +515,7 @@
 
                         <input type="hidden" name="${passengerType}[${i}][PassengerType]" value="${typeValue}">
                     </div>
+                    ${passportSection}
                     ${ssrOptions}
                 </div>
             </div>

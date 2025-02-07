@@ -1665,7 +1665,7 @@ console.log('Destination:', getCookie('destination'));
         console.log('flightSearchResults:', sessionStorage.getItem('flightSearchResults'));
         console.log('flightTraceId:', sessionStorage.getItem('flightTraceId'));
         console.log('flightSearchParams:', sessionStorage.getItem('flightSearchParams'));
-        window.location.href =  `/flight?${searchParams.toString()}`;
+     
 
  
             // Optional: Keep only the last 5 searches
