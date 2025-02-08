@@ -1473,13 +1473,7 @@ document.getElementById('submitButton').addEventListener('click', async function
                         additionalTxnFeePub: parseFloat(outboundFareQuoteData.Fare.AdditionalTxnFeePub || 0),
                         airTransFee: (outboundFareQuoteData.Fare.AirTransFee || '0').toString()
                     }],
-                    gst: {
-                        companyAddress: document.querySelector('[name="GSTCompanyAddress"]')?.value || '',
-                        companyContactNumber: document.querySelector('[name="GSTCompanyContact"]')?.value || '',
-                        companyName: document.querySelector('[name="GSTCompanyName"]')?.value || '',
-                        number: document.querySelector('[name="GSTNumber"]')?.value || '',
-                        companyEmail: document.querySelector('[name="GSTCompanyEmail"]')?.value || ''
-                    }
+                    
                 };
                 if (!bookingPayloads.lcc.outbound) bookingPayloads.lcc.outbound = { passengers: [] };
                 bookingPayloads.lcc.outbound.passengers.push(outboundPassenger);
@@ -1505,13 +1499,7 @@ document.getElementById('submitButton').addEventListener('click', async function
                         additionalTxnFeePub: parseFloat(returnFareQuoteData.Fare.AdditionalTxnFeePub || 0),
                         airTransFee: (returnFareQuoteData.Fare.AirTransFee || '0').toString()
                     }],
-                    gst: {
-                        companyAddress: document.querySelector('[name="GSTCompanyAddress"]')?.value || '',
-                        companyContactNumber: document.querySelector('[name="GSTCompanyContact"]')?.value || '',
-                        companyName: document.querySelector('[name="GSTCompanyName"]')?.value || '',
-                        number: document.querySelector('[name="GSTNumber"]')?.value || '',
-                        companyEmail: document.querySelector('[name="GSTCompanyEmail"]')?.value || ''
-                    }
+                   
                 };
                 if (!bookingPayloads.lcc.return) bookingPayloads.lcc.return = { passengers: [] };
                 bookingPayloads.lcc.return.passengers.push(returnPassenger);
@@ -1532,7 +1520,23 @@ document.getElementById('submitButton').addEventListener('click', async function
                 srdvIndex: outboundSrdvIndex,
                 traceId: traceId,
                 resultIndex: outboundResultIndex,
-                passengers: bookingPayloads.nonLcc.outbound.passengers
+                passengers: bookingPayloads.nonLcc.outbound.passengers,
+                fare: [{
+                    baseFare: parseFloat(outboundFareQuoteData.Fare.BaseFare),
+                    tax: parseFloat(outboundFareQuoteData.Fare.Tax),
+                    yqTax: parseFloat(outboundFareQuoteData.Fare.YQTax || 0),
+                    transactionFee: (outboundFareQuoteData.Fare.TransactionFee || '0').toString(),
+                    additionalTxnFeeOfrd: parseFloat(outboundFareQuoteData.Fare.AdditionalTxnFeeOfrd || 0),
+                    additionalTxnFeePub: parseFloat(outboundFareQuoteData.Fare.AdditionalTxnFeePub || 0),
+                    airTransFee: (outboundFareQuoteData.Fare.AirTransFee || '0').toString()
+                }],
+                gst: {
+                    companyAddress: document.querySelector('[name="GSTCompanyAddress"]')?.value || '',
+                    companyContactNumber: document.querySelector('[name="GSTCompanyContact"]')?.value || '',
+                    companyName: document.querySelector('[name="GSTCompanyName"]')?.value || '',
+                    number: document.querySelector('[name="GSTNumber"]')?.value || '',
+                    companyEmail: document.querySelector('[name="GSTCompanyEmail"]')?.value || ''
+                }
             });
             nonLccResults.push(outboundResult);
         }
@@ -1542,7 +1546,23 @@ document.getElementById('submitButton').addEventListener('click', async function
                 srdvIndex: returnSrdvIndex,
                 traceId: traceId,
                 resultIndex: returnResultIndex,
-                passengers: bookingPayloads.nonLcc.return.passengers
+                passengers: bookingPayloads.nonLcc.return.passengers,
+                 fare: [{
+                        baseFare: parseFloat(returnFareQuoteData.Fare.BaseFare),
+                        tax: parseFloat(returnFareQuoteData.Fare.Tax),
+                        yqTax: parseFloat(returnFareQuoteData.Fare.YQTax || 0),
+                        transactionFee: (returnFareQuoteData.Fare.TransactionFee || '0').toString(),
+                        additionalTxnFeeOfrd: parseFloat(returnFareQuoteData.Fare.AdditionalTxnFeeOfrd || 0),
+                        additionalTxnFeePub: parseFloat(returnFareQuoteData.Fare.AdditionalTxnFeePub || 0),
+                        airTransFee: (returnFareQuoteData.Fare.AirTransFee || '0').toString()
+                    }],
+                    gst: {
+                        companyAddress: document.querySelector('[name="GSTCompanyAddress"]')?.value || '',
+                        companyContactNumber: document.querySelector('[name="GSTCompanyContact"]')?.value || '',
+                        companyName: document.querySelector('[name="GSTCompanyName"]')?.value || '',
+                        number: document.querySelector('[name="GSTNumber"]')?.value || '',
+                        companyEmail: document.querySelector('[name="GSTCompanyEmail"]')?.value || ''
+                    }
             });
             nonLccResults.push(returnResult);
         }
@@ -1575,7 +1595,7 @@ document.getElementById('submitButton').addEventListener('click', async function
 
         // Redirect to payment page
         const encodedDetails = encodeURIComponent(JSON.stringify(finalBookingDetails));
-        window.location.href = `/payment?details=${encodedDetails}`;
+        window.location.href = `/flight/payment?details=${encodedDetails}`;
 
     } catch (error) {
         console.error('Error during booking process:', error);
