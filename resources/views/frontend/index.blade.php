@@ -1671,14 +1671,6 @@ console.log('journeytypt is this ',journeyType )
                 console.log('OneWay Flights stored in sessionStorage');
             }
 
-<<<<<<< HEAD
-        // Optional: Add a log to confirm data is stored
-        console.log('Stored in sessionStorage:');
-        console.log('flightSearchResults:', sessionStorage.getItem('flightSearchResults'));
-        console.log('flightTraceId:', sessionStorage.getItem('flightTraceId'));
-        console.log('flightSearchParams:', sessionStorage.getItem('flightSearchParams'));
-     
-=======
             // Confirm storage
             console.log('Stored in sessionStorage:', {
                 traceId: sessionStorage.getItem('flightTraceId'),
@@ -1687,7 +1679,6 @@ console.log('journeytypt is this ',journeyType )
                 returnFlights: sessionStorage.getItem('returnFlights'),
                 oneWayFlights: sessionStorage.getItem('flightSearchResults')
             });
->>>>>>> 60d6f4809c6632cd4c59f250c74b5ae005512c4b
 
             // Redirect to results page
            window.location.href =  `/flight?${searchParams.toString()}`;

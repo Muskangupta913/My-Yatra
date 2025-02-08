@@ -56,7 +56,7 @@ body::before {
 }
 
 .flight-card {
-    background-image: linear-gradient(rgba(255, 255, 255, 0.75), rgba(255, 255, 255, 0.75)), url('/assets/images/flight.jpg');
+    background-image: linear-gradient(rgba(255, 255, 255, 0.82), rgba(255, 255, 255, 0.82)), url('/assets/images/flight.jpg');
     background-size: cover;
     background-position: center;
     backdrop-filter: blur(3px);
@@ -434,12 +434,8 @@ body::before {
             });
         })
     );
-<<<<<<< HEAD
-    renderFilteredResults(filteredResults);
-=======
 
     renderFilteredResults(filteredResults, journeyType);
->>>>>>> 60d6f4809c6632cd4c59f250c74b5ae005512c4b
 }
     // Helper to get selected filter values
     function getSelectedValues(name) {
@@ -462,25 +458,13 @@ body::before {
     return logoPath || defaultLogoPath;
 }
     // Render results (existing implementation)
-<<<<<<< HEAD
-    function renderFilteredResults(filteredResults) {
-        resultsContainer.innerHTML = '';
-        if (filteredResults.length === 0) {
-            resultsContainer.innerHTML = `
-                <div class="text-center py-10">
-                    <p class="text-gray-600">No flight results found matching your filters.</p>
-                </div>`;
-            resultsCountDisplay.textContent = '0 results';
-            return;
-        }
-=======
     function renderFilteredResults(filteredResults, journeyType) {
     const resultsContainer = document.getElementById('results-container');
     resultsContainer.innerHTML = '';
     console.log('Rendering Function', journeyType);
->>>>>>> 60d6f4809c6632cd4c59f250c74b5ae005512c4b
 
     let selectedOutbound = null;
+    
     let selectedReturn = null;
 
     // Create fixed bottom div for selections
@@ -592,154 +576,221 @@ body::before {
             });
         });
     }
-<<<<<<< HEAD
-=======
-    // Handle Round-trip flights (journeyType === "2")
-    else if (journeyType === "2") {
-        const returnFlights = JSON.parse(sessionStorage.getItem('returnFlights')) || [];
-        const outboundFlights = JSON.parse(sessionStorage.getItem('outboundFlights')) || [];
+// Handle Round-trip flights (journeyType === "2")
+else if (journeyType === "2") {
+    const returnFlights = JSON.parse(sessionStorage.getItem('returnFlights')) || [];
+    const outboundFlights = JSON.parse(sessionStorage.getItem('outboundFlights')) || [];
 
-        // Function to update selection div
-        function updateSelectionDiv() {
-            if (selectedOutbound || selectedReturn) {
-                selectionDiv.style.display = 'block';
-                selectionDiv.innerHTML = `
-                    <div class="container mx-auto max-w-6xl">
-                        <div class="flex justify-between items-center">
-                            <div class="flex gap-4">
-                                ${selectedOutbound ? `
-                                    <div class="flex items-center">
-                                        <div class="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-semibold">
-                                            Outbound: ${selectedOutbound.airline} - ${selectedOutbound.flightNumber}
-                                        </div>
+    // Function to update selection div
+    function updateSelectionDiv() {
+        if (selectedOutbound || selectedReturn) {
+            selectionDiv.style.display = 'block';
+            selectionDiv.innerHTML = `
+                <div class="container mx-auto max-w-6xl">
+                    <div class="flex justify-between items-center">
+                        <div class="flex gap-4">
+                            ${selectedOutbound ? `
+                                <div class="flex items-center">
+                                    <div class="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-semibold">
+                                        Departure: ${selectedOutbound.airline} - ${selectedOutbound.flightNumber}
+                                     <span class="ml-2 text-green-600">₹${selectedOutbound.price?.toLocaleString() || 'N/A'}</span>
                                     </div>
-                                ` : ''}
-                                ${selectedReturn ? `
-                                    <div class="flex items-center">
-                                        <div class="bg-purple-100 text-purple-800 px-3 py-1 rounded-full text-sm font-semibold">
-                                            Return: ${selectedReturn.airline} - ${selectedReturn.flightNumber}
-                                        </div>
+                                </div>
+                            ` : ''}
+                            ${selectedReturn ? `
+                                <div class="flex items-center">
+                                    <div class="bg-purple-100 text-purple-800 px-3 py-1 rounded-full text-sm font-semibold">
+                                        Return: ${selectedReturn.airline} - ${selectedReturn.flightNumber}
+                                    <span class="ml-2 text-green-600">₹${selectedReturn.price?.toLocaleString() || 'N/A'}</span>
                                     </div>
-                                ` : ''}
-                            </div>
-                           ${selectedOutbound && selectedReturn ? `
-    <button onclick="handleRoundTripFareQuotes('${selectedOutbound.resultIndex}', '${selectedReturn.resultIndex}')"
-            class="bg-blue-500 text-white px-6 py-2 rounded hover:bg-blue-600">
-        View Details
-    </button>
-` : ''}
-                            
+                                </div>
+                            ` : ''}
                         </div>
+                        ${selectedOutbound && selectedReturn ? `
+                          <div class="flex items-center gap-4">
+                                <div class="text-lg font-bold text-green-600">
+                                    Total: ₹${((selectedOutbound.price || 0) + (selectedReturn.price || 0)).toLocaleString()}
+                                </div>
+                                <button onclick="handleRoundTripFareQuotes('${selectedOutbound.resultIndex}', '${selectedReturn.resultIndex}')"
+                                        class="bg-blue-500 text-white px-6 py-2 rounded hover:bg-blue-600">
+                                    View Details
+                                </button>
+                            </div>
+                        ` : ''}
                     </div>
-                `;
-            } else {
-                selectionDiv.style.display = 'none';
-            }
+                </div>
+            `;
+        } else {
+            selectionDiv.style.display = 'none';
         }
-
-        // Create sections for outbound and return flights
-        const outboundSection = document.createElement('div');
-        outboundSection.classList.add('mb-8');
-        outboundSection.innerHTML = '<h2 class="text-xl font-bold mb-4">Select Outbound Flight</h2>';
-
-        const returnSection = document.createElement('div');
-        returnSection.classList.add('mb-8');
-        returnSection.innerHTML = '<h2 class="text-xl font-bold mb-4">Select Return Flight</h2>';
-
-        // Render outbound flights
-        outboundFlights.forEach(outbound => {
-            if (!outbound.FareDataMultiple || !Array.isArray(outbound.FareDataMultiple)) return;
-
-            outbound.FareDataMultiple.forEach(outboundFareData => {
-                const outboundSegment = outbound.Segments?.[0]?.[0];
-                if (!outboundSegment) return;
-
-                const flightCard = document.createElement('div');
-                flightCard.classList.add('mb-4', 'relative');
-                
-                // Add radio button for selection
-                const radioContainer = document.createElement('div');
-                radioContainer.classList.add(
-                    'absolute', 'top-4', 'right-4',
-                    'w-6', 'h-6'
-                );
-                radioContainer.innerHTML = `
-                    <input type="radio" 
-                           name="outbound-flight" 
-                           class="w-6 h-6 cursor-pointer"
-                           value="${outboundFareData.ResultIndex}">
-                `;
-
-                flightCard.innerHTML = createFlightCardContent(outboundSegment, outboundFareData);
-                flightCard.appendChild(radioContainer);
-
-                // Add click handler for selection
-                flightCard.querySelector('input[type="radio"]').addEventListener('change', (e) => {
-                    if (e.target.checked) {
-                        selectedOutbound = {
-                            resultIndex: outboundFareData.ResultIndex,
-                            airline: outboundFareData.FareSegments[0]?.AirlineName,
-                            flightNumber: outboundFareData.FareSegments[0]?.FlightNumber
-                        };
-                        updateSelectionDiv();
-                    }
-                });
-
-                outboundSection.appendChild(flightCard);
-            });
-        });
-
-        // Render return flights
-        returnFlights.forEach(returnFlight => {
-            if (!returnFlight.FareDataMultiple || !Array.isArray(returnFlight.FareDataMultiple)) return;
-
-            returnFlight.FareDataMultiple.forEach(returnFareData => {
-                const returnSegment = returnFlight.Segments?.[0]?.[0];
-                if (!returnSegment) return;
-
-                const flightCard = document.createElement('div');
-                flightCard.classList.add('mb-4', 'relative');
-
-                // Add radio button for selection
-                const radioContainer = document.createElement('div');
-                radioContainer.classList.add(
-                    'absolute', 'top-4', 'right-4',
-                    'w-6', 'h-6'
-                );
-                radioContainer.innerHTML = `
-                    <input type="radio" 
-                           name="return-flight" 
-                           class="w-6 h-6 cursor-pointer"
-                           value="${returnFareData.ResultIndex}">
-                `;
-
-                flightCard.innerHTML = createFlightCardContent(returnSegment, returnFareData);
-                flightCard.appendChild(radioContainer);
-
-                // Add click handler for selection
-                flightCard.querySelector('input[type="radio"]').addEventListener('change', (e) => {
-                    if (e.target.checked) {
-                        selectedReturn = {
-                            resultIndex: returnFareData.ResultIndex,
-                            airline: returnFareData.FareSegments[0]?.AirlineName,
-                            flightNumber: returnFareData.FareSegments[0]?.FlightNumber
-                        };
-                        updateSelectionDiv();
-                    }
-                });
-
-                returnSection.appendChild(flightCard);
-            });
-        });
-
-        resultsContainer.appendChild(outboundSection);
-        resultsContainer.appendChild(returnSection);
     }
 
-    resultsCountDisplay.textContent = `${filteredResults.length} results`;
+    // Add mobile toggle buttons
+    const toggleButtons = document.createElement('div');
+    toggleButtons.classList.add('sticky', 'top-0', 'z-50', 'bg-white', 'shadow-md', 'md:hidden');
+    toggleButtons.innerHTML = `
+        <div class="grid grid-cols-2 gap-1 p-2">
+            <button id="toggleOutbound" class="px-3 py-2 rounded font-medium transition-all duration-200 bg-blue-500 text-white">
+                Departure 
+            </button>
+            <button id="toggleReturn" class="px-3 py-2 rounded font-medium transition-all duration-200">
+                Return 
+            </button>
+        </div>
+    `;
+    resultsContainer.appendChild(toggleButtons);
+
+    // Create container for side-by-side sections
+    const sectionsContainer = document.createElement('div');
+    sectionsContainer.classList.add('grid', 'grid-cols-1', 'md:grid-cols-2', 'gap-4', 'mb-8');
+
+    // Create sections for outbound and return flights
+    const outboundSection = document.createElement('div');
+    outboundSection.classList.add('p-4', 'flight-section', 'block');
+    outboundSection.innerHTML = '<h2 class="text-xl font-bold mb-4">Select Departure Flight</h2>';
+
+    const returnSection = document.createElement('div');
+    returnSection.classList.add('p-4', 'flight-section', 'md:block');
+    returnSection.style.display = 'none'; // Initially hidden on mobile
+    returnSection.innerHTML = '<h2 class="text-xl font-bold mb-4">Select Return Flight</h2>';
+
+    // Create scrollable containers for flight cards
+    const outboundScrollContainer = document.createElement('div');
+    outboundScrollContainer.classList.add('max-h-[calc(100vh-300px)]', 'overflow-y-auto', 'pr-2');
+    
+    const returnScrollContainer = document.createElement('div');
+    returnScrollContainer.classList.add('max-h-[calc(100vh-300px)]', 'overflow-y-auto', 'pr-2');
+
+    // Add toggle functionality
+    document.getElementById('toggleOutbound').addEventListener('click', () => {
+        outboundSection.style.display = 'block';
+        returnSection.style.display = 'none';
+        document.getElementById('toggleOutbound').classList.add('bg-blue-500', 'text-white');
+        document.getElementById('toggleReturn').classList.remove('bg-blue-500', 'text-white');
+    });
+
+    document.getElementById('toggleReturn').addEventListener('click', () => {
+        outboundSection.style.display = 'none';
+        returnSection.style.display = 'block';
+        document.getElementById('toggleReturn').classList.add('bg-blue-500', 'text-white');
+        document.getElementById('toggleOutbound').classList.remove('bg-blue-500', 'text-white');
+    });
+
+    // Add media query listener for desktop view
+    const mediaQuery = window.matchMedia('(min-width: 768px)');
+    function handleTabletChange(e) {
+        if (e.matches) {
+            // Desktop view
+            outboundSection.style.display = 'block';
+            returnSection.style.display = 'block';
+        } else {
+            // Mobile view - show active section
+            const isOutboundActive = document.getElementById('toggleOutbound').classList.contains('bg-blue-500');
+            outboundSection.style.display = isOutboundActive ? 'block' : 'none';
+            returnSection.style.display = isOutboundActive ? 'none' : 'block';
+        }
+    }
+    mediaQuery.addListener(handleTabletChange);
+    handleTabletChange(mediaQuery);
+    // Render outbound flights
+    outboundFlights.forEach(outbound => {
+        if (!outbound.FareDataMultiple || !Array.isArray(outbound.FareDataMultiple)) return;
+
+        outbound.FareDataMultiple.forEach(outboundFareData => {
+            const outboundSegment = outbound.Segments?.[0]?.[0];
+            if (!outboundSegment) return;
+
+            const flightCard = document.createElement('div');
+            flightCard.classList.add('mb-4', 'relative');
+            
+            const radioContainer = document.createElement('div');
+            radioContainer.classList.add(
+                'absolute', 'top-4', 'right-4',
+                'w-6', 'h-6'
+            );
+            radioContainer.innerHTML = `
+                <input type="radio" 
+                       name="outbound-flight" 
+                       class="w-6 h-6 cursor-pointer"
+                       value="${outboundFareData.ResultIndex}">
+            `;
+
+            flightCard.innerHTML = createFlightCardContent(outboundSegment, outboundFareData);
+            flightCard.appendChild(radioContainer);
+
+            flightCard.querySelector('input[type="radio"]').addEventListener('change', (e) => {
+                if (e.target.checked) {
+                    selectedOutbound = {
+                        resultIndex: outboundFareData.ResultIndex,
+                        airline: outboundFareData.FareSegments[0]?.AirlineName,
+                        flightNumber: outboundFareData.FareSegments[0]?.FlightNumber,
+                        price: outboundFareData.Fare?.OfferedFare
+                        
+                    };
+                    updateSelectionDiv();
+                }
+            });
+
+            outboundScrollContainer.appendChild(flightCard);
+        });
+    });
+
+    // Render return flights
+    returnFlights.forEach(returnFlight => {
+        if (!returnFlight.FareDataMultiple || !Array.isArray(returnFlight.FareDataMultiple)) return;
+
+        returnFlight.FareDataMultiple.forEach(returnFareData => {
+            const returnSegment = returnFlight.Segments?.[0]?.[0];
+            if (!returnSegment) return;
+
+            const flightCard = document.createElement('div');
+            flightCard.classList.add('mb-4', 'relative');
+
+            const radioContainer = document.createElement('div');
+            radioContainer.classList.add(
+                'absolute', 'top-4', 'right-4',
+                'w-6', 'h-6'
+            );
+            radioContainer.innerHTML = `
+                <input type="radio" 
+                       name="return-flight" 
+                       class="w-6 h-6 cursor-pointer"
+                       value="${returnFareData.ResultIndex}">
+            `;
+
+            flightCard.innerHTML = createFlightCardContent(returnSegment, returnFareData);
+            flightCard.appendChild(radioContainer);
+
+            flightCard.querySelector('input[type="radio"]').addEventListener('change', (e) => {
+                if (e.target.checked) {
+                    selectedReturn = {
+                        resultIndex: returnFareData.ResultIndex,
+                        airline: returnFareData.FareSegments[0]?.AirlineName,
+                        flightNumber: returnFareData.FareSegments[0]?.FlightNumber,
+                        price: returnFareData.Fare?.OfferedFare
+                    };
+                    updateSelectionDiv();
+                }
+            });
+
+            returnScrollContainer.appendChild(flightCard);
+        });
+    });
+
+    // Append scroll containers to their respective sections
+    outboundSection.appendChild(outboundScrollContainer);
+    returnSection.appendChild(returnScrollContainer);
+
+    // Add sections to the grid container
+    sectionsContainer.appendChild(outboundSection);
+    sectionsContainer.appendChild(returnSection);
+
+    // Add the grid container to the results container
+    resultsContainer.appendChild(sectionsContainer);
 }
 
-
+resultsCountDisplay.textContent = `${filteredResults.length} results`;
+}
 
 
 function createFlightCardContent(segment, fareData) {
@@ -807,7 +858,6 @@ function createFlightCardContent(segment, fareData) {
 }
 
 
->>>>>>> 60d6f4809c6632cd4c59f250c74b5ae005512c4b
     // Sorting functionality (existing implementation)
     function sortResults(option) {
         const journeyType = sessionStorage.getItem('journeyType') || "1";
