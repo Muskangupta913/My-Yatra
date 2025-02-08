@@ -507,6 +507,9 @@ Route::get('/flight-seats', [FlightController::class, 'selectSeat'])->name('flig
 Route::get('/flight-booking', function () {
   return view('frontend.flight-booking');
 })->name('flight.booking');
+Route::get('/flight/roundBooking', function () {
+  return view('frontend.roundFlight-booking');
+});
 Route::post('/fetch-options', [FlightController::class, 'fetchOptions'])->name('fetch.options');
 Route::post('/fetch-ssr-data', [FlightController::class, 'fetchSSRData'])->name('fetch.ssr.data');
 Route::post('/flight/get-seat-map', [FlightController::class, 'getSeatMap'])->name('flight.getSeatMap');
@@ -514,3 +517,4 @@ Route::post('/flight/bookHold', [FlightController::class, 'bookHold']);
 Route::post('/flight/bookLCC', [FlightController::class, 'bookLCC']);
 Route::post('/flight/bookGdsTicket', [FlightController::class, 'bookGdsTicket']);
 Route::post('/flight/balance', [FlightController::class, 'flightBalance']);
+

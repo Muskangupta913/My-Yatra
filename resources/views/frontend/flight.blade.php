@@ -555,9 +555,7 @@ body::before {
     }
     // Handle Round-trip flights (journeyType === "2")
     else if (journeyType === "2") {
-        const returnFlights = JSON.parse(sessionStorage.getItem('returnFlights')) || [];
-        const outboundFlights = JSON.parse(sessionStorage.getItem('outboundFlights')) || [];
-
+       
         // Function to update selection div
         function updateSelectionDiv() {
             if (selectedOutbound || selectedReturn) {
@@ -962,7 +960,7 @@ sessionStorage.setItem('selectedOutboundIndex', outboundResultIndex);
 sessionStorage.setItem('selectedReturnIndex', returnResultIndex);
 
 // Redirect with both flight details
-window.location.href = `/flight-booking?traceId=${traceId}&outboundIndex=${outboundResultIndex}&returnIndex=${returnResultIndex}&details=${encodeURIComponent(JSON.stringify(selectedFlights))}`;
+window.location.href = `/flight/roundBooking?traceId=${traceId}&outboundIndex=${outboundResultIndex}&returnIndex=${returnResultIndex}&details=${encodeURIComponent(JSON.stringify(selectedFlights))}`;
         } else {
             throw new Error('Return fare quote failed');
         }
