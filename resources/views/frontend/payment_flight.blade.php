@@ -1073,74 +1073,140 @@ async function bookLCC() {
 
 function BookGdsTickte() {
     const queryParams = new URLSearchParams(window.location.search);
-    const traceId = queryParams.get("traceId");
-    const resultIndex = queryParams.get("resultIndex");
-    const bookingId = queryParams.get("bookingId");
-    const pnr = queryParams.get("pnr");
-    const srdvIndex = queryParams.get("srdvIndex");
+    const bookingDetails = JSON.parse(sessionStorage.getItem('bookingDetails'));
 
-    console.log("Result Index:", resultIndex);
+// Now you can access individual properties
+const bookingId = bookingDetails.bookingId;
+const pnr = bookingDetails.pnr;
+const srdvIndex = bookingDetails.srdvIndex;
+const traceId = bookingDetails.traceId;
+
+   
     console.log("Booking ID:", bookingId);
     console.log("PNR:", pnr);
     console.log("SRDV Index:", srdvIndex);
     console.log("Trace ID:", traceId);
 
-    if (traceId && resultIndex && bookingId && pnr && srdvIndex) {
-        return { resultIndex, bookingId, pnr, srdvIndex, traceId };
+    if (traceId && bookingId && pnr && srdvIndex) {
+        return { bookingId, pnr, srdvIndex, traceId };
     } else {
         return null; // Return null if any required parameter is missing
     }
 }
 
-// Function to process the GDS Ticket booking
-function processGdsTicket() {
-    const gdsTicketDetails = BookGdsTickte();
 
-    if (!gdsTicketDetails) {
-        console.error("Missing required parameters for GDS ticket booking.");
+
+
+async function processGdsTicket() {
+    const bookingDetails = BookGdsTickte();
+
+    if (!bookingDetails || !bookingDetails.gds) {
+        console.error("❌ No valid GDS booking details found!");
         return;
     }
 
-    const payload = {
-        EndUserIp: "1.1.1.1",
-        ClientId: "180133",
-        UserName: "MakeMy91",
-        Password: "MakeMy@910",
-        srdvType: "MixAPI",
-        srdvIndex: gdsTicketDetails.srdvIndex,
-        traceId: gdsTicketDetails.traceId,
-        pnr: gdsTicketDetails.pnr,
-        bookingId: gdsTicketDetails.bookingId
+    console.log("🚀 Full GDS Booking Details:", bookingDetails);
+
+    // Function to create payload for a single GDS flight
+    const createGdsPayload = (flightDetails) => {
+        if (!flightDetails || !flightDetails.bookingId || !flightDetails.pnr) {
+            console.error("❌ Invalid GDS flight details!");
+            return null;
+        }
+
+        return {
+            EndUserIp: "1.1.1.1",
+            ClientId: "180133",
+            UserName: "MakeMy91",
+            Password: "MakeMy@910",
+            srdvType: "MixAPI",
+            srdvIndex: flightDetails.srdvIndex,
+            traceId: flightDetails.traceId,
+            pnr: flightDetails.pnr,
+            bookingId: flightDetails.bookingId
+        };
     };
 
-    console.log("Sending payload:", payload);
+    // Book outbound flight
+    if (bookingDetails.gds.outbound) {
+        console.log("📤 Processing outbound GDS flight booking...");
+        const outboundPayload = createGdsPayload(bookingDetails.gds.outbound);
+        console.log("Outbound GDS Payload:", outboundPayload); // Debug log
 
-    fetch("/flight/bookGdsTicket", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-            "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').content
-        },
-        body: JSON.stringify(payload)
-    })
-    .then(response => response.json())
-    .then(data => {
-        console.log("API Response:", data);
-        if (data.status === "success") {
-            console.log("Booking successful:", {
-                bookingId: data.data.bookingId,
-                pnr: data.data.pnr,
-                ticketStatus: data.data.ticketStatus,
-                passengers: data.data.passengers
-            });
-        } else {
-            console.error("Booking failed:", data.message);
+        if (outboundPayload) {
+            try {
+                const outboundResponse = await fetch('/flight/bookGdsTicket', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                    },
+                    body: JSON.stringify(outboundPayload)
+                });
+                const outboundData = await outboundResponse.json();
+                
+                if (outboundData.status === 'success') {
+                    console.log("✅ Outbound GDS booking successful:", {
+                        bookingId: outboundData.data.bookingId,
+                        pnr: outboundData.data.pnr,
+                        ticketStatus: outboundData.data.ticketStatus,
+                        passengers: outboundData.data.passengers
+                    });
+                } else {
+                    console.error("❌ Outbound GDS booking failed:", outboundData.message);
+                    alert('Outbound GDS flight booking failed: ' + (outboundData.message || 'Unknown error'));
+                    return;
+                }
+            } catch (error) {
+                console.error("❌ Error booking outbound GDS flight:", error);
+                alert('Error booking outbound GDS flight');
+                return;
+            }
         }
-    })
-    .catch(error => {
-        console.error("API Error:", error);
-    });
+    }
+
+    // Book return flight
+    if (bookingDetails.gds.return) {
+        console.log("📥 Processing return GDS flight booking...");
+        const returnPayload = createGdsPayload(bookingDetails.gds.return);
+        console.log("Return GDS Payload:", returnPayload); // Debug log
+        
+        if (returnPayload) {
+            try {
+                const returnResponse = await fetch('/flight/bookGdsTicket', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                    },
+                    body: JSON.stringify(returnPayload)
+                });
+                const returnData = await returnResponse.json();
+                
+                if (returnData.status === 'success') {
+                    console.log("✅ Return GDS booking successful:", {
+                        bookingId: returnData.data.bookingId,
+                        pnr: returnData.data.pnr,
+                        ticketStatus: returnData.data.ticketStatus,
+                        passengers: returnData.data.passengers
+                    });
+                } else {
+                    console.error("❌ Return GDS booking failed:", returnData.message);
+                    alert('Return GDS flight booking failed: ' + (returnData.message || 'Unknown error'));
+                    return;
+                }
+            } catch (error) {
+                console.error("❌ Error booking return GDS flight:", error);
+                alert('Error booking return GDS flight');
+                return;
+            }
+        }
+    }
+
+    alert('✅ GDS flight bookings completed successfully!');
 }
+
+// Function to process the GDS Ticket booking
 
 
 
