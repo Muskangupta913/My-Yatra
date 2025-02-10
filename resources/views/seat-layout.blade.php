@@ -1329,6 +1329,20 @@ function blockMultipleSeats(passengers) {
                 };
             });
 
+
+            sessionStorage.setItem("BoardingPoint", JSON.stringify({
+    Id: selectedBoardingPointId,
+    Name: selectedBoardingPointName
+}));
+
+sessionStorage.setItem("DroppingPoint", JSON.stringify({
+    Id: selectedDroppingPointId,
+    Name: selectedDroppingPointName
+}));
+
+
+
+
             // Create URL parameters with stringified data
             const urlParameters = new URLSearchParams({
                 TraceId: traceId,

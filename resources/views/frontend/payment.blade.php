@@ -344,6 +344,16 @@ form {
 document.getElementById("payNowButton").addEventListener("click", function (event) {
     event.preventDefault();
 
+    const boardingPoint = JSON.parse(sessionStorage.getItem("BoardingPoint"));
+const droppingPoint = JSON.parse(sessionStorage.getItem("DroppingPoint"));
+
+console.log(boardingPoint); // { Id: value, Name: "value" }
+console.log(droppingPoint); // { Id: value, Name: "value" }
+
+const boardingPointId = boardingPoint ? boardingPoint.Id : null;
+const droppingPointId = droppingPoint ? droppingPoint.Id : null;
+
+
     // Extract URL parameters
     const urlParams = new URLSearchParams(window.location.search);
     const traceId = urlParams.get('TraceId');
@@ -383,8 +393,8 @@ document.getElementById("payNowButton").addEventListener("click", function (even
                 const bookingData = {
                     ResultIndex: resultIndex, // Replace with actual value
                     TraceId: traceId,
-                    BoardingPointId: 1, // Replace with actual value
-                    DroppingPointId: 1, // Replace with actual value
+                    BoardingPointId: boardingPointId, // Dynamically set from sessionStorage
+                    DroppingPointId: droppingPointId, // Dynamically set from sessionStorage
                     RefID: "1",
                     Passenger: [{
                         LeadPassenger: true,

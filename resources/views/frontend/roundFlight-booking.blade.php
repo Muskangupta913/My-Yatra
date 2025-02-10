@@ -330,8 +330,10 @@ console.log('Outbound Result Index:', outboundResultIndex);
 console.log('Return Result Index:', returnResultIndex);
     const encodedDetails = urlParams.get('details');
     const origin = getCookie('origin') ;
-    console.log(' ORIGIN Details:');
-        console.log('ORIGIN:', origin);
+    const destination = getCookie('destination') ;
+    console.log(' ORIGIN Details:', origin);
+    console.log(' DESTINATION Details:',destination);
+     
         const outboundFareQuoteData = JSON.parse(sessionStorage.getItem('outboundFareQuoteData'));
         const returnFareQuoteData = JSON.parse(sessionStorage.getItem('returnFareQuoteData'));
 
@@ -1427,7 +1429,13 @@ document.getElementById('submitButton').addEventListener('click', async function
                 addressLine1: form.querySelector('[name$="[AddressLine1]"]')?.value.trim() || "",
                 passportNo: form.querySelector('[name$="[PassportNo]"]')?.value.trim() || "",
                 passportExpiry: form.querySelector('[name$="[PassportExpiry]"]')?.value || "",
-                passportIssueDate: form.querySelector('[name$="[PassportIssueDate]"]')?.value || ""
+                passportIssueDate: form.querySelector('[name$="[PassportIssueDate]"]')?.value || "",
+                addressLine1: origin,
+                    city: origin,
+                    countryCode: "IN",
+                    countryName: "INDIA",
+                    isLeadPax: index === 0, // First passenger is lead passenger
+
             };
 
             // Selected services for both flights

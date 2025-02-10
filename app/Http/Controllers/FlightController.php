@@ -524,9 +524,11 @@ public function bookLCC(Request $request)
             'passenger.*.addressLine1' => 'nullable|string',
             'passenger.*.city' => 'nullable|string',
             'passenger.*.countryName' => 'nullable|string',
+            'passenger.*.nationality' => 'nullable|string',
             'passenger.*.baggage' => 'nullable|array',
             'passenger.*.mealDynamic' => 'nullable|array',
             'passenger.*.seat' => 'nullable|array',
+            'passenger.*.ssr' => 'nullable|array',
             'fare' => 'required|array',
             'fare.baseFare' => 'required|numeric',
             'fare.tax' => 'required|numeric',
@@ -540,7 +542,7 @@ public function bookLCC(Request $request)
         // Log incoming request for debugging
         Log::info('LCC Booking Request', ['request' => $validatedData]);
 
-        // Prepare the payload
+        // Prepare the payload with enhanced passenger structure
         $payload = [
             'EndUserIp' => request()->ip() ?? '1.1.1.1',
             'ClientId' => '180133',
@@ -557,27 +559,36 @@ public function bookLCC(Request $request)
                     'LastName' => $pax['lastName'],
                     'PaxType' => $pax['paxType'],
                     'Gender' => (string)$pax['gender'],
+                    'DateOfBirth' => $pax['dateOfBirth'] ?? '',
                     'ContactNo' => $pax['contactNo'],
                     'Email' => $pax['email'],
-                    'DateOfBirth' => $pax['dateOfBirth'] ?? '',
                     'PassportNo' => $pax['passportNo'] ?? '',
                     'PassportExpiry' => $pax['passportExpiry'] ?? '',
                     'PassportIssueDate' => $pax['passportIssueDate'] ?? '',
-                    'CountryCode' => $pax['countryCode'] ?? 'IN',
-                    'CountryName' => $pax['countryName'] ?? 'INDIA',
                     'AddressLine1' => $pax['addressLine1'] ?? '',
                     'City' => $pax['city'] ?? '',
+                    'CountryCode' => $pax['countryCode'] ?? 'IN',
+                    'CountryName' => $pax['countryName'] ?? 'INDIA',
+                    'Nationality' => $pax['nationality'] ?? 'IN',
+                    'IsLeadPax' => isset($pax['isLeadPax']) ? (bool)$pax['isLeadPax'] : false,
+                    'FFAirlineCode' => $pax['ffAirlineCode'] ?? '',
                     'Baggage' => $pax['baggage'] ?? [],
                     'MealDynamic' => $pax['mealDynamic'] ?? [],
                     'Seat' => $pax['seat'] ?? [],
+                    'Ssr' => $pax['ssr'] ?? [],
+                    'SegmentAdditionalInfo' => [],
                     'Fare' => [
+                        'Currency' => 'INR',
                         'BaseFare' => $pax['fare']['baseFare'] ?? 0,
                         'Tax' => $pax['fare']['tax'] ?? 0,
                         'YQTax' => $pax['fare']['yqTax'] ?? 0,
-                        'TransactionFee' => (string)($pax['fare']['transactionFee'] ?? '0'),
-                        'AdditionalTxnFeeOfrd' => (string)($pax['fare']['additionalTxnFeeOfrd'] ?? ''),
-                        'AdditionalTxnFeePub' => (string)($pax['fare']['additionalTxnFeePub'] ?? ''),
-                        'AirTransFee' => (string)($pax['fare']['airTransFee'] ?? '0')
+                        'AdditionalTxnFeeOfrd' => (string)($pax['fare']['additionalTxnFeeOfrd'] ?? '0'),
+                        'AdditionalTxnFeePub' => (string)($pax['fare']['additionalTxnFeePub'] ?? '0'),
+                        'ServiceFee' => '0',
+                        'TotalBaggageCharges' => '0',
+                        'TotalMealCharges' => '0',
+                        'TotalSeatCharges' => '0',
+                        'TotalSpecialServiceCharges' => '0'
                     ]
                 ];
             }, $validatedData['passenger'])
@@ -620,19 +631,49 @@ public function bookLCC(Request $request)
             ], 422);
         }
 
-        // Return success response with booking details
+        // Process and return the response with all possible fields
         return response()->json([
             'status' => 'success',
             'data' => [
-                'booking_id' => $apiResponse['Response']['BookingId'],
-                'pnr' => $apiResponse['Response']['PNR'],
-                'srdv_index' => $apiResponse['Response']['SrdvIndex'],
-                'trace_id' => $apiResponse['TraceId'],
-                'is_price_changed' => $apiResponse['Response']['IsPriceChanged'],
-                'is_time_changed' => $apiResponse['Response']['IsTimeChanged'],
-                'ticket_status' => $apiResponse['Response']['TicketStatus'],
-                'fare_details' => $apiResponse['Response']['FlightItinerary']['Fare'],
-                'segments' => $apiResponse['Response']['FlightItinerary']['Segments']
+                'booking_id' => $apiResponse['Response']['BookingId'] ?? null,
+                'pnr' => $apiResponse['Response']['PNR'] ?? null,
+                'srdv_index' => $apiResponse['Response']['SrdvIndex'] ?? null,
+                'trace_id' => $apiResponse['TraceId'] ?? null,
+                'is_price_changed' => $apiResponse['Response']['IsPriceChanged'] ?? false,
+                'is_time_changed' => $apiResponse['Response']['IsTimeChanged'] ?? false,
+                'ticket_status' => $apiResponse['Response']['TicketStatus'] ?? null,
+                'ssr_denied' => $apiResponse['Response']['SSRDenied'] ?? false,
+                'ssr_message' => $apiResponse['Response']['SSRMessage'] ?? null,
+                'flight_itinerary' => [
+                    'fare' => $apiResponse['Response']['FlightItinerary']['Fare'] ?? null,
+                    'segments' => $apiResponse['Response']['FlightItinerary']['Segments'] ?? [],
+                    'passengers' => array_map(function($passenger) {
+                        return [
+                            'pax_id' => $passenger['PaxId'] ?? null,
+                            'title' => $passenger['Title'] ?? null,
+                            'first_name' => $passenger['FirstName'] ?? null,
+                            'last_name' => $passenger['LastName'] ?? null,
+                            'pax_type' => $passenger['PaxType'] ?? null,
+                            'date_of_birth' => $passenger['DateOfBirth'] ?? null,
+                            'gender' => $passenger['Gender'] ?? null,
+                            'passport_no' => $passenger['PassportNo'] ?? null,
+                            'ticket_number' => $passenger['Ticket']['TicketNumber'] ?? null,
+                            'status' => $passenger['Ticket']['Status'] ?? null,
+                            'baggage' => $passenger['Baggage'] ?? [],
+                            'meal_dynamic' => $passenger['MealDynamic'] ?? [],
+                            'seat' => $passenger['Seat'] ?? [],
+                            'ssr' => $passenger['Ssr'] ?? [],
+                            'segment_additional_info' => $passenger['SegmentAdditionalInfo'] ?? []
+                        ];
+                    }, $apiResponse['Response']['FlightItinerary']['Passenger'] ?? []),
+                    'is_lcc' => $apiResponse['Response']['FlightItinerary']['IsLCC'] ?? null,
+                    'airline_code' => $apiResponse['Response']['FlightItinerary']['AirlineCode'] ?? null,
+                    'validating_airline_code' => $apiResponse['Response']['FlightItinerary']['ValidatingAirlineCode'] ?? null,
+                    'last_ticket_date' => $apiResponse['Response']['FlightItinerary']['LastTicketDate'] ?? null,
+                    'invoice_no' => $apiResponse['Response']['FlightItinerary']['InvoiceNo'] ?? null,
+                    'invoice_status' => $apiResponse['Response']['FlightItinerary']['InvoiceStatus'] ?? null,
+                    'invoice_created_on' => $apiResponse['Response']['FlightItinerary']['InvoiceCreatedOn'] ?? null,
+                ]
             ]
         ], 200);
 
@@ -662,7 +703,6 @@ public function bookLCC(Request $request)
         ], 500);
     }
 }
-
 
 
 public function bookGdsTicket(Request $request) {
@@ -765,7 +805,150 @@ public function bookGdsTicket(Request $request) {
 
 
 
+public function bookHold(Request $request) {
+    try {
+        // Validate the request
+        $validatedData = $request->validate([
+            'srdvIndex' => 'required|string',
+            'traceId' => 'required|string',
+            'resultIndex' => 'required|string',
+            'passengers' => 'required|array|min:1',
+            'passengers.*.title' => ['required', 'string', Rule::in(['Mr', 'Mrs', 'Ms', 'Miss', 'Mstr'])],
+            'passengers.*.firstName' => 'required|string|max:32',
+            'passengers.*.lastName' => 'required|string|max:32',
+            'passengers.*.gender' => ['required', 'string', Rule::in(['1', '2'])],
+            'passengers.*.paxType' => ['required', 'integer', Rule::in([1, 2, 3])],
+            'passengers.*.dateOfBirth' => 'required|date_format:Y-m-d\TH:i:s',
+            'passengers.*.passportNo' => 'required|string|max:20',
+            'passengers.*.passportExpiry' => 'required|date_format:Y-m-d\TH:i:s',
+            'passengers.*.addressLine1' => 'required|string|max:100',
+            'passengers.*.city' => 'nullable|string|max:50',
+            'passengers.*.countryCode' => 'required|string|size:2',
+            'passengers.*.countryName' => 'required|string|max:50',
+            'passengers.*.contactNo' => 'required|string|max:15',
+            'passengers.*.email' => 'required|email|max:50',
+            'passengers.*.isLeadPax' => 'required|boolean',
+            'passengers.*.fare' => 'required|array',
+           'passengers.*.fare.*.baseFare' => 'required|numeric|min:0',
+'passengers.*.fare.*.tax' => 'required|numeric|min:0',
+'passengers.*.fare.*.yqTax' => 'nullable|numeric|min:0',
+'passengers.*.fare.*.transactionFee' => 'nullable|string',
+'passengers.*.fare.*.additionalTxnFeeOfrd' => 'nullable|numeric|min:0',
+'passengers.*.fare.*.additionalTxnFeePub' => 'nullable|numeric|min:0',
+'passengers.*.fare.*.airTransFee' => 'nullable|string',
+            'passengers.*.gst.companyAddress' => 'nullable|string',
+            'passengers.*.gst.companyContactNumber' => 'nullable|string',
+            'passengers.*.gst.companyName' => 'nullable|string',
+            'passengers.*.gst.number' => 'nullable|string',
+            'passengers.*.gst.companyEmail' => 'nullable|email',
+        ]);
 
+        // Prepare payload
+        $payload = [
+            'EndUserIp' => '1.1.1.1', // Replace with actual IP
+            'ClientId' => '180133',
+            'UserName' => 'MakeMy91',
+            'Password' => 'MakeMy@910',
+            'SrdvType' => 'MixAPI',
+            'SrdvIndex' => $validatedData['srdvIndex'],
+            'TraceId' => $validatedData['traceId'],
+            'ResultIndex' => $validatedData['resultIndex'],
+            'Passengers' => array_map(function ($passenger) {
+                return [
+                    'Title' => $passenger['title'],
+                    'FirstName' => $passenger['firstName'],
+                    'LastName' => $passenger['lastName'],
+                    'PaxType' => $passenger['paxType'],
+                    'DateOfBirth' => $passenger['dateOfBirth'],  // Already in correct format
+                    'Gender' => $passenger['gender'],
+                    'PassportNo' => $passenger['passportNo'],
+                    'PassportExpiry' => $passenger['passportExpiry'],  // Already in correct format
+                    'AddressLine1' => $passenger['addressLine1'] ?? 'Noida',
+                    'City' => $passenger['city'] ?? 'Noida',
+                    'CountryCode' => $passenger['countryCode'],
+                    'CountryName' => $passenger['countryName'],
+                    'ContactNo' => $passenger['contactNo'],
+                    'Email' => $passenger['email'],
+                    'IsLeadPax' => (int)$passenger['isLeadPax'],
+                    'Fare' => $passenger['fare'],  // Already in correct format as array
+                    'GSTCompanyAddress' => $passenger['gst']['companyAddress'] ?? '',
+                    'GSTCompanyContactNumber' => $passenger['gst']['companyContactNumber'] ?? '',
+                    'GSTCompanyName' => $passenger['gst']['companyName'] ?? '',
+                    'GSTNumber' => $passenger['gst']['number'] ?? '',
+                    'GSTCompanyEmail' => $passenger['gst']['companyEmail'] ?? '',
+                ];
+            }, $validatedData['passengers'])
+        ];
+
+        // Add logging for debugging
+        Log::info('Flight Booking Payload', ['payload' => $payload]);
+
+        // Make API request
+        $response = Http::withHeaders([
+            'Content-Type' => 'application/json',
+            'API-Token' => 'MakeMy@910@23',
+        ])->post('https://flight.srdvtest.com/v8/rest/Hold', $payload);
+
+        Log::info('Flight Booking Response', ['response' => $response->json()]);
+
+        if (!$response->successful()) {
+            Log::error('Flight API Error', [
+                'status' => $response->status(),
+                'body' => $response->json()
+            ]);
+            return response()->json([
+                'status' => 'error',
+                'message' => 'API request failed: ' . ($response->json()['message'] ?? 'Unknown error')
+            ], $response->status());
+        }
+
+        $apiResponse = $response->json();
+
+        // Check for API-level errors
+        if ($apiResponse['Error']['ErrorCode'] !== '0') {
+            return response()->json([
+                'status' => 'error',
+                'message' => $apiResponse['Error']['ErrorMessage']
+            ], 422);
+        }
+
+        // Return success response
+        return response()->json([
+            'status' => 'success',
+            'booking_details' => [
+                'booking_id' => $apiResponse['Response']['BookingId'],
+                'pnr' => $apiResponse['Response']['PNR'],
+                'srdvIndex' => $apiResponse['Response']['SrdvIndex'],
+                'trace_id' => $apiResponse['TraceId'],
+                'fare' => $apiResponse['Response']['FlightItinerary']['Fare'],
+                'is_price_changed' => $apiResponse['Response']['IsPriceChanged'],
+                'is_time_changed' => $apiResponse['Response']['IsTimeChanged'],
+                'last_ticket_date' => $apiResponse['Response']['FlightItinerary']['LastTicketDate']
+            ]
+        ]);
+
+    } catch (ValidationException $e) {
+        Log::error('Validation Error', [
+            'errors' => $e->errors(),
+            'request' => $request->all()
+        ]);
+        return response()->json([
+            'status' => 'error',
+            'message' => 'Validation failed',
+            'errors' => $e->errors()
+        ], 422);
+    } catch (\Exception $e) {
+        Log::error('Flight Booking Error', [
+            'message' => $e->getMessage(),
+            'trace' => $e->getTraceAsString()
+        ]);
+
+        return response()->json([
+            'status' => 'error',
+            'message' => 'Booking failed: ' . $e->getMessage()
+        ], 500);
+    }
+}
 
 
 
