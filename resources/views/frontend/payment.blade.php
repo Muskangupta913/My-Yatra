@@ -933,8 +933,8 @@ function bookLCC() {
     .then(response => response.json())
     .then(data => {
         if (data.status === 'success') {
-            alert('✅ Booking successful! Booking ID: ' + data.booking_details.booking_id);
-            console.log("🎉 Booking Details:", data.booking_details);
+            alert('✅ Booking successful!');
+            console.log("✅ Booking successful!");
         } else {
             alert('❌ Booking failed: ' + (data.message || 'Unknown error'));
             console.error("❌ Booking Failure:", data);

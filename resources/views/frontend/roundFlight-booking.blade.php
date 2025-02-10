@@ -1621,18 +1621,23 @@ async function processNonLCCBooking(payload) {
         },
         body: JSON.stringify(payload)
     });
-    
+
     const data = await response.json();
+
     if (data.status === 'success') {
-        return {
+        // Store booking details in session storage
+        sessionStorage.setItem('bookingDetails', JSON.stringify({
             bookingId: data.booking_details.booking_id,
             pnr: data.booking_details.pnr,
             srdvIndex: data.booking_details.srdvIndex,
             traceId: data.booking_details.trace_id
-        };
+        }));
+
+        // return data; // Return the whole response data if needed
     } else {
         throw new Error(data.message || 'Booking failed');
     }
+
 }
 }); 
 

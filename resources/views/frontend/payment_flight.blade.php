@@ -722,23 +722,26 @@ async function processHotelBooking(bookingData) {
 
 //FLIGHT RELATED FUNCTION
 function getCookie(name) {
-            let nameEQ = name + "=";
-            let ca = document.cookie.split(';');
-            for(let i = 0; i < ca.length; i++) {
-                let c = ca[i].trim();
-                if (c.indexOf(nameEQ) === 0) {
-                    return c.substring(nameEQ.length);
-                }
-            }
-            return null;
+    let nameEQ = name + "=";
+    let ca = document.cookie.split(';');
+    for (let i = 0; i < ca.length; i++) {
+        let c = ca[i].trim();
+        if (c.indexOf(nameEQ) === 0) {
+            return c.substring(nameEQ.length);
         }
+    }
+    return null;
+}
 
-        // Get passenger counts from cookies with default values
-        const origin = getCookie('origin') ;
+// Get origin and destination from cookies
+const origin = getCookie('origin');
+const destination = getCookie('destination');
 
-        // Log the values
-        console.log('Payment Page - ORIGIN Details:');
-        console.log('ORIGIN:', origin);
+// Log the values
+console.log('Payment Page - ORIGIN and DESTINATION Details:');
+console.log('ORIGIN:', origin);
+console.log('DESTINATION:', destination);
+
       
 
         function getBookingDetailsFromURL() {
@@ -763,6 +766,7 @@ function getCookie(name) {
             },
             nonLcc: []
         };
+        const farePax = bookingDetails.lcc.outbound.passengers[0]?.fare?.[0] || {};
 
         // Process LCC flights
         if (bookingDetails.lcc) {
@@ -773,6 +777,19 @@ function getCookie(name) {
                     srdvIndex: bookingDetails.lcc.outbound.srdvIndex,
                     traceId: bookingDetails.lcc.outbound.traceId,
                     totalFare: bookingDetails.lcc.outbound.totalFare,
+                    baseFare: farePax.baseFare || 0,
+            tax: farePax.tax || 0,
+            yqTax: farePax.yqTax || 0,
+            transactionFee: farePax.transactionFee || '0',
+            additionalTxnFeeOfrd: farePax.additionalTxnFeeOfrd || 0,
+            additionalTxnFeePub: farePax.additionalTxnFeePub || 0,
+            airTransFee: farePax.airTransFee || '0',
+                    tax: bookingDetails.lcc.outbound.tax,
+                    yqTax: bookingDetails.lcc.outbound.yqTax,
+                    transactionFee: bookingDetails.lcc.outbound.transactionFee,
+                    additionalTxnFeeOfrd: bookingDetails.lcc.outbound.additionalTxnFeeOfrd,
+                    additionalTxnFeePub: bookingDetails.lcc.outbound.additionalTxnFeePub,
+                    airTransFee: bookingDetails.lcc.outbound.airTransFee,
                     passengers: bookingDetails.lcc.outbound.passengers.map((pax, index) => ({
                         title: pax.title,
                         firstName: pax.firstName,
@@ -781,8 +798,8 @@ function getCookie(name) {
                         contactNo: pax.contactNo || "",
                         email: pax.email || "",
                         paxType: pax.paxType,
-                        addressLine1: pax.addressLine1 || "",
-                        city: pax.addressLine1 || "", // Using addressLine1 as city if needed
+                        addressLine1: origin,
+                        city: origin, // Using addressLine1 as city if needed
                         passportNo: pax.passportNo || "",
                         passportExpiry: pax.passportExpiry || "",
                         passportIssueDate: pax.passportIssueDate || "",
@@ -807,6 +824,20 @@ function getCookie(name) {
                     srdvIndex: bookingDetails.lcc.return.srdvIndex,
                     traceId: bookingDetails.lcc.return.traceId,
                     totalFare: bookingDetails.lcc.return.totalFare,
+                      // Add fare details
+                      baseFare: farePax.baseFare || 0,
+            tax: farePax.tax || 0,
+            yqTax: farePax.yqTax || 0,
+            transactionFee: farePax.transactionFee || '0',
+            additionalTxnFeeOfrd: farePax.additionalTxnFeeOfrd || 0,
+            additionalTxnFeePub: farePax.additionalTxnFeePub || 0,
+            airTransFee: farePax.airTransFee || '0',
+                    tax: bookingDetails.lcc.return.tax,
+                    yqTax: bookingDetails.lcc.return.yqTax,
+                    transactionFee: bookingDetails.lcc.return.transactionFee,
+                    additionalTxnFeeOfrd: bookingDetails.lcc.return.additionalTxnFeeOfrd,
+                    additionalTxnFeePub: bookingDetails.lcc.return.additionalTxnFeePub,
+                    airTransFee: bookingDetails.lcc.return.airTransFee,
                     passengers: bookingDetails.lcc.return.passengers.map((pax, index) => ({
                         title: pax.title,
                         firstName: pax.firstName,
@@ -815,8 +846,8 @@ function getCookie(name) {
                         contactNo: pax.contactNo || "",
                         email: pax.email || "",
                         paxType: pax.paxType,
-                        addressLine1: pax.addressLine1 || "",
-                        city: pax.addressLine1 || "", // Using addressLine1 as city if needed
+                        addressLine1:destination,
+                        city: destination, // Using addressLine1 as city if needed
                         passportNo: pax.passportNo || "",
                         passportExpiry: pax.passportExpiry || "",
                         passportIssueDate: pax.passportIssueDate || "",
@@ -878,112 +909,166 @@ function getCookie(name) {
         return null;
     }
 }
-function bookLCC() {
-    const bookingDetails = getBookingDetailsFromURL(); // Fetch data from URL
+async function bookLCC() {
+    const bookingDetails = getBookingDetailsFromURL();
 
-    if (!bookingDetails || !bookingDetails.passengers || !Array.isArray(bookingDetails.passengers)) {
-        console.error("❌ Passenger details are missing or not in array format!");
+    if (!bookingDetails || !bookingDetails.lcc) {
+        console.error("❌ No valid LCC booking details found!");
         return;
     }
 
-    console.log("🚀 Booking Details Extracted:", bookingDetails);
+    console.log("🚀 Full Booking Details:", bookingDetails);
 
-    // Prepare payload using extracted data
-    const payload = {
-        srdvIndex: bookingDetails.srdvIndex,
-        traceId: bookingDetails.traceId,
-        resultIndex: bookingDetails.resultIndex,
-        totalFare: bookingDetails.totalFare,
-
-        // Map each passenger with all available details
-        passenger: bookingDetails.passengers.map(pax => ({
-            title: pax.title,
-            firstName: pax.firstName,
-            lastName: pax.lastName,
-            gender: pax.gender,
-            contactNo: pax.contactNo,
-            email: pax.email,
-            paxType: pax.paxType,
-            dateOfBirth: pax.dateOfBirth,
-            passportNo: pax.passportNo,
-            passportExpiry: pax.passportExpiry,
-            passportIssueDate: pax.passportIssueDate,
-            addressLine1: pax.addressLine1,
-            city: pax.city,
-            countryCode: pax.countryCode,
-            countryName: pax.countryName,
-
-            // Handle baggage with null check
-            baggage: pax.selectedServices?.baggage ? [{
-                Code: pax.selectedServices.baggage.Code,
-                Weight: pax.selectedServices.baggage.Weight,
-                Price: pax.selectedServices.baggage.Price,
-                Origin: pax.selectedServices.baggage.Origin,
-                Destination: pax.selectedServices.baggage.Destination,
-                WayType: pax.selectedServices.baggage.WayType,
-                Currency: pax.selectedServices.baggage.Currency
-            }] : [],
-
-            // Handle meals with null check
-            mealDynamic: pax.selectedServices?.meals ? pax.selectedServices.meals.map(meal => ({
-                Code: meal.Code,
-                AirlineDescription: meal.AirlineDescription,
-                Price: meal.Price,
-                Origin: meal.Origin,
-                Destination: meal.Destination,
-                WayType: meal.WayType,
-                Quantity: meal.Quantity,
-                Currency: meal.Currency
-            })) : [],
-
-            // Handle seat with null check
-            seat: pax.selectedServices?.seat ? [{
-                Code: pax.selectedServices.seat.code,
-                SeatNumber: pax.selectedServices.seat.seatNumber,
-                Amount: pax.selectedServices.seat.amount,
-                AirlineName: pax.selectedServices.seat.airlineName,
-                AirlineCode: pax.selectedServices.seat.airlineCode,
-                AirlineNumber: pax.selectedServices.seat.airlineNumber
-            }] : []
-        })),
-
-        // Complete fare details
-        fare: {
-            baseFare: bookingDetails.baseFare,
-            tax: bookingDetails.tax,
-            yqTax: bookingDetails.yqTax,
-            transactionFee: parseFloat(bookingDetails.transactionFee || 0),
-            additionalTxnFeeOfrd: bookingDetails.additionalTxnFeeOfrd,
-            additionalTxnFeePub: bookingDetails.additionalTxnFeePub,
-            airTransFee: parseFloat(bookingDetails.airTransFee || 0)
+    // Function to create payload for a single flight
+    const createFlightPayload = (flightDetails) => {
+        if (!flightDetails || !flightDetails.passengers || !Array.isArray(flightDetails.passengers)) {
+            console.error("❌ Invalid flight details!");
+            return null;
         }
+        const fareDetails = flightDetails.passengers[0]?.fare?.[0] || {};
+        // Log fare details for debugging
+        // Log fare details for debugging
+    console.log("Fare details being processed:", {
+        baseFare: fareDetails.baseFare,
+        tax: fareDetails.tax,
+        yqTax: fareDetails.yqTax,
+        transactionFee: fareDetails.transactionFee,
+        additionalTxnFeeOfrd: fareDetails.additionalTxnFeeOfrd,
+        additionalTxnFeePub: fareDetails.additionalTxnFeePub,
+        airTransFee: fareDetails.airTransFee
+    });
+
+
+        return {
+            srdvIndex: flightDetails.srdvIndex,
+            traceId: flightDetails.traceId,
+            resultIndex: flightDetails.resultIndex,
+            totalFare: flightDetails.totalFare,
+            passenger: flightDetails.passengers.map(pax => ({
+                title: pax.title,
+                firstName: pax.firstName,
+                lastName: pax.lastName,
+                gender: pax.gender,
+                contactNo: pax.contactNo,
+                email: pax.email,
+                paxType: pax.paxType,
+                dateOfBirth: pax.dateOfBirth,
+                passportNo: pax.passportNo,
+                passportExpiry: pax.passportExpiry,
+                passportIssueDate: pax.passportIssueDate,
+                addressLine1: pax.addressLine1,
+                city: pax.city,
+                countryCode: pax.countryCode,
+                countryName: pax.countryName,
+
+                baggage: pax.selectedServices?.baggage ? [{
+                    Code: pax.selectedServices.baggage.Code,
+                    Weight: pax.selectedServices.baggage.Weight,
+                    Price: pax.selectedServices.baggage.Price,
+                    Origin: pax.selectedServices.baggage.Origin,
+                    Destination: pax.selectedServices.baggage.Destination,
+                    WayType: pax.selectedServices.baggage.WayType,
+                    Currency: pax.selectedServices.baggage.Currency
+                }] : [],
+
+                mealDynamic: pax.selectedServices?.meals ? pax.selectedServices.meals.map(meal => ({
+                    Code: meal.Code,
+                    AirlineDescription: meal.AirlineDescription,
+                    Price: meal.Price,
+                    Origin: meal.Origin,
+                    Destination: meal.Destination,
+                    WayType: meal.WayType,
+                    Quantity: meal.Quantity,
+                    Currency: meal.Currency
+                })) : [],
+
+                seat: pax.selectedServices?.seat ? [{
+                    Code: pax.selectedServices.seat.code,
+                    SeatNumber: pax.selectedServices.seat.seatNumber,
+                    Amount: pax.selectedServices.seat.amount,
+                    AirlineName: pax.selectedServices.seat.airlineName,
+                    AirlineCode: pax.selectedServices.seat.airlineCode,
+                    AirlineNumber: pax.selectedServices.seat.airlineNumber
+                }] : []
+            })),
+            fare: {
+            baseFare: fareDetails.baseFare || 0,
+            tax: fareDetails.tax || 0,
+            yqTax: fareDetails.yqTax || 0,
+            transactionFee: fareDetails.transactionFee || '0',
+            additionalTxnFeeOfrd: fareDetails.additionalTxnFeeOfrd || 0,
+            additionalTxnFeePub: fareDetails.additionalTxnFeePub || 0,
+            airTransFee: fareDetails.airTransFee || '0'
+        }
+        };
     };
 
-    console.log("✅ Final Payload Ready for Booking:", payload);
 
-    // Send booking request
-    fetch('/flight/bookLCC', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-CSRF-TOKEN': "{{ csrf_token() }}"
-        },
-        body: JSON.stringify(payload)
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.status === 'success') {
-            alert('✅ Booking successful! Booking ID: ' + data.booking_details.booking_id);
-            console.log("🎉 Booking Details:", data.booking_details);
-        } else {
-            alert('❌ Booking failed: ' + (data.message || 'Unknown error'));
-            console.error("❌ Booking Failure:", data);
+    // Book outbound flight
+    if (bookingDetails.lcc.outbound) {
+        console.log("📤 Processing outbound flight booking...");
+        const outboundPayload = createFlightPayload(bookingDetails.lcc.outbound);
+        console.log("Outbound Payload:", outboundPayload); // Debug log
+        if (outboundPayload) {
+            try {
+                const outboundResponse = await fetch('/flight/bookLCC', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': "{{ csrf_token() }}"
+                    },
+                    body: JSON.stringify(outboundPayload)
+                });
+                const outboundData = await outboundResponse.json();
+                
+                if (outboundData.status === 'success') {
+                    console.log("✅ Outbound booking successful:", outboundData.booking_details);
+                } else {
+                    console.error("❌ Outbound booking failed:", outboundData.message);
+                    alert('Outbound flight booking failed: ' + (outboundData.message || 'Unknown error'));
+                    return;
+                }
+            } catch (error) {
+                console.error("❌ Error booking outbound flight:", error);
+                alert('Error booking outbound flight');
+                return;
+            }
         }
-    })
-    .catch(error => {
-        console.error('❌ Error:', error);
-        alert('An error occurred during booking');
-    });
+    }
+
+    // Book return flight
+    if (bookingDetails.lcc.return) {
+        console.log("📥 Processing return flight booking...");
+        const returnPayload = createFlightPayload(bookingDetails.lcc.return);
+        
+        if (returnPayload) {
+            try {
+                const returnResponse = await fetch('/flight/bookLCC', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': "{{ csrf_token() }}"
+                    },
+                    body: JSON.stringify(returnPayload)
+                });
+                const returnData = await returnResponse.json();
+                
+                if (returnData.status === 'success') {
+                    console.log("✅ Return booking successful:", returnData.booking_details);
+                } else {
+                    console.error("❌ Return booking failed:", returnData.message);
+                    alert('Return flight booking failed: ' + (returnData.message || 'Unknown error'));
+                    return;
+                }
+            } catch (error) {
+                console.error("❌ Error booking return flight:", error);
+                alert('Error booking return flight');
+                return;
+            }
+        }
+    }
+
+    alert('✅ Flight bookings completed successfully!');
 }
 
 function BookGdsTickte() {
