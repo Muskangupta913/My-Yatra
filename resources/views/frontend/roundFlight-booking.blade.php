@@ -1416,19 +1416,29 @@ document.getElementById('submitButton').addEventListener('click', async function
             const typeMapping = {'Adult': 1, 'Child': 2, 'Infant': 3};
             const passengerType = typeMapping[passengerTypeString];
 
+
+            function convertToISODateTime(dateString) {
+                if (!dateString) return ''; // Return empty if no date is provided
+                return `${dateString}T00:00:00`;
+            }
+
+            function convertToISODate(dateString) {
+                if (!dateString) return '';
+                return dateString.split('T')[0]; // Remove time part if exists
+            }
             // Base passenger details
             let passenger = {
                 title: form.querySelector('[name$="[Title]"]').value.trim(),
                 firstName: form.querySelector('[name$="[FirstName]"]').value.trim(),
                 lastName: form.querySelector('[name$="[LastName]"]').value.trim(),
-                gender: parseInt(form.querySelector('[name$="[Gender]"]').value),
+                gender: (form.querySelector('[name$="[Gender]"]').value),
                 contactNo: form.querySelector('[name$="[ContactNo]"]')?.value.trim() || "",
                 email: form.querySelector('[name$="[Email]"]')?.value.trim() || "",
-                dateOfBirth: form.querySelector('[name$="[DateOfBirth]"]').value,
+                dateOfBirth: convertToISODateTime(form.querySelector('[name$="[DateOfBirth]"]')?.value || ""),
                 paxType: passengerType,
                 addressLine1: form.querySelector('[name$="[AddressLine1]"]')?.value.trim() || "",
                 passportNo: form.querySelector('[name$="[PassportNo]"]')?.value.trim() || "",
-                passportExpiry: form.querySelector('[name$="[PassportExpiry]"]')?.value || "",
+                passportExpiry: convertToISODateTime(form.querySelector('[name$="[PassportExpiry]"]')?.value || ""),
                 passportIssueDate: form.querySelector('[name$="[PassportIssueDate]"]')?.value || "",
                 addressLine1: origin,
                     city: origin,
@@ -1528,16 +1538,18 @@ document.getElementById('submitButton').addEventListener('click', async function
                 srdvIndex: outboundSrdvIndex,
                 traceId: traceId,
                 resultIndex: outboundResultIndex,
-                passengers: bookingPayloads.nonLcc.outbound.passengers,
-                fare: [{
-                    baseFare: parseFloat(outboundFareQuoteData.Fare.BaseFare),
-                    tax: parseFloat(outboundFareQuoteData.Fare.Tax),
-                    yqTax: parseFloat(outboundFareQuoteData.Fare.YQTax || 0),
-                    transactionFee: (outboundFareQuoteData.Fare.TransactionFee || '0').toString(),
-                    additionalTxnFeeOfrd: parseFloat(outboundFareQuoteData.Fare.AdditionalTxnFeeOfrd || 0),
-                    additionalTxnFeePub: parseFloat(outboundFareQuoteData.Fare.AdditionalTxnFeePub || 0),
-                    airTransFee: (outboundFareQuoteData.Fare.AirTransFee || '0').toString()
-                }],
+                passengers: bookingPayloads.nonLcc.outbound.passengers.map(pax => ({
+    ...pax,
+    fare: [{
+        baseFare: parseFloat(outboundFareQuoteData.Fare.BaseFare),
+        tax: parseFloat(outboundFareQuoteData.Fare.Tax),
+        yqTax: parseFloat(outboundFareQuoteData.Fare.YQTax || 0),
+        transactionFee: (outboundFareQuoteData.Fare.TransactionFee || '0').toString(),
+        additionalTxnFeeOfrd: parseFloat(outboundFareQuoteData.Fare.AdditionalTxnFeeOfrd || 0),
+        additionalTxnFeePub: parseFloat(outboundFareQuoteData.Fare.AdditionalTxnFeePub || 0),
+        airTransFee: (outboundFareQuoteData.Fare.AirTransFee || '0').toString()
+    }]
+})),
                 gst: {
                     companyAddress: document.querySelector('[name="GSTCompanyAddress"]')?.value || '',
                     companyContactNumber: document.querySelector('[name="GSTCompanyContact"]')?.value || '',
@@ -1554,7 +1566,8 @@ document.getElementById('submitButton').addEventListener('click', async function
                 srdvIndex: returnSrdvIndex,
                 traceId: traceId,
                 resultIndex: returnResultIndex,
-                passengers: bookingPayloads.nonLcc.return.passengers,
+                passengers: bookingPayloads.nonLcc.return.passengers.map(pax => ({
+                    ...pax,
                  fare: [{
                         baseFare: parseFloat(returnFareQuoteData.Fare.BaseFare),
                         tax: parseFloat(returnFareQuoteData.Fare.Tax),
@@ -1564,6 +1577,7 @@ document.getElementById('submitButton').addEventListener('click', async function
                         additionalTxnFeePub: parseFloat(returnFareQuoteData.Fare.AdditionalTxnFeePub || 0),
                         airTransFee: (returnFareQuoteData.Fare.AirTransFee || '0').toString()
                     }],
+                })),
                     gst: {
                         companyAddress: document.querySelector('[name="GSTCompanyAddress"]')?.value || '',
                         companyContactNumber: document.querySelector('[name="GSTCompanyContact"]')?.value || '',
