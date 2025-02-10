@@ -56,7 +56,7 @@
 
                         <div class="swiper-slide">
                             <div class="card card-body p-0">
-                                  <img src="{{ asset("assets/images/service2.jpeg")}}" width="100%" height="100%"  alt="">
+                                  <img src="{{ asset('assets/images/service2.jpeg')}}" width="100%" height="100%"  alt="">
                                   <div class="desc py-3 px-3">
                                     <h5 class="swiper-tophead">Travel Planning Assistance</h5>
                                       <p>
@@ -72,7 +72,7 @@
                       
                             <div class="swiper-slide">
                             <div class="card card-body p-0">
-                                  <img src="{{ asset('assets/images/service3.jpeg')}}"  width="100%"   height="100%"   alt="">
+                                  <img src="{{ asset('assets/images/resort.jpg')}}"  width="100%"   height="100%"   alt="">
                                   <div class="desc px-3 py-3">
                                     <h5 class="swiper-tophead">Resort Accommodation</h5>
                                       <p>
@@ -85,7 +85,7 @@
                       
                             <div class="swiper-slide">
                             <div class="card card-body p-0">
-                                  <img src="{{ asset('assets/images/service4.jpeg')}}"  width="100%" height="100%" alt="">
+                                  <img src="{{ asset('assets/images/customer.jpg')}}"  width="100%" height="100%" alt="">
                                   <div class="desc  px-3 py-3">
                                     <h5 class="swiper-tophead">Customer Support</h5>
                                       <p>
@@ -104,7 +104,7 @@
                             
                             <div class="swiper-slide">
                             <div class="card card-body p-0">
-                                  <img src="{{ asset("assets/images/service4.jpeg")}}" width="100%" height="100%" alt="">
+                                  <img src="{{ asset('assets/images/sustain.jpg')}}" width="100%" height="100%" alt="">
                                   <div class="desc  px-3 py-3">
                                     <h5 class="swiper-tophead">Sustainability Initiatives </h5>
                                       <p>
@@ -119,7 +119,7 @@
                       
                             <div class="swiper-slide">
                             <div class="card card-body p-0">
-                                  <img src="{{ asset("assets/images/service5.jpeg")}}"  width="100%" height="100%" alt="">
+                                  <img src="{{ asset('assets/images/offer.jpg')}}"  width="100%" height="100%" alt="">
                                   <div class="desc px-3 py-3">
                                   <h5 class="swiper-tophead">Special Offer And Promotion</h5>
                                       <p class="desc-p-content">

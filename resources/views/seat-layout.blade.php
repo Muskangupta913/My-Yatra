@@ -588,9 +588,7 @@ function fetchSeatLayout() {
 
 function renderSeatLayout(seatDetails) {
     const seatLayoutContainer = document.getElementById('seatLayout');
-    const normalizedData = normalizeLayoutData(seatDetails);
-    
-    
+    const normalizedData = normalizeLayoutData(seatDetails); 
     let layoutHTML = '<div class="bus-layout">';
 // Render Lower Deck and Upper Deck side-by-side
 if (normalizedData.lower.length > 0 || normalizedData.upper.length > 0) {
@@ -616,7 +614,6 @@ if (normalizedData.lower.length > 0 || normalizedData.upper.length > 0) {
                 : ''}
         </div>`;
 }
-
     // Add selected seat info and buttons
     layoutHTML += `
         <div class="deck-info mt-4">
@@ -640,6 +637,7 @@ if (normalizedData.lower.length > 0 || normalizedData.upper.length > 0) {
     // Add event listener for continue button
     document.getElementById('continueButton')?.addEventListener('click', handleContinue);
 }
+
 function renderDeckSeats(deckData, busType)
  {
     // If it's a sleeper bus, use the sleeper layout
@@ -711,6 +709,7 @@ function renderSeaterLayout(deckData)
     seatsHTML += '</div>'; // Close the container
     return seatsHTML;
 }
+
 function renderSleeperLayout(deckData) {
     // Maintain a vertical-layout container for consistency
     let seatsHTML = '<div class="vertical-layout">';

@@ -359,7 +359,7 @@
 
 
 
-       function createPassengerForm(passengerType, count, typeValue) {
+        function createPassengerForm(passengerType, count, typeValue) {
     for (let i = 1; i <= count; i++) {
         let titleOptions = (typeValue === 1) // Check if passenger is an Adult
             ? `<option value="Mr">Mr</option>
@@ -391,7 +391,7 @@
         let ssrOptions = '';
         
         // Add SSR options based on passenger type
-        if (typeValue === 1 || typeValue === 2) { // Adult or Child
+        if (typeValue === 1 || typeValue === 2) { // Adult
             ssrOptions = `
                 <div class="ssr-options mt-4">
                     <h6 class="mb-3">Additional Services</h6>
@@ -477,6 +477,7 @@
         dynamicSections.insertAdjacentHTML('beforeend', passengerForm);
     }
 }
+
 // Generate Passenger Forms with automatic PassengerType
 createPassengerForm("Adult", adultCount, 1);
 createPassengerForm("Child", childCount, 2);
