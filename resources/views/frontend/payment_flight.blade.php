@@ -1094,119 +1094,55 @@ const traceId = bookingDetails.traceId;
     }
 }
 
+// Function to process the GDS Ticket booking
+function processGdsTicket() {
+    const gdsTicketDetails = BookGdsTickte();
 
-
-
-async function processGdsTicket() {
-    const bookingDetails = BookGdsTickte();
-
-    if (!bookingDetails || !bookingDetails.gds) {
-        console.error("❌ No valid GDS booking details found!");
+    if (!gdsTicketDetails) {
+        console.error("Missing required parameters for GDS ticket booking.");
         return;
     }
 
-    console.log("🚀 Full GDS Booking Details:", bookingDetails);
-
-    // Function to create payload for a single GDS flight
-    const createGdsPayload = (flightDetails) => {
-        if (!flightDetails || !flightDetails.bookingId || !flightDetails.pnr) {
-            console.error("❌ Invalid GDS flight details!");
-            return null;
-        }
-
-        return {
-            EndUserIp: "1.1.1.1",
-            ClientId: "180133",
-            UserName: "MakeMy91",
-            Password: "MakeMy@910",
-            srdvType: "MixAPI",
-            srdvIndex: flightDetails.srdvIndex,
-            traceId: flightDetails.traceId,
-            pnr: flightDetails.pnr,
-            bookingId: flightDetails.bookingId
-        };
+    const payload = {
+        EndUserIp: "1.1.1.1",
+        ClientId: "180133",
+        UserName: "MakeMy91",
+        Password: "MakeMy@910",
+        srdvType: "MixAPI",
+        srdvIndex: gdsTicketDetails.srdvIndex,
+        traceId: gdsTicketDetails.traceId,
+        pnr: gdsTicketDetails.pnr,
+        bookingId: gdsTicketDetails.bookingId
     };
 
-    // Book outbound flight
-    if (bookingDetails.gds.outbound) {
-        console.log("📤 Processing outbound GDS flight booking...");
-        const outboundPayload = createGdsPayload(bookingDetails.gds.outbound);
-        console.log("Outbound GDS Payload:", outboundPayload); // Debug log
+    console.log("Sending payload:", payload);
 
-        if (outboundPayload) {
-            try {
-                const outboundResponse = await fetch('/flight/bookGdsTicket', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-                    },
-                    body: JSON.stringify(outboundPayload)
-                });
-                const outboundData = await outboundResponse.json();
-                
-                if (outboundData.status === 'success') {
-                    console.log("✅ Outbound GDS booking successful:", {
-                        bookingId: outboundData.data.bookingId,
-                        pnr: outboundData.data.pnr,
-                        ticketStatus: outboundData.data.ticketStatus,
-                        passengers: outboundData.data.passengers
-                    });
-                } else {
-                    console.error("❌ Outbound GDS booking failed:", outboundData.message);
-                    alert('Outbound GDS flight booking failed: ' + (outboundData.message || 'Unknown error'));
-                    return;
-                }
-            } catch (error) {
-                console.error("❌ Error booking outbound GDS flight:", error);
-                alert('Error booking outbound GDS flight');
-                return;
-            }
+    fetch("/flight/bookGdsTicket", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').content
+        },
+        body: JSON.stringify(payload)
+    })
+    .then(response => response.json())
+    .then(data => {
+        console.log("API Response:", data);
+        if (data.status === "success") {
+            console.log("Booking successful:", {
+                bookingId: data.data.bookingId,
+                pnr: data.data.pnr,
+                ticketStatus: data.data.ticketStatus,
+                passengers: data.data.passengers
+            });
+        } else {
+            console.error("Booking failed:", data.message);
         }
-    }
-
-    // Book return flight
-    if (bookingDetails.gds.return) {
-        console.log("📥 Processing return GDS flight booking...");
-        const returnPayload = createGdsPayload(bookingDetails.gds.return);
-        console.log("Return GDS Payload:", returnPayload); // Debug log
-        
-        if (returnPayload) {
-            try {
-                const returnResponse = await fetch('/flight/bookGdsTicket', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-                    },
-                    body: JSON.stringify(returnPayload)
-                });
-                const returnData = await returnResponse.json();
-                
-                if (returnData.status === 'success') {
-                    console.log("✅ Return GDS booking successful:", {
-                        bookingId: returnData.data.bookingId,
-                        pnr: returnData.data.pnr,
-                        ticketStatus: returnData.data.ticketStatus,
-                        passengers: returnData.data.passengers
-                    });
-                } else {
-                    console.error("❌ Return GDS booking failed:", returnData.message);
-                    alert('Return GDS flight booking failed: ' + (returnData.message || 'Unknown error'));
-                    return;
-                }
-            } catch (error) {
-                console.error("❌ Error booking return GDS flight:", error);
-                alert('Error booking return GDS flight');
-                return;
-            }
-        }
-    }
-
-    alert('✅ GDS flight bookings completed successfully!');
+    })
+    .catch(error => {
+        console.error("API Error:", error);
+    });
 }
-
-// Function to process the GDS Ticket booking
 
 
 

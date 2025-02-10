@@ -1615,7 +1615,7 @@ document.getElementById('submitButton').addEventListener('click', async function
             nonLcc: nonLccResults.length > 0 ? nonLccResults : null
         };
 
-        // Redirect to payment page
+        // Redirect to payment pagegit 
         const encodedDetails = encodeURIComponent(JSON.stringify(finalBookingDetails));
         window.location.href = `/flight/payment?details=${encodedDetails}`;
 
