@@ -322,17 +322,57 @@
           document.addEventListener('DOMContentLoaded', function() {
             const urlParams = new URLSearchParams(window.location.search);
     const traceId = urlParams.get('traceId');
-    const resultIndex = urlParams.get('resultIndex');
+    const outboundResultIndex = urlParams.get('outboundIndex');
+const returnResultIndex = urlParams.get('returnIndex');
+
+// Log for debugging
+console.log('Outbound Result Index:', outboundResultIndex);
+console.log('Return Result Index:', returnResultIndex);
     const encodedDetails = urlParams.get('details');
     const origin = getCookie('origin') ;
-    console.log(' ORIGIN Details:');
-        console.log('ORIGIN:', origin);
+    const destination = getCookie('destination') ;
+    console.log(' ORIGIN Details:', origin);
+    console.log(' DESTINATION Details:',destination);
+     
         const outboundFareQuoteData = JSON.parse(sessionStorage.getItem('outboundFareQuoteData'));
         const returnFareQuoteData = JSON.parse(sessionStorage.getItem('returnFareQuoteData'));
 
         console.log('outbount fetched data ',outboundFareQuoteData);
         console.log('return fetched data ',returnFareQuoteData);
          
+
+        const returnFlights = JSON.parse(sessionStorage.getItem('returnFlights')) || [];
+        const outboundFlights = JSON.parse(sessionStorage.getItem('outboundFlights')) || [];
+
+
+    // Retrieve stored flight search results
+    let outboundSrdvIndex = null;
+// Find SrdvIndex for return flight
+let returnSrdvIndex = null;
+
+// Find SrdvIndex from outboundFlights
+outboundFlights.forEach(outbound => {
+    if (outbound.FareDataMultiple && Array.isArray(outbound.FareDataMultiple)) {
+        outbound.FareDataMultiple.forEach(fareData => {
+            if (fareData.ResultIndex === outboundResultIndex) {
+                outboundSrdvIndex = fareData.SrdvIndex;
+                console.log('departure srdvindex ', outboundSrdvIndex);
+            }
+        });
+    }
+});
+
+// Find SrdvIndex from returnFlights
+returnFlights.forEach(returnFlight => {
+    if (returnFlight.FareDataMultiple && Array.isArray(returnFlight.FareDataMultiple)) {
+        returnFlight.FareDataMultiple.forEach(fareData => {
+            if (fareData.ResultIndex === returnResultIndex) {
+                returnSrdvIndex = fareData.SrdvIndex;
+                console.log('return srdvindex ', returnSrdvIndex);
+            }
+        });
+    }
+});
 
     function getCookie(name) {
             let nameEQ = name + "=";
@@ -359,7 +399,7 @@
 
 
 
-        function createPassengerForm(passengerType, count, typeValue) {
+       function createPassengerForm(passengerType, count, typeValue) {
     for (let i = 1; i <= count; i++) {
         let titleOptions = (typeValue === 1) // Check if passenger is an Adult
             ? `<option value="Mr">Mr</option>
@@ -391,39 +431,77 @@
         let ssrOptions = '';
         
         // Add SSR options based on passenger type
-        if (typeValue === 1 || typeValue === 2) { // Adult
+        if (typeValue === 1 || typeValue === 2) { // Adult or Child
             ssrOptions = `
                 <div class="ssr-options mt-4">
                     <h6 class="mb-3">Additional Services</h6>
-                    <div class="row">
-                        <div class="col-md-4">
-                            <button type="button" class="btn btn-outline-primary w-100 mb-2" 
-                                onclick="fetchSeatMap('seat', ${i}, '${passengerType}')" 
-                                id="selectSeatBtn-${passengerType}-${i}">
-                                Select Seat
-                            </button>
-                            <div id="seatInfo-${passengerType}-${i}" class="small text-muted"></div>
+                    
+                    <!-- Outbound Flight Section -->
+                    <div class="flight-section mb-4">
+                        <h5>Outbound Flight</h5>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <button type="button" class="btn btn-outline-primary w-100 mb-2" 
+                                    onclick="fetchSeatMap('seat', '${outboundResultIndex}', '${outboundSrdvIndex}', 'outbound', '${passengerType}', ${i})" 
+                                    id="selectSeatBtn-outbound-${passengerType}-${i}">
+                                    Select Seat
+                                </button>
+                                <div id="seatInfo-outbound-${passengerType}-${i}" class="small text-muted"></div>
+                            </div>
+                            <div class="col-md-4">
+                                <button type="button" class="btn btn-outline-primary w-100 mb-2" 
+                                    onclick="fetchSSRData('meal', '${passengerType}', '${outboundResultIndex}', '${outboundSrdvIndex}', 'outbound', ${i})" 
+                                    id="meal-btn-outbound-${passengerType}-${i}">
+                                    Select Meal
+                                </button>
+                                <div id="mealInfo-outbound-${passengerType}-${i}" class="small text-muted"></div>
+                            </div>
+                            <div class="col-md-4">
+                                <button type="button" class="btn btn-outline-primary w-100 mb-2" 
+                                    onclick="fetchSSRData('baggage', '${passengerType}', '${outboundResultIndex}', '${outboundSrdvIndex}', 'outbound', ${i})" 
+                                    id="baggage-btn-outbound-${passengerType}-${i}">
+                                    Select Baggage
+                                </button>
+                                <div id="baggageInfo-outbound-${passengerType}-${i}" class="small text-muted"></div>
+                            </div>
                         </div>
-                        <div class="col-md-4">
-                            <button type="button" class="btn btn-outline-primary w-100 mb-2" 
-                                onclick="fetchSSRData('meal', ${i}, '${passengerType}')" 
-                                id="meal-btn-${passengerType}-${i}">
-                                Select Meal
-                            </button>
-                            <div id="mealInfo-${passengerType}-${i}" class="small text-muted"></div>
-                        </div>
-                        <div class="col-md-4">
-                            <button type="button" class="btn btn-outline-primary w-100 mb-2" 
-                                onclick="fetchSSRData('baggage', ${i}, '${passengerType}')" 
-                                id="baggage-btn-${passengerType}-${i}">
-                                Select Baggage
-                            </button>
-                            <div id="baggageInfo-${passengerType}-${i}" class="small text-muted"></div>
-                        </div>
+                        <div id="options-container-outbound-${passengerType}-${i}" class="mt-3"></div>
                     </div>
-                    <div id="options-container-${passengerType}-${i}" class="mt-3"></div>
+
+                    <!-- Return Flight Section -->
+                    <div class="flight-section">
+                        <h5>Return Flight</h5>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <button type="button" class="btn btn-outline-primary w-100 mb-2" 
+                                    onclick="fetchSeatMap('seat', '${returnResultIndex}', '${returnSrdvIndex}', 'return', '${passengerType}', ${i})" 
+                                    id="selectSeatBtn-return-${passengerType}-${i}">
+                                    Select Seat
+                                </button>
+                                <div id="seatInfo-return-${passengerType}-${i}" class="small text-muted"></div>
+                            </div>
+                            <div class="col-md-4">
+                                <button type="button" class="btn btn-outline-primary w-100 mb-2" 
+                                    onclick="fetchSSRData('meal', '${passengerType}', '${returnResultIndex}', '${returnSrdvIndex}', 'return', ${i})" 
+                                    id="meal-btn-return-${passengerType}-${i}">
+                                    Select Meal
+                                </button>
+                                <div id="mealInfo-return-${passengerType}-${i}" class="small text-muted"></div>
+                            </div>
+                            <div class="col-md-4">
+                                <button type="button" class="btn btn-outline-primary w-100 mb-2" 
+                                    onclick="fetchSSRData('baggage', '${passengerType}', '${returnResultIndex}', '${returnSrdvIndex}', 'return', ${i})" 
+                                    id="baggage-btn-return-${passengerType}-${i}">
+                                    Select Baggage
+                                </button>
+                                <div id="baggageInfo-return-${passengerType}-${i}" class="small text-muted"></div>
+                            </div>
+                        </div>
+                        <div id="options-container-return-${passengerType}-${i}" class="mt-3"></div>
+                    </div>
                 </div>`;
-        } 
+        }
+
 
         let passengerForm = `
             <div class="card mb-3">
@@ -477,98 +555,106 @@
         dynamicSections.insertAdjacentHTML('beforeend', passengerForm);
     }
 }
-
 // Generate Passenger Forms with automatic PassengerType
 createPassengerForm("Adult", adultCount, 1);
 createPassengerForm("Child", childCount, 2);
 createPassengerForm("Infant", infantCount, 3);
    
 
-    const fareQuoteData = JSON.parse(sessionStorage.getItem('fareQuoteData'));
-    console.log('fareqoutes segment',fareQuoteData?.Segments )
+    
 
-    function renderFareQuoteSegments(fareQuoteData) {
+function renderFareQuoteSegments(outboundFareQuoteData, returnFareQuoteData) {
     const segmentsContainer = document.getElementById('segmentsContainer');
     segmentsContainer.innerHTML = '';
 
-    if (!fareQuoteData?.Segments) {
-        console.log('Missing Segments data:', fareQuoteData);
-        segmentsContainer.innerHTML = `
-            <div class="p-4 bg-red-50 text-red-600 rounded">
-                No segments data available.
-            </div>`;
-        return;
-    }
+    function createSegmentCard(title, fareQuoteData) {
+        if (!fareQuoteData?.Segments || fareQuoteData.Segments.length === 0) {
+            console.warn(`Missing ${title} Segments data:`, fareQuoteData);
+            return `
+                <div class="p-4 bg-red-50 text-red-600 rounded mb-4">
+                    No ${title} segments data available.
+                </div>`;
+        }
 
-    fareQuoteData.Segments.forEach((segmentGroup) => {
-        const card = document.createElement('div');
-        card.classList.add(
-            'bg-white',
-            'rounded-lg',
-            'shadow-sm',
-            'border',
-            'border-gray-200',
-            'p-4',
-            'mb-4'
-        );
+        let segmentCards = `<h3 class="text-lg font-semibold mb-2">${title}</h3>`;
 
-        let segmentsHtml = '';
-        segmentGroup.forEach((segment, index) => {
-            const departureTime = new Date(segment.DepTime);
-            const arrivalTime = new Date(segment.ArrTime);
+        fareQuoteData.Segments.forEach((segmentGroup) => {
+            let segmentsHtml = '';
+            segmentGroup.forEach((segment, index) => {
+                const departureTime = new Date(segment.DepTime);
+                const arrivalTime = new Date(segment.ArrTime);
 
-            segmentsHtml += `
-                <div class="flex items-center ${index < segmentGroup.length - 1 ? 'mb-2' : ''}">
-                    <div class="w-24 text-center">
-                        <p class="font-bold">${departureTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
-                        <p class="text-sm text-gray-600">${segment.Origin.CityCode}</p>
-                    </div>
-                    
-                    <div class="flex-1 px-4">
-                        <div class="relative flex items-center">
-                            <div class="h-0.5 w-full bg-gray-300"></div>
-                            <div class="absolute w-full text-center">
-                                <span class="bg-white px-2 text-xs text-gray-600">
-                                    ${segment.Airline.AirlineCode} ${segment.Airline.FlightNumber}
-                                </span>
+                segmentsHtml += `
+                    <div class="flex items-center ${index < segmentGroup.length - 1 ? 'mb-2' : ''}">
+                        <div class="w-24 text-center">
+                            <p class="font-bold">${departureTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
+                            <p class="text-sm text-gray-600">${segment.Origin.CityCode}</p>
+                        </div>
+                        
+                        <div class="flex-1 px-4">
+                            <div class="relative flex items-center">
+                                <div class="h-0.5 w-full bg-gray-300"></div>
+                                <div class="absolute w-full text-center">
+                                    <span class="bg-white px-2 text-xs text-gray-600">
+                                        ${segment.Airline.AirlineCode} ${segment.Airline.FlightNumber}
+                                    </span>
+                                </div>
                             </div>
                         </div>
+                        
+                        <div class="w-24 text-center">
+                            <p class="font-bold">${arrivalTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
+                            <p class="text-sm text-gray-600">${segment.Destination.CityCode}</p>
+                        </div>
                     </div>
-                    
-                    <div class="w-24 text-center">
-                        <p class="font-bold">${arrivalTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
-                        <p class="text-sm text-gray-600">${segment.Destination.CityCode}</p>
-                    </div>
-                </div>
-                ${index < segmentGroup.length - 1 ? `
-                    <div class="my-2 px-3 py-1 bg-orange-50 rounded text-sm text-center text-orange-700">
-                        Change planes at ${segment.Destination.CityCode}
-                    </div>
-                ` : ''}
-            `;
+                    ${index < segmentGroup.length - 1 ? `
+                        <div class="my-2 px-3 py-1 bg-orange-50 rounded text-sm text-center text-orange-700">
+                            Change planes at ${segment.Destination.CityCode}
+                        </div>
+                    ` : ''}
+                `;
+            });
+
+            segmentCards += `
+                <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4 mb-4">
+                    ${segmentsHtml}
+                </div>`;
         });
 
-        card.innerHTML = segmentsHtml;
-        segmentsContainer.appendChild(card);
-    });
+        return segmentCards;
+    }
+
+    // Render outbound flight segments
+    segmentsContainer.innerHTML += createSegmentCard('Outbound Flight', outboundFareQuoteData);
+
+    // Render return flight segments
+    segmentsContainer.innerHTML += createSegmentCard('Return Flight', returnFareQuoteData);
 }
 
+// Fetch fare quote data from session storage
 
-if (fareQuoteData) {
-    renderFareQuoteSegments(fareQuoteData);
-}
+// Ensure data exists before rendering
+if (outboundFareQuoteData || returnFareQuoteData) {
+    renderFareQuoteSegments(outboundFareQuoteData, returnFareQuoteData);
+
     // Log fare details for verification
-    if (fareQuoteData && fareQuoteData.Fare) {
-        console.log('Fare Details Successfully Fetched:', fareQuoteData.Fare);
-        
-        // Optional: Set total fare in a hidden input for later use
+    if (outboundFareQuoteData?.Fare || returnFareQuoteData?.Fare) {
+        console.log('Outbound Fare Details:', outboundFareQuoteData?.Fare);
+        console.log('Return Fare Details:', returnFareQuoteData?.Fare);
+
+        // Update total fare input if it exists
         const totalFareInput = document.getElementById('totalFare');
         if (totalFareInput) {
-            totalFareInput.value = fareQuoteData.Fare.OfferedFare || 0;
+            const totalFare = (outboundFareQuoteData?.Fare?.OfferedFare || 0) + 
+                              (returnFareQuoteData?.Fare?.OfferedFare || 0);
+            totalFareInput.value = totalFare;
         }
     } else {
         console.error('Fare Quote Data Not Found in Session Storage');
     }
+} else {
+    console.error('No Fare Quote Data Available');
+}
 
     // Correctly parse details
     let flightDetails = {};
@@ -592,88 +678,146 @@ if (fareQuoteData) {
     }
 
 
-    // Retrieve stored flight search results
-    const results = JSON.parse(sessionStorage.getItem('flightSearchResults')) || [];
+    
 
-    // Find SrdvIndex
-    let srdvIndex = null;
-    results.forEach(resultGroup => {
-        resultGroup.forEach(result => {
-            if (result.FareDataMultiple) {
-                result.FareDataMultiple.forEach(fareData => {
-                    if (fareData.ResultIndex === resultIndex) {
-                        srdvIndex = fareData.SrdvIndex;
-                        console.log('SRDV INDEX', srdvIndex);
-                    }
-                });
-            }
-        });
-    });
 
-    window.passengerSelections = {
-    seats: {},    // Format: {passengerType-index: {seatNumber, code, amount}}
-    meals: {},    // Format: {passengerType-index: [{meal details}]}
-    baggage: {}   // Format: {passengerType-index: {baggageDetails}}
+window.passengerSelections = {
+    seats: {
+        outbound: {},  // Format: {passengerType-index: {seatDetails}}
+        return: {}     // Format: {passengerType-index: {seatDetails}}
+    },    // Format: {passengerType-index: {seatNumber, code, amount}}
+    meals: {
+        outbound: {},  // Format: {passengerType-index: [{meal details}]}
+        return: {}     // Format: {passengerType-index: [{meal details}]}
+    },
+    baggage: {
+        outbound: {},  // Format: {passengerType-index: {baggageDetails}}
+        return: {}     // Format: {passengerType-index: {baggageDetails}}
+    }
 };
     // Add event listeners
-    if (srdvIndex) {
-        document.getElementById('baggage-btn').addEventListener('click', () => fetchSSRData('baggage'));
-        document.getElementById('meal-btn').addEventListener('click', () => fetchSSRData('meal'));
-    } else {
-        console.error('SrdvIndex not found for ResultIndex:', resultIndex);
-    }
-
-    function fetchSSRData(type, index, passengerType) {
-
-        if (!type || !index || !passengerType) {
-        console.error('Missing required parameters:', { type, index, passengerType });
-        return;
-    }
-
-    const passengerId = `${passengerType}-${index}`;
-    fetch("{{ route('fetch.ssr.data') }}", {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-CSRF-TOKEN': "{{ csrf_token() }}"
-        },
-        body: JSON.stringify({
-            EndUserIp: '1.1.1.1',
-            ClientId: '180133',
-            UserName: 'MakeMy91',
-            Password: 'MakeMy@910',
-            SrdvType: "MixAPI",
-            SrdvIndex: srdvIndex,
-            TraceId: traceId,
-            ResultIndex: resultIndex
-        })
-    })
-    .then(response => response.json())
-    .then(data => {
-        const container = document.getElementById(`options-container-${passengerType}-${index}`);
+   
+    if (outboundSrdvIndex && returnSrdvIndex) {
+    document.getElementById('baggage-btn').addEventListener('click', () => {
+        // Create containers for both flights
+        const containerDiv = document.getElementById('ssr-options-container');
+        containerDiv.innerHTML = `
+            <div class="flight-section mb-4">
+                <h5>Outbound Flight</h5>
+                <div id="options-container-outbound"></div>
+            </div>
+            <div class="flight-section">
+                <h5>Return Flight</h5>
+                <div id="options-container-return"></div>
+            </div>
+        `;
         
-        if (!data.success) {
-            container.innerHTML = `<p>This flight does not provide SSR services: ${data.message || 'No details available'}</p>`;
-            return;
-        }
-
-        if (type === 'baggage' && data.Baggage && data.Baggage[0] && data.Baggage[0].length > 0) {
-            renderBaggageOptions(data.Baggage[0], container, passengerId);
-        } else if (type === 'meal' && data.MealDynamic && data.MealDynamic[0] && data.MealDynamic[0].length > 0) {
-            renderMealOptions(data.MealDynamic[0], container, passengerId);
-        } else {
-            container.innerHTML = `<p>No ${type} options available for this flight.</p>`;
-        }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        Swal.fire({
-            icon: 'error',
-            title: 'Error',
-            text: `Failed to load ${type} options. Please try again.`
+        // Log the values being passed
+        console.log('Outbound baggage fetch:', {
+            resultIndex: outboundResultIndex,
+            srdvIndex: outboundSrdvIndex
         });
+        console.log('Return baggage fetch:', {
+            resultIndex: returnResultIndex,
+            srdvIndex: returnSrdvIndex
+        });
+
+        // Fetch baggage data for both flights
+        fetchSSRData('baggage', outboundResultIndex, outboundSrdvIndex, 'outbound');
+        fetchSSRData('baggage', returnResultIndex, returnSrdvIndex, 'return');
+    });
+
+    // Similar structure for meal button
+    document.getElementById('meal-btn').addEventListener('click', () => {
+        // Similar container setup...
+        const containerDiv = document.getElementById('ssr-options-container');
+        containerDiv.innerHTML = `
+            <div class="flight-section mb-4">
+                <h5>Outbound Flight</h5>
+                <div id="options-container-outbound"></div>
+            </div>
+            <div class="flight-section">
+                <h5>Return Flight</h5>
+                <div id="options-container-return"></div>
+            </div>
+        `;
+
+        // Log the values being passed
+        console.log('Outbound meal fetch:', {
+            resultIndex: outboundResultIndex,
+            srdvIndex: outboundSrdvIndex
+        });
+        console.log('Return meal fetch:', {
+            resultIndex: returnResultIndex,
+            srdvIndex: returnSrdvIndex
+        });
+
+        // Fetch meal data for both flights
+        fetchSSRData('meal', outboundResultIndex, outboundSrdvIndex, 'outbound');
+        fetchSSRData('meal', returnResultIndex, returnSrdvIndex, 'return');
     });
 }
+
+
+
+function fetchSSRData(type, passengerType, resultIndex, srdvIndex, direction, passengerIndex) {
+            const containerId = `options-container-${direction}-${passengerType}-${passengerIndex}`;
+            const container = document.getElementById(containerId);
+            
+            if (!container) {
+                console.error(`Container not found: ${containerId}`);
+                return;
+            }
+
+            // Show loading state
+            container.innerHTML = '<div class="text-center">Loading options...</div>';
+
+            const urlParams = new URLSearchParams(window.location.search);
+            const traceId = urlParams.get('traceId');
+
+            fetch("{{ route('fetch.ssr.data') }}", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                },
+                body: JSON.stringify({
+                    EndUserIp: '1.1.1.1',
+                    ClientId: '180133',
+                    UserName: 'MakeMy91',
+                    Password: 'MakeMy@910',
+                    SrdvType: "MixAPI",
+                    SrdvIndex: srdvIndex,
+                    TraceId: traceId,
+                    ResultIndex: resultIndex
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (!data.success) {
+                    container.innerHTML = `<p class="text-danger">This flight does not provide SSR services: ${data.message || 'No details available'}</p>`;
+                    return;
+                }
+
+                if (type === 'baggage' && data.Baggage?.[0]?.length > 0) {
+                    renderBaggageOptions(data.Baggage[0], container, `${passengerType}-${passengerIndex}-${direction}`);
+                } else if (type === 'meal' && data.MealDynamic?.[0]?.length > 0) {
+                    renderMealOptions(data.MealDynamic[0], container, `${passengerType}-${passengerIndex}-${direction}`);
+                } else {
+                    container.innerHTML = `<p>No ${type} options available for this flight.</p>`;
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                container.innerHTML = `<p class="text-danger">Failed to load ${type} options. Please try again.</p>`;
+                
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: `Failed to load ${type} options. Please try again.`
+                });
+            });
+        }
 
 // Make sure selectSeat is available globally
 if (typeof window !== 'undefined') {
@@ -681,10 +825,14 @@ if (typeof window !== 'undefined') {
     }
 
     function renderBaggageOptions(baggageData, container, passengerId) {
-    if (!baggageData.length) {
+    if (!baggageData || !baggageData.length) {
         container.innerHTML = '<p>No baggage options available.</p>';
         return;
     }
+    const radioButtons = container.querySelectorAll('input[type="radio"]');
+    radioButtons.forEach(radio => {
+        radio.setAttribute('data-direction', passengerId.split('-')[2]); // Extract direction
+    });
 
     container.innerHTML = `
         <h6 class="mb-4">Baggage Options</h6>
@@ -706,11 +854,11 @@ if (typeof window !== 'undefined') {
                         <td>
                             <input 
                                 type="radio" 
-                                name="baggage_option_${passengerId}" 
+                                name="baggage_${passengerId}" 
                                 value="${option.Code}" 
                                 data-weight="${option.Weight}" 
                                 data-price="${option.Price}"
-                                data-description="${option.Description}"
+                                data-description="${option.Description || ''}"
                                 data-wayType="${option.WayType}"
                                 data-currency="${option.Currency}"
                                 data-origin="${option.Origin}"
@@ -727,10 +875,17 @@ if (typeof window !== 'undefined') {
 }
 
 window.updateBaggageSelection = function(radio, passengerId) {
+    // Extract direction (outbound/return) from passengerId
+    const [type, index, direction] = passengerId.split('-');
+    
+    if (!window.passengerSelections.baggage[direction]) {
+        window.passengerSelections.baggage[direction] = {};
+    }
+    
     const baggageOption = {
         Code: radio.value,
         Weight: radio.getAttribute('data-weight'),
-        Price: radio.getAttribute('data-price'),
+        Price: parseFloat(radio.getAttribute('data-price')),
         Origin: radio.getAttribute('data-origin'),
         Destination: radio.getAttribute('data-destination'),
         Description: radio.getAttribute('data-description'),
@@ -738,12 +893,25 @@ window.updateBaggageSelection = function(radio, passengerId) {
         Currency: radio.getAttribute('data-currency')
     };
     
-    window.passengerSelections.baggage[passengerId] = baggageOption;
-    showBaggageAlert(radio, passengerId);
+    // Store using the passenger type-index as key
+    const passengerKey = `${type}-${index}`;
+    window.passengerSelections.baggage[direction][passengerKey] = baggageOption;
+    
+    console.log(`Updated baggage selection for ${direction}:`, window.passengerSelections.baggage[direction]);
+    showBaggageAlert(radio);
 };
 
 
 function renderMealOptions(mealData, container, passengerId) {
+    if (!mealData || !mealData.length) {
+        container.innerHTML = '<p>No meal options available.</p>';
+        return;
+    }
+
+    const checkboxes = container.querySelectorAll('input[type="checkbox"]');
+    checkboxes.forEach(checkbox => {
+        checkbox.setAttribute('data-direction', passengerId.split('-')[2]); // Extract direction
+    });
     container.innerHTML = `
         <div class="meal-options-container">
             <h6 class="mb-4">Meal Options (Select Multiple)</h6>
@@ -757,13 +925,12 @@ function renderMealOptions(mealData, container, passengerId) {
                 <div class="meal-option">
                     <input 
                         type="checkbox" 
-                        name="meal_option_${passengerId}" 
+                        name="meal_${passengerId}" 
                         value="${meal.Code}" 
                         data-wayType="${meal.WayType}"
-                        data-descript="${meal.Description || 'No Description'}"
                         data-description="${meal.AirlineDescription || 'No Description'}"
                         data-origin="${meal.Origin}"
-                        data-quantity="${meal.Quantity}"
+                        data-quantity="1"
                         data-currency="${meal.Currency}"
                         data-destination="${meal.Destination}"
                         data-price="${meal.Price}"
@@ -783,6 +950,7 @@ function renderMealOptions(mealData, container, passengerId) {
             `).join('')}
         </div>
     `;
+
 
     // Add some styling for the selected meals display
     const style = document.createElement('style');
@@ -810,9 +978,18 @@ function renderMealOptions(mealData, container, passengerId) {
 // Store selected meals in an array
 window.selectedMealOptions = [];
 
+// Fix the meal update function
 window.updateMealSelections = function(checkbox, passengerId) {
-    if (!window.passengerSelections.meals[passengerId]) {
-        window.passengerSelections.meals[passengerId] = [];
+    // Extract direction (outbound/return) from passengerId
+    const [type, index, direction] = passengerId.split('-');
+    
+    if (!window.passengerSelections.meals[direction]) {
+        window.passengerSelections.meals[direction] = {};
+    }
+    
+    const passengerKey = `${type}-${index}`;
+    if (!window.passengerSelections.meals[direction][passengerKey]) {
+        window.passengerSelections.meals[direction][passengerKey] = [];
     }
 
     const mealData = {
@@ -823,21 +1000,22 @@ window.updateMealSelections = function(checkbox, passengerId) {
         Price: parseFloat(checkbox.getAttribute('data-price')) || 0,
         WayType: checkbox.getAttribute('data-wayType'),
         Quantity: parseInt(checkbox.closest('.meal-option').querySelector('.quantity-input').value),
-        Currency: checkbox.getAttribute('data-currency'),
-        Description: checkbox.getAttribute('data-descript')
+        Currency: checkbox.getAttribute('data-currency')
     };
 
     if (checkbox.checked) {
-        window.passengerSelections.meals[passengerId].push(mealData);
+        window.passengerSelections.meals[direction][passengerKey].push(mealData);
     } else {
-        window.passengerSelections.meals[passengerId] = 
-            window.passengerSelections.meals[passengerId].filter(meal => meal.Code !== mealData.Code);
+        window.passengerSelections.meals[direction][passengerKey] = 
+            window.passengerSelections.meals[direction][passengerKey].filter(meal => meal.Code !== mealData.Code);
     }
 
+    console.log(`Updated meal selection for ${direction}:`, window.passengerSelections.meals[direction]);
     updateMealDisplay(passengerId);
-    updateTotalFare();
     showMealSelectionAlert(passengerId);
 };
+
+
 // Function to adjust quantity
 window.adjustQuantity = function(button, change) {
     const input = button.parentElement.querySelector('.quantity-input');
@@ -903,7 +1081,6 @@ window.updateMealQuantity = function(input, passengerId) {
         if (mealIndex !== -1) {
             selectedMeals[mealIndex].Quantity = parseInt(input.value);
             updateMealDisplay(passengerId);
-            updateTotalFare();
         }
     }
 };
@@ -975,16 +1152,10 @@ window.showBaggageAlert = function(radio) {
 // Replace your existing selectSeatBtn click handler with this:
 
 
-    if (srdvIndex) {
-        document.getElementById('selectSeatBtn').addEventListener('click', () => fetchSSRData('baggage'));
-     
-    } else {
-        console.error('SrdvIndex not found for ResultIndex:', resultIndex);
-    }
-
-    function fetchSeatMap(type, index, passengerType) {
-    const passengerId = `${passengerType}-${index}`;
-    const button = document.getElementById(`selectSeatBtn-${passengerId}`);
+function fetchSeatMap(type, resultIndex, srdvIndex, direction, passengerType, passengerIndex) {
+    const passengerId = `${passengerType}-${passengerIndex}`;
+    const buttonId = `selectSeatBtn-${direction}-${passengerId}`;
+    const button = document.getElementById(buttonId);
     
     if (button) {
         button.disabled = true;
@@ -1022,7 +1193,7 @@ window.showBaggageAlert = function(radio) {
             });
         } else {
             Swal.fire({
-                title: `Select Seat for ${passengerType} ${index}`,
+                title: `Select ${direction.charAt(0).toUpperCase() + direction.slice(1)} Flight Seat for ${passengerType} ${passengerIndex}`,
                 html: data.html,
                 width: '90%',
                 padding: '0',
@@ -1035,9 +1206,10 @@ window.showBaggageAlert = function(radio) {
                     content: 'seat-map-content'
                 },
                 didOpen: () => {
-                    // Add current passenger ID to the modal for reference
+                    // Add current passenger ID and direction to the modal for reference
                     const modal = Swal.getPopup();
                     modal.setAttribute('data-passenger-id', passengerId);
+                    modal.setAttribute('data-direction', direction);
                 }
             });
         }
@@ -1062,15 +1234,21 @@ window.showBaggageAlert = function(radio) {
     });
 }
 
-    if (typeof window !== 'undefined') {
-        window.fetchSeatMap = fetchSeatMap;
-    }
+
+    
 // Keep your original selectSeat function unchanged, just add this line at the end:
 function selectSeat(code, seatNumber, amount, airlineName, airlineCode, airlineNumber) {
     const modal = Swal.getPopup();
     const passengerId = modal.getAttribute('data-passenger-id');
+    const direction = modal.getAttribute('data-direction');
     
-    window.passengerSelections.seats[passengerId] = {
+    // Initialize seats object for both directions if it doesn't exist
+    if (!window.passengerSelections.seats[direction]) {
+        window.passengerSelections.seats[direction] = {};
+    }
+
+    // Store seat selection for specific direction and passenger
+    window.passengerSelections.seats[direction][passengerId] = {
         code,
         seatNumber,
         amount,
@@ -1079,25 +1257,41 @@ function selectSeat(code, seatNumber, amount, airlineName, airlineCode, airlineN
         airlineNumber
     };
 
-    // Update seat info display for the specific passenger
-    const seatInfoElement = document.getElementById(`seatInfo-${passengerId}`);
+    // Update seat info display for the specific passenger and direction
+    const seatInfoElement = document.getElementById(`seatInfo-${direction}-${passengerId}`);
     if (seatInfoElement) {
         seatInfoElement.textContent = `Selected Seat: ${seatNumber} (₹${amount})`;
+    }
+
+    // Calculate total seat cost for all selections
+    let totalSeatCost = 0;
+    ['outbound', 'return'].forEach(dir => {
+        if (window.passengerSelections.seats[dir]) {
+            Object.values(window.passengerSelections.seats[dir]).forEach(seat => {
+                totalSeatCost += parseFloat(seat.amount);
+            });
+        }
+    });
+
+    // Update total fare if the element exists
+    const totalFareInput = document.getElementById('totalFare');
+    if (totalFareInput) {
+        const currentFare = parseFloat(totalFareInput.value) || 0;
+        totalFareInput.value = currentFare + totalSeatCost;
     }
 
     // Show confirmation
     Swal.fire({
         icon: 'success',
         title: 'Seat Selected!',
-        text: `Seat ${seatNumber} (₹${amount}) selected for ${passengerId}`,
+        text: `${direction.charAt(0).toUpperCase() + direction.slice(1)} flight seat ${seatNumber} (₹${amount}) selected for ${passengerId}`,
         showConfirmButton: false,
         timer: 1500
     });
 }
 
-
 // Make sure selectSeat is available globally
-window.selectSeat = selectSeat;
+
 
 
 // Make functions available globally
@@ -1105,6 +1299,7 @@ if (typeof window !== 'undefined') {
     window.fetchSSRData = fetchSSRData;
     window.fetchSeatMap = fetchSeatMap;
     window.selectSeat = selectSeat;
+    
 }
 
 
@@ -1183,148 +1378,45 @@ function checkFlightBalance() {
     });
 }
 
+
+
 document.getElementById('submitButton').addEventListener('click', async function(event) {
     event.preventDefault();
     
     try {
-        await checkFlightBalance();
-        const isLCC = flightDetails.isLCC;
-        console.log('Checking isLCC status:', isLCC);
+        const isLCCoutbound = outboundFareQuoteData?.IsLCC ?? false;
+        const isLCCreturn = returnFareQuoteData?.IsLCC ?? false;
+
+        console.log('Is LCC Outbound:', isLCCoutbound);
+        console.log('Is LCC Return:', isLCCreturn);
+
+        let bookingPayloads = {
+            lcc: {
+                outbound: null,
+                return: null
+            },
+            nonLcc: {
+                outbound: null,
+                return: null
+            }
+        };
+
+        // Process passengers for both flights
+        let passengers = [];
         
-        if (isLCC) {
-            console.log('Processing LCC booking...');
-            // Prepare payload for LCC booking
-            const bookingDetails = {
-                resultIndex: resultIndex,
-                srdvIndex: srdvIndex,
-                traceId: traceId,
-                totalFare: fareQuoteData.Fare.OfferedFare || 0
-            };
-
-            // Initialize passengers array
-            let passengers = [];
+        document.querySelectorAll("#dynamicSections .card").forEach((card, index) => {
+            // [Previous passenger processing code remains the same]
+            const form = card.querySelector('.card-body');
+            const headerText = card.querySelector('.card-header h6').textContent;
+            const passengerTypeMatch = headerText.match(/(Adult|Child|Infant)/);
+            const passengerTypeString = passengerTypeMatch ? passengerTypeMatch[1] : 'Unknown';
+            const passengerIndex = (headerText.match(/\d+/) || [1])[0];
+            const passengerId = `${passengerTypeString}-${passengerIndex}`;
             
-            // Log current selections for debugging
-            console.log('Current passenger selections:', window.passengerSelections);
-            
-            // Get all passenger forms
-            document.querySelectorAll("#dynamicSections .card").forEach((card, index) => {
-                const form = card.querySelector('.card-body');
-                
-                // Extract passenger type from the card header text
-                const headerText = card.querySelector('.card-header h6').textContent;
-                const passengerTypeMatch = headerText.match(/(Adult|Child|Infant)/);
-                const passengerTypeString = passengerTypeMatch ? passengerTypeMatch[1] : 'Unknown';
-                const passengerIndex = (headerText.match(/\d+/) || [1])[0];
-                const passengerId = `${passengerTypeString}-${passengerIndex}`;
+            const typeMapping = {'Adult': 1, 'Child': 2, 'Infant': 3};
+            const passengerType = typeMapping[passengerTypeString];
 
-                console.log('Processing passenger:', passengerId);
 
-                // Map passenger type string to numeric value
-                const typeMapping = {'Adult': 1, 'Child': 2, 'Infant': 3};
-                const passengerType = typeMapping[passengerTypeString];
-
-                // Create passenger object with basic details
-                let passenger = {
-                    title: form.querySelector('[name$="[Title]"]').value.trim(),
-                    firstName: form.querySelector('[name$="[FirstName]"]').value.trim(),
-                    lastName: form.querySelector('[name$="[LastName]"]').value.trim(),
-                    gender: (form.querySelector('[name$="[Gender]"]').value),
-                    contactNo: form.querySelector('[name$="[ContactNo]"]')?.value.trim() || "",
-                    email: form.querySelector('[name$="[Email]"]')?.value.trim() || "",
-                    dateOfBirth: form.querySelector('[name$="[DateOfBirth]"]').value,
-                    paxType: passengerType,
-                    addressLine1: form.querySelector('[name$="[AddressLine1]"]')?.value.trim() || "",
-                    passportNo: form.querySelector('[name$="[PassportNo]"]')?.value.trim() || "",
-                    passportExpiry: form.querySelector('[name$="[PassportExpiry]"]')?.value || "",
-                    passportIssueDate: form.querySelector('[name$="[PassportIssueDate]"]')?.value || ""
-                };
-
-                // Get selected services for this passenger
-                const selectedSeat = window.passengerSelections.seats[passengerId];
-                const selectedBaggage = window.passengerSelections.baggage[passengerId];
-                const selectedMeals = window.passengerSelections.meals[passengerId];
-
-                console.log(`Selected services for ${passengerId}:`, {
-                    seat: selectedSeat,
-                    baggage: selectedBaggage,
-                    meals: selectedMeals
-                });
-
-                // Add selected services
-                passenger.selectedServices = {
-                    seat: selectedSeat || null,
-                    baggage: selectedBaggage || null,
-                    meals: selectedMeals || []
-                };
-
-                // Calculate total SSR cost for this passenger
-                let ssrCost = 0;
-                
-                // Add seat cost if selected
-                if (selectedSeat) {
-                    ssrCost += parseFloat(selectedSeat.amount) || 0;
-                }
-                
-                // Add baggage cost if selected
-                if (selectedBaggage) {
-                    ssrCost += parseFloat(selectedBaggage.Price) || 0;
-                }
-                
-                // Add meals cost if selected
-                if (selectedMeals && selectedMeals.length > 0) {
-                    selectedMeals.forEach(meal => {
-                        ssrCost += (parseFloat(meal.Price) || 0) * (parseInt(meal.Quantity) || 1);
-                    });
-                }
-                
-                passenger.totalSSRCost = ssrCost;
-                
-                // Log the final passenger object
-                console.log(`Final passenger object for ${passengerId}:`, passenger);
-                
-                passengers.push(passenger);
-            });
-
-            // Add passengers to booking details
-            bookingDetails.passengers = passengers;
-
-            // Add fare details
-            bookingDetails.fare = {
-                baseFare: fareQuoteData.Fare.BaseFare,
-                tax: fareQuoteData.Fare.Tax,
-                yqTax: fareQuoteData.Fare.YQTax,
-                transactionFee: fareQuoteData.Fare.TransactionFee,
-                additionalTxnFeeOfrd: fareQuoteData.Fare.AdditionalTxnFeeOfrd,
-                additionalTxnFeePub: fareQuoteData.Fare.AdditionalTxnFeePub,
-                airTransFee: fareQuoteData.Fare.AirTransFee
-            };
-
-            // Calculate total SSR cost across all passengers
-            const totalSSRCost = passengers.reduce((total, passenger) => total + passenger.totalSSRCost, 0);
-            bookingDetails.totalSSRCost = totalSSRCost;
-            
-            // Calculate grand total
-            bookingDetails.grandTotal = (parseFloat(bookingDetails.totalFare) || 0) + totalSSRCost;
-
-            // Log final booking details before encoding
-            console.log('Final booking details:', bookingDetails);
-
-            // Encode booking details for URL
-            const encodedDetails = encodeURIComponent(JSON.stringify(bookingDetails));
-            
-            // Check URL length and redirect
-            const baseUrl = '/payment?details=';
-            const finalUrl = baseUrl + encodedDetails;
-            
-            console.log('Redirecting to:', finalUrl);
-            window.location.href = finalUrl;
-
-            console.log('Redirecting with booking details:', bookingDetails);
-        } else {
-            console.log('Non-LCC flight, redirecting to payment...');
-            
-            // Helper functions
             function convertToISODateTime(dateString) {
                 if (!dateString) return ''; // Return empty if no date is provided
                 return `${dateString}T00:00:00`;
@@ -1334,172 +1426,242 @@ document.getElementById('submitButton').addEventListener('click', async function
                 if (!dateString) return '';
                 return dateString.split('T')[0]; // Remove time part if exists
             }
-
-            function validateEmail(email) {
-                return email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/);
-            }
-
-            function validatePassenger(passengerData) {
-                const errors = [];
-                
-                if (!passengerData.firstName.trim()) errors.push('First name is required');
-                if (!passengerData.lastName.trim()) errors.push('Last name is required');
-                if (!passengerData.passportNo.trim()) errors.push('Passport number is required');
-                if (!passengerData.passportExpiry) errors.push('Passport expiry date is required');
-                if (!passengerData.dateOfBirth) errors.push('Date of birth is required');
-                if (!validateEmail(passengerData.email)) errors.push('Valid email is required');
-                if (!passengerData.contactNo.trim()) errors.push('Contact number is required');
-                
-                return errors;
-            }
-
-            let passengers = [];
-            
-            // Get all passenger forms
-            document.querySelectorAll("#dynamicSections .card").forEach((card, index) => {
-                const form = card.querySelector('.card-body');
-                
-                // Extract passenger type from the card header text
-                const headerText = card.querySelector('.card-header h6').textContent;
-                const passengerTypeMatch = headerText.match(/(Adult|Child|Infant)/);
-                const passengerTypeString = passengerTypeMatch ? passengerTypeMatch[1] : 'Unknown';
-                
-                // Map passenger type string to numeric value
-                const typeMapping = {'Adult': 1, 'Child': 2, 'Infant': 3};
-                const passengerType = typeMapping[passengerTypeString];
-
-                // Create passenger object with form data
-                let passenger = {
-                    title: form.querySelector('[name$="[Title]"]').value.trim(),
-                    firstName: form.querySelector('[name$="[FirstName]"]').value.trim(),
-                    lastName: form.querySelector('[name$="[LastName]"]').value.trim(),
-                    gender: (form.querySelector('[name$="[Gender]"]').value),
-                    contactNo: form.querySelector('[name$="[ContactNo]"]')?.value.trim() || "",
-                    email: form.querySelector('[name$="[Email]"]')?.value.trim() || "",
-                    paxType: passengerType,
-                    passportNo: form.querySelector('[name$="[PassportNo]"]')?.value.trim() || "",
-                    passportExpiry: convertToISODateTime(form.querySelector('[name$="[PassportExpiry]"]')?.value || ""),
-                    passportIssueDate: convertToISODateTime(form.querySelector('[name$="[PassportIssueDate]"]')?.value || ""),
-                    dateOfBirth: convertToISODateTime(form.querySelector('[name$="[DateOfBirth]"]')?.value || ""),
-                    addressLine1: origin,
+            // Base passenger details
+            let passenger = {
+                title: form.querySelector('[name$="[Title]"]').value.trim(),
+                firstName: form.querySelector('[name$="[FirstName]"]').value.trim(),
+                lastName: form.querySelector('[name$="[LastName]"]').value.trim(),
+                gender: (form.querySelector('[name$="[Gender]"]').value),
+                contactNo: form.querySelector('[name$="[ContactNo]"]')?.value.trim() || "",
+                email: form.querySelector('[name$="[Email]"]')?.value.trim() || "",
+                dateOfBirth: convertToISODateTime(form.querySelector('[name$="[DateOfBirth]"]')?.value || ""),
+                paxType: passengerType,
+                addressLine1: form.querySelector('[name$="[AddressLine1]"]')?.value.trim() || "",
+                passportNo: form.querySelector('[name$="[PassportNo]"]')?.value.trim() || "",
+                passportExpiry: convertToISODateTime(form.querySelector('[name$="[PassportExpiry]"]')?.value || ""),
+                passportIssueDate: form.querySelector('[name$="[PassportIssueDate]"]')?.value || "",
+                addressLine1: origin,
                     city: origin,
                     countryCode: "IN",
                     countryName: "INDIA",
                     isLeadPax: index === 0, // First passenger is lead passenger
-                    
-                    // Add fare details for each passenger
-                    fare: [{
-                        baseFare: parseFloat(fareQuoteData.Fare.BaseFare),
-                        tax: parseFloat(fareQuoteData.Fare.Tax),
-                        yqTax: parseFloat(fareQuoteData.Fare.YQTax || 0),
-                        transactionFee: (fareQuoteData.Fare.TransactionFee || '0').toString(),
-                        additionalTxnFeeOfrd: parseFloat(fareQuoteData.Fare.AdditionalTxnFeeOfrd || 0),
-                        additionalTxnFeePub: parseFloat(fareQuoteData.Fare.AdditionalTxnFeePub || 0),
-                        airTransFee: (fareQuoteData.Fare.AirTransFee || '0').toString()
-                    }],
-                    
-                    // Add GST details
-                    gst: {
-                        companyAddress: '',
-                        companyContactNumber: '',
-                        companyName: '',
-                        number: '',
-                        companyEmail: ''
-                    }
-                };
 
-                // Validate passenger data
-                const validationErrors = validatePassenger(passenger);
-                if (validationErrors.length > 0) {
-                    throw new Error(`Validation failed for ${passengerTypeString}: ${validationErrors.join(', ')}`);
-                }
-
-                passengers.push(passenger);
-            });
-
-            // Create the final payload
-            const payload = {
-                srdvIndex: srdvIndex,
-                traceId: traceId,
-                resultIndex: resultIndex,
-                passengers: passengers
             };
 
-            console.log('Final payload for bookHold:', payload);
-
-            // Disable submit button to prevent double submission
-            const submitButton = event.target;
-            submitButton.disabled = true;
-
-            // Make API call for bookHold
-            try {
-                const response = await fetch('/flight/bookHold', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-                    },
-                    body: JSON.stringify(payload)
-                });
-                
-                const data = await response.json();
-                
-                if (data.status === 'success') {
-                    console.log('Non-LCC Booking successful!', data.booking_details);
-                    // Redirect to payment page with booking details
-                    const queryParams = new URLSearchParams({
-                        resultIndex: resultIndex,
-                        bookingId: data.booking_details.booking_id,
-                        pnr: data.booking_details.pnr,
-                        srdvIndex: data.booking_details.srdvIndex,
-                        traceId: data.booking_details.trace_id
-                    });
-                    window.location.href = `/payment?${queryParams.toString()}`;
-                } else {
-                    throw new Error(data.message || 'Booking failed');
+            // Selected services for both flights
+            const services = {
+                outbound: {
+                    seat: window.passengerSelections.seats.outbound?.[passengerId] || null,
+                    baggage: window.passengerSelections.baggage.outbound?.[passengerId] || null,
+                    meals: window.passengerSelections.meals.outbound?.[passengerId] || []
+                },
+                return: {
+                    seat: window.passengerSelections.seats.return?.[passengerId] || null,
+                    baggage: window.passengerSelections.baggage.return?.[passengerId] || null,
+                    meals: window.passengerSelections.meals.return?.[passengerId] || []
                 }
-            } catch (error) {
-                console.error('Error during Non-LCC booking:', error);
-                if (window.Swal) {
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Booking Failed',
-                        text: error.message || 'An error occurred during booking'
+            };
+
+            // Passenger processing and service calculations remain the same
+            const calculateSSRCost = (services) => {
+                let cost = 0;
+                if (services.seat) cost += parseFloat(services.seat.amount) || 0;
+                if (services.baggage) cost += parseFloat(services.baggage.Price) || 0;
+                if (services.meals.length > 0) {
+                    services.meals.forEach(meal => {
+                        cost += (parseFloat(meal.Price) || 0) * (parseInt(meal.Quantity) || 1);
                     });
-                } else {
-                    alert('Booking failed: ' + (error.message || 'An error occurred'));
                 }
-            } finally {
-                submitButton.disabled = false;
+                return cost;
+            };
+
+            // Process outbound flight
+            if (isLCCoutbound) {
+                // LCC outbound passenger processing
+                const outboundPassenger = {
+                    ...passenger,
+                    selectedServices: services.outbound,
+                    totalSSRCost: calculateSSRCost(services.outbound),
+                    fare: [{
+                        baseFare: parseFloat(outboundFareQuoteData.Fare.BaseFare),
+                        tax: parseFloat(outboundFareQuoteData.Fare.Tax),
+                        yqTax: parseFloat(outboundFareQuoteData.Fare.YQTax || 0),
+                        transactionFee: (outboundFareQuoteData.Fare.TransactionFee || '0').toString(),
+                        additionalTxnFeeOfrd: parseFloat(outboundFareQuoteData.Fare.AdditionalTxnFeeOfrd || 0),
+                        additionalTxnFeePub: parseFloat(outboundFareQuoteData.Fare.AdditionalTxnFeePub || 0),
+                        airTransFee: (outboundFareQuoteData.Fare.AirTransFee || '0').toString()
+                    }],
+                    
+                };
+                if (!bookingPayloads.lcc.outbound) bookingPayloads.lcc.outbound = { passengers: [] };
+                bookingPayloads.lcc.outbound.passengers.push(outboundPassenger);
+            } else {
+                // Non-LCC outbound passenger processing
+                if (!bookingPayloads.nonLcc.outbound) bookingPayloads.nonLcc.outbound = { passengers: [] };
+                bookingPayloads.nonLcc.outbound.passengers.push(passenger);
             }
+
+            // Process return flight
+            if (isLCCreturn) {
+                // LCC return passenger processing
+                const returnPassenger = {
+                    ...passenger,
+                    selectedServices: services.return,
+                    totalSSRCost: calculateSSRCost(services.return),
+                    fare: [{
+                        baseFare: parseFloat(returnFareQuoteData.Fare.BaseFare),
+                        tax: parseFloat(returnFareQuoteData.Fare.Tax),
+                        yqTax: parseFloat(returnFareQuoteData.Fare.YQTax || 0),
+                        transactionFee: (returnFareQuoteData.Fare.TransactionFee || '0').toString(),
+                        additionalTxnFeeOfrd: parseFloat(returnFareQuoteData.Fare.AdditionalTxnFeeOfrd || 0),
+                        additionalTxnFeePub: parseFloat(returnFareQuoteData.Fare.AdditionalTxnFeePub || 0),
+                        airTransFee: (returnFareQuoteData.Fare.AirTransFee || '0').toString()
+                    }],
+                   
+                };
+                if (!bookingPayloads.lcc.return) bookingPayloads.lcc.return = { passengers: [] };
+                bookingPayloads.lcc.return.passengers.push(returnPassenger);
+            } else {
+                // Non-LCC return passenger processing
+                if (!bookingPayloads.nonLcc.return) bookingPayloads.nonLcc.return = { passengers: [] };
+                bookingPayloads.nonLcc.return.passengers.push(passenger);
+            }
+        });
+
+        // First process non-LCC bookings
+        let nonLccResults = [];
+        let lccBookingDetails = {};
+
+        // Handle non-LCC bookings first
+        if (!isLCCoutbound && bookingPayloads.nonLcc.outbound) {
+            const outboundResult = await processNonLCCBooking({
+                srdvIndex: outboundSrdvIndex,
+                traceId: traceId,
+                resultIndex: outboundResultIndex,
+                passengers: bookingPayloads.nonLcc.outbound.passengers.map(pax => ({
+    ...pax,
+    fare: [{
+        baseFare: parseFloat(outboundFareQuoteData.Fare.BaseFare),
+        tax: parseFloat(outboundFareQuoteData.Fare.Tax),
+        yqTax: parseFloat(outboundFareQuoteData.Fare.YQTax || 0),
+        transactionFee: (outboundFareQuoteData.Fare.TransactionFee || '0').toString(),
+        additionalTxnFeeOfrd: parseFloat(outboundFareQuoteData.Fare.AdditionalTxnFeeOfrd || 0),
+        additionalTxnFeePub: parseFloat(outboundFareQuoteData.Fare.AdditionalTxnFeePub || 0),
+        airTransFee: (outboundFareQuoteData.Fare.AirTransFee || '0').toString()
+    }]
+})),
+                gst: {
+                    companyAddress: document.querySelector('[name="GSTCompanyAddress"]')?.value || '',
+                    companyContactNumber: document.querySelector('[name="GSTCompanyContact"]')?.value || '',
+                    companyName: document.querySelector('[name="GSTCompanyName"]')?.value || '',
+                    number: document.querySelector('[name="GSTNumber"]')?.value || '',
+                    companyEmail: document.querySelector('[name="GSTCompanyEmail"]')?.value || ''
+                }
+            });
+            nonLccResults.push(outboundResult);
         }
+
+        if (!isLCCreturn && bookingPayloads.nonLcc.return) {
+            const returnResult = await processNonLCCBooking({
+                srdvIndex: returnSrdvIndex,
+                traceId: traceId,
+                resultIndex: returnResultIndex,
+                passengers: bookingPayloads.nonLcc.return.passengers.map(pax => ({
+                    ...pax,
+                 fare: [{
+                        baseFare: parseFloat(returnFareQuoteData.Fare.BaseFare),
+                        tax: parseFloat(returnFareQuoteData.Fare.Tax),
+                        yqTax: parseFloat(returnFareQuoteData.Fare.YQTax || 0),
+                        transactionFee: (returnFareQuoteData.Fare.TransactionFee || '0').toString(),
+                        additionalTxnFeeOfrd: parseFloat(returnFareQuoteData.Fare.AdditionalTxnFeeOfrd || 0),
+                        additionalTxnFeePub: parseFloat(returnFareQuoteData.Fare.AdditionalTxnFeePub || 0),
+                        airTransFee: (returnFareQuoteData.Fare.AirTransFee || '0').toString()
+                    }],
+                })),
+                    gst: {
+                        companyAddress: document.querySelector('[name="GSTCompanyAddress"]')?.value || '',
+                        companyContactNumber: document.querySelector('[name="GSTCompanyContact"]')?.value || '',
+                        companyName: document.querySelector('[name="GSTCompanyName"]')?.value || '',
+                        number: document.querySelector('[name="GSTNumber"]')?.value || '',
+                        companyEmail: document.querySelector('[name="GSTCompanyEmail"]')?.value || ''
+                    }
+            });
+            nonLccResults.push(returnResult);
+        }
+
+        // Then process LCC bookings
+        if (isLCCoutbound || isLCCreturn) {
+            lccBookingDetails = {
+                outbound: isLCCoutbound ? {
+                    resultIndex: outboundResultIndex,
+                    srdvIndex: outboundSrdvIndex,
+                    traceId: traceId,
+                    totalFare: outboundFareQuoteData.Fare.OfferedFare || 0,
+                    ...bookingPayloads.lcc.outbound
+                } : null,
+                return: isLCCreturn ? {
+                    resultIndex: returnResultIndex,
+                    srdvIndex: returnSrdvIndex,
+                    traceId: traceId,
+                    totalFare: returnFareQuoteData.Fare.OfferedFare || 0,
+                    ...bookingPayloads.lcc.return
+                } : null
+            };
+        }
+
+        // Combine all booking details for the payment page
+        const finalBookingDetails = {
+            lcc: Object.keys(lccBookingDetails).length > 0 ? lccBookingDetails : null,
+            nonLcc: nonLccResults.length > 0 ? nonLccResults : null
+        };
+
+        // Redirect to payment pagegit 
+        const encodedDetails = encodeURIComponent(JSON.stringify(finalBookingDetails));
+        window.location.href = `/flight/payment?details=${encodedDetails}`;
+
     } catch (error) {
         console.error('Error during booking process:', error);
-        // Error is already handled in the checkFlightBalance function
+        if (window.Swal) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Booking Failed',
+                text: error.message || 'An error occurred during booking'
+            });
+        } else {
+            alert('Booking failed: ' + (error.message || 'An error occurred'));
+        }
     }
 });
 
+// Helper function for non-LCC bookings
+async function processNonLCCBooking(payload) {
+    const response = await fetch('/flight/bookHold', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+        },
+        body: JSON.stringify(payload)
+    });
 
+    const data = await response.json();
 
-// ALL CODE REALTED TO ROUND TRIP FLIGHT BOOKING
+    if (data.status === 'success') {
+        // Store booking details in session storage
+        sessionStorage.setItem('bookingDetails', JSON.stringify({
+            bookingId: data.booking_details.booking_id,
+            pnr: data.booking_details.pnr,
+            srdvIndex: data.booking_details.srdvIndex,
+            traceId: data.booking_details.trace_id
+        }));
 
+        // return data; // Return the whole response data if needed
+    } else {
+        throw new Error(data.message || 'Booking failed');
+    }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-});
+}
+}); 
 
 
 

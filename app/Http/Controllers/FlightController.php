@@ -608,13 +608,11 @@ public function bookLCC(Request $request)
             'srdvIndex' => 'required|string',
             'traceId' => 'required|string',
             'resultIndex' => 'required|string',
-
-            // Validate each passenger in the array
             'passenger' => 'required|array|min:1',
             'passenger.*.title' => 'required|string',
             'passenger.*.firstName' => 'required|string',
             'passenger.*.lastName' => 'required|string',
-            'passenger.*.gender' => 'required|integer', // Assuming 1 for male, 2 for female
+            'passenger.*.gender' => 'required|string',
             'passenger.*.contactNo' => 'required|string',
             'passenger.*.email' => 'required|email',
             'passenger.*.paxType' => 'required|integer',
@@ -626,11 +624,11 @@ public function bookLCC(Request $request)
             'passenger.*.addressLine1' => 'nullable|string',
             'passenger.*.city' => 'nullable|string',
             'passenger.*.countryName' => 'nullable|string',
+            'passenger.*.nationality' => 'nullable|string',
             'passenger.*.baggage' => 'nullable|array',
             'passenger.*.mealDynamic' => 'nullable|array',
             'passenger.*.seat' => 'nullable|array',
-
-            // Fare validation
+            'fare' => 'required|array',
             'fare.baseFare' => 'required|numeric',
             'fare.tax' => 'required|numeric',
             'fare.yqTax' => 'nullable|numeric',
@@ -639,14 +637,13 @@ public function bookLCC(Request $request)
             'fare.additionalTxnFeePub' => 'nullable|numeric',
             'fare.airTransFee' => 'nullable|numeric',
         ]);
-        // Default empty arrays for optional fields if not provided
-        $baggage = $validatedData['passenger']['baggage'] ?? [];
-        $mealDynamic = $validatedData['passenger']['mealDynamic'] ?? [];
-        $seat = $validatedData['passenger']['seat'] ?? [];
 
-        // Prepare the payload for the API request
+        // Log incoming request for debugging
+        Log::info('LCC Booking Request', ['request' => $validatedData]);
+
+        // Prepare the payload with enhanced passenger structure
         $payload = [
-            'EndUserIp' => '1.1.1.1', // Replace with actual user IP
+            'EndUserIp' => request()->ip() ?? '1.1.1.1',
             'ClientId' => '180133',
             'UserName' => 'MakeMy91',
             'Password' => 'MakeMy@910',
@@ -654,8 +651,6 @@ public function bookLCC(Request $request)
             'SrdvIndex' => $validatedData['srdvIndex'],
             'TraceId' => $validatedData['traceId'],
             'ResultIndex' => $validatedData['resultIndex'],
-
-            // Map multiple passengers correctly
             'Passengers' => array_map(function ($pax) {
                 return [
                     'Title' => $pax['title'],
@@ -663,74 +658,249 @@ public function bookLCC(Request $request)
                     'LastName' => $pax['lastName'],
                     'PaxType' => $pax['paxType'],
                     'Gender' => $pax['gender'],
+                    'DateOfBirth' => $pax['dateOfBirth'] ?? '',
                     'ContactNo' => $pax['contactNo'],
                     'Email' => $pax['email'],
-                    'DateOfBirth' => $pax['dateOfBirth'] ?? '',
                     'PassportNo' => $pax['passportNo'] ?? '',
                     'PassportExpiry' => $pax['passportExpiry'] ?? '',
                     'PassportIssueDate' => $pax['passportIssueDate'] ?? '',
+                    'AddressLine1' => $pax['addressLine1'] ?? '',
+                    'City' => $pax['city'] ?? '',
                     'CountryCode' => $pax['countryCode'] ?? 'IN',
                     'CountryName' => $pax['countryName'] ?? 'INDIA',
-                    'AddressLine1' => $pax['addressLine1'],
-                    'City' => $pax['city'],
-
-                    // Assign baggage per passenger (if applicable)
+                    'Nationality' => $pax['nationality'] ?? 'IN',
+                    'IsLeadPax' => isset($pax['isLeadPax']) ? (bool)$pax['isLeadPax'] : false,
+                    'FFAirlineCode' => $pax['ffAirlineCode'] ?? '',
                     'Baggage' => $pax['baggage'] ?? [],
-
-                    // Assign meals per passenger (if applicable)
                     'MealDynamic' => $pax['mealDynamic'] ?? [],
-
-                    // Assign seats per passenger (if applicable)
                     'Seat' => $pax['seat'] ?? [],
+                   
+                    'Fare' => [
+                        'Currency' => 'INR',
+                        'BaseFare' => $pax['fare']['baseFare'] ?? 0,
+                        'Tax' => $pax['fare']['tax'] ?? 0,
+                        'YQTax' => $pax['fare']['yqTax'] ?? 0,
+                        'AdditionalTxnFeeOfrd' => (string)($pax['fare']['additionalTxnFeeOfrd'] ?? '0'),
+                        'AdditionalTxnFeePub' => (string)($pax['fare']['additionalTxnFeePub'] ?? '0'),
+                        'ServiceFee' => '0',
+                        'TotalBaggageCharges' => '0',
+                        'TotalMealCharges' => '0',
+                        'TotalSeatCharges' => '0',
+                        'TotalSpecialServiceCharges' => '0'
+                    ]
                 ];
-            }, $validatedData['passenger']),
-
-            // Fare details
-            'Fare' => [
-                'BaseFare' => $validatedData['fare']['baseFare'],
-                'Tax' => $validatedData['fare']['tax'],
-                'YQTax' => $validatedData['fare']['yqTax'] ?? 0,
-                'TransactionFee' => $validatedData['fare']['transactionFee'] ?? 0,
-                'AdditionalTxnFeeOfrd' => $validatedData['fare']['additionalTxnFeeOfrd'] ?? 0,
-                'AdditionalTxnFeePub' => $validatedData['fare']['additionalTxnFeePub'] ?? 0,
-                'AirTransFee' => $validatedData['fare']['airTransFee'] ?? 0,
-            ],
+            }, $validatedData['passenger'])
         ];
 
-        // Send payload to third-party API
+        // Log prepared payload
+        Log::info('LCC Booking API Payload', ['payload' => $payload]);
+
+        // Make API request
         $response = Http::withHeaders([
             'API-Token' => 'MakeMy@910@23',
             'Content-Type' => 'application/json',
         ])->post('https://flight.srdvtest.com/v8/rest/TicketLCC', $payload);
 
-        if ($response->successful()) {
-            $apiResponse = $response->json();
+        // Log raw API response
+        Log::info('LCC Booking API Response', ['response' => $response->json()]);
 
-            // Extract relevant data for client response
-        }else {
+        if (!$response->successful()) {
+            Log::error('LCC Booking API Error', [
+                'status' => $response->status(),
+                'response' => $response->json()
+            ]);
+            
             return response()->json([
-                'success' => false,
-                'message' => $apiResponse['Error']['ErrorMessage'] ?? 'Unknown API error',
-                'errorCode' => $apiResponse['Error']['ErrorCode'] ?? null
-            ], 400);
+                'status' => 'error',
+                'message' => 'API request failed',
+                'error' => $response->json()['Error']['ErrorMessage'] ?? 'Unknown error',
+                'code' => $response->json()['Error']['ErrorCode'] ?? null
+            ], $response->status());
         }
-    
 
-        // Handle API error responses
+        $apiResponse = $response->json();
+
+        // Check for API-level errors
+        if (isset($apiResponse['Error']) && $apiResponse['Error']['ErrorCode'] !== '0') {
+            return response()->json([
+                'status' => 'error',
+                'message' => $apiResponse['Error']['ErrorMessage'],
+                'code' => $apiResponse['Error']['ErrorCode']
+            ], 422);
+        }
+
+        // Process and return the response with all possible fields
         return response()->json([
-            'error' => 'Failed to book flight',
-            'details' => $response->json(),
-        ], $response->status());
+            'status' => 'success',
+            'data' => [
+                'booking_id' => $apiResponse['Response']['BookingId'] ?? null,
+                'pnr' => $apiResponse['Response']['PNR'] ?? null,
+                'srdv_index' => $apiResponse['Response']['SrdvIndex'] ?? null,
+                'trace_id' => $apiResponse['TraceId'] ?? null,
+                'is_price_changed' => $apiResponse['Response']['IsPriceChanged'] ?? false,
+                'is_time_changed' => $apiResponse['Response']['IsTimeChanged'] ?? false,
+                'ticket_status' => $apiResponse['Response']['TicketStatus'] ?? null,
+                'ssr_denied' => $apiResponse['Response']['SSRDenied'] ?? false,
+                'ssr_message' => $apiResponse['Response']['SSRMessage'] ?? null,
+                'flight_itinerary' => [
+                    'fare' => $apiResponse['Response']['FlightItinerary']['Fare'] ?? null,
+                    'segments' => $apiResponse['Response']['FlightItinerary']['Segments'] ?? [],
+                    'passengers' => array_map(function($passenger) {
+                        return [
+                            'pax_id' => $passenger['PaxId'] ?? null,
+                            'title' => $passenger['Title'] ?? null,
+                            'first_name' => $passenger['FirstName'] ?? null,
+                            'last_name' => $passenger['LastName'] ?? null,
+                            'pax_type' => $passenger['PaxType'] ?? null,
+                            'date_of_birth' => $passenger['DateOfBirth'] ?? null,
+                            'gender' => $passenger['Gender'] ?? null,
+                            'passport_no' => $passenger['PassportNo'] ?? null,
+                            'ticket_number' => $passenger['Ticket']['TicketNumber'] ?? null,
+                            'status' => $passenger['Ticket']['Status'] ?? null,
+                            'baggage' => $passenger['Baggage'] ?? [],
+                            'meal_dynamic' => $passenger['MealDynamic'] ?? [],
+                            'seat' => $passenger['Seat'] ?? [],
+                            'ssr' => $passenger['Ssr'] ?? [],
+                            'segment_additional_info' => $passenger['SegmentAdditionalInfo'] ?? []
+                        ];
+                    }, $apiResponse['Response']['FlightItinerary']['Passenger'] ?? []),
+                    'is_lcc' => $apiResponse['Response']['FlightItinerary']['IsLCC'] ?? null,
+                    'airline_code' => $apiResponse['Response']['FlightItinerary']['AirlineCode'] ?? null,
+                    'validating_airline_code' => $apiResponse['Response']['FlightItinerary']['ValidatingAirlineCode'] ?? null,
+                    'last_ticket_date' => $apiResponse['Response']['FlightItinerary']['LastTicketDate'] ?? null,
+                    'invoice_no' => $apiResponse['Response']['FlightItinerary']['InvoiceNo'] ?? null,
+                    'invoice_status' => $apiResponse['Response']['FlightItinerary']['InvoiceStatus'] ?? null,
+                    'invoice_created_on' => $apiResponse['Response']['FlightItinerary']['InvoiceCreatedOn'] ?? null,
+                ]
+            ]
+        ], 200);
 
+    } catch (ValidationException $e) {
+        Log::error('LCC Booking Validation Error', [
+            'errors' => $e->errors(),
+            'request' => $request->all()
+        ]);
+        
+        return response()->json([
+            'status' => 'error',
+            'message' => 'Validation failed',
+            'errors' => $e->errors()
+        ], 422);
+        
     } catch (\Exception $e) {
-        // Handle unexpected errors
+        Log::error('LCC Booking System Error', [
+            'message' => $e->getMessage(),
+            'trace' => $e->getTraceAsString(),
+            'request' => $request->all()
+        ]);
+        
         return response()->json([
-            'error' => 'System error',
-            'message' => $e->getMessage()
+            'status' => 'error',
+            'message' => 'An unexpected error occurred',
+            'debug' => config('app.debug') ? $e->getMessage() : null
         ], 500);
-    
     }
 }
+
+
+public function bookGdsTicket(Request $request) {
+    try {
+        // Validate the request
+        $validatedData = $request->validate([
+            'srdvIndex' => 'required|string',
+            'traceId' => 'required|string',
+            'pnr' => 'required|string',
+            'bookingId' => 'required'
+            // Removed duplicate srdvIndex and resultIndex is not needed for this endpoint
+        ]);
+
+        // Prepare payload according to API documentation
+        $payload = [
+            'EndUserIp' => '1.1.1.1', // Replace with actual IP
+            'ClientId' => '180133',
+            'UserName' => 'MakeMy91',
+            'Password' => 'MakeMy@910',
+            'SrdvType' => 'MixAPI',
+            'SrdvIndex' => $validatedData['srdvIndex'],
+            'TraceId' => $validatedData['traceId'],
+            'PNR' => $validatedData['pnr'],
+            'BookingId' => $validatedData['bookingId']
+        ];
+
+        // Add logging for debugging
+        Log::info('GDS Ticket Booking Payload', ['payload' => $payload]);
+
+        // Make API request to correct endpoint
+        $response = Http::withHeaders([
+            'Content-Type' => 'application/json',
+            'API-Token' => 'MakeMy@910@23',
+        ])->post('https://flight.srdvtest.com/v8/rest/TicketGDS', $payload);
+
+        Log::info('GDS Ticket Booking Response', ['response' => $response->json()]);
+
+        if (!$response->successful()) {
+            Log::error('Flight API Error', [
+                'status' => $response->status(),
+                'body' => $response->json()
+            ]);
+            return response()->json([
+                'status' => 'error',
+                'message' => 'API request failed: ' . ($response->json()['message'] ?? 'Unknown error')
+            ], $response->status());
+        }
+
+        $apiResponse = $response->json();
+
+        // Check for API-level errors
+        if ($apiResponse['Error']['ErrorCode'] !== '0') {
+            return response()->json([
+                'status' => 'error',
+                'message' => $apiResponse['Error']['ErrorMessage']
+            ], 422);
+        }
+
+        // Return success response with ticket information
+        return response()->json([
+            'status' => 'success',
+            'data' => [
+                'bookingId' => $apiResponse['Response']['BookingId'],
+                'pnr' => $apiResponse['Response']['PNR'],
+                'ticketStatus' => $apiResponse['Response']['TicketStatus'],
+                'passengers' => collect($apiResponse['Response']['FlightItinerary']['Passenger'])->map(function($passenger) {
+                    return [
+                        'name' => $passenger['FirstName'] . ' ' . $passenger['LastName'],
+                        'ticketNumber' => $passenger['Ticket']['TicketNumber'],
+                        'status' => $passenger['Ticket']['Status']
+                    ];
+                }),
+                'fare' => $apiResponse['Response']['FlightItinerary']['Fare'],
+                'segments' => $apiResponse['Response']['FlightItinerary']['Segments']
+            ]
+        ]);
+
+    } catch (ValidationException $e) {
+        Log::error('Validation Error', [
+            'errors' => $e->errors(),
+            'request' => $request->all()
+        ]);
+        return response()->json([
+            'status' => 'error',
+            'message' => 'Validation failed',
+            'errors' => $e->errors()
+        ], 422);
+    } catch (\Exception $e) {
+        Log::error('GDS Ticket Booking Error', [
+            'message' => $e->getMessage(),
+            'trace' => $e->getTraceAsString()
+        ]);
+
+        return response()->json([
+            'status' => 'error',
+            'message' => 'Ticket booking failed: ' . $e->getMessage()
+        ], 500);
+    }
+}
+
 
 
 public function bookHold(Request $request) {
@@ -757,13 +927,13 @@ public function bookHold(Request $request) {
             'passengers.*.email' => 'required|email|max:50',
             'passengers.*.isLeadPax' => 'required|boolean',
             'passengers.*.fare' => 'required|array',
-            'passengers.*.fare.*.baseFare' => 'required|numeric|min:0',
-            'passengers.*.fare.*.tax' => 'required|numeric|min:0',
-            'passengers.*.fare.*.yqTax' => 'nullable|numeric|min:0',
-            'passengers.*.fare.*.transactionFee' => 'nullable|string',
-            'passengers.*.fare.*.additionalTxnFeeOfrd' => 'nullable|numeric|min:0',
-            'passengers.*.fare.*.additionalTxnFeePub' => 'nullable|numeric|min:0',
-            'passengers.*.fare.*.airTransFee' => 'nullable|string',
+           'passengers.*.fare.*.baseFare' => 'required|numeric|min:0',
+'passengers.*.fare.*.tax' => 'required|numeric|min:0',
+'passengers.*.fare.*.yqTax' => 'nullable|numeric|min:0',
+'passengers.*.fare.*.transactionFee' => 'nullable|string',
+'passengers.*.fare.*.additionalTxnFeeOfrd' => 'nullable|numeric|min:0',
+'passengers.*.fare.*.additionalTxnFeePub' => 'nullable|numeric|min:0',
+'passengers.*.fare.*.airTransFee' => 'nullable|string',
             'passengers.*.gst.companyAddress' => 'nullable|string',
             'passengers.*.gst.companyContactNumber' => 'nullable|string',
             'passengers.*.gst.companyName' => 'nullable|string',
@@ -877,111 +1047,6 @@ public function bookHold(Request $request) {
         ], 500);
     }
 }
-
-
-
-
-public function bookGdsTicket(Request $request) {
-    try {
-        // Validate the request
-        $validatedData = $request->validate([
-            'srdvIndex' => 'required|string',
-            'traceId' => 'required|string',
-            'pnr' => 'required|string',
-            'bookingId' => 'required'
-            // Removed duplicate srdvIndex and resultIndex is not needed for this endpoint
-        ]);
-
-        // Prepare payload according to API documentation
-        $payload = [
-            'EndUserIp' => '1.1.1.1', // Replace with actual IP
-            'ClientId' => '180133',
-            'UserName' => 'MakeMy91',
-            'Password' => 'MakeMy@910',
-            'SrdvType' => 'MixAPI',
-            'SrdvIndex' => $validatedData['srdvIndex'],
-            'TraceId' => $validatedData['traceId'],
-            'PNR' => $validatedData['pnr'],
-            'BookingId' => $validatedData['bookingId']
-        ];
-
-        // Add logging for debugging
-        Log::info('GDS Ticket Booking Payload', ['payload' => $payload]);
-
-        // Make API request to correct endpoint
-        $response = Http::withHeaders([
-            'Content-Type' => 'application/json',
-            'API-Token' => 'MakeMy@910@23',
-        ])->post('https://flight.srdvtest.com/v8/rest/TicketGDS', $payload);
-
-        Log::info('GDS Ticket Booking Response', ['response' => $response->json()]);
-
-        if (!$response->successful()) {
-            Log::error('Flight API Error', [
-                'status' => $response->status(),
-                'body' => $response->json()
-            ]);
-            return response()->json([
-                'status' => 'error',
-                'message' => 'API request failed: ' . ($response->json()['message'] ?? 'Unknown error')
-            ], $response->status());
-        }
-
-        $apiResponse = $response->json();
-
-        // Check for API-level errors
-        if ($apiResponse['Error']['ErrorCode'] !== '0') {
-            return response()->json([
-                'status' => 'error',
-                'message' => $apiResponse['Error']['ErrorMessage']
-            ], 422);
-        }
-
-        // Return success response with ticket information
-        return response()->json([
-            'status' => 'success',
-            'data' => [
-                'bookingId' => $apiResponse['Response']['BookingId'],
-                'pnr' => $apiResponse['Response']['PNR'],
-                'ticketStatus' => $apiResponse['Response']['TicketStatus'],
-                'passengers' => collect($apiResponse['Response']['FlightItinerary']['Passenger'])->map(function($passenger) {
-                    return [
-                        'name' => $passenger['FirstName'] . ' ' . $passenger['LastName'],
-                        'ticketNumber' => $passenger['Ticket']['TicketNumber'],
-                        'status' => $passenger['Ticket']['Status']
-                    ];
-                }),
-                'fare' => $apiResponse['Response']['FlightItinerary']['Fare'],
-                'segments' => $apiResponse['Response']['FlightItinerary']['Segments']
-            ]
-        ]);
-
-    } catch (ValidationException $e) {
-        Log::error('Validation Error', [
-            'errors' => $e->errors(),
-            'request' => $request->all()
-        ]);
-        return response()->json([
-            'status' => 'error',
-            'message' => 'Validation failed',
-            'errors' => $e->errors()
-        ], 422);
-    } catch (\Exception $e) {
-        Log::error('GDS Ticket Booking Error', [
-            'message' => $e->getMessage(),
-            'trace' => $e->getTraceAsString()
-        ]);
-
-        return response()->json([
-            'status' => 'error',
-            'message' => 'Ticket booking failed: ' . $e->getMessage()
-        ], 500);
-    }
-}
-
-
-
-
 
 
 

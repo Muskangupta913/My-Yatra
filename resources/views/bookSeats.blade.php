@@ -396,7 +396,10 @@
     const price = JSON.parse(decodeURIComponent(urlParams.get('Price')));
     const traceId = urlParams.get('TraceId');
     const resultIndex = urlParams.get('ResultIndex');
-    
+    let invoiceAmount= 0;
+             let encodedpassengers = '';
+             invoiceAmount = passengers[0].SeatDetails.Price;
+            encodedpassengers=encodeURIComponent(passengers);
     // Format date and time
     function formatDateTime(dateTimeStr) {
         const dt = new Date(dateTimeStr);
@@ -585,7 +588,7 @@ document.getElementById('seatDetails').innerHTML = seatDetailsHTML;
 
 // Set the href for Pay Now button with all necessary parameters
 // Set the href for Pay Now button with all necessary parameters
-document.getElementById('payNowButton').href = `/payment?TraceId=${traceId}&amount=${invoiceAmount}&PassengerData=${encodeURIComponent(encodedPassengerData)}&ResultIndex=${resultIndex}&BoardingPointName=${encodeURIComponent(boardingPoint)}&DroppingPointName=${encodeURIComponent(droppingPoint)}`;
+document.getElementById('payNowButton').href = `/payment?TraceId=${traceId}&amount=${invoiceAmount}&PassengerData=${encodeURIComponent(encodedpassengers)}&ResultIndex=${resultIndex}&BoardingPointName=${encodeURIComponent(boardingPoint)}&DroppingPointName=${encodeURIComponent(droppingPoint)}`;
 
 // Handle payment click event
 document.getElementById('payNowButton').addEventListener('click', function (e) {
@@ -599,7 +602,7 @@ document.getElementById('payNowButton').addEventListener('click', function (e) {
                 PassengerData: passengers,
                 BoardingPointName: boardingPoint.Name,
                 DroppingPointName: droppingPoint.Name,
-                SeatNumber: passengerData.Seat.SeatName
+                SeatNumber: passengers[0].SeatDetails.SeatName
             };
 
             // Add console logs for debugging
@@ -617,7 +620,7 @@ document.getElementById('payNowButton').addEventListener('click', function (e) {
             .then(data => {
                 if (data.success && data.navigateToPayment) {
                     // Navigate to payment page with all necessary parameters
-                    window.location.href = `${data.url}&PassengerData=${encodedPassengerData}&ResultIndex=${resultIndex}&BoardingPointName=${encodeURIComponent(boardingPoint)}&DroppingPointName=${encodeURIComponent(droppingPoint)}`;
+                    window.location.href = `${data.url}&PassengerData=${encodedpassengers}&ResultIndex=${resultIndex}&BoardingPointName=${encodeURIComponent(boardingPoint)}&DroppingPointName=${encodeURIComponent(droppingPoint)}`;
                 } else if (!data.success) {
                     alert(data.errorMessage || 'Something went wrong. Please try again.');
                 }

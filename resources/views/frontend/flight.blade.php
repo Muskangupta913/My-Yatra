@@ -56,7 +56,7 @@ body::before {
 }
 
 .flight-card {
-    background-image: linear-gradient(rgba(255, 255, 255, 0.82), rgba(255, 255, 255, 0.82)), url('/assets/images/flight.jpg');
+    background-image: linear-gradient(rgba(255, 255, 255, 0.89), rgba(255, 255, 255, 0.89)), url('/assets/images/flight.jpg');
     background-size: cover;
     background-position: center;
     backdrop-filter: blur(3px);
@@ -269,6 +269,7 @@ body::before {
     filters.flightDurations = [...new Set(filters.flightDurations)];
 
     return filters;
+    
 }
     // Dynamically create filter sections
     function createFilterSections(filters) {
@@ -1052,7 +1053,7 @@ sessionStorage.setItem('selectedOutboundIndex', outboundResultIndex);
 sessionStorage.setItem('selectedReturnIndex', returnResultIndex);
 
 // Redirect with both flight details
-window.location.href = `/flight-booking?traceId=${traceId}&outboundIndex=${outboundResultIndex}&returnIndex=${returnResultIndex}&details=${encodeURIComponent(JSON.stringify(selectedFlights))}`;
+window.location.href = `/flight/roundBooking?traceId=${traceId}&outboundIndex=${outboundResultIndex}&returnIndex=${returnResultIndex}&details=${encodeURIComponent(JSON.stringify(selectedFlights))}`;
         } else {
             throw new Error('Return fare quote failed');
         }
