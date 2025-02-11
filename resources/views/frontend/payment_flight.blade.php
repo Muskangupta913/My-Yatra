@@ -1069,33 +1069,16 @@ async function bookLCC() {
 
     alert('✅ Flight bookings completed successfully!');
 }
-
-function BookGdsTickte() {
+function BookGdsTicket() {
     const queryParams = new URLSearchParams(window.location.search);
-    const bookingDetails = JSON.parse(sessionStorage.getItem('bookingDetails'));
+    const bookingDetails = JSON.parse(sessionStorage.getItem('bookingDetails') ?? '{}'); // Prevent parsing null
 
-// Now you can access individual properties
-const bookingId = bookingDetails.bookingId;
-const pnr = bookingDetails.pnr;
-const srdvIndex = bookingDetails.srdvIndex;
-const traceId = bookingDetails.traceId;
-
-   
-    console.log("Booking ID:", bookingId);
-    console.log("PNR:", pnr);
-    console.log("SRDV Index:", srdvIndex);
-    console.log("Trace ID:", traceId);
-
-    if (traceId && bookingId && pnr && srdvIndex) {
-        return { bookingId, pnr, srdvIndex, traceId };
-    } else {
-        return null; // Return null if any required parameter is missing
-    }
+    // Destructuring with default values
+   console.log('booking detailssss',bookingDetails);
 }
-
 // Function to process the GDS Ticket booking
 function processGdsTicket() {
-    const gdsTicketDetails = BookGdsTickte();
+    const gdsTicketDetails = BookGdsTicket();
 
     if (!gdsTicketDetails) {
         console.error("Missing required parameters for GDS ticket booking.");
@@ -1151,9 +1134,8 @@ document.getElementById("payNowButton").addEventListener("click", async function
     event.preventDefault();
 
     const urlParams = new URLSearchParams(window.location.search);
-    const flightDetailsStr = urlParams.get("details");
-    const roomDetailsStr = urlParams.get("roomDetails");
-
+    
+ co
     try {
         // Check for GDS ticket details and process if found
         const gdsTicketDetails = BookGdsTickte();
@@ -1172,15 +1154,6 @@ document.getElementById("payNowButton").addEventListener("click", async function
             } else {
                 throw new Error("Invalid or missing flight booking details.");
             }
-        } 
-        // Process hotel booking if applicable
-        else if (roomDetailsStr) {
-            console.log("Processing hotel booking...");
-            const bookingData = getUrlParameters(); // Use existing hotel-related function
-            if (!bookingData.roomDetails || !bookingData.passengerDetails) {
-                throw new Error("Missing hotel booking details. Please check and try again.");
-            }
-            await processHotelBooking(bookingData);
         } 
         // If no valid booking details are found
         else {

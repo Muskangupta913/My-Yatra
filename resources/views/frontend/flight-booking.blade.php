@@ -1229,7 +1229,7 @@ document.getElementById('submitButton').addEventListener('click', async function
                     title: form.querySelector('[name$="[Title]"]').value.trim(),
                     firstName: form.querySelector('[name$="[FirstName]"]').value.trim(),
                     lastName: form.querySelector('[name$="[LastName]"]').value.trim(),
-                    gender: parseInt(form.querySelector('[name$="[Gender]"]').value),
+                    gender:(form.querySelector('[name$="[Gender]"]').value),
                     contactNo: form.querySelector('[name$="[ContactNo]"]')?.value.trim() || "",
                     email: form.querySelector('[name$="[Email]"]')?.value.trim() || "",
                     dateOfBirth: form.querySelector('[name$="[DateOfBirth]"]').value,

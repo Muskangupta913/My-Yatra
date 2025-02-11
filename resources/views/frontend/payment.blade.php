@@ -863,9 +863,8 @@ function bookLCC() {
         srdvIndex: bookingDetails.srdvIndex,
         traceId: bookingDetails.traceId,
         resultIndex: bookingDetails.resultIndex,
-        totalFare: bookingDetails.totalFare,
 
-        // Map each passenger with all available details
+        // Map each passenger with all available details, including fare
         passenger: bookingDetails.passengers.map(pax => ({
             title: pax.title,
             firstName: pax.firstName,
@@ -914,11 +913,10 @@ function bookLCC() {
                 AirlineName: pax.selectedServices.seat.airlineName,
                 AirlineCode: pax.selectedServices.seat.airlineCode,
                 AirlineNumber: pax.selectedServices.seat.airlineNumber
-            }] : []
-        })),
+            }] : [],
 
-        // Complete fare details
-        fare: {
+            // Assign individual fare for each passenger
+            fare: {
             baseFare: bookingDetails.baseFare,
             tax: bookingDetails.tax,
             yqTax: bookingDetails.yqTax,
@@ -927,6 +925,7 @@ function bookLCC() {
             additionalTxnFeePub: bookingDetails.additionalTxnFeePub,
             airTransFee: parseFloat(bookingDetails.airTransFee || 0)
         }
+        }))
     };
 
     console.log("✅ Final Payload Ready for Booking:", payload);
