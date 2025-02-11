@@ -738,7 +738,6 @@ const origin = getCookie('origin');
 const destination = getCookie('destination');
 
 // Log the values
-console.log('Payment Page - ORIGIN and DESTINATION Details:');
 console.log('ORIGIN:', origin);
 console.log('DESTINATION:', destination);
 

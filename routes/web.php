@@ -521,8 +521,5 @@ Route::post('/flight/bookLCC', [FlightController::class, 'bookLCC']);
 Route::post('/flight/bookGdsTicket', [FlightController::class, 'bookGdsTicket']);
 Route::post('/flight/balance', [FlightController::class, 'flightBalance']);
 
-<<<<<<< HEAD
-=======
 Route::get('/calendar-fare', [FlightController::class, 'index'])->name('calendar.fare');
 Route::post('/get-calendar-fare', [FlightController::class, 'getCalendarFare'])->name('get.calendar.fare');
->>>>>>> 1d47f4474ecf268a4552d1625173d9d5aaee2e7a
