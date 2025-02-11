@@ -542,7 +542,7 @@ document.getElementById('seatDetails').innerHTML = seatDetailsHTML;
                         </div>
                         <div class="detail-content">
                             <div class="detail-label">Age & Gender</div>
-                            <div class="detail-value">${passenger.Age} Years | ${passenger.Gender === 1 ? 'Male' : 'Female'}</div>
+                            <div class="detail-value">${passenger.Age} Years | ${passenger.Gender === '1' ? 'Male' : passenger.Gender === '2' ? 'Female' : ''}</div>
                         </div>
                     </div>
                 </div>

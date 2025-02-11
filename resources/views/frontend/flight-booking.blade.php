@@ -324,8 +324,6 @@
     const traceId = urlParams.get('traceId');
     const resultIndex = urlParams.get('resultIndex');
     const encodedDetails = urlParams.get('details');
-<<<<<<< HEAD
-=======
     const origin = getCookie('origin') ;
     console.log(' ORIGIN Details:');
         console.log('ORIGIN:', origin);
@@ -334,7 +332,6 @@
 
         console.log('outbount fetched data ',outboundFareQuoteData);
         console.log('return fetched data ',returnFareQuoteData);
->>>>>>> 60d6f4809c6632cd4c59f250c74b5ae005512c4b
          
 
     function getCookie(name) {
