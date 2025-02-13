@@ -1612,6 +1612,7 @@ console.log('journeytypt is this ',journeyType )
         to: $('#flightToCity').val(),
         toCode: $('#flightToCityCode').val(),
         departureDate: $('#flightDepartureDate').val(),
+        returnDate: $('#flightReturnDate').val(),
         tripType: $('input[name="journeyType"]:checked').val(),
         adults: adultCount,
         children: childCount,
@@ -1630,7 +1631,6 @@ console.log('journeytypt is this ',journeyType )
             PreferredArrivalTime: `${returnDate}T00:00:00`
         });
     }
-
     const payload = {
         EndUserIp: "1.1.1.1",
         ClientId: "180133",
@@ -1643,7 +1643,6 @@ console.log('journeytypt is this ',journeyType )
         FareType: fareType,
         Segments: segments
     };
-
 
         $.ajax({
     url: '/flight/search',
@@ -1663,6 +1662,7 @@ console.log('journeytypt is this ',journeyType )
 
             // Store flight results based on journey type
             if (payload.JourneyType === "2") {  // RoundTrip
+                
                 sessionStorage.setItem('outboundFlights', JSON.stringify(response.outbound));
                 sessionStorage.setItem('returnFlights', JSON.stringify(response.return));
                 console.log('RoundTrip Flights stored in sessionStorage');

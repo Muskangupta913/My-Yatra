@@ -48,7 +48,6 @@
     flex-direction: row-reverse; /* Reverse the horizontal arrangement */
     gap: 5px; /* Add space between seats */
 }
-
 .seat-wrapper {
     display: flex;
     justify-content: center;
@@ -60,8 +59,6 @@
 .empty {
     visibility: hidden; /* Hide empty seats */
 }
-
-
 .bus-layout {
     display: flex;
     flex-direction: column;
@@ -234,7 +231,6 @@
 .seat:hover .seat-status {
     display: block;
 }
-
 /* Seat information display */
 .seat-info {
     display: flex;
@@ -252,7 +248,6 @@
     background-color: #f8f9fa;
     border-radius: 12px;
 }
-
 .berth-column {
     display: flex;
     flex-direction: column;
@@ -438,9 +433,9 @@
 
            
 <!-- Continue Button Section -->
-<div class="mt-2 text-center" id="continueButtonContainer">
-  <button class="btn btn-success" id="continueButton">Continue</button>
-  <a href="#" class="btn btn-success mt-2 d-none" id="ew">Review Details</a>
+<div class="mt-4 text-center" id="continueButtonContainer">
+    <button class="btn btn-success d-none" id="continueButton">Continue</button>
+    <a href="#" class="btn btn-success mt-2 d-none" id="review">Review Details</a>
 </div>
         </div>
       </div>
@@ -614,23 +609,6 @@ if (normalizedData.lower.length > 0 || normalizedData.upper.length > 0) {
                 : ''}
         </div>`;
 }
-    // Add selected seat info and buttons
-    layoutHTML += `
-        <div class="deck-info mt-4">
-            <div id="selectedSeatInfo" class="d-none">
-                <div class="card">
-                    <div class="card-body">
-                        <h5 class="card-title">Selected Seat Details</h5>
-                        <div id="seatDetailsDisplay"></div>
-                    </div>
-                </div>
-            </div>
-            <div class="mt-2 text-center" id="continueButtonContainer">
-                <button class="btn btn-success d-none" id="continueButton">Continue</button>
-                <a href="#" class="btn btn-success mt-2 d-none" id="review">Review Details</a>
-            </div>
-        </div>`;
-
     layoutHTML += '</div>';
     seatLayoutContainer.innerHTML = layoutHTML;
 
@@ -874,6 +852,7 @@ function removeSeat(seatName) {
     
     updateSelectedSeatsDisplay();
 }
+
 function handleContinue() {
     if (!selectedSeats.length) {
         showError('Please select at least one seat to continue.');
@@ -1383,6 +1362,5 @@ sessionStorage.setItem("DroppingPoint", JSON.stringify({
         toastr.error(`Error: ${error.message}`, 'Error');
     });
 }
-
 </script>
 @endsection

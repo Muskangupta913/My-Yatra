@@ -1069,21 +1069,68 @@ async function bookLCC() {
 
     alert('✅ Flight bookings completed successfully!');
 }
-function BookGdsTicket() {
-    const queryParams = new URLSearchParams(window.location.search);
-    const bookingDetails = JSON.parse(sessionStorage.getItem('bookingDetails') ?? '{}'); // Prevent parsing null
 
-    // Destructuring with default values
-   console.log('booking detailssss',bookingDetails);
+
+
+
+function BookGdsTicket() {
+    try {
+        // Get booking details from sessionStorage
+        const storedDetails = sessionStorage.getItem('bookingDetails');
+        if (!storedDetails) {
+            console.error('No booking details found in sessionStorage');
+            return null;
+        }
+
+        // Parse the stored details (which should be an array)
+        const bookingDetailsArray = JSON.parse(storedDetails);
+        if (!Array.isArray(bookingDetailsArray) || bookingDetailsArray.length === 0) {
+            console.error('Invalid or empty booking details array');
+            return null;
+        }
+
+        // For demonstration, we'll return the first booking detail
+        // You might want to add logic to handle multiple bookings if needed
+        return bookingDetailsArray[0];
+    } catch (error) {
+        console.error('Error processing booking details:', error);
+        return null;
+    }
 }
-// Function to process the GDS Ticket booking
-function processGdsTicket() {
+
+
+async function bookGDS() {
+    const bookingDetails = getBookingDetailsFromURL();
+
     const gdsTicketDetails = BookGdsTicket();
+
+        console.log('gdsticket deatilss',gdsTicketDetails);
+        console.log('booking Id details', gdsTicketDetails.bookingId);
 
     if (!gdsTicketDetails) {
         console.error("Missing required parameters for GDS ticket booking.");
         return;
     }
+
+    
+    // Destructuring with default values
+ 
+
+    // if (!bookingDetails || !bookingDetails.nonLcc) {
+    //     console.error("❌ No valid GDS booking details found!");
+    //     return;
+    // }
+
+    console.log("🚀 Full GDS Booking Details:", bookingDetails);
+
+    // Function to create payload for a single GDS flight
+    const createGDSPayload = (flightDetails) => {
+        if (!flightDetails || !flightDetails.bookingId || !flightDetails.pnr) {
+            console.error("❌ Invalid GDS flight details!");
+            return null;
+        }
+
+        
 
     const payload = {
         EndUserIp: "1.1.1.1",
@@ -1096,75 +1143,184 @@ function processGdsTicket() {
         pnr: gdsTicketDetails.pnr,
         bookingId: gdsTicketDetails.bookingId
     };
+    };
 
-    console.log("Sending payload:", payload);
-
-    fetch("/flight/bookGdsTicket", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-            "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').content
-        },
-        body: JSON.stringify(payload)
-    })
-    .then(response => response.json())
-    .then(data => {
-        console.log("API Response:", data);
-        if (data.status === "success") {
-            console.log("Booking successful:", {
-                bookingId: data.data.bookingId,
-                pnr: data.data.pnr,
-                ticketStatus: data.data.ticketStatus,
-                passengers: data.data.passengers
-            });
-        } else {
-            console.error("Booking failed:", data.message);
+    if (bookingDetails.nonLcc.outbound) {
+        console.log("📤 Processing outbound GDS flight booking...");
+        const outboundPayload = createGDSPayload(bookingDetails.nonLcc.outbound);
+        
+        if (outboundPayload) {
+            try {
+                const outboundResponse = await fetch('/flight/bookGdsTicket', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                    },
+                    body: JSON.stringify(outboundPayload)
+                });
+                
+                const outboundData = await outboundResponse.json();
+                
+                if (outboundData.status === 'success') {
+                    console.log("✅ Outbound GDS booking successful:", {
+                        bookingId: outboundData.data.bookingId,
+                        pnr: outboundData.data.pnr,
+                        ticketStatus: outboundData.data.ticketStatus,
+                        passengers: outboundData.data.passengers
+                    });
+                } else {
+                    console.error("❌ Outbound GDS booking failed:", outboundData.message);
+                    throw new Error('Outbound GDS flight booking failed: ' + (outboundData.message || 'Unknown error'));
+                }
+            } catch (error) {
+                console.error("❌ Error booking outbound GDS flight:", error);
+                throw error;
+            }
         }
-    })
-    .catch(error => {
-        console.error("API Error:", error);
-    });
+    }
+
+    // Process return flight if exists
+    if (bookingDetails.nonLcc.return) {
+        console.log("📥 Processing return GDS flight booking...");
+        const returnPayload = createGDSPayload(bookingDetails.nonLcc.return);
+        
+        if (returnPayload) {
+            try {
+                const returnResponse = await fetch('/flight/bookGdsTicket', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                    },
+                    body: JSON.stringify(returnPayload)
+                });
+                
+                const returnData = await returnResponse.json();
+                
+                if (returnData.status === 'success') {
+                    console.log("✅ Return GDS booking successful:", {
+                        bookingId: returnData.data.bookingId,
+                        pnr: returnData.data.pnr,
+                        ticketStatus: returnData.data.ticketStatus,
+                        passengers: returnData.data.passengers
+                    });
+                } else {
+                    console.error("❌ Return GDS booking failed:", returnData.message);
+                    throw new Error('Return GDS flight booking failed: ' + (returnData.message || 'Unknown error'));
+                }
+            } catch (error) {
+                console.error("❌ Error booking return GDS flight:", error);
+                throw error;
+            }
+        }
+    }
+
+    // If no GDS flights were processed, log a warning
+    if (!bookingDetails.nonLcc.outbound && !bookingDetails.nonLcc.return) {
+        console.warn("⚠️ No GDS flights found to process");
+        return;
+    }
+
+    return true;
 }
 
 
+// Helper function to get booking details from URL
+function getBookingDetailsFromURL() {
+    try {
+        const encodedDetails = new URLSearchParams(window.location.search).get('details');
+        return encodedDetails ? JSON.parse(decodeURIComponent(encodedDetails)) : null;
+    } catch (error) {
+        console.error('Error parsing URL details:', error);
+        return null;
+    }
+}
 
+// Dummy function for LCC booking
+function bookLCC(bookingDetails) {
+    console.log("Processing LCC flight booking:", bookingDetails);
+}
 
 // Event listener for the "Pay Now" button
 document.getElementById("payNowButton").addEventListener("click", async function (event) {
     event.preventDefault();
 
-    const urlParams = new URLSearchParams(window.location.search);
-    
- co
     try {
-        // Check for GDS ticket details and process if found
-        const gdsTicketDetails = BookGdsTickte();
-        if (gdsTicketDetails) {
-            console.log("Processing GDS ticket booking...");
-            processGdsTicket();
-            return; // Exit the function if GDS booking is found
+        // Get booking details from URL
+        const bookingDetails = getBookingDetailsFromURL();
+        if (!bookingDetails || !bookingDetails.urlDetails) {
+            throw new Error("No valid booking details found");
         }
 
-        // Process flight booking if applicable
-        if (flightDetailsStr) {
-            console.log("Processing flight booking...");
-            const bookingDetails = getBookingDetailsFromURL();
-            if (bookingDetails) {
-                bookLCC(bookingDetails);
-            } else {
-                throw new Error("Invalid or missing flight booking details.");
-            }
-        } 
-        // If no valid booking details are found
-        else {
-            throw new Error("Unable to determine booking type. Missing required parameters.");
+        const { outbound, return: returnFlight } = bookingDetails.urlDetails;
+        console.log("Processing flights:", { outbound, returnFlight });
+
+        // Case 1: Both flights are LCC
+        if (outbound.isLCC && returnFlight?.isLCC) {
+            console.log("Both flights are LCC - booking through LCC API");
+            await bookLCC();
         }
+        // Case 2: Both flights are non-LCC
+        else if (!outbound.isLCC && returnFlight && !returnFlight.isLCC) {
+            console.log("Both flights are non-LCC - booking through GDS API");
+            await bookGDS();
+        }
+        // Case 3: Outbound is LCC, Return is non-LCC
+        else if (outbound.isLCC && returnFlight && !returnFlight.isLCC) {
+            console.log("Mixed booking - Outbound: LCC, Return: non-LCC");
+            try {
+                // Execute both bookings in parallel
+                await Promise.all([
+                    bookLCC(),
+                    bookGDS()
+                ]);
+                console.log("Successfully booked both flights");
+            } catch (error) {
+                console.error("Error during mixed booking:", error);
+                throw new Error("Failed to complete mixed booking");
+            }
+        }
+        // Case 4: Outbound is non-LCC, Return is LCC
+        else if (!outbound.isLCC && returnFlight?.isLCC) {
+            console.log("Mixed booking - Outbound: non-LCC, Return: LCC");
+            try {
+                // Execute both bookings in parallel
+                await Promise.all([
+                    bookGDS(),
+                    bookLCC()
+                ]);
+                console.log("Successfully booked both flights");
+            } catch (error) {
+                console.error("Error during mixed booking:", error);
+                throw new Error("Failed to complete mixed booking");
+            }
+        }
+        // Single flight cases
+        else if (outbound && !returnFlight) {
+            // Single outbound flight
+            if (outbound.isLCC) {
+                console.log("Single LCC outbound flight");
+                await bookLCC();
+            } else {
+                console.log("Single non-LCC outbound flight");
+                await bookGDS();
+            }
+        } else {
+            throw new Error("Invalid flight combination");
+        }
+
+        // If we reach here, all bookings were successful
+        alert("✅ Flight bookings completed successfully!");
+        
+        // You might want to redirect to a confirmation page or update the UI
+        // window.location.href = '/booking/confirmation';
+
     } catch (error) {
         console.error("Booking error:", error);
-        alert(`Error: ${error.message}`);
+        alert(`Error during booking: ${error.message}`);
     }
 });
-
 
 
 

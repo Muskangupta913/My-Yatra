@@ -1,4 +1,8 @@
 <<<<<<< HEAD
+// STEP 1: At the top of your script, right after the DOMContentLoaded event listener starts,
+// add these state variables:
+=======
+<<<<<<< HEAD
 public function bookLCC(Request $request)
 {
     try {
@@ -143,136 +147,133 @@ function applyFilters() {
         minPrice: parseFloat(document.getElementById('min-price').value) || 0,
         maxPrice: parseFloat(document.getElementById('max-price').value) || Infinity
     };
+>>>>>>> b23c208d0accd97c9550cae8b5093bad4e5e7476
 
-    if (journeyType === "1") {
-        // Single journey filtering (existing logic)
-        const filteredResults = results.map(resultGroup => 
-            resultGroup.filter(result => filterFlight(result, selectedFilters))
+document.addEventListener('DOMContentLoaded', function () {
+    // Add these lines right here
+    let selectedOutboundIndex = null;
+    let selectedReturnIndex = null;
+
+    const outboundFlights = JSON.parse(sessionStorage.getItem('outboundFlights')) || [];
+    // ... rest of your existing variables
+
+
+// STEP 2: In your renderFilteredResults function, find the section where you create the radio 
+// container for outbound flights. Replace this section:
+
+                const radioContainer = document.createElement('div');
+                radioContainer.classList.add(
+                    'absolute', 'top-4', 'right-4',
+                    'w-6', 'h-6'
+                );
+                radioContainer.innerHTML = `
+                    <input type="radio" 
+                           name="outbound-flight" 
+                           class="w-6 h-6 cursor-pointer "
+                           value="${outboundFareData.ResultIndex}">
+                `;
+
+// With this updated version:
+
+                const radioContainer = document.createElement('div');
+                radioContainer.classList.add(
+                    'absolute', 'top-4', 'right-4',
+                    'w-6', 'h-6'
+                );
+                const isSelected = outboundFareData.ResultIndex === selectedOutboundIndex;
+                radioContainer.innerHTML = `
+                    <input type="radio" 
+                           name="outbound-flight" 
+                           class="w-6 h-6 cursor-pointer"
+                           value="${outboundFareData.ResultIndex}"
+                           ${isSelected ? 'checked' : ''}>
+                `;
+
+// STEP 3: Find the event listener for outbound flight selection and replace it with:
+
+                flightCard.querySelector('input[type="radio"]').addEventListener('change', (e) => {
+                    if (e.target.checked) {
+                        selectedOutboundIndex = outboundFareData.ResultIndex;
+                        selectedOutbound = {
+                            resultIndex: outboundFareData.ResultIndex,
+                            airline: outboundFareData.FareSegments[0]?.AirlineName,
+                            flightNumber: outboundFareData.FareSegments[0]?.FlightNumber,
+                            price: outboundFareData.Fare?.OfferedFare
+                        };
+                        updateSelectionDiv();
+                    }
+                });
+
+// STEP 4: Similarly for return flights, replace the radio container creation with:
+
+                const radioContainer = document.createElement('div');
+                radioContainer.classList.add(
+                    'absolute', 'top-4', 'right-4',
+                    'w-6', 'h-6'
+                );
+                const isSelected = returnFareData.ResultIndex === selectedReturnIndex;
+                radioContainer.innerHTML = `
+                    <input type="radio" 
+                           name="return-flight" 
+                           class="w-6 h-6 cursor-pointer"
+                           value="${returnFareData.ResultIndex}"
+                           ${isSelected ? 'checked' : ''}>
+                `;
+
+// STEP 5: Update the return flight event listener:
+
+                flightCard.querySelector('input[type="radio"]').addEventListener('change', (e) => {
+                    if (e.target.checked) {
+                        selectedReturnIndex = returnFareData.ResultIndex;
+                        selectedReturn = {
+                            resultIndex: returnFareData.ResultIndex,
+                            airline: returnFareData.FareSegments[0]?.AirlineName,
+                            flightNumber: returnFareData.FareSegments[0]?.FlightNumber,
+                            price: returnFareData.Fare?.OfferedFare
+                        };
+                        updateSelectionDiv();
+                    }
+                });
+
+// STEP 6: In your applyFilters function, update the round-trip handling section:
+
+    if (journeyType === "2") {
+        // Get the original flights from sessionStorage
+        const originalOutboundFlights = JSON.parse(sessionStorage.getItem('outboundFlights')) || [];
+        const originalReturnFlights = JSON.parse(sessionStorage.getItem('returnFlights')) || [];
+
+        // Apply filters to both outbound and return flights
+        const filteredOutbound = originalOutboundFlights.filter(filterFlight);
+        const filteredReturn = originalReturnFlights.filter(filterFlight);
+
+        // Check if selected flights still exist in filtered results
+        const outboundExists = filteredOutbound.some(flight => 
+            flight.FareDataMultiple?.some(fare => fare.ResultIndex === selectedOutboundIndex)
         );
-        renderFilteredResults(filteredResults, journeyType);
-    } else if (journeyType === "2") {
-        // Round trip filtering
-        const outboundFlights = JSON.parse(sessionStorage.getItem('outboundFlights')) || [];
-        const returnFlights = JSON.parse(sessionStorage.getItem('returnFlights')) || [];
-
-        // Filter outbound flights
-        const filteredOutbound = outboundFlights.filter(flight => filterFlight(flight, selectedFilters));
+        const returnExists = filteredReturn.some(flight => 
+            flight.FareDataMultiple?.some(fare => fare.ResultIndex === selectedReturnIndex)
+        );
         
-        // Filter return flights
-        const filteredReturn = returnFlights.filter(flight => filterFlight(flight, selectedFilters));
+        // Clear selections if flights no longer exist in filtered results
+        if (!outboundExists) selectedOutboundIndex = null;
+        if (!returnExists) selectedReturnIndex = null;
 
-        // Store filtered results in session storage
-        sessionStorage.setItem('filteredOutboundFlights', JSON.stringify(filteredOutbound));
-        sessionStorage.setItem('filteredReturnFlights', JSON.stringify(filteredReturn));
+        // Clear the existing results container
+        const resultsContainer = document.getElementById('results-container');
+        resultsContainer.innerHTML = '';
 
         // Render the filtered results
-        renderFilteredResults([filteredOutbound, filteredReturn], journeyType);
-    }
-}
+        renderFilteredResults([filteredOutbound, filteredReturn], "2");
 
-// Separate the flight filtering logic into its own function
-function filterFlight(flight, filters) {
-    return flight.FareDataMultiple.some(fareData => {
-        const segment = flight.Segments[0][0];
-        const fareSegment = fareData.FareSegments[0];
-        const departureTime = new Date(segment.DepTime);
-        const duration = segment.Duration;
-
-        // Airline filter
-        const airlineMatch = filters.airlines.length === 0 || 
-            filters.airlines.includes(fareSegment.AirlineName);
-
-        // Price filter
-        const priceMatch = fareData.Fare.OfferedFare >= filters.minPrice && 
-            fareData.Fare.OfferedFare <= filters.maxPrice;
-
-        // Stops filter
-        const stopMatch = filters.stops.length === 0 || 
-            filters.stops.some(stop => 
-                (stop === 'Non-stop' && flight.Segments[0].length === 1) ||
-                (stop !== 'Non-stop' && flight.Segments[0].length > 1)
-            );
-
-        // Departure time filter
-        const departureTimeMatch = filters.departureTime.length === 0 || 
-            (departureTime.getHours() < 12 && filters.departureTime.includes('Morning (Before 12 PM)')) ||
-            (departureTime.getHours() >= 12 && filters.departureTime.includes('Evening (After 12 PM)'));
-
-        // Cabin class filter
-        const cabinClassMatch = filters.cabinClass.length === 0 || 
-            filters.cabinClass.includes(fareSegment.CabinClassName);
-
-        // Baggage filter
-        const baggageMatch = filters.baggage.length === 0 || 
-            filters.baggage.includes(fareSegment.Baggage);
-
-        // Duration filter
-        const durationMatch = filters.flightDuration.length === 0 || 
-            filters.flightDuration.includes(
-                duration <= 60 ? 'Short (≤ 1 hour)' :
-                duration <= 120 ? 'Medium (1-2 hours)' :
-                'Long (> 2 hours)'
-            );
-
-        return airlineMatch && priceMatch && stopMatch && 
-               departureTimeMatch && cabinClassMatch && 
-               baggageMatch && durationMatch;
-    });
-}
-
-// Update the extractAdvancedFilters function to handle both journey types
-function extractAdvancedFilters(results) {
-    const journeyType = sessionStorage.getItem('journeyType') || "1";
-    let flightsToFilter = [];
-
-    if (journeyType === "1") {
-        flightsToFilter = results.flat();
-    } else if (journeyType === "2") {
-        const outboundFlights = JSON.parse(sessionStorage.getItem('outboundFlights')) || [];
-        const returnFlights = JSON.parse(sessionStorage.getItem('returnFlights')) || [];
-        flightsToFilter = [...outboundFlights, ...returnFlights];
-    }
-
-    const filters = {
-        airlines: new Set(),
-        stops: new Set(),
-        priceRange: { min: Infinity, max: -Infinity },
-        departureTime: { early: [], late: [] },
-        cabinClasses: new Set(),
-        baggageOptions: new Set(),
-        flightDurations: []
-    };
-
-    flightsToFilter.forEach(flight => {
-        if (flight.FareDataMultiple) {
-            flight.FareDataMultiple.forEach(fareData => {
-                const segment = flight.Segments[0][0];
-                const fareSegment = fareData.FareSegments[0];
-
-                // Extract all filter options (existing logic)
-                filters.airlines.add(fareSegment.AirlineName || 'Unknown');
-                filters.stops.add(flight.Segments[0].length === 1 ? 'Non-stop' : `${flight.Segments[0].length - 1} Stop`);
-                filters.priceRange.min = Math.min(filters.priceRange.min, fareData.Fare.OfferedFare);
-                filters.priceRange.max = Math.max(filters.priceRange.max, fareData.Fare.OfferedFare);
-                
-                const departureTime = new Date(segment.DepTime);
-                const hours = departureTime.getHours();
-                if (hours < 12) filters.departureTime.early.push('Morning (Before 12 PM)');
-                else filters.departureTime.late.push('Evening (After 12 PM)');
-
-                filters.cabinClasses.add(fareSegment.CabinClassName || 'Unknown');
-                filters.baggageOptions.add(fareSegment.Baggage || 'Unknown');
-
-                const duration = segment.Duration;
-                if (duration) {
-                    filters.flightDurations.push(
-                        duration <= 60 ? 'Short (≤ 1 hour)' :
-                        duration <= 120 ? 'Medium (1-2 hours)' :
-                        'Long (> 2 hours)'
-                    );
-                }
-            });
+        // Update the results count
+        const totalResults = filteredOutbound.length + filteredReturn.length;
+        const resultsCountDisplay = document.getElementById('results-count');
+        if (resultsCountDisplay) {
+            resultsCountDisplay.textContent = `${totalResults} results`;
         }
+<<<<<<< HEAD
+    }
+=======
     });
 
     // Clean up filter sets
@@ -283,3 +284,4 @@ function extractAdvancedFilters(results) {
     return filters;
 >>>>>>> 1d47f4474ecf268a4552d1625173d9d5aaee2e7a
 }
+>>>>>>> b23c208d0accd97c9550cae8b5093bad4e5e7476
