@@ -1322,12 +1322,6 @@ document.getElementById("payNowButton").addEventListener("click", async function
     }
 });
 
-
-
-
-
-
-
     </script>
 </body>
 </html>
