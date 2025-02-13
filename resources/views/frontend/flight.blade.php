@@ -1060,11 +1060,9 @@ window.location.href = `/flight/roundBooking?traceId=${traceId}&outboundIndex=${
     })
     .catch(error => {
         console.error('Error in fare quotes:', error);
-        alert('An error occurred while processing flight details.');
+       
     });
 }
-
-
 
 function viewFlightDetails(resultIndex) {
     const traceId = sessionStorage.getItem('flightTraceId');
@@ -1186,7 +1184,7 @@ function viewFlightDetails(resultIndex) {
     })
     .catch(error => {
         console.error('Error fetching fare quote:', error);
-        alert('An error occurred while fetching flight details.');
+        alert('Error fetching fare quote:', error);
     });
 }
 function fetchFareRules(resultIndex) {

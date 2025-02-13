@@ -1280,11 +1280,7 @@ document.getElementById('submitButton').addEventListener('click', async function
                     title: form.querySelector('[name$="[Title]"]').value.trim(),
                     firstName: form.querySelector('[name$="[FirstName]"]').value.trim(),
                     lastName: form.querySelector('[name$="[LastName]"]').value.trim(),
-<<<<<<< HEAD
-                    gender:(form.querySelector('[name$="[Gender]"]').value),
-=======
                     gender: (form.querySelector('[name$="[Gender]"]').value),
->>>>>>> b7907a6aaf3749afdf65ffc224c2f56ef47abbc7
                     contactNo: form.querySelector('[name$="[ContactNo]"]')?.value.trim() || "",
                     email: form.querySelector('[name$="[Email]"]')?.value.trim() || "",
                     dateOfBirth: form.querySelector('[name$="[DateOfBirth]"]').value,
