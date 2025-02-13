@@ -814,7 +814,7 @@ function renderFilteredResults(filteredResults, journeyType) {
                                             class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
                                         View Details
                                     </button>
-                                    <button onclick="fetchFareRules('${fareData.ResultIndex}')" 
+                                    <button onclick="fetchFareRules('${fareData.ResultIndex}')"
                                             class="bg-gray-200 text-gray-700 px-4 py-2 rounded hover:bg-gray-300">
                                         Fare Rules
                                     </button>

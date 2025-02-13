@@ -500,59 +500,99 @@ createPassengerForm("Infant", infantCount, 3);
         return;
     }
 
-    fareQuoteData.Segments.forEach((segmentGroup) => {
-        const card = document.createElement('div');
-        card.classList.add(
-            'bg-white',
-            'rounded-lg',
-            'shadow-sm',
-            'border',
-            'border-gray-200',
-            'p-4',
-            'mb-4'
-        );
+    fareQuoteData.Segments.forEach((segmentGroup, groupIndex) => {
+    const card = document.createElement('div');
+    card.style.cssText = 'background-color: white; border-radius: 0.75rem; box-shadow: 0 1px 3px rgba(0,0,0,0.1); border: 1px solid #E5E7EB; padding: 1.5rem; margin-bottom: 1.5rem; max-width: 800px; width: 100%;';
 
-        let segmentsHtml = '';
-        segmentGroup.forEach((segment, index) => {
-            const departureTime = new Date(segment.DepTime);
-            const arrivalTime = new Date(segment.ArrTime);
+    let segmentsHtml = `
+        <div style="margin-bottom: 1rem; padding-bottom: 0.75rem; border-bottom: 1px solid #E5E7EB; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem;">
+            <span style="background-color: #F3F4F6; color: #4B5563; padding: 0.375rem 0.75rem; border-radius: 9999px; font-size: 0.875rem; font-weight: 500;">
+                ${groupIndex === 0 ? 'OUTBOUND' : 'RETURN'}
+            </span>
+            <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+                <span style="background-color: #EFF6FF; color: #1E40AF; padding: 0.375rem 0.75rem; border-radius: 9999px; font-size: 0.875rem;">
+                    <span style="font-weight: 500;">Baggage:</span> ${segmentGroup[0].Baggage}
+                </span>
+                <span style="background-color: #EFF6FF; color: #1E40AF; padding: 0.375rem 0.75rem; border-radius: 9999px; font-size: 0.875rem;">
+                    <span style="font-weight: 500;">Cabin:</span> ${segmentGroup[0].CabinBaggage}
+                </span>
+            </div>
+        </div>`;
 
-            segmentsHtml += `
-                <div class="flex items-center ${index < segmentGroup.length - 1 ? 'mb-2' : ''}">
-                    <div class="w-24 text-center">
-                        <p class="font-bold">${departureTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
-                        <p class="text-sm text-gray-600">${segment.Origin.CityCode}</p>
+    segmentGroup.forEach((segment, index) => {
+        const departureTime = new Date(segment.DepTime);
+        const arrivalTime = new Date(segment.ArrTime);
+        const duration = segment.Duration;
+        const hours = Math.floor(duration / 60);
+        const minutes = duration % 60;
+
+        // Format airport and terminal information
+        const originAirportInfo = `${segment.Origin.AirportName}${segment.Origin.Terminal ? '-Terminal ' + segment.Origin.Terminal : ''}`;
+        const destAirportInfo = `${segment.Destination.AirportName}${segment.Destination.Terminal ? '-Terminal ' + segment.Destination.Terminal : ''}`;
+
+        segmentsHtml += `
+            <div style="display: flex; flex-direction: column; ${index < segmentGroup.length - 1 ? 'margin-bottom: 1rem;' : ''}">
+                <div style="display: flex; align-items: center; flex-wrap: wrap; gap: 1rem;">
+                    <div style="min-width: 120px; flex: 1;">
+                        <p style="margin: 0 0 0.25rem 0; font-size: 1.25rem; font-weight: 600; color: #111827;">
+                            ${departureTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                        </p>
+                        <p style="margin: 0; font-size: 1rem; color: #374151;">
+                            ${segment.Origin.CityCode}
+                        </p>
+                        <p style="margin: 0; font-size: 0.875rem; color: #6B7280;">
+                            ${originAirportInfo}
+                        </p>
                     </div>
-                    
-                    <div class="flex-1 px-4">
-                        <div class="relative flex items-center">
-                            <div class="h-0.5 w-full bg-gray-300"></div>
-                            <div class="absolute w-full text-center">
-                                <span class="bg-white px-2 text-xs text-gray-600">
-                                    ${segment.Airline.AirlineCode} ${segment.Airline.FlightNumber}
+
+                    <div style="flex: 2; min-width: 200px; padding: 0 1rem; position: relative;">
+                        <div style="height: 2px; background-color: #E5E7EB; position: relative;">
+                            <div style="position: absolute; width: 100%; text-align: center; top: -20px;">
+                                <span style="font-size: 0.875rem; color: #4B5563; display: block;">
+                                    ${segment.Airline.AirlineCode}-${segment.Airline.FlightNumber}
+                                </span>
+                                <span style="font-size: 0.75rem; color: #6B7280; display: block; margin-top: 0.125rem;">
+                                    ${segment.Airline.AirlineName || segment.Airline.Name || 'Airline'}
+                                </span>
+                                <span style="font-size: 0.75rem; color: #6B7280; display: block; margin-top: 0.125rem;">
+                                    ${hours}h ${minutes}m 
                                 </span>
                             </div>
                         </div>
                     </div>
-                    
-                    <div class="w-24 text-center">
-                        <p class="font-bold">${arrivalTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
-                        <p class="text-sm text-gray-600">${segment.Destination.CityCode}</p>
+
+                    <div style="min-width: 120px; flex: 1; text-align: right;">
+                        <p style="margin: 0 0 0.25rem 0; font-size: 1.25rem; font-weight: 600; color: #111827;">
+                            ${arrivalTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                        </p>
+                        <p style="margin: 0; font-size: 1rem; color: #374151;">
+                            ${segment.Destination.CityCode}
+                        </p>
+                        <p style="margin: 0; font-size: 0.875rem; color: #6B7280;">
+                            ${destAirportInfo}
+                        </p>
                     </div>
                 </div>
-                ${index < segmentGroup.length - 1 ? `
-                    <div class="my-2 px-3 py-1 bg-orange-50 rounded text-sm text-center text-orange-700">
-                        Change planes at ${segment.Destination.CityCode}
-                    </div>
-                ` : ''}
-            `;
-        });
+            </div>`;
 
-        card.innerHTML = segmentsHtml;
-        segmentsContainer.appendChild(card);
+            if (index < segmentGroup.length - 1) {
+                const nextSegment = segmentGroup[index + 1];
+            const groundTime = parseInt(nextSegment.GroundTime) || 0;
+            const groundHours = Math.floor(groundTime / 60);
+            const groundMinutes = groundTime % 60;
+            
+            segmentsHtml += `
+                <div style="margin: 1rem 0; padding: 0.75rem; background-color: #FFEDD5; border-radius: 0.375rem; text-align: center; color: #9A3412;">
+                    <p style="margin: 0; font-weight: 500;">Change planes at ${segment.Destination.CityCode}</p>
+                    <p style="margin: 0.25rem 0 0 0; font-size: 0.875rem;">Layover: ${groundHours}h ${groundMinutes}m</p>
+                </div>`;
+        }
     });
-}
 
+    card.innerHTML = segmentsHtml;
+    segmentsContainer.appendChild(card);
+});
+}
 
 if (fareQuoteData) {
     renderFareQuoteSegments(fareQuoteData);
@@ -631,6 +671,10 @@ if (fareQuoteData) {
     }
 
     const passengerId = `${passengerType}-${index}`;
+    const allContainers = document.querySelectorAll('[id^="options-container-"]');
+    allContainers.forEach(container => {
+        container.style.display = 'none';
+    });
     fetch("{{ route('fetch.ssr.data') }}", {
         method: 'POST',
         headers: {
@@ -651,7 +695,9 @@ if (fareQuoteData) {
     .then(response => response.json())
     .then(data => {
         const container = document.getElementById(`options-container-${passengerType}-${index}`);
-        
+        if (container) {
+            container.style.display = 'block';
+        }
         if (!data.success) {
             container.innerHTML = `<p>This flight does not provide SSR services: ${data.message || 'No details available'}</p>`;
             return;
@@ -740,6 +786,11 @@ window.updateBaggageSelection = function(radio, passengerId) {
     
     window.passengerSelections.baggage[passengerId] = baggageOption;
     showBaggageAlert(radio, passengerId);
+    const container = document.getElementById(`options-container-${passengerId}`);
+    if (container) {
+        container.style.display = 'none';
+    }
+    
 };
 
 

@@ -576,59 +576,108 @@ function renderFareQuoteSegments(outboundFareQuoteData, returnFareQuoteData) {
                 </div>`;
         }
 
-        let segmentCards = `<h3 class="text-lg font-semibold mb-2">${title}</h3>`;
+        let segmentCards = `<h3 style="font-size: 1.125rem; font-weight: 600; margin-bottom: 0.5rem;">${title}</h3>`;
 
-        fareQuoteData.Segments.forEach((segmentGroup) => {
-            let segmentsHtml = '';
-            segmentGroup.forEach((segment, index) => {
-                const departureTime = new Date(segment.DepTime);
-                const arrivalTime = new Date(segment.ArrTime);
+fareQuoteData.Segments.forEach((segmentGroup, groupIndex) => {
+    let segmentsHtml = `
+        <div style="margin-bottom: 1rem; padding-bottom: 0.75rem; border-bottom: 1px solid #E5E7EB; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem;">
+            <span style="background-color: #F3F4F6; color: #4B5563; padding: 0.375rem 0.75rem; border-radius: 9999px; font-size: 0.875rem; font-weight: 500;">
+                ${groupIndex === 0 ? 'OUTBOUND' : 'RETURN'}
+            </span>
+            <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+                <span style="background-color: #EFF6FF; color: #1E40AF; padding: 0.375rem 0.75rem; border-radius: 9999px; font-size: 0.875rem;">
+                    <span style="font-weight: 500;">Baggage:</span> ${segmentGroup[0].Baggage}
+                </span>
+                <span style="background-color: #EFF6FF; color: #1E40AF; padding: 0.375rem 0.75rem; border-radius: 9999px; font-size: 0.875rem;">
+                    <span style="font-weight: 500;">Cabin:</span> ${segmentGroup[0].CabinBaggage}
+                </span>
+            </div>
+        </div>`;
 
-                segmentsHtml += `
-                    <div class="flex items-center ${index < segmentGroup.length - 1 ? 'mb-2' : ''}">
-                        <div class="w-24 text-center">
-                            <p class="font-bold">${departureTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
-                            <p class="text-sm text-gray-600">${segment.Origin.CityCode}</p>
-                        </div>
-                        
-                        <div class="flex-1 px-4">
-                            <div class="relative flex items-center">
-                                <div class="h-0.5 w-full bg-gray-300"></div>
-                                <div class="absolute w-full text-center">
-                                    <span class="bg-white px-2 text-xs text-gray-600">
-                                        ${segment.Airline.AirlineCode} ${segment.Airline.FlightNumber}
-                                    </span>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div class="w-24 text-center">
-                            <p class="font-bold">${arrivalTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
-                            <p class="text-sm text-gray-600">${segment.Destination.CityCode}</p>
+    segmentGroup.forEach((segment, index) => {
+        const departureTime = new Date(segment.DepTime);
+        const arrivalTime = new Date(segment.ArrTime);
+        const duration = segment.Duration;
+        const hours = Math.floor(duration / 60);
+        const minutes = duration % 60;
+
+        // Format airport and terminal information
+        const originAirportInfo = `${segment.Origin.AirportName}${segment.Origin.Terminal ? '-Terminal ' + segment.Origin.Terminal : ''}`;
+        const destAirportInfo = `${segment.Destination.AirportName}${segment.Destination.Terminal ? '-Terminal ' + segment.Destination.Terminal : ''}`;
+
+        segmentsHtml += `
+            <div style="display: flex; align-items: center; ${index < segmentGroup.length - 1 ? 'margin-bottom: 0.5rem;' : ''}">
+                <div style="width: 6rem; text-align: center;">
+                    <p style="font-weight: 700; margin: 0;">
+                        ${departureTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                    </p>
+                    <p style="font-size: 0.875rem; color: #4B5563; margin: 0;">
+                        ${segment.Origin.CityCode}
+                    </p>
+                    <p style="font-size: 0.75rem; color: #6B7280; margin: 0; line-height: 1.2;">
+                        ${originAirportInfo}
+                    </p>
+                </div>
+                
+                <div style="flex: 1; padding: 0 1rem;">
+                    <div style="position: relative; display: flex; align-items: center;">
+                        <div style="height: 0.125rem; width: 100%; background-color: #D1D5DB;"></div>
+                        <div style="position: absolute; width: 100%; text-align: center;">
+                            <span style="font-size: 0.75rem; color: #4B5563; display: block;">
+                                ${segment.Airline.AirlineCode}-${segment.Airline.FlightNumber}
+                            </span>
+                            <span style="font-size: 0.75rem; color: #6B7280; display: block; margin-top: 0.125rem;">
+                                ${segment.Airline.AirlineName || segment.Airline.Name || 'Airline'}
+                            </span>
+                            <span style="font-size: 0.75rem; color: #6B7280; display: block; margin-top: 0.125rem;">
+                                ${hours}h ${minutes}m 
+                            </span>
                         </div>
                     </div>
-                    ${index < segmentGroup.length - 1 ? `
-                        <div class="my-2 px-3 py-1 bg-orange-50 rounded text-sm text-center text-orange-700">
-                            Change planes at ${segment.Destination.CityCode}
-                        </div>
-                    ` : ''}
-                `;
-            });
+                </div>
+                
+                <div style="width: 6rem; text-align: center;">
+                    <p style="font-weight: 700; margin: 0;">
+                        ${arrivalTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                    </p>
+                    <p style="font-size: 0.875rem; color: #4B5563; margin: 0;">
+                        ${segment.Destination.CityCode}
+                    </p>
+                    <p style="font-size: 0.75rem; color: #6B7280; margin: 0; line-height: 1.2;">
+                        ${destAirportInfo}
+                    </p>
+                </div>
+            </div>`;
 
-            segmentCards += `
-                <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4 mb-4">
-                    ${segmentsHtml}
+            if (index < segmentGroup.length - 1) {
+            // ✨ FIXED: Get ground time from the next segment
+            const nextSegment = segmentGroup[index + 1];
+            const groundTime = parseInt(nextSegment.GroundTime) || 0;
+            const groundHours = Math.floor(groundTime / 60);
+            const groundMinutes = groundTime % 60;
+            
+            segmentsHtml += `
+                <div style="margin: 0.5rem 0; padding: 0.25rem 0.75rem; background-color: #FFF7ED; border-radius: 0.375rem; font-size: 0.875rem; text-align: center; color: #C2410C;">
+                    <p style="margin: 0; font-weight: 500;">Change planes at ${segment.Destination.CityCode}</p>
+                    <p style="margin: 0.125rem 0 0 0; font-size: 0.75rem;">Layover: ${groundHours}h ${groundMinutes}m</p>
                 </div>`;
-        });
+        }
+    });
 
-        return segmentCards;
-    }
+    segmentCards += `
+        <div style="background-color: white; border-radius: 0.5rem; box-shadow: 0 1px 2px rgba(0,0,0,0.05); border: 1px solid #E5E7EB; padding: 1rem; margin-bottom: 1rem;">
+            ${segmentsHtml}
+        </div>`;
+});
 
-    // Render outbound flight segments
-    segmentsContainer.innerHTML += createSegmentCard('Outbound Flight', outboundFareQuoteData);
+return segmentCards;
+ }
 
-    // Render return flight segments
-    segmentsContainer.innerHTML += createSegmentCard('Return Flight', returnFareQuoteData);
+// Render outbound flight segments
+segmentsContainer.innerHTML += createSegmentCard('Outbound Flight', outboundFareQuoteData);
+
+// Render return flight segments
+segmentsContainer.innerHTML += createSegmentCard('Return Flight', returnFareQuoteData);
 }
 
 // Fetch fare quote data from session storage
@@ -774,6 +823,10 @@ function fetchSSRData(type, passengerType, resultIndex, srdvIndex, direction, pa
 
             const urlParams = new URLSearchParams(window.location.search);
             const traceId = urlParams.get('traceId');
+            const allContainers = document.querySelectorAll('[id^="options-container-"]');
+    allContainers.forEach(container => {
+        container.style.display = 'none';
+    });
 
             fetch("{{ route('fetch.ssr.data') }}", {
                 method: 'POST',
@@ -794,6 +847,9 @@ function fetchSSRData(type, passengerType, resultIndex, srdvIndex, direction, pa
             })
             .then(response => response.json())
             .then(data => {
+                if (container) {
+            container.style.display = 'block';
+        }
                 if (!data.success) {
                     container.innerHTML = `<p class="text-danger">This flight does not provide SSR services: ${data.message || 'No details available'}</p>`;
                     return;
@@ -899,6 +955,10 @@ window.updateBaggageSelection = function(radio, passengerId) {
     
     console.log(`Updated baggage selection for ${direction}:`, window.passengerSelections.baggage[direction]);
     showBaggageAlert(radio);
+    const container = document.getElementById(`options-container-${passengerId}`);
+    if (container) {
+        container.style.display = 'none';
+    }
 };
 
 
