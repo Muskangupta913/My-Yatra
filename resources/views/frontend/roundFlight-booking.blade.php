@@ -1591,25 +1591,32 @@ document.getElementById('submitButton').addEventListener('click', async function
         // First process non-LCC bookings
         let nonLccResults = [];
         let lccBookingDetails = {};
+        
+        // Handle non-LCC bookings first
+        let nonLccBookingDetails = {
+            outbound: null,
+            return: null
+        };
 
         // Handle non-LCC bookings first
+     
         if (!isLCCoutbound && bookingPayloads.nonLcc.outbound) {
             const outboundResult = await processNonLCCBooking({
                 srdvIndex: outboundSrdvIndex,
                 traceId: traceId,
                 resultIndex: outboundResultIndex,
                 passengers: bookingPayloads.nonLcc.outbound.passengers.map(pax => ({
-    ...pax,
-    fare: [{
-        baseFare: parseFloat(outboundFareQuoteData.Fare.BaseFare),
-        tax: parseFloat(outboundFareQuoteData.Fare.Tax),
-        yqTax: parseFloat(outboundFareQuoteData.Fare.YQTax || 0),
-        transactionFee: (outboundFareQuoteData.Fare.TransactionFee || '0').toString(),
-        additionalTxnFeeOfrd: parseFloat(outboundFareQuoteData.Fare.AdditionalTxnFeeOfrd || 0),
-        additionalTxnFeePub: parseFloat(outboundFareQuoteData.Fare.AdditionalTxnFeePub || 0),
-        airTransFee: (outboundFareQuoteData.Fare.AirTransFee || '0').toString()
-    }]
-})),
+                    ...pax,
+                    fare: [{
+                        baseFare: parseFloat(outboundFareQuoteData.Fare.BaseFare),
+                        tax: parseFloat(outboundFareQuoteData.Fare.Tax),
+                        yqTax: parseFloat(outboundFareQuoteData.Fare.YQTax || 0),
+                        transactionFee: (outboundFareQuoteData.Fare.TransactionFee || '0').toString(),
+                        additionalTxnFeeOfrd: parseFloat(outboundFareQuoteData.Fare.AdditionalTxnFeeOfrd || 0),
+                        additionalTxnFeePub: parseFloat(outboundFareQuoteData.Fare.AdditionalTxnFeePub || 0),
+                        airTransFee: (outboundFareQuoteData.Fare.AirTransFee || '0').toString()
+                    }]
+                })),
                 gst: {
                     companyAddress: document.querySelector('[name="GSTCompanyAddress"]')?.value || '',
                     companyContactNumber: document.querySelector('[name="GSTCompanyContact"]')?.value || '',
@@ -1618,7 +1625,17 @@ document.getElementById('submitButton').addEventListener('click', async function
                     companyEmail: document.querySelector('[name="GSTCompanyEmail"]')?.value || ''
                 }
             });
-            nonLccResults.push(outboundResult);
+            
+            nonLccBookingDetails.outbound = {
+                resultIndex: outboundResultIndex,
+                srdvIndex: outboundSrdvIndex,
+                traceId: traceId,
+                totalFare: outboundFareQuoteData.Fare.OfferedFare,
+                bookingId: outboundResult.bookingId,
+                pnr: outboundResult.pnr,
+                passengers: outboundResult.passengers,
+                gst: outboundResult.gst
+            };
         }
 
         if (!isLCCreturn && bookingPayloads.nonLcc.return) {
@@ -1628,7 +1645,7 @@ document.getElementById('submitButton').addEventListener('click', async function
                 resultIndex: returnResultIndex,
                 passengers: bookingPayloads.nonLcc.return.passengers.map(pax => ({
                     ...pax,
-                 fare: [{
+                    fare: [{
                         baseFare: parseFloat(returnFareQuoteData.Fare.BaseFare),
                         tax: parseFloat(returnFareQuoteData.Fare.Tax),
                         yqTax: parseFloat(returnFareQuoteData.Fare.YQTax || 0),
@@ -1636,17 +1653,27 @@ document.getElementById('submitButton').addEventListener('click', async function
                         additionalTxnFeeOfrd: parseFloat(returnFareQuoteData.Fare.AdditionalTxnFeeOfrd || 0),
                         additionalTxnFeePub: parseFloat(returnFareQuoteData.Fare.AdditionalTxnFeePub || 0),
                         airTransFee: (returnFareQuoteData.Fare.AirTransFee || '0').toString()
-                    }],
+                    }]
                 })),
-                    gst: {
-                        companyAddress: document.querySelector('[name="GSTCompanyAddress"]')?.value || '',
-                        companyContactNumber: document.querySelector('[name="GSTCompanyContact"]')?.value || '',
-                        companyName: document.querySelector('[name="GSTCompanyName"]')?.value || '',
-                        number: document.querySelector('[name="GSTNumber"]')?.value || '',
-                        companyEmail: document.querySelector('[name="GSTCompanyEmail"]')?.value || ''
-                    }
+                gst: {
+                    companyAddress: document.querySelector('[name="GSTCompanyAddress"]')?.value || '',
+                    companyContactNumber: document.querySelector('[name="GSTCompanyContact"]')?.value || '',
+                    companyName: document.querySelector('[name="GSTCompanyName"]')?.value || '',
+                    number: document.querySelector('[name="GSTNumber"]')?.value || '',
+                    companyEmail: document.querySelector('[name="GSTCompanyEmail"]')?.value || ''
+                }
             });
-            nonLccResults.push(returnResult);
+            
+            nonLccBookingDetails.return = {
+                resultIndex: returnResultIndex,
+                srdvIndex: returnSrdvIndex,
+                traceId: traceId,
+                totalFare: returnFareQuoteData.Fare.OfferedFare,
+                bookingId: returnResult.bookingId,
+                pnr: returnResult.pnr,
+                passengers: returnResult.passengers,
+                gst: returnResult.gst
+            };
         }
 
         // Then process LCC bookings
@@ -1669,14 +1696,39 @@ document.getElementById('submitButton').addEventListener('click', async function
             };
         }
 
+
+        let decodedUrlDetails;
+try {
+    const encodedDetails = new URLSearchParams(window.location.search).get('details');
+    decodedUrlDetails = encodedDetails ? JSON.parse(decodeURIComponent(encodedDetails)) : null;
+} catch (error) {
+    console.error('Error parsing URL details:', error);
+    decodedUrlDetails = null;
+}
         // Combine all booking details for the payment page
         const finalBookingDetails = {
             lcc: Object.keys(lccBookingDetails).length > 0 ? lccBookingDetails : null,
-            nonLcc: nonLccResults.length > 0 ? nonLccResults : null
+            nonLcc: (nonLccBookingDetails.outbound || nonLccBookingDetails.return) ? nonLccBookingDetails : null,
+            urlDetails: decodedUrlDetails
         };
+
+        console.log("Is LCC Outbound:", isLCCoutbound);
+console.log("Is LCC Return:", isLCCreturn);
+
+console.log("Non-LCC Outbound Passengers:", bookingPayloads.nonLcc.outbound);
+console.log("Non-LCC Return Passengers:", bookingPayloads.nonLcc.return);
+
+console.log("Processing Non-LCC Outbound:", !isLCCoutbound && bookingPayloads.nonLcc.outbound);
+console.log("Processing Non-LCC Return:", !isLCCreturn && bookingPayloads.nonLcc.return);
+
+
+
 
         // Redirect to payment pagegit 
         const encodedDetails = encodeURIComponent(JSON.stringify(finalBookingDetails));
+        console.log("Final Booking Details:", JSON.stringify(finalBookingDetails, null, 2));
+        console.log('Encoded Details:', decodeURIComponent(new URLSearchParams(window.location.search).get('details')));
+
         window.location.href = `/flight/payment?details=${encodedDetails}`;
 
     } catch (error) {
@@ -1707,20 +1759,60 @@ async function processNonLCCBooking(payload) {
     const data = await response.json();
 
     if (data.status === 'success') {
-        // Store booking details in session storage
-        sessionStorage.setItem('bookingDetails', JSON.stringify({
+        const bookingDetails = {
             bookingId: data.booking_details.booking_id,
             pnr: data.booking_details.pnr,
             srdvIndex: data.booking_details.srdvIndex,
-            traceId: data.booking_details.trace_id
-        }));
+            traceId: data.booking_details.trace_id,
+            passengers: payload.passengers,
+            gst: payload.gst,
+            isOutbound: payload.srdvIndex === outboundSrdvIndex
+        };
 
-        // return data; // Return the whole response data if needed
+        // Fix: Ensure we're working with an array
+        let existingDetails;
+        try {
+            existingDetails = JSON.parse(sessionStorage.getItem('bookingDetails'));
+            // Check if parsed result is an array, if not, create new array
+            if (!Array.isArray(existingDetails)) {
+                existingDetails = [];
+            }
+        } catch (error) {
+            // If parsing fails, start with empty array
+            existingDetails = [];
+        }
+
+        existingDetails.push(bookingDetails);
+        sessionStorage.setItem('bookingDetails', JSON.stringify(existingDetails));
+
+        return bookingDetails;
     } else {
         throw new Error(data.message || 'Booking failed');
     }
-
 }
+// Then, modify how the final booking details are combined:
+// const finalBookingDetails = {
+//     lcc: Object.keys(lccBookingDetails).length > 0 ? lccBookingDetails : null,
+//     nonLcc: nonLccResults.length > 0 ? nonLccResults.map(result => ({
+//         ...result,
+//         resultIndex: result.isOutbound ? outboundResultIndex : returnResultIndex,
+//         totalFare: result.isOutbound 
+//             ? outboundFareQuoteData.Fare.OfferedFare 
+//             : returnFareQuoteData.Fare.OfferedFare,
+//         passengers: result.passengers.map(pax => ({
+//             ...pax,
+//             fare: [{
+//                 baseFare: parseFloat(result.isOutbound ? outboundFareQuoteData.Fare.BaseFare : returnFareQuoteData.Fare.BaseFare),
+//                 tax: parseFloat(result.isOutbound ? outboundFareQuoteData.Fare.Tax : returnFareQuoteData.Fare.Tax),
+//                 yqTax: parseFloat(result.isOutbound ? outboundFareQuoteData.Fare.YQTax : returnFareQuoteData.Fare.YQTax) || 0,
+//                 transactionFee: result.isOutbound ? outboundFareQuoteData.Fare.TransactionFee : returnFareQuoteData.Fare.TransactionFee || '0',
+//                 additionalTxnFeeOfrd: parseFloat(result.isOutbound ? outboundFareQuoteData.Fare.AdditionalTxnFeeOfrd : returnFareQuoteData.Fare.AdditionalTxnFeeOfrd) || 0,
+//                 additionalTxnFeePub: parseFloat(result.isOutbound ? outboundFareQuoteData.Fare.AdditionalTxnFeePub : returnFareQuoteData.Fare.AdditionalTxnFeePub) || 0,
+//                 airTransFee: result.isOutbound ? outboundFareQuoteData.Fare.AirTransFee : returnFareQuoteData.Fare.AirTransFee || '0'
+//             }]
+//         }))
+//     })) : null
+// };
 }); 
 
 

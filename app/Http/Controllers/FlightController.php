@@ -628,14 +628,14 @@ public function bookLCC(Request $request)
             'passenger.*.baggage' => 'nullable|array',
             'passenger.*.mealDynamic' => 'nullable|array',
             'passenger.*.seat' => 'nullable|array',
-            'fare' => 'required|array',
-            'fare.baseFare' => 'required|numeric',
-            'fare.tax' => 'required|numeric',
-            'fare.yqTax' => 'nullable|numeric',
-            'fare.transactionFee' => 'nullable|numeric',
-            'fare.additionalTxnFeeOfrd' => 'nullable|numeric',
-            'fare.additionalTxnFeePub' => 'nullable|numeric',
-            'fare.airTransFee' => 'nullable|numeric',
+            'passenger.*.fare' => 'required|array',
+            'passenger.*.fare.baseFare' => 'required|numeric',
+            'passenger.*.fare.tax' => 'required|numeric',
+            'passenger.*.fare.yqTax' => 'nullable|numeric',
+            'passenger.*.fare.transactionFee' => 'nullable|numeric',
+            'passenger.*.fare.additionalTxnFeeOfrd' => 'nullable|numeric',
+            'passenger.*.fare.additionalTxnFeePub' => 'nullable|numeric',
+            'passenger.*.fare.airTransFee' => 'nullable|numeric',
         ]);
 
         // Log incoming request for debugging
@@ -670,28 +670,22 @@ public function bookLCC(Request $request)
                     'CountryName' => $pax['countryName'] ?? 'INDIA',
                     'Nationality' => $pax['nationality'] ?? 'IN',
                     'IsLeadPax' => isset($pax['isLeadPax']) ? (bool)$pax['isLeadPax'] : false,
-                    'FFAirlineCode' => $pax['ffAirlineCode'] ?? '',
                     'Baggage' => $pax['baggage'] ?? [],
                     'MealDynamic' => $pax['mealDynamic'] ?? [],
                     'Seat' => $pax['seat'] ?? [],
-                   
                     'Fare' => [
                         'Currency' => 'INR',
-                        'BaseFare' => $pax['fare']['baseFare'] ?? 0,
-                        'Tax' => $pax['fare']['tax'] ?? 0,
+                        'BaseFare' => $pax['fare']['baseFare'],
+                        'Tax' => $pax['fare']['tax'],
                         'YQTax' => $pax['fare']['yqTax'] ?? 0,
-                        'AdditionalTxnFeeOfrd' => (string)($pax['fare']['additionalTxnFeeOfrd'] ?? '0'),
-                        'AdditionalTxnFeePub' => (string)($pax['fare']['additionalTxnFeePub'] ?? '0'),
-                        'ServiceFee' => '0',
-                        'TotalBaggageCharges' => '0',
-                        'TotalMealCharges' => '0',
-                        'TotalSeatCharges' => '0',
-                        'TotalSpecialServiceCharges' => '0'
+                        'TransactionFee' => $pax['fare']['transactionFee'] ?? 0,
+                        'AdditionalTxnFeeOfrd' => $pax['fare']['additionalTxnFeeOfrd'] ?? 0,
+                        'AdditionalTxnFeePub' => $pax['fare']['additionalTxnFeePub'] ?? 0,
+                        'AirTransFee' => $pax['fare']['airTransFee'] ?? 0
                     ]
                 ];
             }, $validatedData['passenger'])
         ];
-
         // Log prepared payload
         Log::info('LCC Booking API Payload', ['payload' => $payload]);
 
@@ -760,8 +754,6 @@ public function bookLCC(Request $request)
                             'baggage' => $passenger['Baggage'] ?? [],
                             'meal_dynamic' => $passenger['MealDynamic'] ?? [],
                             'seat' => $passenger['Seat'] ?? [],
-                            'ssr' => $passenger['Ssr'] ?? [],
-                            'segment_additional_info' => $passenger['SegmentAdditionalInfo'] ?? []
                         ];
                     }, $apiResponse['Response']['FlightItinerary']['Passenger'] ?? []),
                     'is_lcc' => $apiResponse['Response']['FlightItinerary']['IsLCC'] ?? null,
