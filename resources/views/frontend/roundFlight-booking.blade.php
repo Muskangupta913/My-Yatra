@@ -290,7 +290,7 @@
                     <div id="seatMapContainer" class="mt-3" style="display: none;"></div>
 
                     <!-- Fare Details -->
-                    <div class="card mb-3">
+                    <div class="card mb-3" style="display: none;">
                         <div class="card-header">
                             <h6 class="mb-0">Fare Details</h6>
                         </div>
@@ -1561,55 +1561,138 @@ function updateTotalFare() {
     // Update the total in the UI
     const totalPriceElement = document.getElementById('totalPrice');
     if (totalPriceElement) {
-        totalPriceElement.textContent = `₹${priceDetails.grandTotal.toFixed(2)}`;
+        totalPriceElement.innerHTML = `
+            <div class="price-badge bg-success bg-gradient p-3 rounded-pill text-white text-center">
+                <h4 class="mb-0">Total Fare: ₹${priceDetails.grandTotal.toFixed(2)}</h4>
+            </div>`;
     }
 
     // Update the breakdown section
     const breakdownElement = document.getElementById('priceBreakdown');
     if (breakdownElement) {
         let breakdown = `
-            <div class="price-breakdown card">
-                <div class="card-body">
-                    <h5 class="card-title mb-4">Price Breakdown</h5>
-                    
-                    <!-- Base Fares Section -->
-                    <div class="base-fares mb-4">
-                        <h6 class="fw-bold">Base Fares</h6>
-                        <div class="ms-3">
-                            <div>Outbound Flight: ₹${window.outboundFareQuoteData?.Fare?.OfferedFare || 0}</div>
-                            <div>Return Flight: ₹${window.returnFareQuoteData?.Fare?.OfferedFare || 0}</div>
-                        </div>
+            <div class="price-breakdown-container">
+                <div class="card shadow-lg border-0 rounded-lg">
+                    <div class="card-header bg-primary bg-gradient text-white py-3">
+                        <h4 class="card-title mb-0 text-center">
+                            <i class="fas fa-receipt me-2"></i>Detailed Price Breakdown
+                        </h4>
                     </div>
-
                     
-                    </div>`;
+                    <div class="card-body p-4">
+                        <!-- Base Fares Section -->
+                        <div class="base-fares-section mb-4">
+                            <div class="section-header bg-light p-3 rounded-top border-start border-4 border-primary">
+                                <h5 class="mb-0 text-primary">
+                                    <i class="fas fa-plane-departure me-2"></i>Base Fares
+                                </h5>
+                            </div>
+                            <div class="section-content p-3 border rounded-bottom">
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <div class="fare-card bg-light p-3 rounded text-center">
+                                            <div class="text-primary mb-2"><i class="fas fa-plane-departure fa-2x"></i></div>
+                                            <h6>Outbound Flight</h6>
+                                            <h5 class="text-success mb-0">₹${window.outboundFareQuoteData?.Fare?.OfferedFare || 0}</h5>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="fare-card bg-light p-3 rounded text-center">
+                                            <div class="text-primary mb-2"><i class="fas fa-plane-arrival fa-2x"></i></div>
+                                            <h6>Return Flight</h6>
+                                            <h5 class="text-success mb-0">₹${window.returnFareQuoteData?.Fare?.OfferedFare || 0}</h5>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>`;
 
         // Passenger-wise Breakdown
-        breakdown += `<div class="passenger-selections mb-4">
-            <h6 class="fw-bold">Passenger Selections</h6>`;
+        breakdown += `<div class="passenger-selections">
+            <div class="section-header bg-light p-3 rounded-top border-start border-4 border-primary">
+                <h5 class="mb-0 text-primary">
+                    <i class="fas fa-users me-2"></i>Passenger Selections
+                </h5>
+            </div>`;
 
         Object.entries(priceDetails.passengerCosts).forEach(([passengerId, costs]) => {
             breakdown += `
-                <div class="passenger-section mb-3">
-                    <div class="fw-bold text-primary">${passengerId}</div>
-                    
-                    <!-- Outbound Flight -->
-                    <div class="ms-3 mb-2">
-                        <div class="fw-semibold">Outbound Flight:</div>
-                        <div class="ms-3">
-                            ${costs.outbound.seats > 0 ? `<div>Seat Selection: ₹${costs.outbound.seats.toFixed(2)}</div>` : ''}
-                            ${costs.outbound.meals > 0 ? `<div>Meal Selection: ₹${costs.outbound.meals.toFixed(2)}</div>` : ''}
-                            ${costs.outbound.baggage > 0 ? `<div>Baggage Selection: ₹${costs.outbound.baggage.toFixed(2)}</div>` : ''}
-                        </div>
+                <div class="passenger-card mb-4 border rounded-bottom p-3">
+                    <div class="passenger-header bg-light p-2 rounded mb-3">
+                        <h6 class="mb-0 text-primary">
+                            <i class="fas fa-user-circle me-2"></i>${passengerId}
+                        </h6>
                     </div>
                     
-                    <!-- Return Flight -->
-                    <div class="ms-3">
-                        <div class="fw-semibold">Return Flight:</div>
-                        <div class="ms-3">
-                            ${costs.return.seats > 0 ? `<div>Seat Selection: ₹${costs.return.seats.toFixed(2)}</div>` : ''}
-                            ${costs.return.meals > 0 ? `<div>Meal Selection: ₹${costs.return.meals.toFixed(2)}</div>` : ''}
-                            ${costs.return.baggage > 0 ? `<div>Baggage Selection: ₹${costs.return.baggage.toFixed(2)}</div>` : ''}
+                    <div class="row g-4">
+                        <!-- Outbound Flight Selections -->
+                        <div class="col-md-6">
+                            <div class="flight-selections p-3 bg-light rounded">
+                                <h6 class="text-primary mb-3">
+                                    <i class="fas fa-plane-departure me-2"></i>Outbound Selections
+                                </h6>
+                                <div class="selection-items">
+                                    ${costs.outbound.seats > 0 ? `
+                                        <div class="selection-item d-flex align-items-center mb-2">
+                                            <div class="icon-wrapper me-2">
+                                                <i class="fas fa-chair text-success"></i>
+                                            </div>
+                                            <div class="flex-grow-1">Seat Selection</div>
+                                            <div class="price text-success">₹${costs.outbound.seats.toFixed(2)}</div>
+                                        </div>` : ''}
+                                    ${costs.outbound.meals > 0 ? `
+                                        <div class="selection-item d-flex align-items-center mb-2">
+                                            <div class="icon-wrapper me-2">
+                                                <i class="fas fa-utensils text-warning"></i>
+                                            </div>
+                                            <div class="flex-grow-1">Meal Selection</div>
+                                            <div class="price text-success">₹${costs.outbound.meals.toFixed(2)}</div>
+                                        </div>` : ''}
+                                    ${costs.outbound.baggage > 0 ? `
+                                        <div class="selection-item d-flex align-items-center">
+                                            <div class="icon-wrapper me-2">
+                                                <i class="fas fa-suitcase text-info"></i>
+                                            </div>
+                                            <div class="flex-grow-1">Baggage Selection</div>
+                                            <div class="price text-success">₹${costs.outbound.baggage.toFixed(2)}</div>
+                                        </div>` : ''}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Return Flight Selections -->
+                        <div class="col-md-6">
+                            <div class="flight-selections p-3 bg-light rounded">
+                                <h6 class="text-primary mb-3">
+                                    <i class="fas fa-plane-arrival me-2"></i>Return Selections
+                                </h6>
+                                <div class="selection-items">
+                                    ${costs.return.seats > 0 ? `
+                                        <div class="selection-item d-flex align-items-center mb-2">
+                                            <div class="icon-wrapper me-2">
+                                                <i class="fas fa-chair text-success"></i>
+                                            </div>
+                                            <div class="flex-grow-1">Seat Selection</div>
+                                            <div class="price text-success">₹${costs.return.seats.toFixed(2)}</div>
+                                        </div>` : ''}
+                                    ${costs.return.meals > 0 ? `
+                                        <div class="selection-item d-flex align-items-center mb-2">
+                                            <div class="icon-wrapper me-2">
+                                                <i class="fas fa-utensils text-warning"></i>
+                                            </div>
+                                            <div class="flex-grow-1">Meal Selection</div>
+                                            <div class="price text-success">₹${costs.return.meals.toFixed(2)}</div>
+                                        </div>` : ''}
+                                    ${costs.return.baggage > 0 ? `
+                                        <div class="selection-item d-flex align-items-center">
+                                            <div class="icon-wrapper me-2">
+                                                <i class="fas fa-suitcase text-info"></i>
+                                            </div>
+                                            <div class="flex-grow-1">Baggage Selection</div>
+                                            <div class="price text-success">₹${costs.return.baggage.toFixed(2)}</div>
+                                        </div>` : ''}
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>`;
@@ -1618,10 +1701,12 @@ function updateTotalFare() {
         breakdown += `</div>
                 
                 <!-- Grand Total -->
-                <div class="grand-total mt-4 pt-3 border-top">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <h5 class="mb-0">Grand Total:</h5>
-                        <h5 class="mb-0">₹${priceDetails.grandTotal.toFixed(2)}</h5>
+                <div class="grand-total-section mt-4">
+                    <div class="card bg-success bg-gradient text-white">
+                        <div class="card-body p-4 text-center">
+                            <h5 class="mb-2">Grand Total</h5>
+                            <h2 class="mb-0">₹${priceDetails.grandTotal.toFixed(2)}</h2>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -1630,6 +1715,7 @@ function updateTotalFare() {
         breakdownElement.innerHTML = breakdown;
     }
 }
+
 
 // Make functions available globally
 if (typeof window !== 'undefined') {

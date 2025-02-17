@@ -1077,8 +1077,150 @@ public function getCalendarFare(Request $request)
         ], 500);
     }
 }
+public function flightBalance(Request $request)
+{
+
+    $request->validate([
+        'EndUserIp' => 'required|string',
+        'ClientId' => 'required|string',
+        'UserName' => 'required|string',
+        'Password' => 'required|string'
+    ]);
+    // Prepare API request payload
+    $payload = [
+                'EndUserIp' => '1.1.1.1',
+                'ClientId' => '180133',
+                'UserName' => 'MakeMy91',
+                'Password' => 'MakeMy@910',
+    ];
+
+    try {
+        // Make the API call
+        $response = Http::withHeaders([
+            'Content-Type' => 'application/json',
+             'Api-Token' => 'MakeMy@910@23'
+        ])->post('https://flight.srdvtest.com/v8/rest/Balance', $payload);
+
+        // Handle the response
+        $balanceData = $response->json();
+
+        // Check for API success
+        if ($response->successful() && isset($balanceData['Error'])) {
+            if ($balanceData['Error']['ErrorCode'] === "0") {
+                return response()->json([
+                    'status' => 'success',
+                    'balance' => $balanceData['Balance'],
+                    'creditLimit' => $balanceData['CreditLimit']
+                ]);
+            } else {
+                // API returned an error
+                return response()->json([
+                    'status' => 'error',
+                    'message' => $balanceData['Error']['ErrorMessage'] ?? 'API Error'
+                ], 400);
+            }
+        }
+
+        // Log unexpected response format
+        \Log::error('Balance API Unexpected Response:', ['response' => $balanceData]);
+        
+        return response()->json([
+            'status' => 'error',
+            'message' => 'Invalid response from balance service'
+        ], 400);
+
+    } catch (\Exception $e) {
+        \Log::error('Balance API Exception:', [
+            'message' => $e->getMessage(),
+            'trace' => $e->getTraceAsString()
+        ]);
+
+        return response()->json([
+            'status' => 'error',
+            'message' => 'An error occurred while fetching balance details'
+        ], 500);
+    }
+}
 
 
+public function flightBalanceLog(Request $request) {
+    // Validate request
+    $validated = $request->validate([
+        'TraceId' => 'required|string',
+        'amount' => 'required|numeric'
+    ]);
+
+    // Hotel Balance Log API request data
+    $requestData = [
+        'EndUserIp' => '1.1.1.1',
+        'ClientId' => '180133',
+        'UserName' => 'MakeMy91',
+        'Password' => 'MakeMy@910',
+    ];
+
+    try {
+        // Make the API call
+        $response = Http::withHeaders([
+            'Content-Type' => 'application/json',
+            'Api-Token' => 'MakeMy@910@23'
+        ])->post('https://flight.srdvtest.com/v8/rest/BalanceLog', $requestData);
+
+        $data = $response->json();
+        \Log::info('Hotel Balance API Response:', $data);
+
+        if (isset($data['Error']) && $data['Error']['ErrorCode'] === '0' && isset($data['Result'])) {
+            $result = $data['Result'][0]; // Get the first result since we're dealing with current balance
+
+            $currentBalance = floatval($result['Balance']);
+            $debitAmount = floatval($validated['amount']);
+            
+            // Validate sufficient balance
+            if ($currentBalance < $debitAmount) {
+                return response()->json([
+                    'success' => false,
+                    'errorMessage' => 'Insufficient balance. Current balance: ' . $currentBalance,
+                ], 400);
+            }
+
+            // Calculate new balance
+            $updatedBalance = $currentBalance - $debitAmount;
+
+            // Prepare the response with updated values
+            $processedLog = [
+                'ID' => $result['ID'],
+                'Date' => $result['Date'],
+                'ClientID' => $result['ClientID'],
+                'ClientName' => $result['ClientName'],
+                'Detail' => $result['Detail'],
+                'Debit' => $debitAmount,
+                'Credit' => 0,
+                'PreviousBalance' => $currentBalance,
+                'Balance' => $updatedBalance,
+                'Module' => 'Flight API',
+                'TraceID' => $validated['TraceId'],
+                'RefID' => $result['RefID'],
+                'UpdatedBy' => $result['UpdatedBy']
+            ];
+
+            return response()->json([
+                'success' => true,
+                'balanceLog' => $processedLog,
+            ]);
+        }
+
+        return response()->json([
+            'success' => false,
+            'errorMessage' => $data['Error']['ErrorMessage'] ?? 'Unknown error occurred.',
+        ], 400);
+
+    } catch (\Exception $e) {
+        \Log::error('Balance Log API Error: ' . $e->getMessage());
+        return response()->json([
+            'success' => false,
+            'errorMessage' => 'Failed to process balance log request.',
+        ], 500);
+    }
+}
 
 
 
@@ -1320,160 +1462,7 @@ public function getCalendarFare(Request $request)
     }
 
     
-    public function flightBalance(Request $request)
-{
-
-    $request->validate([
-        'EndUserIp' => 'required|string',
-        'ClientId' => 'required|string',
-        'UserName' => 'required|string',
-        'Password' => 'required|string'
-    ]);
-    // Prepare API request payload
-    $payload = [
-                'EndUserIp' => '1.1.1.1',
-                'ClientId' => '180133',
-                'UserName' => 'MakeMy91',
-                'Password' => 'MakeMy@910',
-    ];
-
-    try {
-        // Make the API call
-        $response = Http::withHeaders([
-            'Content-Type' => 'application/json',
-             'Api-Token' => 'MakeMy@910@23'
-        ])->post('https://flight.srdvtest.com/v8/rest/Balance', $payload);
-
-        // Handle the response
-        $balanceData = $response->json();
-
-        // Check for API success
-        if ($response->successful() && isset($balanceData['Error'])) {
-            if ($balanceData['Error']['ErrorCode'] === "0") {
-                return response()->json([
-                    'status' => 'success',
-                    'balance' => $balanceData['Balance'],
-                    'creditLimit' => $balanceData['CreditLimit']
-                ]);
-            } else {
-                // API returned an error
-                return response()->json([
-                    'status' => 'error',
-                    'message' => $balanceData['Error']['ErrorMessage'] ?? 'API Error'
-                ], 400);
-            }
-        }
-
-        // Log unexpected response format
-        \Log::error('Balance API Unexpected Response:', ['response' => $balanceData]);
-        
-        return response()->json([
-            'status' => 'error',
-            'message' => 'Invalid response from balance service'
-        ], 400);
-
-    } catch (\Exception $e) {
-        \Log::error('Balance API Exception:', [
-            'message' => $e->getMessage(),
-            'trace' => $e->getTraceAsString()
-        ]);
-
-        return response()->json([
-            'status' => 'error',
-            'message' => 'An error occurred while fetching balance details'
-        ], 500);
-    }
-}
-
-
-public function balanceLog(Request $request)
-{
-    // Extract data from the request body instead of query parameters
-    $requestBody = $request->json()->all();
-    $traceId = $requestBody['TraceId'] ?? null;
-    $amount = $requestBody['amount'] ?? null;
-
-    // Validate required parameters
-    if (!$traceId || !$amount) {
-        return response()->json([
-            'success' => false,
-            'errorMessage' => 'Missing required parameters (TraceId or amount)',
-        ]);
-    }
-
-    // Hotel Balance Log API request data
-    $requestData = [
-        'EndUserIp' => '1.1.1.1',
-                'ClientId' => '180133',
-                'UserName' => 'MakeMy91',
-                'Password' => 'MakeMy@910',
-    ];
-
-    // Make the API call
-    $response = Http::withHeaders([
-        'Content-Type' => 'application/json',
-        'Api-Token' => 'MakeMy@910@23'
-    ])->post('https://flight.srdvtest.com/v8/rest/BalanceLog', $requestData);
-
-    // Parse the API response
-    $data = $response->json();
-
-    // Log the full API response for debugging
-    \Log::info('Hotel Balance API Response:', $data);
-
-    // Check for successful response and ensure the `Result` key exists
-    if (isset($data['Error']) && $data['Error']['ErrorCode'] === '0' && isset($data['Result'])) {
-        $results = $data['Result'];
-        $processedLogs = [];
-
-        foreach ($results as $result) {
-            $currentBalance = ($result['Balance']);
-            $debitAmount = ($amount);
-
-            // Debugging log
-            \Log::info("Processing Hotel Log: Current Balance: {$currentBalance}, Debit Amount: {$debitAmount}");
-
-            // Calculate updated balance
-            $updatedBalance = $currentBalance - $debitAmount;
-
-            // Check for insufficient balance
-            if ($updatedBalance < 0) {
-                \Log::warning("Insufficient Balance for Transaction. TraceID: {$traceId}");
-                return response()->json([
-                    'success' => false,
-                    'errorMessage' => 'Insufficient balance.',
-                ]);
-            }
-
-            // Build the processed log entry
-            $processedLogs[] = [
-                'ID' => $result['ID'],
-                'Date' => $result['Date'],
-                'ClientID' => $result['ClientID'],
-                'ClientName' => $result['ClientName'],
-                'Detail' => $result['Detail'],
-                'Debit' => $debitAmount,
-                'Credit' => floatval($result['Credit']),
-                'Balance' => $updatedBalance,
-                'Module' => $result['Module'],
-                'TraceID' => $traceId,
-                'RefID' => $result['RefID'],
-                'UpdatedBy' => $result['UpdatedBy']
-            ];
-        }
-
-        return response()->json([
-            'success' => true,
-            'balanceLogs' => $processedLogs,
-        ]);
-    }
-
-    return response()->json([
-        'success' => false,
-        'errorMessage' => $data['Error']['ErrorMessage'] ?? 'Unknown error occurred.',
-    ]);
-}
-
+    
 
 }
 

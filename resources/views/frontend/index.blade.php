@@ -1632,6 +1632,7 @@ console.log('journeytypt is this ',journeyType )
         });
     }
     const payload = {
+
         AdultCount: adultCount.toString(),
         ChildCount: childCount.toString(),
         InfantCount: infantCount.toString(),

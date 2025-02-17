@@ -539,7 +539,7 @@ createPassengerForm("Infant", infantCount, 3);
         const minutes = duration % 60;
 
         // Format airport and terminal information
-        const originAirportInfo = `${segment.Origin.AirportName}${segment.Origin.Terminal ? '-Terminal ' + segment.Origin.Terminal : ''}`;
+      const originAirportInfo = `${segment.Origin.AirportName}${segment.Origin.Terminal ? '-Terminal ' + segment.Origin.Terminal : ''}`;
 const destAirportInfo = `${segment.Destination.AirportName}${segment.Destination.Terminal ? '-Terminal ' + segment.Destination.Terminal : ''}`;
 
         segmentsHtml += `
@@ -1293,51 +1293,136 @@ function calculateTotalPrice() {
 function updateTotalFare() {
     const total = calculateTotalPrice();
     
-    // Update the total in the UI
+    // Update the total in the UI with enhanced styling
     const totalPriceElement = document.getElementById('totalPrice');
     if (totalPriceElement) {
-        totalPriceElement.textContent = `₹${total.toFixed(2)}`;
+        totalPriceElement.innerHTML = `
+            <div class="price-badge bg-success bg-gradient p-3 rounded-pill text-white text-center">
+                <h4 class="mb-0">Total Fare: ₹${total.toFixed(2)}</h4>
+            </div>`;
     }
 
-    // If you have a breakdown section, you can show the details
+    // Enhanced breakdown section with better styling
     const breakdownElement = document.getElementById('priceBreakdown');
     if (breakdownElement) {
-        let breakdown = '<h6>Price Breakdown:</h6>';
-        
-        // Add base fare to breakdown
-        const baseFare = window.fareQuoteData?.Fare?.OfferedFare || 0;
-        breakdown += `<div class="base-fare">`;
-        breakdown += `<strong>Base Fare:</strong> ₹${parseFloat(baseFare).toFixed(2)}<br>`;
-        breakdown += `</div>`;
+        let breakdown = `
+            <div class="price-breakdown-container">
+                <div class="card shadow-lg border-0 rounded-lg">
+                    <div class="card-header bg-primary bg-gradient text-white py-3">
+                        <h4 class="card-title mb-0 text-center">
+                            <i class="fas fa-receipt me-2"></i>Price Breakdown
+                        </h4>
+                    </div>
+                    
+                    <div class="card-body p-4">
+                        <!-- Base Fare Section -->
+                        <div class="base-fare-section mb-4">
+                            <div class="section-header bg-light p-3 rounded-top border-start border-4 border-primary">
+                                <h5 class="mb-0 text-primary">
+                                    <i class="fas fa-ticket-alt me-2"></i>Base Fare
+                                </h5>
+                            </div>
+                            <div class="section-content p-3 border rounded-bottom">
+                                <div class="fare-card bg-light p-3 rounded text-center">
+                                    <div class="text-primary mb-2">
+                                        <i class="fas fa-plane fa-2x"></i>
+                                    </div>
+                                    <h5 class="text-success mb-0">₹${parseFloat(window.fareQuoteData?.Fare?.OfferedFare || 0).toFixed(2)}</h5>
+                                </div>
+                            </div>
+                        </div>
 
-        // Add passenger selections breakdown
+                        <!-- Passenger Selections -->
+                        <div class="passenger-selections">
+                            <div class="section-header bg-light p-3 rounded-top border-start border-4 border-primary">
+                                <h5 class="mb-0 text-primary">
+                                    <i class="fas fa-users me-2"></i>Passenger Selections
+                                </h5>
+                            </div>`;
+
+        // Add passenger selections breakdown with enhanced styling
         for (const passengerId in window.passengerSelections.seats) {
-            breakdown += `<div class="passenger-breakdown">`;
-            breakdown += `<strong>Passenger ${passengerId}:</strong><br>`;
-            
-            // Seat details
-            const seat = window.passengerSelections.seats[passengerId];
-            if (seat && seat.amount) {
-                breakdown += `Seat ${seat.seatNumber}: ₹${parseFloat(seat.amount).toFixed(2)}<br>`;
-            }
-            
-            // Meal details
-            const meals = window.passengerSelections.meals[passengerId] || [];
-            if (meals.length > 0) {
-                meals.forEach(meal => {
-                    const mealTotal = parseFloat(meal.Price) * parseInt(meal.Quantity);
-                    breakdown += `${meal.AirlineDescription} (Qty: ${meal.Quantity}): ₹${mealTotal.toFixed(2)}<br>`;
-                });
-            }
-            
-            // Baggage details
-            const baggage = window.passengerSelections.baggage[passengerId];
-            if (baggage && baggage.Price) {
-                breakdown += `Baggage (${baggage.Weight}kg): ₹${parseFloat(baggage.Price).toFixed(2)}<br>`;
-            }
-            
-            breakdown += `</div>`;
+            breakdown += `
+                <div class="passenger-card mb-4 border rounded-bottom p-3">
+                    <div class="passenger-header bg-light p-2 rounded mb-3">
+                        <h6 class="mb-0 text-primary">
+                            <i class="fas fa-user-circle me-2"></i>Passenger ${passengerId}
+                        </h6>
+                    </div>
+                    
+                    <div class="selections-container">
+                        <!-- Seat Selection -->
+                        ${(() => {
+                            const seat = window.passengerSelections.seats[passengerId];
+                            if (seat && seat.amount) {
+                                return `
+                                    <div class="selection-item d-flex align-items-center p-2 mb-2 bg-light rounded">
+                                        <div class="icon-wrapper me-3">
+                                            <i class="fas fa-chair text-success"></i>
+                                        </div>
+                                        <div class="flex-grow-1">
+                                            <div class="fw-semibold">Seat ${seat.seatNumber}</div>
+                                        </div>
+                                        <div class="price text-success">₹${parseFloat(seat.amount).toFixed(2)}</div>
+                                    </div>`;
+                            }
+                            return '';
+                        })()}
+
+                        <!-- Meal Selections -->
+                        ${(() => {
+                            const meals = window.passengerSelections.meals[passengerId] || [];
+                            return meals.map(meal => `
+                                <div class="selection-item d-flex align-items-center p-2 mb-2 bg-light rounded">
+                                    <div class="icon-wrapper me-3">
+                                        <i class="fas fa-utensils text-warning"></i>
+                                    </div>
+                                    <div class="flex-grow-1">
+                                        <div class="fw-semibold">${meal.AirlineDescription}</div>
+                                        <div class="text-muted small">Quantity: ${meal.Quantity}</div>
+                                    </div>
+                                    <div class="price text-success">₹${(parseFloat(meal.Price) * parseInt(meal.Quantity)).toFixed(2)}</div>
+                                </div>`
+                            ).join('');
+                        })()}
+
+                        <!-- Baggage Selection -->
+                        ${(() => {
+                            const baggage = window.passengerSelections.baggage[passengerId];
+                            if (baggage && baggage.Price) {
+                                return `
+                                    <div class="selection-item d-flex align-items-center p-2 mb-2 bg-light rounded">
+                                        <div class="icon-wrapper me-3">
+                                            <i class="fas fa-suitcase text-info"></i>
+                                        </div>
+                                        <div class="flex-grow-1">
+                                            <div class="fw-semibold">Extra Baggage</div>
+                                            <div class="text-muted small">${baggage.Weight}kg</div>
+                                        </div>
+                                        <div class="price text-success">₹${parseFloat(baggage.Price).toFixed(2)}</div>
+                                    </div>`;
+                            }
+                            return '';
+                        })()}
+                    </div>
+                </div>`;
         }
+
+        breakdown += `
+                        </div>
+                        
+                        <!-- Grand Total -->
+                        <div class="grand-total-section mt-4">
+                            <div class="card bg-success bg-gradient text-white">
+                                <div class="card-body p-4 text-center">
+                                    <h5 class="mb-2">Grand Total</h5>
+                                    <h2 class="mb-0">₹${total.toFixed(2)}</h2>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>`;
         
         breakdownElement.innerHTML = breakdown;
     }
