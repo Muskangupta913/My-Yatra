@@ -273,16 +273,16 @@
                     <div id="dynamicSections"></div>
 
                     <!-- Options -->
-                    <div class="option-selection">
+                    <div class="option-selection" style="display: none;">
                         <button type="button" class="btn btn-primary" id="baggage-btn">Baggage Options</button>
                         <button type="button" class="btn btn-secondary" id="meal-btn">Meal Options</button>
                     </div>
-                    <div id="options-container">
+                    <div id="options-container" style="display: none;">
                         <p>Please select an option to view details.</p>
                     </div>
 
                     <!-- Seat Selection -->
-                    <div class="seat-selection-section mb-3">
+                    <div class="seat-selection-section mb-3" style="display: none;">
                         <h6>Seat Selection</h6>
                         <button type="button" class="btn btn-secondary" id="selectSeatBtn">Select Seat</button>
                         <span id="seatInfo" class="ms-2" style="font-size: 14px;"></span>
@@ -290,7 +290,7 @@
                     <div id="seatMapContainer" class="mt-3" style="display: none;"></div>
 
                     <!-- Fare Details -->
-                    <div class="card mb-3">
+                    <div class="card mb-3" style="display: none;">
                         <div class="card-header">
                             <h6 class="mb-0">Fare Details</h6>
                         </div>
@@ -512,57 +512,98 @@ createPassengerForm("Infant", infantCount, 3);
         return;
     }
 
-    fareQuoteData.Segments.forEach((segmentGroup) => {
-        const card = document.createElement('div');
-        card.classList.add(
-            'bg-white',
-            'rounded-lg',
-            'shadow-sm',
-            'border',
-            'border-gray-200',
-            'p-4',
-            'mb-4'
-        );
+    fareQuoteData.Segments.forEach((segmentGroup, groupIndex) => {
+    const card = document.createElement('div');
+    card.style.cssText = 'background-color: white; border-radius: 0.75rem; box-shadow: 0 1px 3px rgba(0,0,0,0.1); border: 1px solid #E5E7EB; padding: 1.5rem; margin-bottom: 1.5rem; max-width: 800px; width: 100%;';
 
-        let segmentsHtml = '';
-        segmentGroup.forEach((segment, index) => {
-            const departureTime = new Date(segment.DepTime);
-            const arrivalTime = new Date(segment.ArrTime);
+    let segmentsHtml = `
+        <div style="margin-bottom: 1rem; padding-bottom: 0.75rem; border-bottom: 1px solid #E5E7EB; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem;">
+            <span style="background-color: #F3F4F6; color: #4B5563; padding: 0.375rem 0.75rem; border-radius: 9999px; font-size: 0.875rem; font-weight: 500;">
+                ${groupIndex === 0 ? 'OUTBOUND' : 'RETURN'}
+            </span>
+            <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+                <span style="background-color: #EFF6FF; color: #1E40AF; padding: 0.375rem 0.75rem; border-radius: 9999px; font-size: 0.875rem;">
+                    <span style="font-weight: 500;">Baggage:</span> ${segmentGroup[0].Baggage}
+                </span>
+                <span style="background-color: #EFF6FF; color: #1E40AF; padding: 0.375rem 0.75rem; border-radius: 9999px; font-size: 0.875rem;">
+                    <span style="font-weight: 500;">Cabin:</span> ${segmentGroup[0].CabinBaggage}
+                </span>
+            </div>
+        </div>`;
 
-            segmentsHtml += `
-                <div class="flex items-center ${index < segmentGroup.length - 1 ? 'mb-2' : ''}">
-                    <div class="w-24 text-center">
-                        <p class="font-bold">${departureTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
-                        <p class="text-sm text-gray-600">${segment.Origin.CityCode}</p>
+    segmentGroup.forEach((segment, index) => {
+        const departureTime = new Date(segment.DepTime);
+        const arrivalTime = new Date(segment.ArrTime);
+        const duration = segment.Duration;
+        const hours = Math.floor(duration / 60);
+        const minutes = duration % 60;
+
+        // Format airport and terminal information
+        const originAirportInfo = `${segment.Origin.AirportName}${segment.Origin.Terminal ? '-Terminal ' + segment.Origin.Terminal : ''}`;
+const destAirportInfo = `${segment.Destination.AirportName}${segment.Destination.Terminal ? '-Terminal ' + segment.Destination.Terminal : ''}`;
+
+        segmentsHtml += `
+            <div style="display: flex; flex-direction: column; ${index < segmentGroup.length - 1 ? 'margin-bottom: 1rem;' : ''}">
+                <div style="display: flex; align-items: center; flex-wrap: wrap; gap: 1rem;">
+                    <div style="min-width: 120px; flex: 1;">
+                        <p style="margin: 0 0 0.25rem 0; font-size: 1.25rem; font-weight: 600; color: #111827;">
+                            ${departureTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                        </p>
+                        <p style="margin: 0; font-size: 1rem; color: #374151;">
+                            ${segment.Origin.CityCode}
+                        </p>
+                        <p style="margin: 0; font-size: 0.875rem; color: #6B7280;">
+                            ${originAirportInfo}
+                        </p>
                     </div>
-                    
-                    <div class="flex-1 px-4">
-                        <div class="relative flex items-center">
-                            <div class="h-0.5 w-full bg-gray-300"></div>
-                            <div class="absolute w-full text-center">
-                                <span class="bg-white px-2 text-xs text-gray-600">
-                                    ${segment.Airline.AirlineCode} ${segment.Airline.FlightNumber}
+
+                    <div style="flex: 2; min-width: 200px; padding: 0 1rem; position: relative;">
+                        <div style="height: 2px; background-color: #E5E7EB; position: relative;">
+                            <div style="position: absolute; width: 100%; text-align: center; top: -20px;">
+                                <span style="font-size: 0.875rem; color: #4B5563; display: block;">
+                                    ${segment.Airline.AirlineCode}-${segment.Airline.FlightNumber}
+                                </span>
+                                <span style="font-size: 0.75rem; color: #6B7280; display: block; margin-top: 0.125rem;">
+                                    ${segment.Airline.AirlineName || segment.Airline.Name || 'Airline'}
+                                </span>
+                                <span style="font-size: 0.75rem; color: #6B7280; display: block; margin-top: 0.125rem;">
+                                    ${hours}h ${minutes}m 
                                 </span>
                             </div>
                         </div>
                     </div>
-                    
-                    <div class="w-24 text-center">
-                        <p class="font-bold">${arrivalTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
-                        <p class="text-sm text-gray-600">${segment.Destination.CityCode}</p>
+
+                    <div style="min-width: 120px; flex: 1; text-align: right;">
+                        <p style="margin: 0 0 0.25rem 0; font-size: 1.25rem; font-weight: 600; color: #111827;">
+                            ${arrivalTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                        </p>
+                        <p style="margin: 0; font-size: 1rem; color: #374151;">
+                            ${segment.Destination.CityCode}
+                        </p>
+                        <p style="margin: 0; font-size: 0.875rem; color: #6B7280;">
+                            ${destAirportInfo}
+                        </p>
                     </div>
                 </div>
-                ${index < segmentGroup.length - 1 ? `
-                    <div class="my-2 px-3 py-1 bg-orange-50 rounded text-sm text-center text-orange-700">
-                        Change planes at ${segment.Destination.CityCode}
-                    </div>
-                ` : ''}
-            `;
-        });
+            </div>`;
 
-        card.innerHTML = segmentsHtml;
-        segmentsContainer.appendChild(card);
+            if (index < segmentGroup.length - 1) {
+                const nextSegment = segmentGroup[index + 1];
+            const groundTime = parseInt(nextSegment.GroundTime) || 0;
+            const groundHours = Math.floor(groundTime / 60);
+            const groundMinutes = groundTime % 60;
+            
+            segmentsHtml += `
+                <div style="margin: 1rem 0; padding: 0.75rem; background-color: #FFEDD5; border-radius: 0.375rem; text-align: center; color: #9A3412;">
+                    <p style="margin: 0; font-weight: 500;">Change planes at ${segment.Destination.CityCode}</p>
+                    <p style="margin: 0.25rem 0 0 0; font-size: 0.875rem;">Layover: ${groundHours}h ${groundMinutes}m</p>
+                </div>`;
+        }
     });
+
+    card.innerHTML = segmentsHtml;
+    segmentsContainer.appendChild(card);
+});
 }
 
 
@@ -759,47 +800,111 @@ window.updateBaggageSelection = function(radio, passengerId) {
 function renderMealOptions(mealData, container, passengerId) {
     container.innerHTML = `
         <div class="meal-options-container">
-            <h6 class="mb-4">Meal Options (Select Multiple)</h6>
             <div class="selected-meals-summary mb-3">
                 <strong>Selected Meals: </strong>
                 <div id="selectedMealsDisplay_${passengerId}" class="mt-2">
                     <em class="text-muted">No meals selected</em>
                 </div>
             </div>
-            ${mealData.map(meal => `
-                <div class="meal-option">
-                    <input 
-                        type="checkbox" 
-                        name="meal_option_${passengerId}" 
-                        value="${meal.Code}" 
-                        data-wayType="${meal.WayType}"
-                        data-descript="${meal.Description || 'No Description'}"
-                        data-description="${meal.AirlineDescription || 'No Description'}"
-                        data-origin="${meal.Origin}"
-                        data-quantity="${meal.Quantity}"
-                        data-currency="${meal.Currency}"
-                        data-destination="${meal.Destination}"
-                        data-price="${meal.Price}"
-                        onchange="updateMealSelections(this, '${passengerId}')"
-                    >
-                    <label>
-                        ${meal.AirlineDescription || 'No Meal'} 
-                        (₹${meal.Price || 0})
-                        <div class="meal-quantity">
+            <div class="meal-list">
+                ${mealData.map(meal => `
+                    <div class="meal-option">
+                        <div class="meal-selection">
+                            <input 
+                                type="checkbox" 
+                                name="meal_option_${passengerId}" 
+                                value="${meal.Code}" 
+                                data-wayType="${meal.WayType}"
+                                data-descript="${meal.Description || 'No Description'}"
+                                data-description="${meal.AirlineDescription || 'No Description'}"
+                                data-origin="${meal.Origin}"
+                                data-quantity="${meal.Quantity}"
+                                data-currency="${meal.Currency}"
+                                data-destination="${meal.Destination}"
+                                data-price="${meal.Price}"
+                                onchange="updateMealSelections(this, '${passengerId}')"
+                                id="meal_${meal.Code}_${passengerId}"
+                            >
+                            <label for="meal_${meal.Code}_${passengerId}" class="meal-label">
+                                ${meal.AirlineDescription || 'No Meal'} 
+                                <span class="meal-price">₹${meal.Price || 0}</span>
+                            </label>
+                        </div>
+                        <div class="meal-quantity compact">
                             <button type="button" class="quantity-btn" onclick="adjustQuantity(this, -1, '${passengerId}')" ${meal.Price ? '' : 'disabled'}>-</button>
                             <input type="number" min="1" max="5" value="1" class="quantity-input" 
                                 onchange="updateMealQuantity(this, '${passengerId}')" ${meal.Price ? '' : 'disabled'}>
                             <button type="button" class="quantity-btn" onclick="adjustQuantity(this, 1, '${passengerId}')" ${meal.Price ? '' : 'disabled'}>+</button>
                         </div>
-                    </label>
-                </div>
-            `).join('')}
+                    </div>
+                `).join('')}
+            </div>
         </div>
     `;
 
-    // Add some styling for the selected meals display
+    // Add styling for the new compact meal list
     const style = document.createElement('style');
     style.textContent = `
+        .meal-list {
+            max-height: 300px;
+            overflow-y: auto;
+            border: 1px solid #e0e0e0;
+            border-radius: 4px;
+        }
+        .meal-option {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 12px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        .meal-option:last-child {
+            border-bottom: none;
+        }
+        .meal-option:hover {
+            background-color: #f9f9f9;
+        }
+        .meal-selection {
+            display: flex;
+            align-items: center;
+            flex: 1;
+        }
+        .meal-label {
+            margin-left: 8px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            flex: 1;
+            max-width: 70%;
+        }
+        .meal-price {
+            font-weight: bold;
+            color: #2c5282;
+            margin-left: 8px;
+        }
+        .meal-quantity.compact {
+            display: flex;
+            align-items: center;
+        }
+        .quantity-btn {
+            width: 25px;
+            height: 25px;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid #ccc;
+            background: #f8f9fa;
+            border-radius: 3px;
+        }
+        .quantity-input {
+            width: 35px;
+            text-align: center;
+            margin: 0 4px;
+            padding: 2px;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+        }
         .selected-meals-display-item {
             background-color: #f8f9fa;
             border: 1px solid #dee2e6;
@@ -819,7 +924,6 @@ function renderMealOptions(mealData, container, passengerId) {
     `;
     document.head.appendChild(style);
 }
-
 // Store selected meals in an array
 window.selectedMealOptions = [];
 
@@ -1548,7 +1652,6 @@ document.getElementById('submitButton').addEventListener('click', async function
                 let passenger = {
                     title: form.querySelector('[name$="[Title]"]').value.trim(),
                     firstName: form.querySelector('[name$="[FirstName]"]').value.trim(),
-                    lastName: form.querySelector('[name$="[LastName]"]').value.trim(),
                     gender: (form.querySelector('[name$="[Gender]"]').value),
                     contactNo: form.querySelector('[name$="[ContactNo]"]')?.value.trim() || "",
                     email: form.querySelector('[name$="[Email]"]')?.value.trim() || "",

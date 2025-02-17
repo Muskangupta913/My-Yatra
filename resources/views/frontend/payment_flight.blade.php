@@ -1099,7 +1099,10 @@ async function bookGDS() {
 
     const gdsTicketDetails = BookGdsTicket();
 
-       
+        // console.log('gdsticket deatilss',gdsTicketDetails);
+        // console.log('Outbound Booking ID:', bookingDetails.nonLcc.outbound.bookingId);
+        // console.log('Return Booking ID:', bookingDetails.nonLcc.return.bookingId);
+
 
     if (!gdsTicketDetails) {
         console.error("Missing required parameters for GDS ticket booking.");
