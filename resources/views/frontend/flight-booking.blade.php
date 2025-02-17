@@ -273,16 +273,16 @@
                     <div id="dynamicSections"></div>
 
                     <!-- Options -->
-                    <div class="option-selection" style="display: none;">
+                    <div class="option-selection">
                         <button type="button" class="btn btn-primary" id="baggage-btn">Baggage Options</button>
                         <button type="button" class="btn btn-secondary" id="meal-btn">Meal Options</button>
                     </div>
-                    <div id="options-container" style="display: none;">
+                    <div id="options-container">
                         <p>Please select an option to view details.</p>
                     </div>
 
                     <!-- Seat Selection -->
-                    <div class="seat-selection-section mb-3" style="display: none;">
+                    <div class="seat-selection-section mb-3">
                         <h6>Seat Selection</h6>
                         <button type="button" class="btn btn-secondary" id="selectSeatBtn">Select Seat</button>
                         <span id="seatInfo" class="ms-2" style="font-size: 14px;"></span>
@@ -303,6 +303,11 @@
                             </div>
                         </div>
                     </div>
+
+                    <div class="total-price-container">
+    <h5>Total Price: <span id="totalPrice">₹0.00</span></h5>
+    <div id="priceBreakdown"></div>
+</div>
 
                     <!-- Submit Button -->
                     <button type="button" id="submitButton" class="btn btn-primary">Submit Booking</button>
@@ -325,13 +330,23 @@
     const resultIndex = urlParams.get('resultIndex');
     const encodedDetails = urlParams.get('details');
     const origin = getCookie('origin') ;
-    console.log(' ORIGIN Details:');
-        console.log('ORIGIN:', origin);
-        const outboundFareQuoteData = JSON.parse(sessionStorage.getItem('outboundFareQuoteData'));
-        const returnFareQuoteData = JSON.parse(sessionStorage.getItem('returnFareQuoteData'));
+    // console.log(' ORIGIN Details:');
+    //     console.log('ORIGIN:', origin);
+        // const outboundFareQuoteData = JSON.parse(sessionStorage.getItem('outboundFareQuoteData'));
+        // const returnFareQuoteData = JSON.parse(sessionStorage.getItem('returnFareQuoteData'));
 
-        console.log('outbount fetched data ',outboundFareQuoteData);
-        console.log('return fetched data ',returnFareQuoteData);
+        // console.log('outbount fetched data ',outboundFareQuoteData);
+        // console.log('return fetched data ',returnFareQuoteData);
+
+
+        const fareQuoteData = JSON.parse(sessionStorage.getItem('fareQuoteData'));
+        console.log('AdultDOB required ', fareQuoteData.AdultDobRequired);
+        console.log('childDOB required ', fareQuoteData.ChildDobRequired);
+        console.log('infantDOB required ', fareQuoteData.InfantDobRequired);
+        console.log('SeatSelectAllowed required ', fareQuoteData.SeatSelectAllowed);
+        console.log('IsPassportRequiredAtBook required ', fareQuoteData.IsPassportRequiredAtBook);
+        console.log('fareqoutes ',fareQuoteData);
+
          
 
     function getCookie(name) {
@@ -359,7 +374,7 @@
 
 
 
-        function createPassengerForm(passengerType, count, typeValue) {
+       function createPassengerForm(passengerType, count, typeValue) {
     for (let i = 1; i <= count; i++) {
         let titleOptions = (typeValue === 1) // Check if passenger is an Adult
             ? `<option value="Mr">Mr</option>
@@ -391,7 +406,7 @@
         let ssrOptions = '';
         
         // Add SSR options based on passenger type
-        if (typeValue === 1 || typeValue === 2) { // Adult
+        if (typeValue === 1 || typeValue === 2) { // Adult or Child
             ssrOptions = `
                 <div class="ssr-options mt-4">
                     <h6 class="mb-3">Additional Services</h6>
@@ -477,16 +492,13 @@
         dynamicSections.insertAdjacentHTML('beforeend', passengerForm);
     }
 }
-
 // Generate Passenger Forms with automatic PassengerType
 createPassengerForm("Adult", adultCount, 1);
 createPassengerForm("Child", childCount, 2);
 createPassengerForm("Infant", infantCount, 3);
    
 
-    const fareQuoteData = JSON.parse(sessionStorage.getItem('fareQuoteData'));
-    console.log('fareqoutes segment',fareQuoteData?.Segments )
-
+  
     function renderFareQuoteSegments(fareQuoteData) {
     const segmentsContainer = document.getElementById('segmentsContainer');
     segmentsContainer.innerHTML = '';
@@ -740,6 +752,7 @@ window.updateBaggageSelection = function(radio, passengerId) {
     
     window.passengerSelections.baggage[passengerId] = baggageOption;
     showBaggageAlert(radio, passengerId);
+    updateTotalFare();
 };
 
 
@@ -950,6 +963,8 @@ function showBaggageAlert(radio) {
     } else {
         alert(`Baggage: ${weight > 0 ? weight + ' kg' : 'No Baggage'} - ${price > 0 ? '₹' + price : 'Free'}`);
     }
+   
+    
 }
 
 
@@ -969,6 +984,7 @@ window.showBaggageAlert = function(radio) {
     } else {
         alert(`Baggage: ${weight > 0 ? weight + ' kg' : 'No Baggage'} - ${price > 0 ? '₹' + price : 'Free'}`);
     }
+   
 };
 
     // Seat Selection
@@ -1093,6 +1109,7 @@ function selectSeat(code, seatNumber, amount, airlineName, airlineCode, airlineN
         showConfirmButton: false,
         timer: 1500
     });
+    updateTotalFare();
 }
 
 
@@ -1107,6 +1124,157 @@ if (typeof window !== 'undefined') {
     window.selectSeat = selectSeat;
 }
 
+window.fareQuoteData = fareQuoteData;
+
+function calculateTotalPrice() {
+    let total = 0;
+
+    // Add base fare from fareQuoteData
+    const baseFare = window.fareQuoteData?.Fare?.OfferedFare || 0;
+    total += parseFloat(baseFare);
+
+    console.log('total fare and price',total);
+
+    // Iterate through all passenger selections
+    for (const passengerId in window.passengerSelections.seats) {
+        // Add seat prices
+        const seatSelection = window.passengerSelections.seats[passengerId];
+        if (seatSelection && seatSelection.amount) {
+            total += parseFloat(seatSelection.amount);
+        }
+
+        // Add meal prices
+        const mealSelections = window.passengerSelections.meals[passengerId] || [];
+        mealSelections.forEach(meal => {
+            if (meal.Price && meal.Quantity) {
+                total += (parseFloat(meal.Price) * parseInt(meal.Quantity));
+            }
+        });
+
+        // Add baggage prices
+        const baggageSelection = window.passengerSelections.baggage[passengerId];
+        if (baggageSelection && baggageSelection.Price) {
+            total += parseFloat(baggageSelection.Price);
+        }
+    }
+
+    return total;
+}
+
+
+
+function updateTotalFare() {
+    const total = calculateTotalPrice();
+    
+    // Update the total in the UI
+    const totalPriceElement = document.getElementById('totalPrice');
+    if (totalPriceElement) {
+        totalPriceElement.textContent = `₹${total.toFixed(2)}`;
+    }
+
+    // If you have a breakdown section, you can show the details
+    const breakdownElement = document.getElementById('priceBreakdown');
+    if (breakdownElement) {
+        let breakdown = '<h6>Price Breakdown:</h6>';
+        
+        // Add base fare to breakdown
+        const baseFare = window.fareQuoteData?.Fare?.OfferedFare || 0;
+        breakdown += `<div class="base-fare">`;
+        breakdown += `<strong>Base Fare:</strong> ₹${parseFloat(baseFare).toFixed(2)}<br>`;
+        breakdown += `</div>`;
+
+        // Add passenger selections breakdown
+        for (const passengerId in window.passengerSelections.seats) {
+            breakdown += `<div class="passenger-breakdown">`;
+            breakdown += `<strong>Passenger ${passengerId}:</strong><br>`;
+            
+            // Seat details
+            const seat = window.passengerSelections.seats[passengerId];
+            if (seat && seat.amount) {
+                breakdown += `Seat ${seat.seatNumber}: ₹${parseFloat(seat.amount).toFixed(2)}<br>`;
+            }
+            
+            // Meal details
+            const meals = window.passengerSelections.meals[passengerId] || [];
+            if (meals.length > 0) {
+                meals.forEach(meal => {
+                    const mealTotal = parseFloat(meal.Price) * parseInt(meal.Quantity);
+                    breakdown += `${meal.AirlineDescription} (Qty: ${meal.Quantity}): ₹${mealTotal.toFixed(2)}<br>`;
+                });
+            }
+            
+            // Baggage details
+            const baggage = window.passengerSelections.baggage[passengerId];
+            if (baggage && baggage.Price) {
+                breakdown += `Baggage (${baggage.Weight}kg): ₹${parseFloat(baggage.Price).toFixed(2)}<br>`;
+            }
+            
+            breakdown += `</div>`;
+        }
+        
+        breakdownElement.innerHTML = breakdown;
+    }
+}
+
+if (typeof window !== 'undefined') {
+    window.calculateTotalPrice = calculateTotalPrice;
+    window.updateTotalFare = updateTotalFare;
+    console.log('updated proice',calculateTotalPrice);
+}
+
+
+// First, add this function at the beginning to calculate total price
+function calculateTotalPriceWithDetails() {
+    // Get base fare from fareQuoteData
+    const baseFare = parseFloat(fareQuoteData.Fare.BaseFare) || 0;
+    const tax = parseFloat(fareQuoteData.Fare.Tax) || 0;
+    const yqTax = parseFloat(fareQuoteData.Fare.YQTax) || 0;
+    const transactionFee = parseFloat(fareQuoteData.Fare.TransactionFee) || 0;
+    const additionalTxnFeeOfrd = parseFloat(fareQuoteData.Fare.AdditionalTxnFeeOfrd) || 0;
+    const additionalTxnFeePub = parseFloat(fareQuoteData.Fare.AdditionalTxnFeePub) || 0;
+    const airTransFee = parseFloat(fareQuoteData.Fare.AirTransFee) || 0;
+
+    // Calculate SSR costs
+    let totalSSRCost = 0;
+    for (const passengerId in window.passengerSelections.seats) {
+        // Add seat prices
+        const seatSelection = window.passengerSelections.seats[passengerId];
+        if (seatSelection && seatSelection.amount) {
+            totalSSRCost += parseFloat(seatSelection.amount);
+        }
+
+        // Add meal prices
+        const mealSelections = window.passengerSelections.meals[passengerId] || [];
+        mealSelections.forEach(meal => {
+            if (meal.Price && meal.Quantity) {
+                totalSSRCost += (parseFloat(meal.Price) * parseInt(meal.Quantity));
+            }
+        });
+
+        // Add baggage prices
+        const baggageSelection = window.passengerSelections.baggage[passengerId];
+        if (baggageSelection && baggageSelection.Price) {
+            totalSSRCost += parseFloat(baggageSelection.Price);
+        }
+    }
+
+    // Calculate grand total
+    const grandTotal = baseFare + tax + yqTax + transactionFee + 
+                      additionalTxnFeeOfrd + additionalTxnFeePub + 
+                      airTransFee + totalSSRCost;
+
+    return {
+        grandTotal,
+        totalSSRCost,
+        baseFare,
+        tax,
+        yqTax,
+        transactionFee,
+        additionalTxnFeeOfrd,
+        additionalTxnFeePub,
+        airTransFee
+    };
+}
 
 
 
@@ -1183,10 +1351,17 @@ function checkFlightBalance() {
     });
 }
 
+
+
+
+// Make functions available globally
+
 document.getElementById('submitButton').addEventListener('click', async function(event) {
     event.preventDefault();
     
     try {
+
+        const totalPriceDetails = calculateTotalPriceWithDetails();
         await checkFlightBalance();
         const isLCC = flightDetails.isLCC;
         console.log('Checking isLCC status:', isLCC);
@@ -1198,7 +1373,8 @@ document.getElementById('submitButton').addEventListener('click', async function
                 resultIndex: resultIndex,
                 srdvIndex: srdvIndex,
                 traceId: traceId,
-                totalFare: fareQuoteData.Fare.OfferedFare || 0
+                totalFare: fareQuoteData.Fare.OfferedFare || 0,
+                grandTotal: totalPriceDetails.grandTotal,
             };
 
             // Initialize passengers array
@@ -1229,11 +1405,7 @@ document.getElementById('submitButton').addEventListener('click', async function
                     title: form.querySelector('[name$="[Title]"]').value.trim(),
                     firstName: form.querySelector('[name$="[FirstName]"]').value.trim(),
                     lastName: form.querySelector('[name$="[LastName]"]').value.trim(),
-<<<<<<< HEAD
-                    gender:(form.querySelector('[name$="[Gender]"]').value),
-=======
                     gender: (form.querySelector('[name$="[Gender]"]').value),
->>>>>>> b7907a6aaf3749afdf65ffc224c2f56ef47abbc7
                     contactNo: form.querySelector('[name$="[ContactNo]"]')?.value.trim() || "",
                     email: form.querySelector('[name$="[Email]"]')?.value.trim() || "",
                     dateOfBirth: form.querySelector('[name$="[DateOfBirth]"]').value,
@@ -1456,7 +1628,8 @@ document.getElementById('submitButton').addEventListener('click', async function
                         bookingId: data.booking_details.booking_id,
                         pnr: data.booking_details.pnr,
                         srdvIndex: data.booking_details.srdvIndex,
-                        traceId: data.booking_details.trace_id
+                        traceId: data.booking_details.trace_id,
+                        grandTotal: totalPriceDetails.grandTotal
                     });
                     window.location.href = `/payment?${queryParams.toString()}`;
                 } else {

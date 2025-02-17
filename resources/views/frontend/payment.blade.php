@@ -772,7 +772,8 @@ function getCookie(name) {
             srdvIndex,
             traceId,
             totalFare,
-            fare
+            fare,
+            grandTotal
         } = flightDetails;
 
         // Extract passengers correctly
@@ -789,6 +790,7 @@ function getCookie(name) {
             srdvIndex,
             traceId,
             totalFare,
+            grandTotal,
 
             // Passenger details as an array
             passengers: passengers.map((pax, index) => ({

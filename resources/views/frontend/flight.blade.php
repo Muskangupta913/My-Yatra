@@ -200,7 +200,7 @@ body::before {
     const journeyType = sessionStorage.getItem('journeyType') || "1"; // Default to One-Way
     const isRoundTrip = journeyType; // Check if it's round trip
 
-    console.log('journey type is',isRoundTrip);
+    // console.log('journey type is',isRoundTrip);
      
 
     // Advanced filter extraction
@@ -739,7 +739,7 @@ function renderFilteredResults(filteredResults, journeyType) {
             resultsCountDisplay.textContent = `${totalResults} results found`;
         }
     } else {
-        console.log('journeytype inside function value', journeyType);
+        // console.log('journeytype inside function value', journeyType);
         filteredResults.forEach(resultGroup => {
             resultGroup.forEach(result => {
                 if (result.FareDataMultiple && Array.isArray(result.FareDataMultiple)) {
@@ -814,7 +814,7 @@ function renderFilteredResults(filteredResults, journeyType) {
                                             class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
                                         View Details
                                     </button>
-                                    <button onclick="fetchFareRules('${fareData.ResultIndex}')" 
+                                    <button onclick="fetchFareRules('${fareData.ResultIndex}')"
                                             class="bg-gray-200 text-gray-700 px-4 py-2 rounded hover:bg-gray-300">
                                         Fare Rules
                                     </button>
@@ -938,10 +938,7 @@ console.log('Outbound SrdvIndex:', outboundSrdvIndex);
 console.log('Return SrdvIndex:', returnSrdvIndex);
     // Create payloads for both flights
     const outboundPayload = {
-        EndUserIp: '1.1.1.1',
-        ClientId: '180133',
-        UserName: 'MakeMy91',
-        Password: 'MakeMy@910',
+       
         SrdvType: 'MixAPI',
         SrdvIndex: outboundSrdvIndex,
         TraceId: traceId,
@@ -951,10 +948,7 @@ console.log('Return SrdvIndex:', returnSrdvIndex);
     console.log('outbound payload', outboundPayload);
 
     const returnPayload = {
-        EndUserIp: '1.1.1.1',
-        ClientId: '180133',
-        UserName: 'MakeMy91',
-        Password: 'MakeMy@910',
+       
         SrdvType: 'MixAPI',
         SrdvIndex: returnSrdvIndex,
         TraceId: traceId,
@@ -1060,11 +1054,9 @@ window.location.href = `/flight/roundBooking?traceId=${traceId}&outboundIndex=${
     })
     .catch(error => {
         console.error('Error in fare quotes:', error);
-        alert('An error occurred while processing flight details.');
+       
     });
 }
-
-
 
 function viewFlightDetails(resultIndex) {
     const traceId = sessionStorage.getItem('flightTraceId');
@@ -1131,10 +1123,7 @@ function viewFlightDetails(resultIndex) {
 
     // Prepare payload for fareQuote API
     const payload = {
-        EndUserIp: '1.1.1.1',
-        ClientId: '180133',
-        UserName: 'MakeMy91',
-        Password: 'MakeMy@910',
+       
         SrdvType: 'MixAPI',
         SrdvIndex: srdvIndex,
         TraceId: traceId,
@@ -1158,7 +1147,10 @@ function viewFlightDetails(resultIndex) {
             sessionStorage.setItem('selectedFlightResultIndex', resultIndex);
             sessionStorage.setItem('selectedFlightTraceId', traceId);
 
-            // Create the URL with all flight details
+         
+          
+
+            //Create the URL with all flight details
             window.location.href = `/flight-booking?traceId=${traceId}&resultIndex=${resultIndex}&details=${encodeURIComponent(JSON.stringify({
                 isLCC: selectedFlight.isLCC,
                 refundable:selectedFlight.refundable,
@@ -1186,7 +1178,7 @@ function viewFlightDetails(resultIndex) {
     })
     .catch(error => {
         console.error('Error fetching fare quote:', error);
-        alert('An error occurred while fetching flight details.');
+        alert('Error fetching fare quote:', error);
     });
 }
 function fetchFareRules(resultIndex) {
@@ -1220,10 +1212,6 @@ function fetchFareRules(resultIndex) {
     }
     // Prepare payload for fare rules API
     const payload = {
-        EndUserIp: '1.1.1.1', // Replace with actual IP
-        ClientId: '180133',
-        UserName: 'MakeMy91',
-        Password: 'MakeMy@910',
         SrdvType: 'MixAPI', // This can also be dynamically extracted if needed
         SrdvIndex: srdvIndex,
         TraceId: traceId,
@@ -1517,10 +1505,7 @@ async function handleCalendarFareClick(departureDate, fare, airlineCode, airline
         
         // Create search payload
         const searchPayload = {
-            EndUserIp: '1.1.1.1',
-            ClientId: '180133',
-            UserName: 'MakeMy91',
-            Password: 'MakeMy@910',
+          
             SrdvType: 'MixAPI',
             FareType: 'PUB',
             Segments: [

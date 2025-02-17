@@ -1632,10 +1632,6 @@ console.log('journeytypt is this ',journeyType )
         });
     }
     const payload = {
-        EndUserIp: "1.1.1.1",
-        ClientId: "180133",
-        UserName: "MakeMy91",
-        Password: "MakeMy@910",
         AdultCount: adultCount.toString(),
         ChildCount: childCount.toString(),
         InfantCount: infantCount.toString(),

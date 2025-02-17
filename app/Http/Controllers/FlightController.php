@@ -96,10 +96,7 @@ class FlightController extends Controller
     
             // Basic validation
             $validator = Validator::make($data, [
-                'EndUserIp' => 'required',
-                'ClientId' => 'required',
-                'UserName' => 'required',
-                'Password' => 'required',
+               
                 'AdultCount' => 'required',
                 'ChildCount' => 'required',
                 'InfantCount' => 'required',
@@ -158,6 +155,7 @@ class FlightController extends Controller
                     'Api-Token' => 'MakeMy@910@23',
                 ])
                 ->post('https://flight.srdvtest.com/v8/rest/Search', $payload);
+               
     
             \Log::info('API Response:', [
                 'status' => $response->status(),
@@ -231,10 +229,7 @@ class FlightController extends Controller
             $data = $request->all();
     
             $validator = Validator::make($data, [
-                'EndUserIp' => 'required',
-                'ClientId' => 'required',
-                'UserName' => 'required',
-                'Password' => 'required',
+                
                 'SrdvType' => 'required',
                 'SrdvIndex' => 'required',
                 'TraceId' => 'required',
@@ -255,10 +250,10 @@ class FlightController extends Controller
             }
     
             $payload = [
-                'EndUserIp' => $data['EndUserIp'],
-                'ClientId' => $data['ClientId'],
-                'UserName' => $data['UserName'],
-                'Password' => $data['Password'],
+                'EndUserIp' => '1.1.1.1', // Replace with actual user IP
+                'ClientId' => '180133',
+                'UserName' => 'MakeMy91',
+                'Password' => 'MakeMy@910',
                 'SrdvType' => $data['SrdvType'],
                 'SrdvIndex' => $data['SrdvIndex'],
                 'TraceId' => $data['TraceId'],
@@ -331,10 +326,7 @@ class FlightController extends Controller
             $data = $request->all();
 
             $validator = Validator::make($data, [
-                'EndUserIp' => 'required',
-                'ClientId' => 'required',
-                'UserName' => 'required',
-                'Password' => 'required',
+              
                 'SrdvType' => 'required',
                 'SrdvIndex' => 'required',
                 'TraceId' => 'required',
@@ -355,10 +347,10 @@ class FlightController extends Controller
             }
 
             $payload = [
-                'EndUserIp' => $data['EndUserIp'],
-                'ClientId' => $data['ClientId'],
-                'UserName' => $data['UserName'],
-                'Password' => $data['Password'],
+               'EndUserIp' => '1.1.1.1', // Replace with actual user IP
+                'ClientId' => '180133',
+                'UserName' => 'MakeMy91',
+                'Password' => 'MakeMy@910',
                 'SrdvType' => $data['SrdvType'],
                 'SrdvIndex' => $data['SrdvIndex'],
                 'TraceId' => $data['TraceId'],
@@ -1041,6 +1033,51 @@ public function bookHold(Request $request) {
 }
 
 
+public function getCalendarFare(Request $request)
+{
+    try {
+        $selectedDate = now()->format('Y-m-d'); // Default to current date
+        $origin = "LKO";
+        $destination = "DEL";
+
+        $formattedDate = date('Y-m-d\T00:00:00', strtotime($selectedDate));
+
+        $payload = [
+            "EndUserIp" => "1.1.1.1",
+            "ClientId" => "180133",
+            "UserName" => "MakeMy91",
+            "Password" => "MakeMy@910",
+            "JourneyType" => "1",
+            "Sources" => null,
+            "FareType" => 1,
+            "Segments" => [
+                [
+                    "Origin" => strtoupper($origin),
+                    "Destination" => strtoupper($destination),
+                    "FlightCabinClass" => "1",
+                    "PreferredDepartureTime" => $formattedDate,
+                    "PreferredArrivalTime" => $formattedDate
+                ]
+            ]
+        ];
+
+        $response = Http::withHeaders([
+            'Content-Type' => 'application/json',
+            'API-Token' => 'MakeMy@910@23',
+            'Accept' => 'application/json',
+        ])->post('https://flight.srdvtest.com/v8/rest/GetCalendarFare', $payload);
+
+        return response()->json($response->json());
+    } catch (\Exception $e) {
+        return response()->json([
+            'Error' => [
+                'ErrorCode' => 1,
+                'ErrorMessage' => $e->getMessage()
+            ]
+        ], 500);
+    }
+}
+
 
 
 
@@ -1064,50 +1101,7 @@ public function bookHold(Request $request) {
         return view('frontend.flight-section', compact('flights'));
     }
 
-    public function getCalendarFare(Request $request)
-    {
-        try {
-            $selectedDate = now()->format('Y-m-d'); // Default to current date
-            $origin = "LKO";
-            $destination = "DEL";
-
-            $formattedDate = date('Y-m-d\T00:00:00', strtotime($selectedDate));
-
-            $payload = [
-                "EndUserIp" => "1.1.1.1",
-                "ClientId" => "180133",
-                "UserName" => "MakeMy91",
-                "Password" => "MakeMy@910",
-                "JourneyType" => "1",
-                "Sources" => null,
-                "FareType" => 1,
-                "Segments" => [
-                    [
-                        "Origin" => strtoupper($origin),
-                        "Destination" => strtoupper($destination),
-                        "FlightCabinClass" => "1",
-                        "PreferredDepartureTime" => $formattedDate,
-                        "PreferredArrivalTime" => $formattedDate
-                    ]
-                ]
-            ];
-
-            $response = Http::withHeaders([
-                'Content-Type' => 'application/json',
-                'API-Token' => 'MakeMy@910@23',
-                'Accept' => 'application/json',
-            ])->post('https://flight.srdvtest.com/v8/rest/GetCalendarFare', $payload);
-
-            return response()->json($response->json());
-        } catch (\Exception $e) {
-            return response()->json([
-                'Error' => [
-                    'ErrorCode' => 1,
-                    'ErrorMessage' => $e->getMessage()
-                ]
-            ], 500);
-        }
-    }
+   
     public function showBookingForm()
     {
         // Example baggage options
@@ -1167,7 +1161,7 @@ public function bookHold(Request $request) {
             // API Payload - Modify with actual data if needed
             $payload = [
                 'EndUserIp' => '1.1.1.1',
-                'ClientId' => '180133',
+                'ClientId' => '180189',
                 'UserName' => 'MakeMy91',
                 'Password' => 'MakeMy@910',
                 'SrdvType' => 'MixAPI',

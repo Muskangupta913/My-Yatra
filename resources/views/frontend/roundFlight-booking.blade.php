@@ -304,6 +304,11 @@
                         </div>
                     </div>
 
+                    <div class="total-price-container">
+    <h5>Total Price: <span id="totalPrice">₹0.00</span></h5>
+    <div id="priceBreakdown"></div>
+</div>
+
                     <!-- Submit Button -->
                     <button type="button" id="submitButton" class="btn btn-primary">Submit Booking</button>
                 </form>
@@ -331,8 +336,8 @@ console.log('Return Result Index:', returnResultIndex);
     const encodedDetails = urlParams.get('details');
     const origin = getCookie('origin') ;
     const destination = getCookie('destination') ;
-    console.log(' ORIGIN Details:', origin);
-    console.log(' DESTINATION Details:',destination);
+    // console.log(' ORIGIN Details:', origin);
+    // console.log(' DESTINATION Details:',destination);
      
         const outboundFareQuoteData = JSON.parse(sessionStorage.getItem('outboundFareQuoteData'));
         const returnFareQuoteData = JSON.parse(sessionStorage.getItem('returnFareQuoteData'));
@@ -576,59 +581,108 @@ function renderFareQuoteSegments(outboundFareQuoteData, returnFareQuoteData) {
                 </div>`;
         }
 
-        let segmentCards = `<h3 class="text-lg font-semibold mb-2">${title}</h3>`;
+        let segmentCards = `<h3 style="font-size: 1.125rem; font-weight: 600; margin-bottom: 0.5rem;">${title}</h3>`;
 
-        fareQuoteData.Segments.forEach((segmentGroup) => {
-            let segmentsHtml = '';
-            segmentGroup.forEach((segment, index) => {
-                const departureTime = new Date(segment.DepTime);
-                const arrivalTime = new Date(segment.ArrTime);
+fareQuoteData.Segments.forEach((segmentGroup, groupIndex) => {
+    let segmentsHtml = `
+        <div style="margin-bottom: 1rem; padding-bottom: 0.75rem; border-bottom: 1px solid #E5E7EB; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem;">
+            <span style="background-color: #F3F4F6; color: #4B5563; padding: 0.375rem 0.75rem; border-radius: 9999px; font-size: 0.875rem; font-weight: 500;">
+                ${groupIndex === 0 ? 'OUTBOUND' : 'RETURN'}
+            </span>
+            <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+                <span style="background-color: #EFF6FF; color: #1E40AF; padding: 0.375rem 0.75rem; border-radius: 9999px; font-size: 0.875rem;">
+                    <span style="font-weight: 500;">Baggage:</span> ${segmentGroup[0].Baggage}
+                </span>
+                <span style="background-color: #EFF6FF; color: #1E40AF; padding: 0.375rem 0.75rem; border-radius: 9999px; font-size: 0.875rem;">
+                    <span style="font-weight: 500;">Cabin:</span> ${segmentGroup[0].CabinBaggage}
+                </span>
+            </div>
+        </div>`;
 
-                segmentsHtml += `
-                    <div class="flex items-center ${index < segmentGroup.length - 1 ? 'mb-2' : ''}">
-                        <div class="w-24 text-center">
-                            <p class="font-bold">${departureTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
-                            <p class="text-sm text-gray-600">${segment.Origin.CityCode}</p>
-                        </div>
-                        
-                        <div class="flex-1 px-4">
-                            <div class="relative flex items-center">
-                                <div class="h-0.5 w-full bg-gray-300"></div>
-                                <div class="absolute w-full text-center">
-                                    <span class="bg-white px-2 text-xs text-gray-600">
-                                        ${segment.Airline.AirlineCode} ${segment.Airline.FlightNumber}
-                                    </span>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div class="w-24 text-center">
-                            <p class="font-bold">${arrivalTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
-                            <p class="text-sm text-gray-600">${segment.Destination.CityCode}</p>
+    segmentGroup.forEach((segment, index) => {
+        const departureTime = new Date(segment.DepTime);
+        const arrivalTime = new Date(segment.ArrTime);
+        const duration = segment.Duration;
+        const hours = Math.floor(duration / 60);
+        const minutes = duration % 60;
+
+        // Format airport and terminal information
+        const originAirportInfo = `${segment.Origin.AirportName}${segment.Origin.Terminal ? '-Terminal ' + segment.Origin.Terminal : ''}`;
+        const destAirportInfo = `${segment.Destination.AirportName}${segment.Destination.Terminal ? '-Terminal ' + segment.Destination.Terminal : ''}`;
+
+        segmentsHtml += `
+            <div style="display: flex; align-items: center; ${index < segmentGroup.length - 1 ? 'margin-bottom: 0.5rem;' : ''}">
+                <div style="width: 6rem; text-align: center;">
+                    <p style="font-weight: 700; margin: 0;">
+                        ${departureTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                    </p>
+                    <p style="font-size: 0.875rem; color: #4B5563; margin: 0;">
+                        ${segment.Origin.CityCode}
+                    </p>
+                    <p style="font-size: 0.75rem; color: #6B7280; margin: 0; line-height: 1.2;">
+                        ${originAirportInfo}
+                    </p>
+                </div>
+                
+                <div style="flex: 1; padding: 0 1rem;">
+                    <div style="position: relative; display: flex; align-items: center;">
+                        <div style="height: 0.125rem; width: 100%; background-color: #D1D5DB;"></div>
+                        <div style="position: absolute; width: 100%; text-align: center;">
+                            <span style="font-size: 0.75rem; color: #4B5563; display: block;">
+                                ${segment.Airline.AirlineCode}-${segment.Airline.FlightNumber}
+                            </span>
+                            <span style="font-size: 0.75rem; color: #6B7280; display: block; margin-top: 0.125rem;">
+                                ${segment.Airline.AirlineName || segment.Airline.Name || 'Airline'}
+                            </span>
+                            <span style="font-size: 0.75rem; color: #6B7280; display: block; margin-top: 0.125rem;">
+                                ${hours}h ${minutes}m 
+                            </span>
                         </div>
                     </div>
-                    ${index < segmentGroup.length - 1 ? `
-                        <div class="my-2 px-3 py-1 bg-orange-50 rounded text-sm text-center text-orange-700">
-                            Change planes at ${segment.Destination.CityCode}
-                        </div>
-                    ` : ''}
-                `;
-            });
+                </div>
+                
+                <div style="width: 6rem; text-align: center;">
+                    <p style="font-weight: 700; margin: 0;">
+                        ${arrivalTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                    </p>
+                    <p style="font-size: 0.875rem; color: #4B5563; margin: 0;">
+                        ${segment.Destination.CityCode}
+                    </p>
+                    <p style="font-size: 0.75rem; color: #6B7280; margin: 0; line-height: 1.2;">
+                        ${destAirportInfo}
+                    </p>
+                </div>
+            </div>`;
 
-            segmentCards += `
-                <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4 mb-4">
-                    ${segmentsHtml}
+            if (index < segmentGroup.length - 1) {
+            // ✨ FIXED: Get ground time from the next segment
+            const nextSegment = segmentGroup[index + 1];
+            const groundTime = parseInt(nextSegment.GroundTime) || 0;
+            const groundHours = Math.floor(groundTime / 60);
+            const groundMinutes = groundTime % 60;
+            
+            segmentsHtml += `
+                <div style="margin: 0.5rem 0; padding: 0.25rem 0.75rem; background-color: #FFF7ED; border-radius: 0.375rem; font-size: 0.875rem; text-align: center; color: #C2410C;">
+                    <p style="margin: 0; font-weight: 500;">Change planes at ${segment.Destination.CityCode}</p>
+                    <p style="margin: 0.125rem 0 0 0; font-size: 0.75rem;">Layover: ${groundHours}h ${groundMinutes}m</p>
                 </div>`;
-        });
+        }
+    });
 
-        return segmentCards;
-    }
+    segmentCards += `
+        <div style="background-color: white; border-radius: 0.5rem; box-shadow: 0 1px 2px rgba(0,0,0,0.05); border: 1px solid #E5E7EB; padding: 1rem; margin-bottom: 1rem;">
+            ${segmentsHtml}
+        </div>`;
+});
 
-    // Render outbound flight segments
-    segmentsContainer.innerHTML += createSegmentCard('Outbound Flight', outboundFareQuoteData);
+return segmentCards;
+ }
 
-    // Render return flight segments
-    segmentsContainer.innerHTML += createSegmentCard('Return Flight', returnFareQuoteData);
+// Render outbound flight segments
+segmentsContainer.innerHTML += createSegmentCard('Outbound Flight', outboundFareQuoteData);
+
+// Render return flight segments
+segmentsContainer.innerHTML += createSegmentCard('Return Flight', returnFareQuoteData);
 }
 
 // Fetch fare quote data from session storage
@@ -774,6 +828,10 @@ function fetchSSRData(type, passengerType, resultIndex, srdvIndex, direction, pa
 
             const urlParams = new URLSearchParams(window.location.search);
             const traceId = urlParams.get('traceId');
+            const allContainers = document.querySelectorAll('[id^="options-container-"]');
+    allContainers.forEach(container => {
+        container.style.display = 'none';
+    });
 
             fetch("{{ route('fetch.ssr.data') }}", {
                 method: 'POST',
@@ -794,6 +852,9 @@ function fetchSSRData(type, passengerType, resultIndex, srdvIndex, direction, pa
             })
             .then(response => response.json())
             .then(data => {
+                if (container) {
+            container.style.display = 'block';
+        }
                 if (!data.success) {
                     container.innerHTML = `<p class="text-danger">This flight does not provide SSR services: ${data.message || 'No details available'}</p>`;
                     return;
@@ -899,6 +960,10 @@ window.updateBaggageSelection = function(radio, passengerId) {
     
     console.log(`Updated baggage selection for ${direction}:`, window.passengerSelections.baggage[direction]);
     showBaggageAlert(radio);
+    const container = document.getElementById(`options-container-${passengerId}`);
+    if (container) {
+        container.style.display = 'none';
+    }
 };
 
 
@@ -1012,6 +1077,7 @@ window.updateMealSelections = function(checkbox, passengerId) {
 
     console.log(`Updated meal selection for ${direction}:`, window.passengerSelections.meals[direction]);
     updateMealDisplay(passengerId);
+    updateTotalFare();
     showMealSelectionAlert(passengerId);
 };
 
@@ -1288,6 +1354,7 @@ function selectSeat(code, seatNumber, amount, airlineName, airlineCode, airlineN
         showConfirmButton: false,
         timer: 1500
     });
+    updateTotalFare();
 }
 
 // Make sure selectSeat is available globally
@@ -1301,6 +1368,217 @@ if (typeof window !== 'undefined') {
     window.selectSeat = selectSeat;
     
 }
+window.outboundFareQuoteData = outboundFareQuoteData;
+window.returnFareQuoteData = returnFareQuoteData;
+
+
+function calculateTotalPrice() {
+    let total = 0;
+
+    // Add base fares from both flights
+    const outboundBaseFare = window.outboundFareQuoteData?.Fare?.OfferedFare || 0;
+    const returnBaseFare = window.returnFareQuoteData?.Fare?.OfferedFare || 0;
+    total += parseFloat(outboundBaseFare) + parseFloat(returnBaseFare);
+    console.log('total fare and price',total);
+    console.log('outbound baseFare',outboundBaseFare);
+    console.log('return baseFare',returnBaseFare);
+
+
+    // Iterate through all passenger selections for both flights
+    ['outbound', 'return'].forEach(direction => {
+        // Add seat prices
+        const seatSelections = window.passengerSelections.seats[direction] || {};
+        Object.values(seatSelections).forEach(seat => {
+            if (seat && seat.amount) {
+                total += parseFloat(seat.amount);
+            }
+        });
+
+        // Add meal prices
+        const mealSelections = window.passengerSelections.meals[direction] || {};
+        Object.entries(mealSelections).forEach(([passengerId, meals]) => {
+            meals.forEach(meal => {
+                if (meal.Price && meal.Quantity) {
+                    total += (parseFloat(meal.Price) * parseInt(meal.Quantity));
+                }
+            });
+        });
+
+        // Add baggage prices
+        const baggageSelections = window.passengerSelections.baggage[direction] || {};
+        Object.values(baggageSelections).forEach(baggage => {
+            if (baggage && baggage.Price) {
+                total += parseFloat(baggage.Price);
+            }
+        });
+    });
+
+    return total;
+}
+
+function getPassengerTypes() {
+    // Get all unique passenger IDs from selections
+    const passengerIds = new Set();
+    ['outbound', 'return'].forEach(direction => {
+        Object.keys(window.passengerSelections.seats[direction] || {}).forEach(id => passengerIds.add(id));
+        Object.keys(window.passengerSelections.meals[direction] || {}).forEach(id => passengerIds.add(id));
+        Object.keys(window.passengerSelections.baggage[direction] || {}).forEach(id => passengerIds.add(id));
+    });
+    return Array.from(passengerIds);
+}
+
+function calculateTotalPriceWithDetails() {
+    const outboundFare = outboundFareQuoteData?.Fare || {};
+    const returnFare = returnFareQuoteData?.Fare || {};
+
+    // Calculate base components for both flights
+    const baseFare = (parseFloat(outboundFare.OfferedFare) || 0) + (parseFloat(returnFare.OfferedFare) || 0);
+    const tax = (parseFloat(outboundFare.Tax) || 0) + (parseFloat(returnFare.Tax) || 0);
+    const yqTax = (parseFloat(outboundFare.YQTax) || 0) + (parseFloat(returnFare.YQTax) || 0);
+    const transactionFee = (parseFloat(outboundFare.TransactionFee) || 0) + (parseFloat(returnFare.TransactionFee) || 0);
+    const additionalTxnFeeOfrd = (parseFloat(outboundFare.AdditionalTxnFeeOfrd) || 0) + (parseFloat(returnFare.AdditionalTxnFeeOfrd) || 0);
+    const additionalTxnFeePub = (parseFloat(outboundFare.AdditionalTxnFeePub) || 0) + (parseFloat(returnFare.AdditionalTxnFeePub) || 0);
+    const airTransFee = (parseFloat(outboundFare.AirTransFee) || 0) + (parseFloat(returnFare.AirTransFee) || 0);
+
+    // Calculate SSR costs by passenger
+    const passengerCosts = {};
+    const passengerIds = getPassengerTypes();
+
+    passengerIds.forEach(passengerId => {
+        passengerCosts[passengerId] = {
+            outbound: { seats: 0, meals: 0, baggage: 0 },
+            return: { seats: 0, meals: 0, baggage: 0 }
+        };
+
+        ['outbound', 'return'].forEach(direction => {
+            // Add seat costs
+            const seat = window.passengerSelections.seats[direction]?.[passengerId];
+            if (seat?.amount) {
+                passengerCosts[passengerId][direction].seats = parseFloat(seat.amount);
+            }
+
+            // Add meal costs
+            const meals = window.passengerSelections.meals[direction]?.[passengerId] || [];
+            meals.forEach(meal => {
+                if (meal.Price && meal.Quantity) {
+                    passengerCosts[passengerId][direction].meals += parseFloat(meal.Price) * parseInt(meal.Quantity);
+                }
+            });
+
+            // Add baggage costs
+            const baggage = window.passengerSelections.baggage[direction]?.[passengerId];
+            if (baggage?.Price) {
+                passengerCosts[passengerId][direction].baggage = parseFloat(baggage.Price);
+            }
+        });
+    });
+
+    // Calculate total SSR cost
+    let totalSSRCost = 0;
+    Object.values(passengerCosts).forEach(passenger => {
+        ['outbound', 'return'].forEach(direction => {
+            totalSSRCost += passenger[direction].seats + passenger[direction].meals + passenger[direction].baggage;
+        });
+    });
+
+    return {
+        grandTotal: baseFare + totalSSRCost,
+        baseFare,
+        tax,
+        yqTax,
+        transactionFee,
+        additionalTxnFeeOfrd,
+        additionalTxnFeePub,
+        airTransFee,
+        outboundBaseFare: outboundFare.BaseFare || 0,
+        returnBaseFare: returnFare.BaseFare || 0,
+        passengerCosts,
+        totalSSRCost
+    };
+}
+
+function updateTotalFare() {
+    const priceDetails = calculateTotalPriceWithDetails();
+    
+    // Update the total in the UI
+    const totalPriceElement = document.getElementById('totalPrice');
+    if (totalPriceElement) {
+        totalPriceElement.textContent = `₹${priceDetails.grandTotal.toFixed(2)}`;
+    }
+
+    // Update the breakdown section
+    const breakdownElement = document.getElementById('priceBreakdown');
+    if (breakdownElement) {
+        let breakdown = `
+            <div class="price-breakdown card">
+                <div class="card-body">
+                    <h5 class="card-title mb-4">Price Breakdown</h5>
+                    
+                    <!-- Base Fares Section -->
+                    <div class="base-fares mb-4">
+                        <h6 class="fw-bold">Base Fares</h6>
+                        <div class="ms-3">
+                            <div>Outbound Flight: ₹${window.outboundFareQuoteData?.Fare?.OfferedFare || 0}</div>
+                            <div>Return Flight: ₹${window.returnFareQuoteData?.Fare?.OfferedFare || 0}</div>
+                        </div>
+                    </div>
+
+                    
+                    </div>`;
+
+        // Passenger-wise Breakdown
+        breakdown += `<div class="passenger-selections mb-4">
+            <h6 class="fw-bold">Passenger Selections</h6>`;
+
+        Object.entries(priceDetails.passengerCosts).forEach(([passengerId, costs]) => {
+            breakdown += `
+                <div class="passenger-section mb-3">
+                    <div class="fw-bold text-primary">${passengerId}</div>
+                    
+                    <!-- Outbound Flight -->
+                    <div class="ms-3 mb-2">
+                        <div class="fw-semibold">Outbound Flight:</div>
+                        <div class="ms-3">
+                            ${costs.outbound.seats > 0 ? `<div>Seat Selection: ₹${costs.outbound.seats.toFixed(2)}</div>` : ''}
+                            ${costs.outbound.meals > 0 ? `<div>Meal Selection: ₹${costs.outbound.meals.toFixed(2)}</div>` : ''}
+                            ${costs.outbound.baggage > 0 ? `<div>Baggage Selection: ₹${costs.outbound.baggage.toFixed(2)}</div>` : ''}
+                        </div>
+                    </div>
+                    
+                    <!-- Return Flight -->
+                    <div class="ms-3">
+                        <div class="fw-semibold">Return Flight:</div>
+                        <div class="ms-3">
+                            ${costs.return.seats > 0 ? `<div>Seat Selection: ₹${costs.return.seats.toFixed(2)}</div>` : ''}
+                            ${costs.return.meals > 0 ? `<div>Meal Selection: ₹${costs.return.meals.toFixed(2)}</div>` : ''}
+                            ${costs.return.baggage > 0 ? `<div>Baggage Selection: ₹${costs.return.baggage.toFixed(2)}</div>` : ''}
+                        </div>
+                    </div>
+                </div>`;
+        });
+
+        breakdown += `</div>
+                
+                <!-- Grand Total -->
+                <div class="grand-total mt-4 pt-3 border-top">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">Grand Total:</h5>
+                        <h5 class="mb-0">₹${priceDetails.grandTotal.toFixed(2)}</h5>
+                    </div>
+                </div>
+            </div>
+        </div>`;
+        
+        breakdownElement.innerHTML = breakdown;
+    }
+}
+
+// Make functions available globally
+if (typeof window !== 'undefined') {
+    window.calculateTotalPrice = calculateTotalPrice;
+    window.calculateTotalPriceWithDetails = calculateTotalPriceWithDetails;
+    window.updateTotalFare = updateTotalFare;
+}
 
 
 
@@ -1308,6 +1586,9 @@ if (typeof window !== 'undefined') {
 // Function to check flight balance
 function checkFlightBalance() {
     return new Promise((resolve, reject) => {
+        const outboundFare = outboundFareQuoteData?.Fare?.OfferedFare || 0;
+        const returnFare = returnFareQuoteData?.Fare?.OfferedFare || 0;
+        const totalFare = outboundFare + returnFare;
         // Create loading overlay
         const loadingOverlay = document.createElement('div');
         loadingOverlay.style.position = 'fixed';
@@ -1346,7 +1627,7 @@ function checkFlightBalance() {
                 throw new Error(data.message || 'Failed to check balance');
             }
 
-            const totalFare = fareQuoteData.Fare.OfferedFare || 0;
+           
 
             // Check if balance is sufficient
             if (data.balance < totalFare) {
@@ -1384,6 +1665,8 @@ document.getElementById('submitButton').addEventListener('click', async function
     event.preventDefault();
     
     try {
+        await checkFlightBalance();
+        const totalPriceDetails = calculateTotalPriceWithDetails();
         const isLCCoutbound = outboundFareQuoteData?.IsLCC ?? false;
         const isLCCreturn = returnFareQuoteData?.IsLCC ?? false;
 
@@ -1649,7 +1932,8 @@ try {
         const finalBookingDetails = {
             lcc: Object.keys(lccBookingDetails).length > 0 ? lccBookingDetails : null,
             nonLcc: (nonLccBookingDetails.outbound || nonLccBookingDetails.return) ? nonLccBookingDetails : null,
-            urlDetails: decodedUrlDetails
+            urlDetails: decodedUrlDetails,
+            grandTotal: totalPriceDetails.grandTotal,
         };
 
         console.log("Is LCC Outbound:", isLCCoutbound);
@@ -1730,29 +2014,7 @@ async function processNonLCCBooking(payload) {
         throw new Error(data.message || 'Booking failed');
     }
 }
-// Then, modify how the final booking details are combined:
-// const finalBookingDetails = {
-//     lcc: Object.keys(lccBookingDetails).length > 0 ? lccBookingDetails : null,
-//     nonLcc: nonLccResults.length > 0 ? nonLccResults.map(result => ({
-//         ...result,
-//         resultIndex: result.isOutbound ? outboundResultIndex : returnResultIndex,
-//         totalFare: result.isOutbound 
-//             ? outboundFareQuoteData.Fare.OfferedFare 
-//             : returnFareQuoteData.Fare.OfferedFare,
-//         passengers: result.passengers.map(pax => ({
-//             ...pax,
-//             fare: [{
-//                 baseFare: parseFloat(result.isOutbound ? outboundFareQuoteData.Fare.BaseFare : returnFareQuoteData.Fare.BaseFare),
-//                 tax: parseFloat(result.isOutbound ? outboundFareQuoteData.Fare.Tax : returnFareQuoteData.Fare.Tax),
-//                 yqTax: parseFloat(result.isOutbound ? outboundFareQuoteData.Fare.YQTax : returnFareQuoteData.Fare.YQTax) || 0,
-//                 transactionFee: result.isOutbound ? outboundFareQuoteData.Fare.TransactionFee : returnFareQuoteData.Fare.TransactionFee || '0',
-//                 additionalTxnFeeOfrd: parseFloat(result.isOutbound ? outboundFareQuoteData.Fare.AdditionalTxnFeeOfrd : returnFareQuoteData.Fare.AdditionalTxnFeeOfrd) || 0,
-//                 additionalTxnFeePub: parseFloat(result.isOutbound ? outboundFareQuoteData.Fare.AdditionalTxnFeePub : returnFareQuoteData.Fare.AdditionalTxnFeePub) || 0,
-//                 airTransFee: result.isOutbound ? outboundFareQuoteData.Fare.AirTransFee : returnFareQuoteData.Fare.AirTransFee || '0'
-//             }]
-//         }))
-//     })) : null
-// };
+
 }); 
 
 
