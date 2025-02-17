@@ -1099,9 +1099,9 @@ async function bookGDS() {
 
     const gdsTicketDetails = BookGdsTicket();
 
-        console.log('gdsticket deatilss',gdsTicketDetails);
-        console.log('Outbound Booking ID:', bookingDetails.nonLcc.outbound.bookingId);
-        console.log('Return Booking ID:', bookingDetails.nonLcc.return.bookingId);
+        // console.log('gdsticket deatilss',gdsTicketDetails);
+        // console.log('Outbound Booking ID:', bookingDetails.nonLcc.outbound.bookingId);
+        // console.log('Return Booking ID:', bookingDetails.nonLcc.return.bookingId);
 
 
     if (!gdsTicketDetails) {

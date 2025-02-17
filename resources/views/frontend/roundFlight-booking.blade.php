@@ -960,61 +960,114 @@ window.updateBaggageSelection = function(radio, passengerId) {
         container.style.display = 'none';
     }
 };
-
-
 function renderMealOptions(mealData, container, passengerId) {
-    if (!mealData || !mealData.length) {
-        container.innerHTML = '<p>No meal options available.</p>';
-        return;
-    }
-
-    const checkboxes = container.querySelectorAll('input[type="checkbox"]');
-    checkboxes.forEach(checkbox => {
-        checkbox.setAttribute('data-direction', passengerId.split('-')[2]); // Extract direction
-    });
     container.innerHTML = `
         <div class="meal-options-container">
-            <h6 class="mb-4">Meal Options (Select Multiple)</h6>
             <div class="selected-meals-summary mb-3">
                 <strong>Selected Meals: </strong>
                 <div id="selectedMealsDisplay_${passengerId}" class="mt-2">
                     <em class="text-muted">No meals selected</em>
                 </div>
             </div>
-            ${mealData.map(meal => `
-                <div class="meal-option">
-                    <input 
-                        type="checkbox" 
-                        name="meal_${passengerId}" 
-                        value="${meal.Code}" 
-                        data-wayType="${meal.WayType}"
-                        data-description="${meal.AirlineDescription || 'No Description'}"
-                        data-origin="${meal.Origin}"
-                        data-quantity="1"
-                        data-currency="${meal.Currency}"
-                        data-destination="${meal.Destination}"
-                        data-price="${meal.Price}"
-                        onchange="updateMealSelections(this, '${passengerId}')"
-                    >
-                    <label>
-                        ${meal.AirlineDescription || 'No Meal'} 
-                        (₹${meal.Price || 0})
-                        <div class="meal-quantity">
+            <div class="meal-list">
+                ${mealData.map(meal => `
+                    <div class="meal-option">
+                        <div class="meal-selection">
+                            <input 
+                                type="checkbox" 
+                                name="meal_option_${passengerId}" 
+                                value="${meal.Code}" 
+                                data-wayType="${meal.WayType}"
+                                data-descript="${meal.Description || 'No Description'}"
+                                data-description="${meal.AirlineDescription || 'No Description'}"
+                                data-origin="${meal.Origin}"
+                                data-quantity="${meal.Quantity}"
+                                data-currency="${meal.Currency}"
+                                data-destination="${meal.Destination}"
+                                data-price="${meal.Price}"
+                                onchange="updateMealSelections(this, '${passengerId}')"
+                                id="meal_${meal.Code}_${passengerId}"
+                            >
+                            <label for="meal_${meal.Code}_${passengerId}" class="meal-label">
+                                ${meal.AirlineDescription || 'No Meal'} 
+                                <span class="meal-price">₹${meal.Price || 0}</span>
+                            </label>
+                        </div>
+                        <div class="meal-quantity compact">
                             <button type="button" class="quantity-btn" onclick="adjustQuantity(this, -1, '${passengerId}')" ${meal.Price ? '' : 'disabled'}>-</button>
                             <input type="number" min="1" max="5" value="1" class="quantity-input" 
                                 onchange="updateMealQuantity(this, '${passengerId}')" ${meal.Price ? '' : 'disabled'}>
                             <button type="button" class="quantity-btn" onclick="adjustQuantity(this, 1, '${passengerId}')" ${meal.Price ? '' : 'disabled'}>+</button>
                         </div>
-                    </label>
-                </div>
-            `).join('')}
+                    </div>
+                `).join('')}
+            </div>
         </div>
     `;
 
-
-    // Add some styling for the selected meals display
+    // Add styling for the new compact meal list
     const style = document.createElement('style');
     style.textContent = `
+        .meal-list {
+            max-height: 300px;
+            overflow-y: auto;
+            border: 1px solid #e0e0e0;
+            border-radius: 4px;
+        }
+        .meal-option {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 12px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        .meal-option:last-child {
+            border-bottom: none;
+        }
+        .meal-option:hover {
+            background-color: #f9f9f9;
+        }
+        .meal-selection {
+            display: flex;
+            align-items: center;
+            flex: 1;
+        }
+        .meal-label {
+            margin-left: 8px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            flex: 1;
+            max-width: 70%;
+        }
+        .meal-price {
+            font-weight: bold;
+            color: #2c5282;
+            margin-left: 8px;
+        }
+        .meal-quantity.compact {
+            display: flex;
+            align-items: center;
+        }
+        .quantity-btn {
+            width: 25px;
+            height: 25px;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid #ccc;
+            background: #f8f9fa;
+            border-radius: 3px;
+        }
+        .quantity-input {
+            width: 35px;
+            text-align: center;
+            margin: 0 4px;
+            padding: 2px;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+        }
         .selected-meals-display-item {
             background-color: #f8f9fa;
             border: 1px solid #dee2e6;
@@ -1038,18 +1091,9 @@ function renderMealOptions(mealData, container, passengerId) {
 // Store selected meals in an array
 window.selectedMealOptions = [];
 
-// Fix the meal update function
 window.updateMealSelections = function(checkbox, passengerId) {
-    // Extract direction (outbound/return) from passengerId
-    const [type, index, direction] = passengerId.split('-');
-    
-    if (!window.passengerSelections.meals[direction]) {
-        window.passengerSelections.meals[direction] = {};
-    }
-    
-    const passengerKey = `${type}-${index}`;
-    if (!window.passengerSelections.meals[direction][passengerKey]) {
-        window.passengerSelections.meals[direction][passengerKey] = [];
+    if (!window.passengerSelections.meals[passengerId]) {
+        window.passengerSelections.meals[passengerId] = [];
     }
 
     const mealData = {
@@ -1060,22 +1104,21 @@ window.updateMealSelections = function(checkbox, passengerId) {
         Price: parseFloat(checkbox.getAttribute('data-price')) || 0,
         WayType: checkbox.getAttribute('data-wayType'),
         Quantity: parseInt(checkbox.closest('.meal-option').querySelector('.quantity-input').value),
-        Currency: checkbox.getAttribute('data-currency')
+        Currency: checkbox.getAttribute('data-currency'),
+        Description: checkbox.getAttribute('data-descript')
     };
 
     if (checkbox.checked) {
-        window.passengerSelections.meals[direction][passengerKey].push(mealData);
+        window.passengerSelections.meals[passengerId].push(mealData);
     } else {
-        window.passengerSelections.meals[direction][passengerKey] = 
-            window.passengerSelections.meals[direction][passengerKey].filter(meal => meal.Code !== mealData.Code);
+        window.passengerSelections.meals[passengerId] = 
+            window.passengerSelections.meals[passengerId].filter(meal => meal.Code !== mealData.Code);
     }
 
-    console.log(`Updated meal selection for ${direction}:`, window.passengerSelections.meals[direction]);
     updateMealDisplay(passengerId);
+    updateTotalFare();
     showMealSelectionAlert(passengerId);
 };
-
-
 // Function to adjust quantity
 window.adjustQuantity = function(button, change) {
     const input = button.parentElement.querySelector('.quantity-input');
@@ -1141,6 +1184,7 @@ window.updateMealQuantity = function(input, passengerId) {
         if (mealIndex !== -1) {
             selectedMeals[mealIndex].Quantity = parseInt(input.value);
             updateMealDisplay(passengerId);
+            updateTotalFare();
         }
     }
 };
@@ -1153,6 +1197,7 @@ window.adjustQuantity = function(button, change, passengerId) {
         updateMealQuantity(input, passengerId);
     }
 };
+
 
 // Function to show meal selection alert
 function showMealSelectionAlert() {

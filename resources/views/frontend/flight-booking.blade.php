@@ -797,47 +797,111 @@ window.updateBaggageSelection = function(radio, passengerId) {
 function renderMealOptions(mealData, container, passengerId) {
     container.innerHTML = `
         <div class="meal-options-container">
-            <h6 class="mb-4">Meal Options (Select Multiple)</h6>
             <div class="selected-meals-summary mb-3">
                 <strong>Selected Meals: </strong>
                 <div id="selectedMealsDisplay_${passengerId}" class="mt-2">
                     <em class="text-muted">No meals selected</em>
                 </div>
             </div>
-            ${mealData.map(meal => `
-                <div class="meal-option">
-                    <input 
-                        type="checkbox" 
-                        name="meal_option_${passengerId}" 
-                        value="${meal.Code}" 
-                        data-wayType="${meal.WayType}"
-                        data-descript="${meal.Description || 'No Description'}"
-                        data-description="${meal.AirlineDescription || 'No Description'}"
-                        data-origin="${meal.Origin}"
-                        data-quantity="${meal.Quantity}"
-                        data-currency="${meal.Currency}"
-                        data-destination="${meal.Destination}"
-                        data-price="${meal.Price}"
-                        onchange="updateMealSelections(this, '${passengerId}')"
-                    >
-                    <label>
-                        ${meal.AirlineDescription || 'No Meal'} 
-                        (₹${meal.Price || 0})
-                        <div class="meal-quantity">
+            <div class="meal-list">
+                ${mealData.map(meal => `
+                    <div class="meal-option">
+                        <div class="meal-selection">
+                            <input 
+                                type="checkbox" 
+                                name="meal_option_${passengerId}" 
+                                value="${meal.Code}" 
+                                data-wayType="${meal.WayType}"
+                                data-descript="${meal.Description || 'No Description'}"
+                                data-description="${meal.AirlineDescription || 'No Description'}"
+                                data-origin="${meal.Origin}"
+                                data-quantity="${meal.Quantity}"
+                                data-currency="${meal.Currency}"
+                                data-destination="${meal.Destination}"
+                                data-price="${meal.Price}"
+                                onchange="updateMealSelections(this, '${passengerId}')"
+                                id="meal_${meal.Code}_${passengerId}"
+                            >
+                            <label for="meal_${meal.Code}_${passengerId}" class="meal-label">
+                                ${meal.AirlineDescription || 'No Meal'} 
+                                <span class="meal-price">₹${meal.Price || 0}</span>
+                            </label>
+                        </div>
+                        <div class="meal-quantity compact">
                             <button type="button" class="quantity-btn" onclick="adjustQuantity(this, -1, '${passengerId}')" ${meal.Price ? '' : 'disabled'}>-</button>
                             <input type="number" min="1" max="5" value="1" class="quantity-input" 
                                 onchange="updateMealQuantity(this, '${passengerId}')" ${meal.Price ? '' : 'disabled'}>
                             <button type="button" class="quantity-btn" onclick="adjustQuantity(this, 1, '${passengerId}')" ${meal.Price ? '' : 'disabled'}>+</button>
                         </div>
-                    </label>
-                </div>
-            `).join('')}
+                    </div>
+                `).join('')}
+            </div>
         </div>
     `;
 
-    // Add some styling for the selected meals display
+    // Add styling for the new compact meal list
     const style = document.createElement('style');
     style.textContent = `
+        .meal-list {
+            max-height: 300px;
+            overflow-y: auto;
+            border: 1px solid #e0e0e0;
+            border-radius: 4px;
+        }
+        .meal-option {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 12px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        .meal-option:last-child {
+            border-bottom: none;
+        }
+        .meal-option:hover {
+            background-color: #f9f9f9;
+        }
+        .meal-selection {
+            display: flex;
+            align-items: center;
+            flex: 1;
+        }
+        .meal-label {
+            margin-left: 8px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            flex: 1;
+            max-width: 70%;
+        }
+        .meal-price {
+            font-weight: bold;
+            color: #2c5282;
+            margin-left: 8px;
+        }
+        .meal-quantity.compact {
+            display: flex;
+            align-items: center;
+        }
+        .quantity-btn {
+            width: 25px;
+            height: 25px;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid #ccc;
+            background: #f8f9fa;
+            border-radius: 3px;
+        }
+        .quantity-input {
+            width: 35px;
+            text-align: center;
+            margin: 0 4px;
+            padding: 2px;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+        }
         .selected-meals-display-item {
             background-color: #f8f9fa;
             border: 1px solid #dee2e6;
@@ -857,7 +921,6 @@ function renderMealOptions(mealData, container, passengerId) {
     `;
     document.head.appendChild(style);
 }
-
 // Store selected meals in an array
 window.selectedMealOptions = [];
 
@@ -1423,7 +1486,6 @@ document.getElementById('submitButton').addEventListener('click', async function
                 let passenger = {
                     title: form.querySelector('[name$="[Title]"]').value.trim(),
                     firstName: form.querySelector('[name$="[FirstName]"]').value.trim(),
-                    lastName: form.querySelector('[name$="[LastName]"]').value.trim(),
                     gender: (form.querySelector('[name$="[Gender]"]').value),
                     contactNo: form.querySelector('[name$="[ContactNo]"]')?.value.trim() || "",
                     email: form.querySelector('[name$="[Email]"]')?.value.trim() || "",

@@ -176,8 +176,12 @@ body::before {
     <div class="absolute inset-0 bg-black/50 backdrop-blur-sm"></div>
     <!-- Modal Content -->
     <div class="bg-white rounded-xl w-full max-w-3xl mx-auto relative shadow-2xl">
-        <div class="bg-blue-600 p-4 rounded-t-xl">
-            <h2 class="text-xl font-bold text-white">Fare Rules</h2>
+    <div class="bg-blue-600 p-4 rounded-t-xl flex justify-between items-center">
+        <h2 class="text-xl font-bold text-white">Fare Rules</h2>
+        <button onclick="document.getElementById('fareRulesModal').style.display = 'none'" 
+                class="text-white hover:text-gray-200 text-2xl font-bold">
+            ×
+        </button>
         </div>
         <div class="p-6 max-h-[70vh] overflow-y-auto">
             <div id="fareRulesDetails" class="text-gray-800 space-y-4">
@@ -1063,7 +1067,6 @@ window.location.href = `/flight/roundBooking?traceId=${traceId}&outboundIndex=${
        
     });
 }
-
 function viewFlightDetails(resultIndex) {
     const traceId = sessionStorage.getItem('flightTraceId');
     const results = JSON.parse(sessionStorage.getItem('flightSearchResults')) || [];
@@ -1241,7 +1244,7 @@ function fetchFareRules(resultIndex) {
                 if (data.success && data.fareRules) {
                     // Format and display fare rules
             fareRulesDetails.innerHTML = `
-                <div class="fare-rules-content">
+                 <div class="fare-rules-content ">
                     <h2>Fare Rules for Flight</h2>
                     <p><strong>Airline:</strong> ${data.fareRules.Airline}</p>
                     <p><strong>Route:</strong> ${data.fareRules.Origin} to ${data.fareRules.Destination}</p>
