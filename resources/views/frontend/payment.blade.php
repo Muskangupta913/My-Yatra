@@ -850,15 +850,62 @@ function getCookie(name) {
         return null;
     }
 }
-function bookLCC() {
-    const bookingDetails = getBookingDetailsFromURL(); // Fetch data from URL
 
-    if (!bookingDetails || !bookingDetails.passengers || !Array.isArray(bookingDetails.passengers)) {
-        console.error("❌ Passenger details are missing or not in array format!");
+function fetchBalanceLogAndBookLCC() {
+    const bookingDetails = getBookingDetailsFromURL();
+    if (!bookingDetails?.traceId || !bookingDetails?.grandTotal) {
+        showError('Booking details are missing or incomplete!');
         return;
     }
 
-    console.log("🚀 Booking Details Extracted:", bookingDetails);
+    console.log('Processing balance log for:', {
+        traceId: bookingDetails.traceId,
+        amount: bookingDetails.grandTotal
+    });
+
+    // Send as POST request with JSON body
+    fetch('/flight/balance-log', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+        },
+        body: JSON.stringify({
+            TraceId: bookingDetails.traceId,
+            amount: bookingDetails.grandTotal
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            console.log('Balance log processed:', data.balanceLog);
+            // Proceed with booking only if balance deduction was successful
+            bookLCC(bookingDetails);
+        } else {
+            showError(data.errorMessage || 'Failed to process balance log');
+        }
+    })
+    .catch(error => {
+        console.error('Balance log error:', error);
+        showError('Failed to process balance check. Please try again.');
+    });
+}
+
+function showError(message) {
+    console.error('Error:', message);
+    alert('❌ ' + message);
+}
+
+
+function bookLCC(bookingDetails) {
+//     const bookingDetails = getBookingDetailsFromURL(); // Fetch data from URL
+//  console.log('grandTotal :', bookingDetails.grandTotal);
+//     if (!bookingDetails || !bookingDetails.passengers || !Array.isArray(bookingDetails.passengers)) {
+//         console.error("❌ Passenger details are missing or not in array format!");
+//         return;
+//     }
+
+//     console.log("🚀 Booking Details Extracted:", bookingDetails);
 
     // Prepare payload using extracted data
     const payload = {
