@@ -1704,19 +1704,19 @@ document.getElementById('submitButton').addEventListener('click', async function
                 return email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/);
             }
 
-            function validatePassenger(passengerData) {
-                const errors = [];
+            // function validatePassenger(passengerData) {
+            //     const errors = [];
                 
-                if (!passengerData.firstName.trim()) errors.push('First name is required');
-                if (!passengerData.lastName.trim()) errors.push('Last name is required');
-                if (!passengerData.passportNo.trim()) errors.push('Passport number is required');
-                if (!passengerData.passportExpiry) errors.push('Passport expiry date is required');
-                if (!passengerData.dateOfBirth) errors.push('Date of birth is required');
-                if (!validateEmail(passengerData.email)) errors.push('Valid email is required');
-                if (!passengerData.contactNo.trim()) errors.push('Contact number is required');
+            //     if (!passengerData.firstName.trim()) errors.push('First name is required');
+            //     if (!passengerData.lastName.trim()) errors.push('Last name is required');
+            //     if (!passengerData.passportNo.trim()) errors.push('Passport number is required');
+            //     if (!passengerData.passportExpiry) errors.push('Passport expiry date is required');
+            //     if (!passengerData.dateOfBirth) errors.push('Date of birth is required');
+            //     if (!validateEmail(passengerData.email)) errors.push('Valid email is required');
+            //     if (!passengerData.contactNo.trim()) errors.push('Contact number is required');
                 
-                return errors;
-            }
+            //     return errors;
+            // }
 
             let passengers = [];
             
@@ -1737,6 +1737,7 @@ document.getElementById('submitButton').addEventListener('click', async function
                 let passenger = {
                     title: form.querySelector('[name$="[Title]"]').value.trim(),
                     firstName: form.querySelector('[name$="[FirstName]"]').value.trim(),
+                    lastName: form.querySelector('[name$="[LastName]"]').value.trim(),
                     gender: (form.querySelector('[name$="[Gender]"]').value),
                     contactNo: form.querySelector('[name$="[ContactNo]"]')?.value.trim() || "",
                     email: form.querySelector('[name$="[Email]"]')?.value.trim() || "",
@@ -1773,10 +1774,10 @@ document.getElementById('submitButton').addEventListener('click', async function
                 };
 
                 // Validate passenger data
-                const validationErrors = validatePassenger(passenger);
-                if (validationErrors.length > 0) {
-                    throw new Error(`Validation failed for ${passengerTypeString}: ${validationErrors.join(', ')}`);
-                }
+                // const validationErrors = validatePassenger(passenger);
+                // if (validationErrors.length > 0) {
+                //     throw new Error(`Validation failed for ${passengerTypeString}: ${validationErrors.join(', ')}`);
+                // }
 
                 passengers.push(passenger);
             });
