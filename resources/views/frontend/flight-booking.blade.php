@@ -514,7 +514,7 @@ createPassengerForm("Infant", infantCount, 3);
 
     fareQuoteData.Segments.forEach((segmentGroup, groupIndex) => {
     const card = document.createElement('div');
-    card.style.cssText = 'background-color: white; border-radius: 0.75rem; box-shadow: 0 1px 3px rgba(0,0,0,0.1); border: 1px solid #E5E7EB; padding: 1.5rem; margin-bottom: 1.5rem; max-width: 800px; width: 100%;';
+    card.style.cssText = 'background-color: white; border-radius: 0.75rem; box-shadow: 0 1px 3px rgba(0,0,0,0.1); border: 1px solid #E5E7EB; padding: 1.5rem; margin-bottom: 1.5rem; max-width: 1200px; width: 100%;';
 
     let segmentsHtml = `
         <div style="margin-bottom: 1rem; padding-bottom: 0.75rem; border-bottom: 1px solid #E5E7EB; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem;">
@@ -778,24 +778,25 @@ if (typeof window !== 'undefined') {
         </table>
     `;
 }
-
 window.updateBaggageSelection = function(radio, passengerId) {
-    const baggageOption = {
-        Code: radio.value,
-        Weight: radio.getAttribute('data-weight'),
-        Price: radio.getAttribute('data-price'),
+if (window.passengerSelections.baggage[passengerId]?.Code === radio.value) {
+        radio.checked = false;
+        delete window.passengerSelections.baggage[passengerId];
+    } else {
+        window.passengerSelections.baggage[passengerId] = {
+            Code: radio.value,
+            Weight: radio.getAttribute('data-weight'),
+            Price: radio.getAttribute('data-price'),
         Origin: radio.getAttribute('data-origin'),
         Destination: radio.getAttribute('data-destination'),
         Description: radio.getAttribute('data-description'),
         WayType: radio.getAttribute('data-wayType'),
         Currency: radio.getAttribute('data-currency')
-    };
-    
-    window.passengerSelections.baggage[passengerId] = baggageOption;
+        };
+    }
     showBaggageAlert(radio, passengerId);
     updateTotalFare();
 };
-
 
 function renderMealOptions(mealData, container, passengerId) {
     container.innerHTML = `
@@ -921,6 +922,14 @@ function renderMealOptions(mealData, container, passengerId) {
             padding-top: 8px;
             border-top: 1px solid #dee2e6;
         }
+             .btn-close-meal {
+        border: none;
+        background: none;
+        color: #dc3545;
+        font-weight: bold;
+        cursor: pointer;
+        margin-left: 8px;
+    }
     `;
     document.head.appendChild(style);
 }
@@ -994,9 +1003,12 @@ function updateMealDisplay(passengerId) {
         const mealTotal = meal.Price * meal.Quantity;
         totalPrice += mealTotal;
         return `
-            <div class="selected-meals-display-item">
+           <div class="selected-meals-display-item">
                 <span>${meal.AirlineDescription} (Qty: ${meal.Quantity})</span>
-                <span>₹${mealTotal.toFixed(2)}</span>
+                <div>
+                    <span>₹${mealTotal.toFixed(2)}</span>
+                    <button type="button" class="btn-close-meal" onclick="removeMeal('${meal.Code}', '${passengerId}')">×</button>
+                </div>
             </div>
         `;
     }).join('');
@@ -1010,7 +1022,18 @@ function updateMealDisplay(passengerId) {
 
     displayElement.innerHTML = mealsHtml;
 }
-
+window.removeMeal = function(mealCode, passengerId) {
+    // Uncheck the checkbox
+    document.getElementById(`meal_${mealCode}_${passengerId}`).checked = false;
+    
+    // Remove from selections array
+    window.passengerSelections.meals[passengerId] = 
+        window.passengerSelections.meals[passengerId].filter(meal => meal.Code !== mealCode);
+    
+    // Update displays
+    updateMealDisplay(passengerId);
+    updateTotalFare();
+};
 // Update quantity handling to refresh the display
 window.updateMealQuantity = function(input, passengerId) {
     const checkbox = input.closest('.meal-option').querySelector(`input[name="meal_option_${passengerId}"]`);
@@ -1274,9 +1297,7 @@ function updateTotalFare() {
     const totalPriceElement = document.getElementById('totalPrice');
     if (totalPriceElement) {
         totalPriceElement.innerHTML = `
-            <div class="price-badge bg-success bg-gradient p-3 rounded-pill text-white text-center">
-                <h4 class="mb-0">Total Fare: ₹${total.toFixed(2)}</h4>
-            </div>`;
+            `;
     }
 
     // Enhanced breakdown section with better styling

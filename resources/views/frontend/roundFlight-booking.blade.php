@@ -1165,7 +1165,10 @@ function updateMealDisplay(passengerId) {
         return `
             <div class="selected-meals-display-item">
                 <span>${meal.AirlineDescription} (Qty: ${meal.Quantity})</span>
-                <span>₹${mealTotal.toFixed(2)}</span>
+                <div>
+                    <span>₹${mealTotal.toFixed(2)}</span>
+                    <button type="button" class="btn-close-meal" onclick="removeMeal('${meal.Code}', '${passengerId}')">×</button>
+                </div>
             </div>
         `;
     }).join('');
@@ -1179,7 +1182,18 @@ function updateMealDisplay(passengerId) {
 
     displayElement.innerHTML = mealsHtml;
 }
-
+window.removeMeal = function(mealCode, passengerId) {
+    // Uncheck the checkbox
+    document.getElementById(`meal_${mealCode}_${passengerId}`).checked = false;
+    
+    // Remove from selections array
+    window.passengerSelections.meals[passengerId] = 
+        window.passengerSelections.meals[passengerId].filter(meal => meal.Code !== mealCode);
+    
+    // Update displays
+    updateMealDisplay(passengerId);
+    updateTotalFare();
+};
 // Update quantity handling to refresh the display
 window.updateMealQuantity = function(input, passengerId) {
     const checkbox = input.closest('.meal-option').querySelector(`input[name="meal_option_${passengerId}"]`);
