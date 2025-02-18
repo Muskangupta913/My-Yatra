@@ -1297,9 +1297,7 @@ function updateTotalFare() {
     const totalPriceElement = document.getElementById('totalPrice');
     if (totalPriceElement) {
         totalPriceElement.innerHTML = `
-            <div class="price-badge bg-success bg-gradient p-3 rounded-pill text-white text-center">
-                <h4 class="mb-0">Total Fare: ₹${total.toFixed(2)}</h4>
-            </div>`;
+            `;
     }
 
     // Enhanced breakdown section with better styling
