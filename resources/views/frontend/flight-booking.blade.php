@@ -617,7 +617,7 @@ if (fareQuoteData) {
         // Optional: Set total fare in a hidden input for later use
         const totalFareInput = document.getElementById('totalFare');
         if (totalFareInput) {
-            totalFareInput.value = fareQuoteData.Fare.OfferedFare || 0;
+            totalFareInput.value = fareQuoteData.Fare.PublishedFare || 0;
         }
     } else {
         console.error('Fare Quote Data Not Found in Session Storage');
@@ -1257,7 +1257,7 @@ function calculateTotalPrice() {
     let total = 0;
 
     // Add base fare from fareQuoteData
-    const baseFare = window.fareQuoteData?.Fare?.OfferedFare || 0;
+    const baseFare = window.fareQuoteData?.Fare?.PublishedFare|| 0;
     total += parseFloat(baseFare);
 
     console.log('total fare and price',total);
@@ -1288,15 +1288,15 @@ function calculateTotalPrice() {
     return total;
 }
 
-
-
 function updateTotalFare() {
-    const total = calculateTotalPrice();
+    const totalPriceDetails = calculateTotalPriceWithDetails();
+    const total = totalPriceDetails.grandTotal;
     
     // Update the total in the UI with enhanced styling
     const totalPriceElement = document.getElementById('totalPrice');
     if (totalPriceElement) {
         totalPriceElement.innerHTML = `
+        ₹${totalPriceDetails.grandTotal.toFixed(2)}
             `;
     }
 
@@ -1325,7 +1325,7 @@ function updateTotalFare() {
                                     <div class="text-primary mb-2">
                                         <i class="fas fa-plane fa-2x"></i>
                                     </div>
-                                    <h5 class="text-success mb-0">₹${parseFloat(window.fareQuoteData?.Fare?.OfferedFare || 0).toFixed(2)}</h5>
+                                    <h5 class="text-success mb-0">₹${parseFloat(window.fareQuoteData?.Fare?.PublishedFare || 0).toFixed(2)}</h5>
                                 </div>
                             </div>
                         </div>
@@ -1337,9 +1337,14 @@ function updateTotalFare() {
                                     <i class="fas fa-users me-2"></i>Passenger Selections
                                 </h5>
                             </div>`;
+                 const allPassengerIds = new Set([
+            ...Object.keys(window.passengerSelections.seats || {}),
+            ...Object.keys(window.passengerSelections.meals || {}),
+            ...Object.keys(window.passengerSelections.baggage || {})
+        ]);
 
-        // Add passenger selections breakdown with enhanced styling
-        for (const passengerId in window.passengerSelections.seats) {
+        // Generate breakdown for each passenger
+        allPassengerIds.forEach(passengerId => {
             breakdown += `
                 <div class="passenger-card mb-4 border rounded-bottom p-3">
                     <div class="passenger-header bg-light p-2 rounded mb-3">
@@ -1404,23 +1409,18 @@ function updateTotalFare() {
                         })()}
                     </div>
                 </div>`;
-        }
+        });
 
         breakdown += `
-                        </div>
-                        
-                        <!-- Grand Total -->
-                        <div class="grand-total-section mt-4">
-                            <div class="card bg-success bg-gradient text-white">
-                                <div class="card-body p-4 text-center">
-                                    <h5 class="mb-2">Grand Total</h5>
-                                    <h2 class="mb-0">₹${total.toFixed(2)}</h2>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>`;
+                     <!-- Grand Total -->
+           <div class="grand-total-section mt-4">
+    <div class="card bg-success bg-gradient text-white">
+        <div class="card-body p-4 text-center">
+            <h5 class="mb-2">Grand Total</h5>
+            <h2 class="mb-0">₹${totalPriceDetails.grandTotal.toFixed(2)}</h2>
+        </div>
+    </div>
+</div>`;
         
         breakdownElement.innerHTML = breakdown;
     }
@@ -1431,8 +1431,6 @@ if (typeof window !== 'undefined') {
     window.updateTotalFare = updateTotalFare;
     console.log('updated proice',calculateTotalPrice);
 }
-
-
 // First, add this function at the beginning to calculate total price
 function calculateTotalPriceWithDetails() {
     // Get base fare from fareQuoteData
@@ -1446,7 +1444,14 @@ function calculateTotalPriceWithDetails() {
 
     // Calculate SSR costs
     let totalSSRCost = 0;
-    for (const passengerId in window.passengerSelections.seats) {
+    const allPassengerIds = new Set([
+        ...Object.keys(window.passengerSelections.seats || {}),
+        ...Object.keys(window.passengerSelections.meals || {}),
+        ...Object.keys(window.passengerSelections.baggage || {})
+    ]);
+
+    // Calculate total SSR costs for all selections
+    allPassengerIds.forEach(passengerId => {
         // Add seat prices
         const seatSelection = window.passengerSelections.seats[passengerId];
         if (seatSelection && seatSelection.amount) {
@@ -1466,7 +1471,7 @@ function calculateTotalPriceWithDetails() {
         if (baggageSelection && baggageSelection.Price) {
             totalSSRCost += parseFloat(baggageSelection.Price);
         }
-    }
+    });
 
     // Calculate grand total
     const grandTotal = baseFare + tax + yqTax + transactionFee + 
@@ -1485,7 +1490,6 @@ function calculateTotalPriceWithDetails() {
         airTransFee
     };
 }
-
 
 
 // Function to check flight balance
@@ -1529,7 +1533,7 @@ function checkFlightBalance() {
                 throw new Error(data.message || 'Failed to check balance');
             }
 
-            const totalFare = fareQuoteData.Fare.OfferedFare || 0;
+            const totalFare = fareQuoteData.Fare.PublishedFare || 0;
 
             // Check if balance is sufficient
             if (data.balance < totalFare) {
@@ -1583,7 +1587,7 @@ document.getElementById('submitButton').addEventListener('click', async function
                 resultIndex: resultIndex,
                 srdvIndex: srdvIndex,
                 traceId: traceId,
-                totalFare: fareQuoteData.Fare.OfferedFare || 0,
+                totalFare: fareQuoteData.Fare.PublishedFare || 0,
                 grandTotal: totalPriceDetails.grandTotal,
             };
 
@@ -1725,19 +1729,19 @@ document.getElementById('submitButton').addEventListener('click', async function
                 return email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/);
             }
 
-            function validatePassenger(passengerData) {
-                const errors = [];
+            // function validatePassenger(passengerData) {
+            //     const errors = [];
                 
-                if (!passengerData.firstName.trim()) errors.push('First name is required');
-                if (!passengerData.lastName.trim()) errors.push('Last name is required');
-                if (!passengerData.passportNo.trim()) errors.push('Passport number is required');
-                if (!passengerData.passportExpiry) errors.push('Passport expiry date is required');
-                if (!passengerData.dateOfBirth) errors.push('Date of birth is required');
-                if (!validateEmail(passengerData.email)) errors.push('Valid email is required');
-                if (!passengerData.contactNo.trim()) errors.push('Contact number is required');
+            //     if (!passengerData.firstName.trim()) errors.push('First name is required');
+            //     if (!passengerData.lastName.trim()) errors.push('Last name is required');
+            //     if (!passengerData.passportNo.trim()) errors.push('Passport number is required');
+            //     if (!passengerData.passportExpiry) errors.push('Passport expiry date is required');
+            //     if (!passengerData.dateOfBirth) errors.push('Date of birth is required');
+            //     if (!validateEmail(passengerData.email)) errors.push('Valid email is required');
+            //     if (!passengerData.contactNo.trim()) errors.push('Contact number is required');
                 
-                return errors;
-            }
+            //     return errors;
+            // }
 
             let passengers = [];
             
@@ -1794,10 +1798,10 @@ document.getElementById('submitButton').addEventListener('click', async function
                 };
 
                 // Validate passenger data
-                const validationErrors = validatePassenger(passenger);
-                if (validationErrors.length > 0) {
-                    throw new Error(`Validation failed for ${passengerTypeString}: ${validationErrors.join(', ')}`);
-                }
+                // const validationErrors = validatePassenger(passenger);
+                // if (validationErrors.length > 0) {
+                //     throw new Error(`Validation failed for ${passengerTypeString}: ${validationErrors.join(', ')}`);
+                // }
 
                 passengers.push(passenger);
             });

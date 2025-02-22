@@ -1,12 +1,13 @@
 @extends('frontend.layouts.master')
 @section('title', 'flight search')
-@section('content')
 @section('styles')
      <!-- Tailwind CSS -->
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"> 
+    
     <style>
+        
         .flight-card {
             transition: all 0.3s ease;
             box-shadow: 0 4px 6px rgba(0,0,0,0.1);
@@ -24,7 +25,6 @@
     background-repeat: no-repeat;
     position: relative;
 }
-
 .container {
     position: relative;
     z-index: 1;
@@ -69,7 +69,6 @@ body::before {
     box-shadow: 0 10px 15px rgba(0, 0, 0, 0.2);
 }
 
-/* Additional styles to ensure text readability */
 .flight-card p, 
 .flight-card h2, 
 .flight-card span,
@@ -90,9 +89,28 @@ body::before {
 .filter-section {
     transition: transform 0.3s ease-in-out;
 }
+/* Tablet View (768px to 481px) */
+@media (max-width: 768px) and (min-width: 481px) {
+    .filter-section {
+        position: static;
+        top: auto;
+        left: auto;
+        height: auto;
+        width: 100%;
+        max-width: none;
+        z-index: 1;
+        overflow-y: visible;
+        transform: none;
+        padding-top: 20px;
+        display: block;
+        visibility: visible;
+        background-color: rgba(255, 255, 255, 0.82);
+    }
+}
 
-@media (max-width: 768px) {
-.filter-section {
+/* Mobile View (480px and below) */
+@media (max-width: 760px) {
+    .filter-section {
         position: fixed;
         top: 0;
         left: 0;
@@ -102,14 +120,14 @@ body::before {
         z-index: 1000;
         overflow-y: auto;
         transform: translateX(-100%);
-        padding-top: 60px; /* Space for close button */
+        padding-top: 60px;
     }
 
-.filter-section.show {
+    .filter-section.show {
         transform: translateX(0);
     }
 
-.filter-overlay {
+    .filter-overlay {
         position: fixed;
         inset: 0;
         background-color: rgba(0, 0, 0, 0.5);
@@ -119,11 +137,12 @@ body::before {
         transition: opacity 0.3s ease-in-out;
     }
 
-.filter-overlay.show {
+    .filter-overlay.show {
         opacity: 1;
         pointer-events: auto;
     }
 }
+
     </style>
  @endsection 
  @section('content')
@@ -295,35 +314,79 @@ body::before {
     }
     // Create filter section HTML
     function createFilterSection(title, name, options) {
-        if (name === 'airlines') {
+    if (name === 'airlines') {
         const optionsHTML = Array.from(options).map(airlineName => {
-            // Find the airline code from the results data
+            // Find the airline code for this airline name
             let airlineCode = '';
-            for (const resultGroup of results) {
-                for (const result of resultGroup) {
-                    if (result.FareDataMultiple) {
-                        for (const fareData of result.FareDataMultiple) {
-                            if (fareData.FareSegments[0]?.AirlineName === airlineName) {
-                                airlineCode = fareData.FareSegments[0].AirlineCode;
-                                break;
-                            }
-                        }
-                    }
-                    if (airlineCode) break;
+            
+            if (journeyType === "2") {
+                // For round trips, check both outbound and return flights
+                const outboundFlights = JSON.parse(sessionStorage.getItem('outboundFlights')) || [];
+                const returnFlights = JSON.parse(sessionStorage.getItem('returnFlights')) || [];
+                
+                // First check outbound flights
+                const outboundFlight = outboundFlights.find(flight => 
+                    flight.FareDataMultiple?.some(fareData => 
+                        fareData.FareSegments[0]?.AirlineName === airlineName
+                    )
+                );
+                
+                if (outboundFlight) {
+                    const fareData = outboundFlight.FareDataMultiple.find(fd => 
+                        fd.FareSegments[0]?.AirlineName === airlineName
+                    );
+                    airlineCode = fareData?.FareSegments[0]?.AirlineCode;
                 }
-                if (airlineCode) break;
+                
+                // If not found in outbound, check return flights
+                if (!airlineCode) {
+                    const returnFlight = returnFlights.find(flight => 
+                        flight.FareDataMultiple?.some(fareData => 
+                            fareData.FareSegments[0]?.AirlineName === airlineName
+                        )
+                    );
+                    
+                    if (returnFlight) {
+                        const fareData = returnFlight.FareDataMultiple.find(fd => 
+                            fd.FareSegments[0]?.AirlineName === airlineName
+                        );
+                        airlineCode = fareData?.FareSegments[0]?.AirlineCode;
+                    }
+                }
+            } else {
+                // For one-way flights
+                for (const resultGroup of results) {
+                    const flight = resultGroup.find(result => 
+                        result.FareDataMultiple?.some(fareData => 
+                            fareData.FareSegments[0]?.AirlineName === airlineName
+                        )
+                    );
+                    
+                    if (flight) {
+                        const fareData = flight.FareDataMultiple.find(fd => 
+                            fd.FareSegments[0]?.AirlineName === airlineName
+                        );
+                        airlineCode = fareData?.FareSegments[0]?.AirlineCode;
+                        break;
+                    }
+                }
             }
+
+            // Ensure we have a valid airline code, or use a default
+            const logoPath = airlineCode ? getAirlineLogo(airlineCode) : '/assets/images/airlines/airlines/48_48/6E.png';
+
             return `
                 <label class="flex items-center mb-3 hover:bg-gray-50 p-2 rounded">
                     <input type="checkbox" name="${name}" value="${airlineName}" class="mr-3">
-                    <img src="${getAirlineLogo(airlineCode)}" 
+                    <img src="${logoPath}" 
                          alt="${airlineName}" 
                          class="w-8 h-8 mr-3 object-contain"
-                         onerror="this.onerror=null; this.src='/assets/images/airlines/airlines/48_48/default-airline.png'; this.classList.add('grayscale', 'opacity-70');">
+                         onerror="this.onerror=null; this.src='/assets/images/airlines/airlines/48_48/6E.png'; this.classList.add('grayscale', 'opacity-70');">
                     <span class="text-sm">${airlineName}</span>
                 </label>
             `;
         }).join('');
+        
         return `
             <div class="mb-6">
                 <h4 class="font-semibold mb-3 text-gray-700">${title}</h4>
@@ -338,6 +401,7 @@ body::before {
                 ${option}
             </label>
         `).join('');
+        
         return `
             <div class="mb-4">
                 <h4 class="font-semibold mb-2">${title}</h4>
@@ -570,47 +634,49 @@ function renderFilteredResults(filteredResults, journeyType) {
 
         // Function to update selection div
         function updateSelectionDiv() {
-            if (selectedOutbound || selectedReturn) {
-                selectionDiv.style.display = 'block';
-                selectionDiv.innerHTML = `
-                    <div class="container mx-auto max-w-6xl">
-                        <div class="flex justify-between items-center">
-                            <div class="flex gap-4">
-                                ${selectedOutbound ? `
-                                    <div class="flex items-center">
-                                        <div class="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-semibold">
-                                            Departure: ${selectedOutbound.airline} - ${selectedOutbound.flightNumber}
-                                            <span class="ml-2 text-green-600">₹${selectedOutbound.price?.toLocaleString() || 'N/A'}</span>
-                                        </div>
-                                    </div>
-                                ` : ''}
-                                ${selectedReturn ? `
-                                    <div class="flex items-center">
-                                        <div class="bg-purple-100 text-purple-800 px-3 py-1 rounded-full text-sm font-semibold">
-                                            Return: ${selectedReturn.airline} - ${selectedReturn.flightNumber}
-                                            <span class="ml-2 text-green-600">₹${selectedReturn.price?.toLocaleString() || 'N/A'}</span>
-                                        </div>
-                                    </div>
-                                ` : ''}
-                            </div>
-                            ${selectedOutbound && selectedReturn ? `
-                                <div class="flex items-center gap-4">
-                                    <div class="text-lg font-bold text-green-600">
-                                        Total: ₹${((selectedOutbound.price || 0) + (selectedReturn.price || 0)).toLocaleString()}
-                                    </div>
-                                    <button onclick="handleRoundTripFareQuotes('${selectedOutbound.resultIndex}', '${selectedReturn.resultIndex}')"
-                                            class="bg-blue-500 text-white px-6 py-2 rounded hover:bg-blue-600">
-                                        View Details
-                                    </button>
+    if (selectedOutbound || selectedReturn) {
+        selectionDiv.style.display = 'block';
+        selectionDiv.innerHTML = `
+            <div class="container mx-auto max-w-6xl px-4">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center space-y-4 sm:space-y-0">
+                    <div class="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
+                        ${selectedOutbound ? `
+                            <div class="flex items-center w-full sm:w-auto">
+                                <div class="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-semibold truncate w-full sm:w-auto">
+                                    <span class="block sm:inline">Departure: </span>
+                                    <span class="block sm:inline">${selectedOutbound.airline} - ${selectedOutbound.flightNumber}</span>
+                                    <span class="block sm:inline ml-0 sm:ml-2 text-green-600">₹${selectedOutbound.price?.toLocaleString() || 'N/A'}</span>
                                 </div>
-                            ` : ''}
-                        </div>
+                            </div>
+                        ` : ''}
+                        ${selectedReturn ? `
+                            <div class="flex items-center w-full sm:w-auto">
+                                <div class="bg-purple-100 text-purple-800 px-3 py-1 rounded-full text-sm font-semibold truncate w-full sm:w-auto">
+                                    <span class="block sm:inline">Return: </span>
+                                    <span class="block sm:inline">${selectedReturn.airline} - ${selectedReturn.flightNumber}</span>
+                                    <span class="block sm:inline ml-0 sm:ml-2 text-green-600">₹${selectedReturn.price?.toLocaleString() || 'N/A'}</span>
+                                </div>
+                            </div>
+                        ` : ''}
                     </div>
-                `;
-            } else {
-                selectionDiv.style.display = 'none';
-            }
-        }
+                    ${selectedOutbound && selectedReturn ? `
+                        <div class="flex flex-col sm:flex-row items-start sm:items-center gap-4 w-full sm:w-auto">
+                            <div class="text-lg font-bold text-green-600 w-full sm:w-auto text-center sm:text-left">
+                                Total: ₹${((selectedOutbound.price || 0) + (selectedReturn.price || 0)).toLocaleString()}
+                            </div>
+                            <button onclick="handleRoundTripFareQuotes('${selectedOutbound.resultIndex}', '${selectedReturn.resultIndex}')"
+                                    class="bg-blue-500 text-white px-6 py-2 rounded hover:bg-blue-600 w-full sm:w-auto">
+                                View Details
+                            </button>
+                        </div>
+                    ` : ''}
+                </div>
+            </div>
+        `;
+    } else {
+        selectionDiv.style.display = 'none';
+    }
+}
 
         // Render filtered outbound flights
         filteredOutbound.forEach(outbound => {
@@ -805,7 +871,7 @@ function renderFilteredResults(filteredResults, journeyType) {
                             </div>
 
                             <div class="border-t pt-3 flex justify-between items-center">
-                                <div class="flex space-x-2">
+                               <div class="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2">
                                     <span class="bg-green-100 text-green-800 px-2 py-1 rounded text-xs">
                                         ${fareData.FareSegments[0]?.Baggage || 'N/A'} Baggage
                                     </span>
@@ -813,7 +879,7 @@ function renderFilteredResults(filteredResults, journeyType) {
                                         ${fareData.FareSegments[0]?.CabinClassName || 'N/A'}
                                     </span>
                                 </div>
-                                <div class="flex space-x-2">
+                               <div class="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2">
                                     <button onclick="viewFlightDetails('${fareData.ResultIndex}')" 
                                             class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
                                         View Details
@@ -838,61 +904,82 @@ function renderFilteredResults(filteredResults, journeyType) {
 
 function createFlightCardContent(segment, fareData) {
     return `
-        <div class="flight-card bg-white border border-gray-200 rounded-lg p-6 shadow-md">
-            <div class="flex justify-between items-center mb-6">
+      
+        <div class="flight-card bg-white border border-gray-200 rounded-lg p-4 md:p-6 shadow-md">
+            <!-- Airline and Price Header -->
+            <div class="flex justify-between items-start md:items-center mb-6 gap-4">
                 <div class="flex items-center">
                     <img src="${getAirlineLogo(fareData.FareSegments[0]?.AirlineCode)}" 
                          alt="${fareData.FareSegments[0]?.AirlineName || 'Airline'}" 
-                         class="w-12 h-12 mr-4 object-contain"
+                         class="w-10 h-10 md:w-12 md:h-12 mr-3 md:mr-4 object-contain flex-shrink-0"
                          onerror="this.onerror=null; this.src='/assets/images/airlines/airlines/48_48/default-airline.png'">
                     <div>
-                        <h2 class="text-xl font-bold text-blue-700">${fareData.FareSegments[0]?.AirlineName || 'Airline'}</h2>
-                        <p class="text-sm text-gray-900">${fareData.FareSegments[0]?.AirlineCode || ''} - ${fareData.FareSegments[0]?.FlightNumber || 'N/A'}</p>
+                        <h2 class="text-lg md:text-xl font-bold text-blue-700">
+                            ${fareData.FareSegments[0]?.AirlineName || 'Airline'}
+                        </h2>
+                        <p class="text-sm text-gray-900">
+                            ${fareData.FareSegments[0]?.AirlineCode || ''} - ${fareData.FareSegments[0]?.FlightNumber || 'N/A'}
+                        </p>
                     </div>
                 </div>
-                <div class="text-right">
-                    <p class="text-2xl font-bold text-green-600">₹${fareData.Fare?.OfferedFare?.toLocaleString() || 'N/A'}</p>
+                <div class="text-right flex-shrink-0">
+                    <p class="text-xl md:text-2xl font-bold text-green-600">₹${fareData.Fare?.OfferedFare?.toLocaleString() || 'N/A'}</p>
                 </div>
             </div>
 
+            <!-- Flight Details -->
             <div class="flex justify-between items-center mb-4">
-                <div>
-                    <p class="font-semibold">${segment?.DepTime ? new Date(segment.DepTime).toLocaleTimeString() : 'N/A'}</p>
-                    <p class="text-sm text-gray-900">${segment?.Origin?.AirportName || 'N/A'} (${segment?.Origin?.AirportCode || 'N/A'})</p>
+                <!-- Departure Info -->
+                <div class="text-left flex-1 max-w-[30%]">
+                    <p class="font-semibold text-sm md:text-base mb-1">
+                        ${segment?.DepTime ? new Date(segment.DepTime).toLocaleTimeString() : 'N/A'}
+                    </p>
+                    <p class="text-sm text-gray-900 break-words">
+                        ${segment?.Origin?.AirportName || 'N/A'}<br>
+                        <span class="text-gray-600">(${segment?.Origin?.AirportCode || 'N/A'})</span>
+                    </p>
                 </div>
-                  <div class="flex items-center space-x-3">
-            <div class="text-center">
-                <div class="flex items-center">
-                    <div class="w-3 h-3 bg-blue-500 rounded-full mr-2"></div>
-                    <div class="w-24 h-0.5 bg-gray-300 relative">
-                        <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-xs text-gray-900">
-                            ${segment?.Duration || 'N/A'} mins
+
+                <!-- Flight Duration -->
+                <div class="flex-shrink-0 px-2 md:px-4 text-center w-[40%]">
+                    <div class="flex items-center justify-center mb-1">
+                        <div class="w-2 h-2 md:w-3 md:h-3 bg-blue-500 rounded-full"></div>
+                        <div class="h-0.5 bg-gray-300 flex-1 relative mx-2">
+                            <div class="absolute -top-4 left-1/2 transform -translate-x-1/2 
+                                        text-xs whitespace-nowrap text-gray-600">
+                                ${segment?.Duration || 'N/A'} mins
+                            </div>
                         </div>
+                        <div class="w-2 h-2 md:w-3 md:h-3 bg-blue-500 rounded-full"></div>
                     </div>
-                    <div class="w-3 h-3 bg-blue-500 rounded-full ml-2"></div>
+                    <i class="fas fa-plane text-gray-700 text-sm"></i>
                 </div>
-                <i class="fas fa-plane text-gray-700 mt-1"></i>
-            </div>
-        </div>
-                <div class="text-right">
-                    <p class="font-semibold">${segment?.ArrTime ? new Date(segment.ArrTime).toLocaleTimeString() : 'N/A'}</p>
-                    <p class="text-sm text-gray-900">${segment?.Destination?.AirportName || 'N/A'} (${segment?.Destination?.AirportCode || 'N/A'})</p>
+
+                <!-- Arrival Info -->
+                <div class="text-right flex-1 max-w-[30%]">
+                    <p class="font-semibold text-sm md:text-base mb-1">
+                        ${segment?.ArrTime ? new Date(segment.ArrTime).toLocaleTimeString() : 'N/A'}
+                    </p>
+                    <p class="text-sm text-gray-900 break-words">
+                        ${segment?.Destination?.AirportName || 'N/A'}<br>
+                        <span class="text-gray-600">(${segment?.Destination?.AirportCode || 'N/A'})</span>
+                    </p>
                 </div>
             </div>
 
-            <div class="border-t pt-3 flex justify-between items-center">
-                <div class="flex space-x-2">
-                    <span class="bg-green-100 text-green-800 px-2 py-1 rounded text-xs">
+            <!-- Footer Section -->
+            <div class="border-t pt-3 flex flex-wrap justify-between items-center gap-3">
+                <div class="flex flex-wrap gap-2">
+                    <span class="bg-green-100 text-green-800 px-2 py-1 rounded text-xs whitespace-nowrap">
                         ${fareData.FareSegments[0]?.Baggage || 'N/A'} Baggage
                     </span>
-                    <span class="bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs">
+                    <span class="bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs whitespace-nowrap">
                         ${fareData.FareSegments[0]?.CabinClassName || 'N/A'}
                     </span>
                 </div>
-                <div class="flex space-x-2">
-                   
+                <div class="flex gap-2">
                     <button onclick="fetchFareRules('${fareData.ResultIndex}')" 
-                            class="bg-gray-200 text-gray-700 px-4 py-2 rounded hover:bg-gray-300">
+                            class="bg-gray-200 text-gray-700 px-4 py-2 rounded hover:bg-gray-300 text-sm">
                         Fare Rules
                     </button>
                 </div>
@@ -1061,6 +1148,7 @@ window.location.href = `/flight/roundBooking?traceId=${traceId}&outboundIndex=${
        
     });
 }
+
 function viewFlightDetails(resultIndex) {
     const traceId = sessionStorage.getItem('flightTraceId');
     const results = JSON.parse(sessionStorage.getItem('flightSearchResults')) || [];
@@ -1324,50 +1412,51 @@ document.addEventListener('DOMContentLoaded', function() {
         window.location.href = newUrl.toString();
     };
 
-    // Generate HTML for the header
     document.getElementById('flight-header').innerHTML = `
-        <div class="flight-route-container">
-            <h1 class="text-3xl font-bold text-white mb-2 flex items-center">
-                <span class="text-4xl">${from} (${fromCode})</span>
-                <div class="mx-3 flex items-center">
+    <div class="flight-route-container">
+        <h1 class="text-2xl sm:text-3xl font-bold text-white mb-2">
+            <div class="flex flex-wrap items-center gap-2">
+                <span class="text-3xl sm:text-4xl break-words">${from} (${fromCode})</span>
+                <div class="mx-1 sm:mx-3 flex items-center">
                     ${tripType === '2' ? `
-                        <i class="fas fa-exchange-alt text-xl text-white cursor-pointer hover:text-gray-200" 
+                        <i class="fas fa-exchange-alt text-lg sm:text-xl text-white cursor-pointer hover:text-gray-200" 
                            onclick="swapLocations()" 
                            title="Swap Origin and Destination"></i>
                     ` : `
-                        <i class="fas fa-arrow-right text-xl text-white"></i>
+                        <i class="fas fa-arrow-right text-lg sm:text-xl text-white"></i>
                     `}
                 </div>
-                <span class="text-4xl">${to} (${toCode})</span>
-            </h1>
+                <span class="text-3xl sm:text-4xl break-words">${to} (${toCode})</span>
+            </div>
+        </h1>
+        
+        <div class="text-white text-opacity-90 text-sm sm:text-base">
+            <div class="flex flex-wrap items-center gap-2 sm:gap-4">
+                <p class="flex items-center">
+                    <i class="fas fa-plane-departure mr-1 sm:mr-2"></i>
+                    ${formatDate(departureDate)}
+                </p>
+                ${tripType === '2' ? `
+                    <p class="flex items-center">
+                        <i class="fas fa-plane-arrival mr-1 sm:mr-2"></i>
+                        ${formatDate(returnDate)}
+                    </p>
+                ` : ''}
+            </div>
             
-            <div class="text-white text-opacity-90 space-y-1">
-                <div class="flex flex-wrap items-center gap-4">
-                    <p class="flex items-center">
-                        <i class="fas fa-plane-departure mr-2"></i>
-                        ${formatDate(departureDate)}
-                    </p>
-                    ${tripType === '2' ? `
-                        <p class="flex items-center">
-                            <i class="fas fa-plane-arrival mr-2"></i>
-                            ${formatDate(returnDate)}
-                        </p>
-                    ` : ''}
-                </div>
-                
-                <div class="flex flex-wrap gap-4 mt-2">
-                    <p class="flex items-center">
-                        <i class="fas fa-users mr-2"></i>
-                        ${getPassengerSummary()}
-                    </p>
-                    <p class="flex items-center">
-                        <i class="fas fa-chair mr-2"></i>
-                        ${cabinClassMap[cabinClass] || 'Economy'} Class
-                    </p>
-                </div>
+            <div class="flex flex-wrap gap-2 sm:gap-4 mt-1 sm:mt-2">
+                <p class="flex items-center">
+                    <i class="fas fa-users mr-1 sm:mr-2"></i>
+                    ${getPassengerSummary()}
+                </p>
+                <p class="flex items-center">
+                    <i class="fas fa-chair mr-1 sm:mr-2"></i>
+                    ${cabinClassMap[cabinClass] || 'Economy'} Class
+                </p>
             </div>
         </div>
-    `;
+    </div>
+`;
 });
   // calendar fare
     $(document).ready(function() {
