@@ -19,7 +19,7 @@ class BusController extends Controller
 
     public function __construct()
     {
-         $this->ClientId = env('BUS_API_CLIENT_ID' , '180189');
+         $this->ClientId = env('BUS_API_CLIENT_ID' , '180133');
         $this->UserName = env('BUS_API_USERNAME', 'MakeMy91');
         $this->Password = env('BUS_API_PASSWORD', 'MakeMy@910');
         $this->ApiToken = env('BUS_API_TOKEN', 'MakeMy@910@23');
@@ -52,9 +52,9 @@ class BusController extends Controller
     
         // Create the payload
         $payload = json_encode([
-            'ClientId' => $this->ClientId,
-            'UserName' => $this->UserName,
-            'Password' => $this->Password,
+            'ClientId' => '180133',
+            'UserName' => 'MakeMy91',
+            'Password' => 'MakeMy@910',
             'source_city' => trim($request->source_city),
             'source_code' => (int) trim($request->source_code),
             'destination_city' => trim($request->destination_city),
@@ -69,9 +69,9 @@ class BusController extends Controller
             // Make the API request
             $response = Http::withHeaders([
                 'Content-Type' => 'application/json',
-                'Api-Token' => $this->ApiToken, // Use the class property
+                'Api-Token' => 'MakeMy@910@23', // Use the class property
             ])->withBody($payload, 'application/json')
-                ->post('https://bus.srdvapi.com/v8/rest/Search');
+                ->post('https://bus.srdvtest.com/v8/rest/Search');
     
             // Decode the JSON response
             $data = $response->json();
@@ -134,7 +134,7 @@ class BusController extends Controller
                 'Content-Type' => 'application/json',
                 'Api-Token' => $this->ApiToken,
             ])->withBody($payload, 'application/json')
-              ->post('https://bus.srdvapi.com/v8/rest/GetSeatLayOut');
+              ->post('https://bus.srdvtest.com/v8/rest/GetSeatLayOut');
     
             $data = $response->json();
     
@@ -265,7 +265,7 @@ class BusController extends Controller
             $response = Http::withHeaders([
                 'Content-Type' => 'application/json',
                 'Api-Token' => $this->ApiToken,  // Use the class property
-            ])->post('https://bus.srdvapi.com/v8/rest/GetBoardingPointDetails', $payload);
+            ])->post('https://bus.srdvtest.com/v8/rest/GetBoardingPointDetails', $payload);
     
             $data = $response->json();
     
@@ -370,7 +370,7 @@ class BusController extends Controller
             $response = Http::withHeaders([
                 'Content-Type' => 'application/json',
                 'Api-Token' => $this->ApiToken,
-            ])->post('https://bus.srdvapi.com/v8/rest/Block', $payload);
+            ])->post('https://bus.srdvtest.com/v8/rest/Block', $payload);
     
             $data = $response->json();
             Log::info('Block Seats API Response:', ['response' => $data]);
@@ -459,7 +459,7 @@ public function bookBus(Request $request)
             $response = Http::withHeaders([
                 'Content-Type' => 'application/json',
                 'Api-Token' => $this->ApiToken,  // Use the class property
-            ])->post('https://bus.srdvapi.com/v8/rest/Book', $payload);
+            ])->post('https://bus.srdvtest.com/v5/rest/Book', $payload);
 
             $data = $response->json();
             Log::info('Book API Response:', ['response' => $data]);
@@ -584,7 +584,7 @@ public function bookBus(Request $request)
         $response = Http::withHeaders([
             'Content-Type' => 'application/json',
              'Api-Token' => $this->ApiToken,  // Use the class property
-        ])->post('https://bus.srdvapi.com/v8/rest/Balance', $payload);
+        ])->post('https://bus.srdvtest.com/v5/rest/Balance', $payload);
 
         if ($response->successful()) {
             $data = $response->json();
@@ -662,7 +662,7 @@ public function balanceLog(Request $request)
     $response = Http::withHeaders([
         'Content-Type' => 'application/json',
         'Api-Token' => $this->ApiToken,
-    ])->post('https://bus.srdvapi.com/v8/rest/BalanceLog', $requestData);
+    ])->post('https://bus.srdvtest.com/v5/rest/BalanceLog', $requestData);
 
     // Parse the API response
     $data = $response->json();

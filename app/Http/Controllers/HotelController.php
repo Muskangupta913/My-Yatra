@@ -21,7 +21,7 @@ class HotelController extends Controller
 
     public function __construct()
     {
-         $this->ClientId = env('HOTEL_API_CLIENT_ID' , '180189');
+         $this->ClientId = env('HOTEL_API_CLIENT_ID' , '180133');
         $this->UserName = env('HOTEL_API_USERNAME', 'MakeMy91');
         $this->Password = env('HOTEL_API_PASSWORD', 'MakeMy@910');
         $this->ApiToken = env('HOTEL_API_TOKEN', 'MakeMy@910@23');
@@ -67,9 +67,9 @@ public function search(Request $request)
 
     try {
         $payload = [
-            'ClientId' => $this->ClientId,
-            'UserName' => $this->UserName,
-            'Password' => $this->Password,
+            'ClientId' => '180133',
+            'UserName' => 'MakeMy91',
+            'Password' => 'MakeMy@910',
             "EndUserIp" => "1.1.1.1",
             "BookingMode" => "5",
             "CheckInDate" => $request->input('CheckInDate'),
@@ -110,7 +110,7 @@ public function search(Request $request)
                 ]
             ])
             ->retry(3, 100)
-            ->post('https://hotel.srdvapi.com/v8/rest/Search', $payload);
+            ->post('https://hotel.srdvtest.com/v8/rest/Search', $payload);
 
         // Log the raw API response
         \Log::info('API Response:', ['status' => $response->status(), 'body' => $response->body()]);
@@ -183,9 +183,9 @@ public function hotelDetails(Request $request)
 
         // Prepare API request payload
         $payload = [
-           'ClientId' => $this->ClientId,
-            'UserName' => $this->UserName,
-            'Password' => $this->Password,
+            'ClientId' => '180133',
+            'UserName' => 'MakeMy91',
+            'Password' => 'MakeMy@910',
             "EndUserIp" => "1.1.1.1",
             "SrdvIndex" => "15",      // Static data as per API documentation
             "SrdvType" => "MixAPI",   // Static data as per API documentation
@@ -198,7 +198,7 @@ public function hotelDetails(Request $request)
             $response = Http::withHeaders([
                 'Content-Type' => 'application/json',
                 'Api-Token' => 'MakeMy@910@23'
-            ])->post('https://hotel.srdvapi.com/v8/rest/GetHotelInfo', $payload);
+            ])->post('https://hotel.srdvtest.com/v8/rest/GetHotelInfo', $payload);
     
             // Get the response from the API
            
@@ -250,16 +250,17 @@ public function hotelDetails(Request $request)
             "HotelCode" => $request->input('hotelCode'),
             "TraceId" => $request->input('traceId'),
             "EndUserIp" => "1.1.1.1",
-           'ClientId' => $this->ClientId,
-            'UserName' => $this->UserName,
-            'Password' => $this->Password,
+            'ClientId' => '180133',
+            'UserName' => 'MakeMy91',
+            'Password' => 'MakeMy@910',
+            "EndUserIp" => "1.1.1.1",
         ];
 
         try {
             $response = Http::withHeaders([
                 'Content-Type' => 'application/json',
                 'Api-Token' => 'MakeMy@910@23'
-            ])->post('https://hotel.srdvapi.com/v8/rest/GetHotelRoom', $payload);
+            ])->post('https://hotel.srdvtest.com/v8/rest/GetHotelRoom', $payload);
 
             if ($response->successful()) {
                 $roomDetails = $response->json();
@@ -316,10 +317,10 @@ public function hotelDetails(Request $request)
         $payload = array_merge($validated, [
             'IsVoucherBooking' => true,
             'ClientReferenceNo' => 0,
-           'ClientId' => $this->ClientId,
-            'UserName' => $this->UserName,
-            'Password' => $this->Password,
-            'EndUserIp' => '1.1.1.1',
+            'ClientId' => '180133',
+            'UserName' => 'MakeMy91',
+            'Password' => 'MakeMy@910',
+            "EndUserIp" => "1.1.1.1",
             'SrdvIndex' => '15',
             'SrdvType' => 'MixAPI',
         ]);
@@ -328,7 +329,7 @@ public function hotelDetails(Request $request)
         $response = Http::withHeaders([
             'Content-Type' => 'application/json',
             'Api-Token' => 'MakeMy@910@23'
-        ])->post('https://hotel.srdvapi.com/v8/rest/BlockRoom', $payload);
+        ])->post('https://hotel.srdvtest.com/v8/rest/BlockRoom', $payload);
 
         $responseData = $response->json();
 
@@ -385,10 +386,10 @@ public function handleBalance(Request $request)
     ]);
     // Prepare API request payload
     $payload = [
-       'ClientId' => $this->ClientId,
-            'UserName' => $this->UserName,
-            'Password' => $this->Password,
-            "EndUserIp" => "1.1.1.1",
+        'ClientId' => '180133',
+        'UserName' => 'MakeMy91',
+        'Password' => 'MakeMy@910',
+        "EndUserIp" => "1.1.1.1",
     ];
 
     try {
@@ -396,7 +397,7 @@ public function handleBalance(Request $request)
         $response = Http::withHeaders([
             'Content-Type' => 'application/json',
              'Api-Token' => 'MakeMy@910@23'
-        ])->post('https://hotel.srdvapi.com/v8/rest/Balance', $payload);
+        ])->post('https://hotel.srdvtest.com/v8/rest/Balance', $payload);
 
         // Handle the response
         $balanceData = $response->json();
@@ -442,47 +443,50 @@ public function handleBalance(Request $request)
 
 public function balanceLog(Request $request)
 {
-    // Extract data from the request body instead of query parameters
-    $requestBody = $request->json()->all();
-    $traceId = $requestBody['TraceId'] ?? null;
-    $amount = $requestBody['amount'] ?? null;
+    // Validate request data
+    $validated = $request->validate([
+        'TraceId' => 'required|string',
+        'amount' => 'required|numeric'
+    ]);
 
-    // Validate required parameters
-    if (!$traceId || !$amount) {
-        return response()->json([
-            'success' => false,
-            'errorMessage' => 'Missing required parameters (TraceId or amount)',
-        ]);
-    }
+    // Extract validated data
+    $traceId = $validated['TraceId'];
+    $amount = $validated['amount'];
 
     // Hotel Balance Log API request data
     $requestData = [
-        'EndUserIp' => $requestBody['EndUserIp'] ?? '1.1.1.1',
-       'ClientId' => $this->ClientId,
-            'UserName' => $this->UserName,
-            'Password' => $this->Password,
+        'ClientId' => '180133',
+        'UserName' => 'MakeMy91',
+        'Password' => 'MakeMy@910',
+        'EndUserIp' => '1.1.1.1',
     ];
 
-    // Make the API call
-    $response = Http::withHeaders([
-        'Content-Type' => 'application/json',
-        'Api-Token' => 'MakeMy@910@23'
-    ])->post('https://hotel.srdvapi.com/v8/rest/BalanceLog', $requestData);
+    try {
+        // Make the API call
+        $response = Http::withHeaders([
+            'Content-Type' => 'application/json',
+            'Api-Token' => 'MakeMy@910@23'
+        ])->post('https://hotel.srdvtest.com/v8/rest/BalanceLog', $requestData);
 
-    // Parse the API response
-    $data = $response->json();
+        // Parse the API response
+        $data = $response->json();
 
-    // Log the full API response for debugging
-    \Log::info('Hotel Balance API Response:', $data);
+        // Log the API response for debugging
+        \Log::info('Hotel Balance API Response:', ['response' => $data]);
 
-    // Check for successful response and ensure the `Result` key exists
-    if (isset($data['Error']) && $data['Error']['ErrorCode'] === '0' && isset($data['Result'])) {
-        $results = $data['Result'];
-        $processedLogs = [];
+        // Check for successful response
+        if (isset($data['Error']) && $data['Error']['ErrorCode'] === '0' && isset($data['Result']) && is_array($data['Result'])) {
+            
+            // Get the first result item (API returns array of results)
+            $result = $data['Result'][0];
+            
+            // Verify we have a valid result with required fields
+            if (!isset($result['Balance'])) {
+                throw new \Exception('Balance information not found in API response');
+            }
 
-        foreach ($results as $result) {
-            $currentBalance = ($result['Balance']);
-            $debitAmount = ($amount);
+            $currentBalance = floatval($result['Balance']);
+            $debitAmount = floatval($amount);
 
             // Debugging log
             \Log::info("Processing Hotel Log: Current Balance: {$currentBalance}, Debit Amount: {$debitAmount}");
@@ -492,42 +496,59 @@ public function balanceLog(Request $request)
 
             // Check for insufficient balance
             if ($updatedBalance < 0) {
-                \Log::warning("Insufficient Balance for Transaction. TraceID: {$traceId}");
                 return response()->json([
                     'success' => false,
                     'errorMessage' => 'Insufficient balance.',
+                    'currentBalance' => $currentBalance,
+                    'requiredAmount' => $debitAmount
                 ]);
             }
 
-            // Build the processed log entry
-            $processedLogs[] = [
+            // Prepare the processed log entry
+            $processedLog = [
                 'ID' => $result['ID'],
                 'Date' => $result['Date'],
                 'ClientID' => $result['ClientID'],
                 'ClientName' => $result['ClientName'],
                 'Detail' => $result['Detail'],
                 'Debit' => $debitAmount,
-                'Credit' => floatval($result['Credit']),
+                'Credit' => floatval($result['Credit'] ?? 0),
                 'Balance' => $updatedBalance,
                 'Module' => $result['Module'],
                 'TraceID' => $traceId,
-                'RefID' => $result['RefID'],
+                'RefID' => $result['RefID'] ?? '',
                 'UpdatedBy' => $result['UpdatedBy']
             ];
+
+            return response()->json([
+                'success' => true,
+                'balanceLog' => $processedLog,
+                'currentBalance' => $currentBalance,
+                'updatedBalance' => $updatedBalance
+            ]);
         }
 
+        // Handle API error response
+        $errorMessage = $data['Error']['ErrorMessage'] ?? 'Unknown error occurred';
+        throw new \Exception("API Error: {$errorMessage}");
+
+    } catch (\Exception $e) {
+        \Log::error('Balance Log Error: ' . $e->getMessage(), [
+            'trace_id' => $traceId,
+            'amount' => $amount
+        ]);
+
         return response()->json([
-            'success' => true,
-            'balanceLogs' => $processedLogs,
+            'success' => false,
+            'errorMessage' => $e->getMessage()
         ]);
     }
-
-    return response()->json([
-        'success' => false,
-        'errorMessage' => $data['Error']['ErrorMessage'] ?? 'Unknown error occurred.',
-    ]);
 }
 
+// Helper function to check if all keys exist in an array
+function array_key_exists_all(array $keys, array $arr) {
+    return !array_diff_key(array_flip($keys), $arr);
+}
 
 
 
@@ -611,10 +632,10 @@ public function bookRoom(Request $request)
             "SrdvType" => "MixAPI",
             "SrdvIndex" => $data['SrdvIndex'] ?? "15",
             "TraceId" => $data['TraceId'],
+            'ClientId' => '180133',
+            'UserName' => 'MakeMy91',
+            'Password' => 'MakeMy@910',
             "EndUserIp" => "1.1.1.1",
-           'ClientId' => $this->ClientId,
-            'UserName' => $this->UserName,
-            'Password' => $this->Password,
         ];
 
         // Enhanced logging
@@ -626,7 +647,7 @@ public function bookRoom(Request $request)
                 'Content-Type' => 'application/json',
                 'Api-Token' => 'MakeMy@910@23'
             ])
-            ->post('https://hotel.srdvapi.com/v8/rest/Book', $bookingRequest);
+            ->post('https://hotel.srdvtest.com/v8/rest/Book', $bookingRequest);
 
         // Log the raw response
         \Log::info('Raw API Response:', [

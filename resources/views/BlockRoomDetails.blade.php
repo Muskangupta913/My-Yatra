@@ -19,24 +19,24 @@
         
         <div id="passengers-container">
             <form id="passenger-form" style="display: flex; flex-direction: column; gap: 15px;">
-                <div style="display: flex; flex-wrap: wrap; gap: 15px;">
-                    <select name="Title" required style="flex: 0 0 100px; padding: 10px; border: 1px solid #ddd; border-radius: 4px; background-color: white;">
+                <!-- <div style="display: flex; flex-wrap: wrap; gap: 15px;"> -->
+                    <!-- <select name="Title" required style="flex: 0 0 100px; padding: 10px; border: 1px solid #ddd; border-radius: 4px; background-color: white;">
                         <option value="">Title</option>
                         <option value="Mr">Mr</option>
                         <option value="Mrs">Mrs</option>
                         <option value="Ms">Ms</option>
                         <option value="Miss">Miss</option>
                         <option value="Master">Mstr</option>
-                    </select>
+                    </select> -->
                     
-                    <input type="text" name="FirstName" placeholder="First Name" required 
+                    <!-- <input type="text" name="FirstName" placeholder="First Name" required 
                         style="flex: 1; min-width: 200px; padding: 10px; border: 1px solid #ddd; border-radius: 4px;">
                     
                     <input type="text" name="LastName" placeholder="Last Name" required 
                         style="flex: 1; min-width: 200px; padding: 10px; border: 1px solid #ddd; border-radius: 4px;">
-                </div>
+                </div> -->
 
-                <input type="email" name="Email" placeholder="Email Address" required 
+                <!-- <input type="email" name="Email" placeholder="Email Address" required 
                     style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px;">
 
                 <input type="tel" name="Phoneno" placeholder="Phone Number" required 
@@ -64,7 +64,7 @@
                     <input type="checkbox" name="LeadPassenger" id="lead-passenger" 
                         style="width: 18px; height: 18px;">
                     <label for="lead-passenger" style="color: #444; font-size: 14px;">Lead Passenger</label>
-                </div>
+                </div> -->
 
                 <!-- Buttons container -->
                 <div style="display: flex; gap: 15px; margin-top: 10px;">
@@ -88,36 +88,33 @@
     event.preventDefault();
     
     // First validate the form data
+// Global variable to store passenger details
+window.passengerDetails = [];
+
+document.addEventListener('DOMContentLoaded', function() {
+    populateBookingPage();
+    setupFormHandlers();
+});
+
+function setupFormHandlers() {
+    const passengerForm = document.getElementById('passenger-form');
+    if (passengerForm) {
+        passengerForm.addEventListener('submit', handleFormSubmit);
+    }
+}
+
+function handleFormSubmit(event) {
+    event.preventDefault();
     if (!validatePassengerForm()) {
         return;
     }
-    
-    // Then try to add the new passenger
-    if (addNewPassengerForm()) {
-        // Check if we have all required passengers
-        const validation = validatePassengerCounts();
-        if (!validation.isValid) {
-            // Show message and don't proceed if we don't have all passengers
-            alert(validation.message);
-            return;
-        }
-        
-        // If we have all required passengers, proceed with balance check
-        closeModal();
-        try {
-            await checkBalance();
-        } catch (error) {
-            console.error('Error checking balance:', error);
-            // Remove the last added passenger if balance check fails
-            if (window.passengerDetails && window.passengerDetails.length > 0) {
-                window.passengerDetails.pop();
-                updatePassengersDisplay();
-            }
-        }
-    }
-});
 
-
+    const passengerData = collectFormData();
+    window.passengerDetails.push(passengerData);
+    updatePassengersDisplay();
+    event.target.reset();
+}
+}); 
 
 function validatePassengerForm() {
     const form = document.getElementById('passenger-form');
@@ -139,14 +136,14 @@ function validatePassengerForm() {
         return false;
     }
     
-    // Phone validation - ensure it's numeric and reasonable length
+    // Phone validation
     const phone = formData.get('Phoneno');
     if (!/^\d{10,15}$/.test(phone)) {
         alert('Please enter a valid phone number (10-15 digits)');
         return false;
     }
     
-    // PAN validation if provided (optional field)
+    // PAN validation if provided
     const pan = formData.get('PAN');
     if (pan && !/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/.test(pan)) {
         alert('Please enter a valid PAN number (e.g., ABCDE1234F)');
@@ -156,240 +153,245 @@ function validatePassengerForm() {
     return true;
 }
 
-function getCookie(name) {
-    const value = `; ${document.cookie}`;
-    const parts = value.split(`; ${name}=`);
-    if (parts.length === 2) {
-        const cookieValue = parts.pop().split(';').shift();
-        // Handle undefined or null values
-        return cookieValue === 'undefined' || cookieValue === 'null' ? null : cookieValue;
-    }
-    return null;
-}
-
-function getPassengerCountsFromCookies() {
-    // Get cookie values with proper error handling
-    const adultsStr = getCookie('noOfAdults');
-    const childrenStr = getCookie('noOfChildren');
-    const childAgesStr = getCookie('childAges');
-
-    // Parse values with fallbacks
-    const adults = adultsStr ? parseInt(adultsStr) : 0;
-    const children = childrenStr ? parseInt(childrenStr) : 0;
-    
-    // Parse child ages array
-    let childAges = [];
-    if (childAgesStr) {
-        try {
-            childAges = childAgesStr.split(',').map(age => parseInt(age)).filter(age => !isNaN(age));
-        } catch (error) {
-            console.error('Error parsing child ages:', error);
-        }
-    }
-
-    return {
-        adults: isNaN(adults) ? 0 : adults,
-        children: isNaN(children) ? 0 : children,
-        childAges: childAges
-    };
-}
-
-
-function getCurrentPassengerCounts() {
-    const passengers = window.passengerDetails || [];
-    return passengers.reduce((counts, passenger) => {
-        if (passenger.paxType === 'Adult') {
-            counts.adults++;
-        } else if (passenger.paxType === 'Child') {
-            counts.children++;
-        }
-        return counts;
-    }, { adults: 0, children: 0 });
-}
-
-
-
-function validatePassengerCounts() {
-    const cookieCounts = getPassengerCountsFromCookies();
-    const currentPassengers = window.passengerDetails || [];
-    
-    // Log the values for debugging
-    console.log('Cookie counts:', cookieCounts);
-    console.log('Current passengers:', currentPassengers);
-    
-    // Count current adults and children
-    const currentCounts = currentPassengers.reduce((counts, passenger) => {
-        if (passenger.paxType === 'Adult') {
-            counts.adults++;
-        } else if (passenger.paxType === 'Child') {
-            counts.children++;
-        }
-        return counts;
-    }, { adults: 0, children: 0 });
-
-
-    console.log('Current counts:', currentCounts);
-
-// Check if we need more passengers
-const missingAdults = Math.max(0, cookieCounts.adults - currentCounts.adults);
-const missingChildren = Math.max(0, cookieCounts.children - currentCounts.children);
-
-if (missingAdults > 0 || missingChildren > 0) {
-    let message = 'Please add ';
-    const missing = [];
-    
-    if (missingAdults > 0) {
-        missing.push(`${missingAdults} more adult${missingAdults > 1 ? 's' : ''}`);
-    }
-    if (missingChildren > 0) {
-        missing.push(`${missingChildren} more child${missingChildren > 1 ? 'ren' : ''}`);
-    }
-    
-    message += missing.join(' and ');
-    return {
-        isValid: false,
-        message: message
-    };
-}
-
-// Check if we have too many passengers
-if (currentCounts.adults > cookieCounts.adults || currentCounts.children > cookieCounts.children) {
-    return {
-        isValid: false,
-        message: `You have added more passengers than initially selected. Please remove excess passengers.`
-    };
-}
-
-return {
-    isValid: true,
-    message: ''
-};
-}
-
-// Function to set test cookies (for debugging)
-function setTestCookies(adults = 2, children = 1, childAges = [5]) {
-document.cookie = `noOfAdults=${adults}; path=/; max-age=604800`;
-document.cookie = `noOfChildren=${children}; path=/; max-age=604800`;
-document.cookie = `childAges=${childAges.join(',')}; path=/; max-age=604800`;
-debugCookieValues();
-}
-
-window.passengerDetails = [];
-function addNewPassengerForm() {
+function collectFormData() {
     const form = document.getElementById('passenger-form');
     const formData = new FormData(form);
-    
-    // Create passenger data object
-    const passengerData = {
-        title: formData.get('Title'),
-        firstName: formData.get('FirstName'),
-        lastName: formData.get('LastName'),
-        email: formData.get('Email'),
-        phone: formData.get('Phoneno'),
-        paxType: formData.get('PaxType'),
-        pan: formData.get('PAN'),
-        leadPassenger: formData.get('LeadPassenger') === 'on'
-    };
-    
-    // Initialize global array if needed
-    window.passengerDetails = window.passengerDetails || [];
-    
-    // Validate passenger type counts before adding
-    const cookieCounts = getPassengerCountsFromCookies();
-    const currentCounts = getCurrentPassengerCounts();
-    
-    if (passengerData.paxType === 'Adult' && currentCounts.adults >= cookieCounts.adults) {
-        alert('Maximum number of adults already added');
-        return false;
-    }
-    
-    if (passengerData.paxType === 'Child' && currentCounts.children >= cookieCounts.children) {
-        alert('Maximum number of children already added');
-        return false;
-    }
-    
-    // Add to global array
-    window.passengerDetails.push(passengerData);
-    
-    // Update display
-    updatePassengersDisplay();
-    
-    // Reset form
-    form.reset();
-    
-    return true;
+    const passengerData = {};
+    formData.forEach((value, key) => {
+        passengerData[key] = value;
+    });
+    return passengerData;
 }
 
-function updatePassengersDisplay() {
+function getCookieValues() {
+    function getCookie(name) {
+        const value = `; ${document.cookie}`;
+        const parts = value.split(`; ${name}=`);
+        if (parts.length === 2) {
+            return parts.pop().split(';').shift();
+        }
+        return null;
+    }
+
+    const adultCount = parseInt(getCookie('adultCount')) || 0;
+    const childCount = parseInt(getCookie('childCount')) || 0;
+    const childAges = JSON.parse(getCookie('childAges') || '[]');
+
+    return { adultCount, childCount, childAges };
+}
+
+function generatePassengerForms() {
+    const { adultCount, childCount, childAges } = getCookieValues();
     const container = document.getElementById('passengers-container');
+    container.innerHTML = '';
     
-    // Create or get the passengers list section
-    let passengersListSection = document.getElementById('passengers-list');
-    if (!passengersListSection) {
-        passengersListSection = document.createElement('div');
-        passengersListSection.id = 'passengers-list';
-        passengersListSection.style.marginTop = '20px';
-        container.appendChild(passengersListSection);
+    // Generate adult forms
+    for (let i = 0; i < adultCount; i++) {
+        container.insertAdjacentHTML('beforeend', createAdultForm(i));
     }
-    
-    // Update the display
-    if (window.passengerDetails.length > 0) {
-        passengersListSection.innerHTML = '<h3>Added Passengers:</h3>' + 
-            window.passengerDetails.map((passenger, index) => `
-                <div style="border: 1px solid #ddd; padding: 10px; margin: 10px 0; border-radius: 4px;">
-                    <div>
-                        <strong>${passenger.title} ${passenger.firstName} ${passenger.lastName}</strong>
-                        ${passenger.leadPassenger ? ' (Lead Passenger)' : ''}
-                    </div>
-                    <div>Type: ${passenger.paxType}</div>
-                    <div>Email: ${passenger.email}</div>
-                    <div>Phone: ${passenger.phone}</div>
-                    ${passenger.pan ? `<div>PAN: ${passenger.pan}</div>` : ''}
-                    <button onclick="removePassenger(${index})" 
-                            style="background-color: #ff4444; color: white; border: none; 
-                                   padding: 5px 10px; margin-top: 10px; border-radius: 4px; 
-                                   cursor: pointer;">
-                        Remove
-                    </button>
+
+    // Generate child forms
+    for (let i = 0; i < childCount; i++) {
+        container.insertAdjacentHTML('beforeend', createChildForm(i, childAges[i]));
+    }
+
+    // Add submit button
+    container.insertAdjacentHTML('beforeend', createSubmitButton());
+}
+
+function createAdultForm(index) {
+    return `
+        <div class="passenger-form" data-type="adult" style="border: 1px solid #ddd; padding: 15px; margin-bottom: 20px; border-radius: 4px;">
+            <h3>Adult Passenger ${index + 1}</h3>
+            <form id="adult-form-${index}" class="passenger-details-form">
+                <div style="display: flex; flex-wrap: wrap; gap: 15px;">
+                    <select name="Title" required style="flex: 0 0 100px; padding: 10px; border: 1px solid #ddd; border-radius: 4px;">
+                        <option value="">Title</option>
+                        <option value="Mr">Mr</option>
+                        <option value="Mrs">Mrs</option>
+                        <option value="Ms">Ms</option>
+                        <option value="Miss">Miss</option>
+                    </select>
+                    
+                    <input type="text" name="FirstName" placeholder="First Name" required 
+                        style="flex: 1; min-width: 200px; padding: 10px; border: 1px solid #ddd; border-radius: 4px;">
+                    
+                    <input type="text" name="LastName" placeholder="Last Name" required 
+                        style="flex: 1; min-width: 200px; padding: 10px; border: 1px solid #ddd; border-radius: 4px;">
                 </div>
-            `).join('');
-    } else {
-        passengersListSection.innerHTML = '';
+
+                <input type="email" name="Email" placeholder="Email Address" required 
+                    style="width: 100%; padding: 10px; margin-top: 15px; border: 1px solid #ddd; border-radius: 4px;">
+
+                <input type="tel" name="Phoneno" placeholder="Phone Number" required 
+                    style="width: 100%; padding: 10px; margin-top: 15px; border: 1px solid #ddd; border-radius: 4px;">
+
+                <input type="hidden" name="PaxType" value="Adult">
+                
+                <input type="text" name="PAN" placeholder="PAN Number" 
+                    style="width: 100%; padding: 10px; margin-top: 15px; border: 1px solid #ddd; border-radius: 4px;">
+                    
+                     <input type="text" name="PASSPORT" placeholder="PASSPORT NUMBER" 
+                    style="width: 100%; padding: 10px; margin-top: 15px; border: 1px solid #ddd; border-radius: 4px;">
+
+               ${index === 0 ? `
+    <div style="margin-top: 15px;">
+        <input 
+            type="checkbox" 
+            name="LeadPassenger" 
+            id="lead-passenger-${index}" 
+            value="true"
+            checked 
+            disabled
+        >
+        <label for="lead-passenger-${index}">Lead Passenger</label>
+        <input 
+            type="hidden" 
+            name="IsLeadPax" 
+            value="true"
+        >
+    </div>
+                ` : ''}
+            </form>
+        </div>
+    `;
+}
+
+function createChildForm(index, age) {
+    return `
+        <div class="passenger-form" data-type="child" style="border: 1px solid #ddd; padding: 15px; margin-bottom: 20px; border-radius: 4px;">
+            <h3>Child Passenger ${index + 1} (Age: ${age || 'N/A'})</h3>
+            <form id="child-form-${index}" class="passenger-details-form">
+                <div style="display: flex; flex-wrap: wrap; gap: 15px;">
+                    <select name="Title" required style="flex: 0 0 100px; padding: 10px; border: 1px solid #ddd; border-radius: 4px;">
+                        <option value="">Title</option>
+                        <option value="Mstr">Mstr</option>
+                        <option value="Miss">Miss</option>
+                    </select>
+                    
+                    <input type="text" name="FirstName" placeholder="First Name" required 
+                        style="flex: 1; min-width: 200px; padding: 10px; border: 1px solid #ddd; border-radius: 4px;">
+                    
+                    <input type="text" name="LastName" placeholder="Last Name" required 
+                        style="flex: 1; min-width: 200px; padding: 10px; border: 1px solid #ddd; border-radius: 4px;">
+                         <input type="email" name="Email" placeholder="Email Address" required 
+                    style="width: 100%; padding: 10px; margin-top: 15px; border: 1px solid #ddd; border-radius: 4px;">
+
+                <input type="tel" name="Phoneno" placeholder="Phone Number" required 
+                    style="width: 100%; padding: 10px; margin-top: 15px; border: 1px solid #ddd; border-radius: 4px;">
+
+                      <input type="text" name="PAN" placeholder="PAN Number" 
+                    style="width: 100%; padding: 10px; margin-top: 15px; border: 1px solid #ddd; border-radius: 4px;">
+                
+                       <input type="text" name="PASSPORT" placeholder="PASSPORT NUMBER"
+                    style="width: 100%; padding: 10px; margin-top: 15px; border: 1px solid #ddd; border-radius: 4px;">
+                
+                    </div>
+
+                <input type="hidden" name="PaxType" value="Child">
+                <input type="hidden" name="Age" value="${age || ''}">
+            </form>
+        </div>
+    `;
+}
+
+function createSubmitButton() {
+    return `
+        <div style="display: flex; justify-content: center; margin-top: 20px;">
+            <button onclick="submitAllPassengers()" 
+                style="padding: 12px 30px; background-color: #4CAF50; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 16px;">
+                Submit All Passengers
+            </button>
+        </div>
+    `;
+}
+    
+
+        window.generatePassengerForms = generatePassengerForms;
+
+
+function submitAllPassengers() {
+    const forms = document.querySelectorAll('.passenger-details-form');
+    const passengerData = [];
+    let isValid = true;
+
+    forms.forEach(form => {
+        if (!form.checkValidity()) {
+            isValid = false;
+            form.reportValidity();
+            return;
+        }
+
+        const formData = new FormData(form);
+        const passenger = {};
+        formData.forEach((value, key) => {
+            passenger[key] = value;
+        });
+        passengerData.push(passenger);
+    });
+
+    if (!isValid) {
+        return;
     }
-}
 
-function removePassenger(index) {
-    if (confirm('Are you sure you want to remove this passenger?')) {
-        window.passengerDetails.splice(index, 1);
-        updatePassengersDisplay();
-    }
-}
-
-function isValidEmail(email) {
-    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-}
-
-// Update the form submit handler
+    window.passengerDetails = passengerData;
+    closeModal();
+    checkBalance().catch(error => {
+        console.error('Error checking balance:', error);
+        window.passengerDetails = [];
+    });
+}// Update the form submit handler
 document.getElementById('passenger-form').addEventListener('submit', function(event) {
     event.preventDefault();
     addNewPassengerForm();
 });
 
 
-        function fetchBookingDetails() {
-            const urlParams = new URLSearchParams(window.location.search);
-            const traceId = urlParams.get('traceId');
-            const resultIndex = urlParams.get('resultIndex');
-            const hotelCode = urlParams.get('hotelCode');
-            const hotelName = decodeURIComponent(urlParams.get('hotelName') || '');
-            const roomDetails = JSON.parse(decodeURIComponent(urlParams.get('roomDetails') || '{}'));
-
-            return { traceId, resultIndex, hotelCode, hotelName, roomDetails };
+function confirmBooking() {
+            showPassengerModal();
         }
+
+        document.addEventListener('DOMContentLoaded', populateBookingPage);
+        window.addEventListener('resize', () => {
+    populateBookingPage();
+});
+
+function showPassengerModal() {
+    const modal = document.getElementById('passenger-modal');
+    modal.style.display = 'block';
+    generatePassengerForms();
+}
+
+function closeModal() {
+    const modal = document.getElementById('passenger-modal');
+    modal.style.display = 'none';
+}
+
+
+
+        
+function fetchBookingDetails() {
+    const urlParams = new URLSearchParams(window.location.search);
+    
+    const traceId = urlParams.get('traceId');
+    const resultIndex = urlParams.get('resultIndex');
+    const hotelCode = urlParams.get('hotelCode');
+    const hotelName = decodeURIComponent(urlParams.get('hotelName') || '');
+    const roomDetails = JSON.parse(decodeURIComponent(urlParams.get('roomDetails') || '{}'));
+
+    // Fetch the new required fields
+    const isPassportMandatory = urlParams.get('isPassportMandatory');
+    const isPanMandatory = urlParams.get('isPanMandatory');
+    const requireAllPaxDetails = urlParams.get('requireAllPaxDetails');
+
+    return { traceId, resultIndex, hotelCode, hotelName, roomDetails, isPassportMandatory, isPanMandatory, requireAllPaxDetails };
+}
+
 
         function populateBookingPage() {
     const bookingDetails = fetchBookingDetails();
     const bookingContainer = document.getElementById('booking-container');
+    console.log('details are here', bookingDetails);
 
     if (!bookingDetails.roomDetails) {
         bookingContainer.innerHTML = `
@@ -549,20 +551,7 @@ function cycleImages(clickedImage) {
 }
 
 // Add window resize listener to update styles
-window.addEventListener('resize', () => {
-    populateBookingPage();
-});
 
-
-        function showPassengerModal() {
-            const modal = document.getElementById('passenger-modal');
-            modal.style.display = 'block';
-        }
-
-        function closeModal() {
-            const modal = document.getElementById('passenger-modal');
-            modal.style.display = 'none';
-        }
 
         async function checkBalance() {
             const loadingOverlay = document.createElement('div');
@@ -573,7 +562,7 @@ window.addEventListener('resize', () => {
             try {
                 const requestData = {
                     EndUserIp: '1.1.1.1',
-                    ClientId: '180189',
+                    ClientId: '180133',
                     UserName: 'MakeMy91',
                     Password: 'MakeMy@910'
                 };
@@ -637,15 +626,7 @@ window.addEventListener('resize', () => {
             } finally {
                 document.body.removeChild(loadingOverlay);
             }
-        }
-
-       
-
-        function confirmBooking() {
-            showPassengerModal();
-        }
-
-        document.addEventListener('DOMContentLoaded', populateBookingPage);
+        }   
     </script>
 
     <style>

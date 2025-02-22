@@ -610,16 +610,10 @@ async function processHotelBooking(bookingData) {
     try {
         // Prepare balance payload
         const balancePayload = {
-            EndUserIp: "1.1.1.1",
-            ClientId: "180133",
-            UserName: "MakeMy91",
-            Password: "MakeMy@910",
-            amount: parseFloat(bookingData.roomDetails.OfferedPrice),
+          
+            amount: (bookingData.roomDetails.OfferedPrice),
             TraceId: bookingData.hotelDetails.traceId,
-            bookingDetails: {
-                hotelName: bookingData.hotelDetails.hotelName,
-                roomType: bookingData.roomDetails.RoomTypeName
-            }
+          
         };
 
         console.log("Balance Payload:", balancePayload);
@@ -642,16 +636,16 @@ async function processHotelBooking(bookingData) {
         }
 
         const hotelPassengers = bookingData.passengerDetails.map(passenger => ({
-            Title: passenger.title,
-            ChildCount: passenger.childCount || 0,
-            FirstName: passenger.firstName,
-            LastName: passenger.lastName,
-            Phoneno: passenger.phone,
-            Email: passenger.email,
-            PaxType: passenger.paxType || "1",
-            LeadPassenger: passenger.leadPassenger || false,
-            PAN: passenger.pan || ""
-        }));
+    Title: passenger.Title,  // Correct capitalization
+    FirstName: passenger.FirstName,  // Correct capitalization
+    LastName: passenger.LastName,  // Correct capitalization
+    Phoneno: passenger.Phoneno || "",  // Ensure it doesn't return undefined
+    Email: passenger.Email || "",  // Ensure it doesn't return undefined
+    PaxType: passenger.PaxType || "1",  // Default to "1" (Adult) if missing
+    LeadPassenger: passenger.LeadPassenger || false,  // Ensure it defaults to false
+    PAN: passenger.PAN || "" // Ensure it doesn't return undefined
+}));
+
 
         const roomDetail = {
             RoomId: bookingData.roomDetails.RoomId,
@@ -664,7 +658,7 @@ async function processHotelBooking(bookingData) {
             InfoSource: bookingData.roomDetails.InfoSource || "",
             SequenceNo: bookingData.roomDetails.SequenceNo || "",
             SmokingPreference: "0",
-            ChildCount: bookingData.roomDetails.childCount || 0,
+            ChildCount: hotelPassengers.filter(p => p.PaxType === "Child").length, // Corrected
             RequireAllPaxDetails: false,
             HotelPassenger: hotelPassengers,
             Currency: bookingData.roomDetails.Currency,
@@ -1058,16 +1052,16 @@ function fetchBalanceLogAndBookGDS() {
             'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
         },
         body: JSON.stringify({
-            traceId: gdsTicketDetails.traceId,
-            amount: gdsTicketDetails.grandTotal
-        })
+    TraceId: gdsTicketDetails.traceId,  // Changed to uppercase 'T'
+    amount: gdsTicketDetails.grandTotal
+})
     })
     .then(response => response.json())
     .then(data => {
         if (data.success) {
             console.log('Balance log processed:', data.balanceLog);
             // Proceed with booking only if balance deduction was successful
-            BookGdsTickte(gdsTicketDetails);
+            processGdsTicket(gdsTicketDetails);
         } else {
             showError(data.errorMessage || 'Failed to process balance log');
         }

@@ -263,9 +263,10 @@
             <div class="mb-2 col-md-2">
     <div class="date-caption">Passengers</div>
     <div class="dropdown">
-        <button class="btn btn-secondary dropdown-toggle w-100" type="button" id="passengerDropdown" data-bs-toggle="dropdown">
+        <button class="form-control rounded-0 py-3 text-start" type="button" id="passengerDropdown" data-bs-toggle="dropdown">
             Passengers
         </button>
+        
         <div class="dropdown-menu p-3" style="width: 250px;">
             <div class="mb-2">
                 <label for="adultCount">Adults</label>
@@ -1185,10 +1186,16 @@ $(document).on('click keydown', function (e) {
 
 
             // Get all child ages
-        const childCount = parseInt(data["RoomGuests[0][NoOfChild]"]);
-        const childAges = [];
-        
+        const childSelect = document.querySelector('select[name="RoomGuests[0][NoOfChild]"]');
+        const childCount = childSelect ? parseInt(childSelect.value) : 0;
+
+        // Get adult count directly from select element
+        const adultSelect = document.querySelector('select[name="RoomGuests[0][NoOfAdults]"]');
+        const adultCount = adultSelect ? parseInt(adultSelect.value) : 0;
+
+    
         // Only collect ages if there are children
+        const childAges = [];
         if (childCount > 0) {
             for (let i = 0; i < childCount; i++) {
                 const ageSelect = document.querySelector(`select[name="RoomGuests[0][ChildAges][${i}]"]`);
@@ -1197,43 +1204,31 @@ $(document).on('click keydown', function (e) {
                 }
             }
         }
-
-
-        function getCookie(name) {
-    const value = `; ${document.cookie}`;
-    const parts = value.split(`; ${name}=`);
-    if (parts.length === 2) return parts.pop().split(';').shift();
-    return null;
-}
-
-// Example usage - Get cookie values
-console.log('NoOfChildren:', getCookie('noOfChildren'));
-console.log('ChildAges:', getCookie('childAges'));
-console.log('NoOfAdults:', getCookie('noOfAdults'));
-
-       
         // Get the selected number of children
 const noOfChildrenSelect = document.querySelector('select[name="RoomGuests[0][NoOfChild]"]');
 const selectedChildCount = noOfChildrenSelect ? noOfChildrenSelect.value : '0';
 
+  // Function to set cookie with expiration
+  function setCookie(name, value, days) {
+            const expires = new Date();
+            expires.setTime(expires.getTime() + (days * 24 * 60 * 60 * 1000));
+            document.cookie = `${name}=${value};expires=${expires.toUTCString()};path=/`;
+        }
+
+        // Store in cookies
+        setCookie('adultCount', adultCount, 7);
+        setCookie('childCount', childCount, 7);
+        setCookie('childAges', JSON.stringify(childAges), 7);
+
+        // Add more detailed console logging
+        console.log('Stored Guest Information:', {
+            adultCount: adultCount,
+            childCount: childCount,
+            childAges: childAges,
+            rawCookies: document.cookie.split(';').map(cookie => cookie.trim())
+        });
 // Set cookies with expiry time (e.g., 7 days)
-document.cookie = `noOfChildren=${selectedChildCount}; path=/; max-age=604800`;
-document.cookie = `childAges=${childAges}; path=/; max-age=604800`;
-document.cookie = `noOfAdults=${String(data["RoomGuests[0][NoOfAdults]"])}; path=/; max-age=604800`;
-
-
-
-// Check specific cookies
-console.log('Cookies:', document.cookie);
-
-
-
-
             const payload = {
-                ClientId: "180189",
-                UserName: "MakeMy91",
-                Password: "MakeMy@910",
-                EndUserIp: "1.1.1.1",
                 BookingMode: "5",
                 CheckInDate: formattedCheckInDate,
                 NoOfNights: String(data.NoOfNights),
