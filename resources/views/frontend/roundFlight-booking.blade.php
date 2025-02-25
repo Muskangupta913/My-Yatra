@@ -731,10 +731,6 @@ if (outboundFareQuoteData || returnFareQuoteData) {
         }
     }
 
-
-    
-
-
 window.passengerSelections = {
     seats: {
         outbound: {},  // Format: {passengerType-index: {seatDetails}}
@@ -811,8 +807,6 @@ window.passengerSelections = {
         fetchSSRData('meal', returnResultIndex, returnSrdvIndex, 'return');
     });
 }
-
-
 
 function fetchSSRData(type, passengerType, resultIndex, srdvIndex, direction, passengerIndex) {
             const containerId = `options-container-${direction}-${passengerType}-${passengerIndex}`;

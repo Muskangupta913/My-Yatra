@@ -7,7 +7,7 @@
     @section('styles')
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
-    * { 
+* { 
     margin: 0; 
     padding: 0; 
     box-sizing: border-box; 
@@ -20,18 +20,18 @@ body {
 
 /* Main Layout Styles */
 .main-container {
-    max-width: 1400px; 
-    margin: 20px auto; 
-    padding: 0 20px; 
-    display: flex; 
-    gap: 20px; 
+    max-width: 1800px;
+    margin: 20px auto;
+    padding: 0 20px;
+    display: flex;
+    gap: 20px;
     position: relative;
 }
 
 /* Filter Sidebar Styles */
 #filterSidebar {
-    width: 350px; /* Increased width */
-    min-width: 320px; /* Minimum width to prevent excessive shrinking */
+    width: 350px;
+    min-width: 320px;
     background: white;
     padding: 20px;
     border-radius: 8px;
@@ -40,7 +40,7 @@ body {
     top: 30px;
     height: calc(100vh - 40px);
     overflow-y: auto;
-    align-self: flex-start; /* Ensures sidebar stays at the top */
+    align-self: flex-start;
 }
 
 /* Filter Sections */
@@ -80,16 +80,16 @@ body {
 .active-filters {
     display: flex;
     flex-wrap: wrap;
-    gap: 8px;
-    margin-bottom: 20px;
+    gap: 10px;
+    margin-bottom: 25px;
 }
 
 .filter-badge {
     background: #e8f0fe;
     color: #1a73e8;
-    padding: 4px 8px;
+    padding: 6px 12px;
     border-radius: 4px;
-    font-size: 12px;
+    font-size: 0.875rem;
     display: flex;
     align-items: center;
     gap: 4px;
@@ -103,17 +103,28 @@ body {
     padding: 0 4px;
 }
 
-/* Hotel Card Styles */
+/* Hotel Grid and Cards */
+#hotelGrid {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    width: 100%;
+}
+
 .hotel-card {
     display: flex;
     background: white;
     border-radius: 8px;
     overflow: hidden;
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    transition: transform 0.2s;
+    transition: transform 0.2s, box-shadow 0.2s;
     cursor: pointer;
-    margin-bottom: 20px;
     width: 100%;
+}
+
+.hotel-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
 }
 
 .hotel-image-container {
@@ -137,44 +148,7 @@ body {
     margin: 10px 0;
 }
 
-/* Mobile Styles */
-@media (max-width: 768px) {
-    #filterSidebar {
-        width: 350px;
-    min-width: 320px;
-    background: white;
-    padding: 20px;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    position: sticky;
-    top: 20px;
-    max-height: calc(100vh - 40px); /* Limit height to viewport minus margins */
-    overflow: hidden; /* Hide scroll by default */
-    transition: overflow 0.3s ease; /* Smooth transition for scroll behavior */
-}
-
-    .hotel-card {
-        flex-direction: column;
-    }
-
-    .hotel-image-container {
-        flex: 0 0 200px;
-        width: 100%;
-    }
-
-    #mobileFilterBtn {
-        display: block;
-    }
-}
-/* Show scrollbar on hover */
-#filterSidebar:hover {
-    overflow-y: auto; /* Enable scroll on hover */
-}
-
-/* Make scroll smooth */
-#filterSidebar {
-    scrollbar-behavior: smooth;
-}
+/* Scrollbar Styles */
 #filterSidebar::-webkit-scrollbar {
     width: 6px;
 }
@@ -191,6 +165,225 @@ body {
 
 #filterSidebar::-webkit-scrollbar-thumb:hover {
     background: #555;
+}
+
+/* Search Header Styles */
+.search-header {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
+    padding: 15px 20px;
+    color: white;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 15px;
+}
+
+.search-info-item {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.search-info-icon {
+    font-size: 24px;
+    color: #ecf0f1;
+}
+
+.search-info-text {
+    display: flex;
+    flex-direction: column;
+}
+
+.search-info-label {
+    font-size: 12px;
+    color: #bdc3c7;
+    margin-bottom: 3px;
+}
+
+.search-info-value {
+    font-size: 16px;
+    font-weight: 600;
+}
+
+/* Responsive Design */
+/* Desktop and Large Laptop (1440px and above) */
+@media (min-width: 1440px) {
+    .main-container {
+        padding: 0 40px;
+        gap: 30px;
+    }
+
+    .hotel-card {
+        min-height: 280px;
+    }
+
+    .hotel-image-container {
+        flex: 0 0 350px;
+        height: 280px;
+    }
+
+    .hotel-info-container {
+        padding: 25px;
+    }
+
+    .hotel-info-container h3 {
+        font-size: 1.75rem;
+    }
+
+    .hotel-info-container p {
+        font-size: 1rem;
+    }
+
+    .filter-section h4 {
+        font-size: 1.125rem;
+    }
+}
+
+/* Regular Laptop and Small Desktop (1024px to 1439px) */
+@media (min-width: 1024px) and (max-width: 1439px) {
+    .main-container {
+        padding: 0 30px;
+    }
+
+    .hotel-card {
+        min-height: 250px;
+    }
+
+    .hotel-image-container {
+        flex: 0 0 300px;
+        height: 250px;
+    }
+}
+
+/* Tablet Landscape (900px to 1023px) */
+@media (min-width: 900px) and (max-width: 1023px) {
+    .main-container {
+        padding: 0 25px;
+    }
+
+    #filterSidebar {
+        width: 280px;
+        min-width: 280px;
+    }
+
+    .hotel-card {
+        min-height: 220px;
+    }
+
+    .hotel-image-container {
+        flex: 0 0 250px;
+        height: 220px;
+    }
+}
+
+/* Mobile Styles */
+@media (max-width: 768px) {
+    .main-container {
+        flex-direction: column;
+    }
+
+    #filterSidebar {
+        width: 100%;
+        min-width: auto;
+        position: fixed;
+        top: 0;
+        left: -100%;
+        height: 100vh;
+        z-index: 1000;
+        transform: translateX(-100%);
+        transition: transform 0.3s ease;
+    }
+
+    #filterSidebar.active {
+        left: 0;
+        transform: translateX(0);
+    }
+
+    .hotel-card {
+        flex-direction: column;
+    }
+
+    .hotel-image-container {
+        flex: 0 0 200px;
+        width: 100%;
+        height: 200px;
+    }
+
+    .search-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    #mobileFilterBtn {
+        display: block;
+    }
+}
+
+/* Mobile Filter Button */
+#mobileFilterBtn {
+    display: none;
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    padding: 12px 24px;
+    background: #1a73e8;
+    color: white;
+    border: none;
+    border-radius: 25px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    z-index: 1000;
+}
+
+/* Hotel Card Image */
+.hotel-image-container img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* Hotel Status Badges */
+.hotel-status {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: rgba(0,0,0,0.7);
+    color: #ffd700;
+    padding: 5px 10px;
+    border-radius: 4px;
+}
+
+.hotel-category {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    background: rgba(0,0,0,0.7);
+    color: white;
+    padding: 5px 10px;
+    border-radius: 4px;
+}
+
+/* Results Count Section */
+#resultsCount {
+    background: white;
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+/* Sort Select Styles */
+#sortSelect {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+    color: #333;
 }
 </style>
  @endsection
@@ -250,7 +443,7 @@ body {
         </style>
 </div>
 
-    <div style="max-width: 1400px; margin: 80px 20px auto; padding: 0 20px; display: flex; gap: 20px; position: relative;">
+    <div style=" margin: 80px 20px auto; padding: 0 20px; display: flex; gap: 20px; position: relative;">
         <!-- Enhanced Filters Sidebar -->
 <aside id="filterSidebar" style="width: 320px; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); position: sticky; top: 20px; height: calc(100vh - 40px); overflow-y: auto;">
 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
@@ -621,7 +814,8 @@ function setupMobileResponsiveness() {
         }
 
         function renderHotels(hotels) {
-            const grid = document.getElementById('hotelGrid');
+    const grid = document.getElementById('hotelGrid');
+    
     if (hotels.length === 0) {
         grid.innerHTML = `
             <div style="text-align: center; padding: 40px; background: white; border-radius: 8px;">
@@ -632,10 +826,11 @@ function setupMobileResponsiveness() {
         return;
     }
 
+    // Store scroll position
+    const scrollPosition = window.pageYOffset;
+
     grid.innerHTML = hotels.map(hotel => `
         <div class="hotel-card" 
-             onmouseover="this.style.transform='translateY(-4px)'" 
-             onmouseout="this.style.transform='translateY(0)'"
              onclick="viewHotelDetails('${hotel.ResultIndex}', '${hotel.HotelCode}')">
             <div class="hotel-image-container">
                 <img src="${hotel.HotelPicture || '/api/placeholder/400/200'}" 
@@ -656,7 +851,6 @@ function setupMobileResponsiveness() {
                             <i class="fas fa-map-marker-alt" style="color: #1a73e8;"></i> 
                             ${hotel.HotelAddress}, ${hotel.City}, ${hotel.State} ${hotel.PinCode}
                         </p>
-                       
                     </div>
                     <div style="margin-bottom: 15px;">
                         <p style="font-size: 14px; color: #444;">
@@ -688,24 +882,13 @@ function setupMobileResponsiveness() {
             </div>
         </div>
     `).join('');
+
+    // Restore scroll position
+    window.scrollTo(0, scrollPosition);
 }
 
-        function viewHotelDetails(resultIndex, hotelCode) {
-            const traceId = sessionStorage.getItem('traceId');
-            if (!traceId) {
-                console.error('TraceId not found');
-                return;
-            }
-            sessionStorage.setItem('selectedHotelResultIndex', resultIndex);
-            sessionStorage.setItem('selectedHotelTraceId', traceId);
-            sessionStorage.setItem('selectedHotelCode', hotelCode);
-            window.location.href = `/hotel-info?traceId=${traceId}&resultIndex=${resultIndex}&hotelCode=${hotelCode}`;
-        }
-
-        // Handle window resize
-        window.addEventListener('resize', () => {
-            const grid = document.getElementById('hotelGrid');
-            grid.style.gridTemplateColumns = window.innerWidth > 1200 ? 'repeat(3, 1fr)' : window.innerWidth > 768 ? 'repeat(2, 1fr)' : '1fr';
-        });
+// Remove the window resize event listener that changes grid columns
+// The layout will now be handled purely by CSS
+window.removeEventListener('resize', handleViewChange);
     </script>
         @endsection

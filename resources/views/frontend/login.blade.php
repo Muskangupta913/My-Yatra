@@ -1,97 +1,26 @@
-function createFilterSection(title, name, options) {
-    if (name === 'airlines') {
-        const optionsHTML = Array.from(options).map(airlineName => {
-            // Find the airline code for this airline name
-            let airlineCode = '';
-            
-            if (journeyType === "2") {
-                // For round trips, check both outbound and return flights
-                const outboundFlights = JSON.parse(sessionStorage.getItem('outboundFlights')) || [];
-                const returnFlights = JSON.parse(sessionStorage.getItem('returnFlights')) || [];
-                
-                // First check outbound flights
-                const outboundFlight = outboundFlights.find(flight => 
-                    flight.FareDataMultiple?.some(fareData => 
-                        fareData.FareSegments[0]?.AirlineName === airlineName
-                    )
-                );
-                
-                if (outboundFlight) {
-                    const fareData = outboundFlight.FareDataMultiple.find(fd => 
-                        fd.FareSegments[0]?.AirlineName === airlineName
-                    );
-                    airlineCode = fareData?.FareSegments[0]?.AirlineCode;
-                }
-                
-                // If not found in outbound, check return flights
-                if (!airlineCode) {
-                    const returnFlight = returnFlights.find(flight => 
-                        flight.FareDataMultiple?.some(fareData => 
-                            fareData.FareSegments[0]?.AirlineName === airlineName
-                        )
-                    );
-                    
-                    if (returnFlight) {
-                        const fareData = returnFlight.FareDataMultiple.find(fd => 
-                            fd.FareSegments[0]?.AirlineName === airlineName
-                        );
-                        airlineCode = fareData?.FareSegments[0]?.AirlineCode;
-                    }
-                }
-            } else {
-                // For one-way flights
-                for (const resultGroup of results) {
-                    const flight = resultGroup.find(result => 
-                        result.FareDataMultiple?.some(fareData => 
-                            fareData.FareSegments[0]?.AirlineName === airlineName
-                        )
-                    );
-                    
-                    if (flight) {
-                        const fareData = flight.FareDataMultiple.find(fd => 
-                            fd.FareSegments[0]?.AirlineName === airlineName
-                        );
-                        airlineCode = fareData?.FareSegments[0]?.AirlineCode;
-                        break;
-                    }
-                }
-            }
+<!-- Guest Nationality -->
+<div class="mb-3 col-md-2"> <!-- Original div sizing and alignment that others should match -->
+    <div class="date-caption" style="text-align: center;">Nationality</div>
+    <select id="nationalitySelect" class="form-control rounded-0 py-3 text-center">
+        <option value="" selected>Select Nationality</option>
+        <option value="IN" data-nationality="Indian">INDIA</option>
+        <option value="US" data-nationality="American">American</option>
+        <option value="GB" data-nationality="British">British</option>
+        <option value="CA" data-nationality="Canadian">Canadian</option>
+    </select>
+</div>
 
-            // Ensure we have a valid airline code, or use a default
-            const logoPath = airlineCode ? getAirlineLogo(airlineCode) : '/assets/images/airlines/airlines/48_48/6E.png';
+<!-- Hidden inputs now wrapped in consistent div for alignment -->
+<!-- ADDED: Wrapper div for hidden inputs with same classes -->
+<div class="mb-3 col-md-2">
+    <div class="date-caption" style="text-align: center; visibility: hidden;">Hidden Fields</div>
+    <input type="hidden" name="CountryCode" id="countryCodeInput" value="">
+    <input type="hidden" name="SelectedNationality" id="hiddenNationality" value="">
+</div>
 
-            return `
-                <label class="flex items-center mb-3 hover:bg-gray-50 p-2 rounded">
-                    <input type="checkbox" name="${name}" value="${airlineName}" class="mr-3">
-                    <img src="${logoPath}" 
-                         alt="${airlineName}" 
-                         class="w-8 h-8 mr-3 object-contain"
-                         onerror="this.onerror=null; this.src='/assets/images/airlines/airlines/48_48/6E.png'; this.classList.add('grayscale', 'opacity-70');">
-                    <span class="text-sm">${airlineName}</span>
-                </label>
-            `;
-        }).join('');
-        
-        return `
-            <div class="mb-6">
-                <h4 class="font-semibold mb-3 text-gray-700">${title}</h4>
-                <div class="space-y-1">${optionsHTML}</div>
-            </div>
-        `;
-    } else {
-        // Original handling for other filter sections
-        const optionsHTML = Array.from(options).map(option => `
-            <label class="flex items-center mb-2">
-                <input type="checkbox" name="${name}" value="${option}" class="mr-2">
-                ${option}
-            </label>
-        `).join('');
-        
-        return `
-            <div class="mb-4">
-                <h4 class="font-semibold mb-2">${title}</h4>
-                <div class="space-y-2">${optionsHTML}</div>
-            </div>
-        `;
-    }
-}
+<!-- Search Button -->
+<!-- MODIFIED: Adjusted classes and styles to match nationality div -->
+<div class="mb-3 col-md-2">
+    <div class="date-caption" style="text-align: center;">Search</div> <!-- Changed visibility:hidden to match other captions -->
+    <button type="button" class="btn btn-warning w-100 rounded-0 py-3 fw-bold hotelbuttonsearch" id="searchButton">Search</button>
+</div>

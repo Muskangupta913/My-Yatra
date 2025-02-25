@@ -149,7 +149,7 @@ body::before {
 <!-- Root wrapper for full width -->
 <div class="min-h-screen w-full">
     <!-- Main content container -->
-    <div class="max-w-[1440px] mx-auto px-6 py-8">
+    <div class=" mx-auto px-6 py-8">
         <!-- Search Summary Header with gradient -->
         <div class="gradient-header rounded-xl p-6 mb-8 shadow-md bg-gradient-to-r from-blue-600/60 to-blue-800/60">
             <div class="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
@@ -899,8 +899,6 @@ function renderFilteredResults(filteredResults, journeyType) {
         });
     }
 }
-
-
 
 function createFlightCardContent(segment, fareData) {
     return `

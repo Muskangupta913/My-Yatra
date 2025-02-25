@@ -434,7 +434,7 @@ Route::get('/kashmir', function () {
 Route::get('/rishikesh', function () {
   return view('rishikesh'); // Replace 'rishikesh' with the actual Blade file name without the .blade.php extension.
 })->name('rishikesh');
-
+Route::get('/travel-bharat', [TravelController::class, 'index'])->name('travel.bharat');
 // Car Route
 Route::get('/cars', [CarController::class, 'index'])->name('cars');
 Route::get('/cars', [HomeController::class, 'cars']);

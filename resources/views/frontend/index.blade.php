@@ -55,7 +55,11 @@
     overflow: hidden;
     text-overflow: ellipsis;
 }
-
+#roomGuestsDropdown{
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
 
 </style>
 @endsection
@@ -119,43 +123,34 @@
     <hr class="searchline">
     <form id="hotelSearchForm">
         <div class="row">
-            <!-- City Input -->
-            <!-- <div class="mb-3 col-md-3 hotel-search">
-                <div class="date-caption">Enter City</div>
-                <input type="text" class="form-control rounded-0 py-3" name="CityName" id="hotelSearchCity" placeholder="Enter City Name" required autocomplete="off" style="text-align: center; width: 100%;" >
-                <input type="hidden" name="CityId" id="cityIdInput" value="">
-                <div id="hotelSearchCityList" class="card" style="position: absolute; width: 23%; max-height: 150px; overflow-y: scroll;"></div>
-            </div> -->
-            
             <div class="mb-3 col-md-3">
                 <div class="date-caption">Enter City</div>
-                <input type="text" class="form-control rounded-0 py-3" name="CityName" id="hotelSearchCity" placeholder="Enter City Name" required autocomplete="off" >
+                <input type="text" class="form-control rounded-0 py-3" name="CityName" id="hotelSearchCity" placeholder="Enter City Name" required style="text-align: center;" >
                 <input type="hidden" name="CityId" id="cityIdInput" value="" >
-                <div id="hotelSearchCityList" class="card" style="position: absolute; width: 23%; max-height: 150px; overflow-y: scroll;"></div>
+                <div id="hotelSearchCityList" class="card" ></div>
             </div>
             <!-- Check-in Date -->
             <div class="mb-3 col-md-2">
-    <div class="date-caption">Check-in Date</div>
-    <input type="text" id="checkinDatepicker" name="CheckInDate" class="form-control rounded-0 py-3 datepicker" placeholder="Select Check-in Date" required style="text-align: center;">
-</div>
+                 <div class="date-caption">Check-in </div>
+                 <input type="text" id="checkinDatepicker" name="CheckInDate" class="form-control rounded-0 py-3 datepicker" placeholder="Select Check-in Date" required style="text-align: center;">
+            </div>
 
             <!-- Number of Nights -->
             <div class="mb-3 col-md-2">
                 <div class="date-caption">No. of Nights</div>
-                <input type="number" name="NoOfNights" class="form-control rounded-0 py-3" placeholder="Enter No. of Nights" required style="text-align: center;">
+                <input type="number" name="NoOfNights" class="form-control rounded-0 py-3" placeholder="No. of Nights" required style="text-align: center;">
             </div>
 
             <div class="mb-3 col-md-3">
-    <div class="date-caption">Room & Guests</div>
-    <div class="dropdown">
+            <div class="date-caption">Room & Guests</div>
+            <div class="dropdown">
         <button
             class="btn btn-outline-secondary dropdown-toggle w-100 rounded-0 py-3"
             type="button"
             id="roomGuestsDropdown"
             data-bs-toggle="dropdown"
             aria-expanded="false"
-            style="background-color: white; color: #6c757d; border-color: #ced4da;"
-        >
+            style="background-color: white; color: #6c757d; border-color: #ced4da;">
             1 Room, 2 Adults, 0 Children
         </button>
         <ul class="dropdown-menu p-3" aria-labelledby="roomGuestsDropdown" style="width: 100%; max-width: 300px;">
@@ -208,7 +203,7 @@
             <div class="mb-3 col-md-2">
                 <div class="date-caption"style="text-align: center;">Nationality</div>
                 <select id="nationalitySelect" class="form-control rounded-0 py-3 text-center">
-                    <option value="" selected>Select Nationality</option>
+                    <option value="" selected>Select</option>
                     <option value="IN" data-nationality="Indian">INDIA</option>
                     <option value="US" data-nationality="American">American</option>
                     <option value="GB" data-nationality="British">British</option>
@@ -595,47 +590,58 @@
 
 <section class="tripPlan">
   <div class="container">
-    <div class="row">
-      <div class="col-xl-6">
+    <div class="row gy-5"> <!-- Added gy-5 for vertical spacing -->
+      <div class="col-xl-6 mb-xl-0 mb-5"> <!-- Added margin bottom for mobile -->
         <div class="img-box3">
-          <div class="img1"><img src="assets/img/normal/about_3_1.jpg" alt="About"></div>
-          <div class="img2 movingX"><img src="assets/img/tour/tour_2_4.jpg" alt="About"></div>
-
+          <div class="img1">
+            <img src="assets/img/normal/about_3_1.jpg" alt="About" class="img-fluid">
+          </div>
+          <div class="img2 movingX">
+            <img src="assets/img/tour/tour_2_4.jpg" alt="About" class="img-fluid">
+          </div>
         </div>
       </div>
       <div class="col-xl-6 trip-descriptions">
         <div class="ps-xl-4">
-          <div class="title-area mb-20 pe-xxl-5 me-xxl-5">
-            <span class="sub-title style1">Let’s Go
-              Together</span>
-            <h2 class="sec-title mb-20 pe-xl-5 me-xl-5 heading">Plan Your Dream Trip with Us</h2>
+          <div class="title-area mb-20">
+            <span class="sub-title style1">Let's Go Together</span>
+            <h2 class="sec-title mb-20 heading">Plan Your Dream Trip with Us</h2>
           </div>
           <p class="sec-text mb-30">At <strong>Make My Bharat Yatra Pvt. Ltd.,</strong> we believe that every journey should be memorable. Whether it's exploring exotic destinations or enjoying a peaceful retreat, we're here to ensure your trip is one-of-a-kind. Let us take care of all the details while you focus on creating unforgettable memories.</p>
           <div class="about-item-wrap">
-            <div class="about-item style2">
-              <div class="about-item_img"><img src="assets/img/icon/about_1_1.svg" alt=""></div>
-              <div class="about-item_centent">
+            <div class="about-item style2 mb-4">
+              <div class="about-item_img">
+                <img src="assets/img/icon/about_1_1.svg" alt="">
+              </div>
+              <div class="about-item_content">
                 <h5 class="box-title">Exclusive Trip</h5>
                 <p class="about-item_text">Experience unique, handpicked tour packages designed just for you. Our expert team ensures you get the most out of every destination.</p>
               </div>
             </div>
-            <div class="about-item style2">
-              <div class="about-item_img"><img src="assets/img/icon/about_1_2.svg" alt=""></div>
-              <div class="about-item_centent">
+            <div class="about-item style2 mb-4">
+              <div class="about-item_img">
+                <img src="assets/img/icon/about_1_2.svg" alt="">
+              </div>
+              <div class="about-item_content">
                 <h5 class="box-title">Safety First Always</h5>
                 <p class="about-item_text">Your safety is our top priority. We follow stringent safety standards to ensure a secure and worry-free travel experience.</p>
               </div>
             </div>
-            <div class="about-item style2">
-              <div class="about-item_img"><img src="assets/img/icon/about_1_3.svg" alt=""></div>
-              <div class="about-item_centent">
+            <div class="about-item style2 mb-4">
+              <div class="about-item_img">
+                <img src="assets/img/icon/about_1_3.svg" alt="">
+              </div>
+              <div class="about-item_content">
                 <h5 class="box-title">Professional Guide</h5>
-                <p class="about-item_text">Our knowledgeable and friendly guides are here to enhance your travel with deep insights, ensuring you don’t miss out on any hidden gems.</p>
+                <p class="about-item_text">Our knowledgeable and friendly guides are here to enhance your travel with deep insights, ensuring you don't miss out on any hidden gems.</p>
               </div>
             </div>
           </div>
-          <div class="mt-35"><a href="{{ route('aboutUs')}}" class="btn btn-warning rounded-pill py-3 px-4 mt-3 fw-semibold">Learn More <i
-                class="fa-solid fa-arrow-right"></i></a></div>
+          <div class="mt-4">
+            <a href="{{ route('aboutUs')}}" class="btn btn-warning rounded-pill py-3 px-4 fw-semibold">
+              Learn More <i class="fa-solid fa-arrow-right ms-2"></i>
+            </a>
+          </div>
         </div>
       </div>
     </div>
@@ -644,13 +650,12 @@
 
 <section class="holiday-packages">
   <div class="container">
-    <h3 class="border-start border-4 border-warning px-3 mb-4">Best Selling India
-      Holiday Packages</h3>
-    <div class="swiper mySwiperHoliday  best-places">
-      <div class="swiper-wrapper shadow">
+    <h3 class="border-start border-4 border-warning px-3 mb-4">Best Selling India Holiday Packages</h3>
+    <div class="swiper mySwiperHoliday best-places"style="height: auto !important;">
+      <div class="swiper-wrapper "style="height: auto !important;">
         @if ($tourpackages->count() > 0)
         @foreach ($tourpackages as $item)
-        <div class="swiper-slide holiday-packages-swiper mt-3">
+        <div class="swiper-slide holiday-packages-swiper mt-3"style="height: auto !important;'">
           <div class="card">
             <div class="card-body items p-0">
               @php
@@ -661,8 +666,9 @@
                 <div class="recommended under-checkbox">{{ round($discount, 2) }}% OFF<span></span></div>
                 <div class="duration">
                   <div class="duration-days">
-                    <small style="font-size: 14px;
-                 font-weight: 700;"> <i class="fa-solid fa-calendar-days"></i> {{$item->duration}}</small>
+                    <small style="font-size: 14px; font-weight: 700;"> 
+                      <i class="fa-solid fa-calendar-days"></i> {{$item->duration}}
+                    </small>
                   </div>
                   <div class="features">
                     <i class="fa-solid fa-hotel"></i>
@@ -674,24 +680,38 @@
             </div>
             <div class="card-footer py-3 bg-white">
               <div class="desc">
-             <h5 class="title"><a href="{{ url('holiday-packages', $item->slug)}}" class="title text-decoration-none">
-                    {{ \Illuminate\Support\Str::limit($item->package_name, 32, '...') }}</a> </h5>
+                <h5 class="title">
+                  <a href="{{ url('holiday-packages', $item->slug)}}" class="title text-decoration-none">
+                    {{ \Illuminate\Support\Str::limit($item->package_name, 32, '...') }}
+                  </a>
+                </h5>
                 <p class="sub-title fs-5 text-secondary">{{$item->destination->destination_name}}</p>
                 <p class="sub-titles">Starting From</p>
-                <span class="price">
-                  <span>₹{{ number_format($item->offer_price) }}</span>
-                  <div class="item-center">
-                  <del>{{ number_format($item->ragular_price) }} /-</del>
-                  <span class="person"> per person</span>
-                  <a href="{{ url('holiday-packages', $item->slug)}}" 
-                   style="display: inline-block; background-color: #ff9800; margin: 0 0 0 240px; color: white; text-decoration: none; 
-                   padding: 10px 20px; font-size: 16px; font-weight: 600; border-radius: 5px; 
-                   box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1); transition: background-color 0.3s ease;">
-                   Details
-                  </a>
+                <div style="display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 10px;">
+                  <div>
+                    <span style="font-size: 1.25rem; font-weight: 600; color: #ff9800;">₹{{ number_format($item->offer_price) }}</span>
+                    <div>
+                      <del>{{ number_format($item->ragular_price) }} /-</del>
+                      <span style="font-size: 0.9rem; color: #666;"> per person</span>
+                    </div>
                   </div>
-                </span> 
-              </div>   
+                  <a href="{{ url('holiday-packages', $item->slug)}}" 
+                    style="display: inline-block; 
+                           background-color: #ff9800; 
+                           color: white; 
+                           text-decoration: none; 
+                           padding: 8px 16px; 
+                           font-size: 16px; 
+                           font-weight: 600; 
+                           border-radius: 5px; 
+                           box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+                           transition: background-color 0.3s ease;
+                           min-width: 100px;
+                           text-align: center;">
+                    Details
+                  </a>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -699,7 +719,6 @@
         @endif
       </div>
     </div>
-  </div>
   </div>
 </section>
 
@@ -724,7 +743,7 @@
     </a>
         </div>
           <div class="col-xl-4 col-lg-4  mb-3 col-md-12">
-          <a href="#tour-places">
+          <a href="{{ route('kashmir') }}">
              <img src="{{ asset('assets/images/offer-1.webp')}}" class="shadow" width="100%" alt="">
           </a>
           </div>
