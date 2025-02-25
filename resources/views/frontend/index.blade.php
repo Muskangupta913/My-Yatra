@@ -41,6 +41,27 @@
     color: #666;
     font-size: 0.9em;
 }
+.form-check-inline {
+    display: inline-flex !important;
+    margin-right: 1rem !important;
+}
+
+.dropdown-menu {
+    z-index: 1050;
+}
+
+#passengerDropdown {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+#roomGuestsDropdown{
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+
 </style>
 @endsection
 
@@ -211,7 +232,7 @@
         </div>
     </form>
 </div>
-
+  <!-- Flight Booking -->
 
 <div class="tab-pane fade mt-5" id="flight" role="tabpanel" aria-labelledby="home-tab">
     <h4 class="mb-5" id="flight-title">Book Flights</h4>
@@ -249,13 +270,13 @@
     <div id="flightToCityList" class="card" style="position: absolute; width: 23%; max-height: 150px; overflow-y: scroll;"></div>
 </div>
             <div class="mb-2 col-md-2">
-                <div class="date-caption">Departure Date</div>
+                <div class="date-caption">Departure </div>
                 <input type="text" id="flightDepartureDate" name="departureDate"
                     class="form-control rounded-0 py-3 datepicker"
                     placeholder="Select Departure Date" required>
             </div>
             <div class="mb-2 col-md-2">
-                <div class="date-caption">Return Date</div>
+                <div class="date-caption">Return </div>
                 <input type="text" id="flightReturnDate" name="returnDate"
                     class="form-control rounded-0 py-3 datepicker"
                     placeholder="Select Return Date">
@@ -279,7 +300,7 @@
                        max="9">
             </div>
             <div class="mb-2">
-                <label for="childCount">Children</label>
+                <label for="childCount">Child</label>
                 <input type="number" 
                        id="childCount"
                        name="childCount" 
@@ -303,7 +324,7 @@
 </div>
             <div class="mb-2 col-md-2">
                 <div class="date-caption" style="visibility: hidden">Search</div>
-                <button type="submit" id="flightSearch" class="btn btn-warning w-100 rounded-0 py-3 fw-bold">Search Flights</button>
+                <button type="submit" id="flightSearch" class="btn btn-warning w-100 rounded-0 py-3 fw-bold">Search</button>
             </div>
         </div>
                   <!-- Fare Type Selection -->
@@ -736,6 +757,32 @@
   </script>
    -->
    <script>
+    // Add this JavaScript after your HTML
+document.addEventListener('DOMContentLoaded', function() {
+    const passengerDropdown = document.getElementById('passengerDropdown');
+    const adultCount = document.getElementById('adultCount');
+    const childCount = document.getElementById('childCount');
+    const infantCount = document.getElementById('infantCount');
+
+    function updatePassengerDisplay() {
+        const adults = parseInt(adultCount.value) || 0;
+        const children = parseInt(childCount.value) || 0;
+        const infants = parseInt(infantCount.value) || 0;
+        
+        let displayText = '';
+        
+        if (adults > 0) displayText += `${adults} Adult${adults > 1 ? 's' : ''} `;
+        if (children > 0) displayText += `${children} Child${children > 1 ? 'ren' : ''} `;
+        if (infants > 0) displayText += `${infants} Infant${infants > 1 ? 's' : ''} `;
+        
+        passengerDropdown.textContent = displayText.trim() || 'Select';
+    }
+
+    // Add event listeners to all inputs
+    adultCount.addEventListener('change', updatePassengerDisplay);
+    childCount.addEventListener('change', updatePassengerDisplay);
+    infantCount.addEventListener('change', updatePassengerDisplay);
+});
 // Modified loading spinner functions
 function showLoadingSpinner() {
     const spinner = document.getElementById('loadingSpinner');
@@ -1228,6 +1275,15 @@ const selectedChildCount = noOfChildrenSelect ? noOfChildrenSelect.value : '0';
             rawCookies: document.cookie.split(';').map(cookie => cookie.trim())
         });
 // Set cookies with expiry time (e.g., 7 days)
+document.cookie = `noOfChildren=${selectedChildCount}; path=/; max-age=604800`;
+document.cookie = `childAges=${childAges}; path=/; max-age=604800`;
+document.cookie = `noOfAdults=${String(data["RoomGuests[0][NoOfAdults]"])}; path=/; max-age=604800`;
+
+
+
+// Check specific cookies
+console.log('Cookies:', document.cookie);
+
             const payload = {
                 BookingMode: "5",
                 CheckInDate: formattedCheckInDate,

@@ -116,12 +116,15 @@ function handleFormSubmit(event) {
 }
 }); 
 
+// Update validatePassengerForm to handle mandatory document requirements
 function validatePassengerForm() {
     const form = document.getElementById('passenger-form');
     const formData = new FormData(form);
+    const bookingDetails = fetchBookingDetails();
+    const paxType = formData.get('PaxType');
     
-    // Required fields validation
-    const requiredFields = ['Title', 'FirstName', 'LastName', 'Email', 'Phoneno', 'PaxType'];
+    // Basic required fields validation
+    const requiredFields = ['Title', 'FirstName', 'LastName', 'Email', 'Phoneno'];
     for (const field of requiredFields) {
         if (!formData.get(field)) {
             alert(`Please fill in the ${field.replace(/([A-Z])/g, ' $1').toLowerCase()}`);
@@ -142,12 +145,94 @@ function validatePassengerForm() {
         alert('Please enter a valid phone number (10-15 digits)');
         return false;
     }
-    
-    // PAN validation if provided
+
+    // PAN validation
     const pan = formData.get('PAN');
-    if (pan && !/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/.test(pan)) {
-        alert('Please enter a valid PAN number (e.g., ABCDE1234F)');
+    if (bookingDetails.isPanMandatory === 'true') {
+        if (!pan) {
+            alert('PAN number is mandatory for this booking');
+            return false;
+        }
+        if (!/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/.test(pan)) {
+            alert('Please enter a valid PAN number (e.g., ABCDE1234F)');
+            return false;
+        }
+    }
+
+    // Passport validation
+    const passport = formData.get('PASSPORT');
+    if (bookingDetails.isPassportMandatory === 'true') {
+        if (!passport) {
+            alert('Passport number is mandatory for this booking');
+            return false;
+        }
+        if (!/^[A-Z0-9]{8,9}$/.test(passport)) {
+            alert('Please enter a valid passport number');
+            return false;
+        }
+    }
+
+    return true;
+}// Update validatePassengerForm to handle requireAllPaxDetails
+function validatePassengerForm() {
+    const form = document.getElementById('passenger-form');
+    const formData = new FormData(form);
+    const bookingDetails = fetchBookingDetails();
+    const paxType = formData.get('PaxType');
+    const isLeadPax = formData.get('IsLeadPax') === 'true';
+    
+    // If requireAllPaxDetails is false and this is not the lead passenger, skip validation
+    if (bookingDetails.requireAllPaxDetails === 'false' && !isLeadPax) {
+        return true;
+    }
+
+    // Basic required fields validation
+    const requiredFields = ['Title', 'FirstName', 'LastName', 'Email', 'Phoneno'];
+    for (const field of requiredFields) {
+        if (!formData.get(field)) {
+            alert(`Please fill in the ${field.replace(/([A-Z])/g, ' $1').toLowerCase()}`);
+            return false;
+        }
+    }
+    
+    // Email validation
+    const email = formData.get('Email');
+    if (!isValidEmail(email)) {
+        alert('Please enter a valid email address');
         return false;
+    }
+    
+    // Phone validation
+    const phone = formData.get('Phoneno');
+    if (!/^\d{10,15}$/.test(phone)) {
+        alert('Please enter a valid phone number (10-15 digits)');
+        return false;
+    }
+
+    // PAN validation
+    const pan = formData.get('PAN');
+    if (bookingDetails.isPanMandatory === 'true') {
+        if (!pan) {
+            alert('PAN number is mandatory for this booking');
+            return false;
+        }
+        if (!/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/.test(pan)) {
+            alert('Please enter a valid PAN number (e.g., ABCDE1234F)');
+            return false;
+        }
+    }
+
+    // Passport validation
+    const passport = formData.get('PASSPORT');
+    if (bookingDetails.isPassportMandatory === 'true') {
+        if (!passport) {
+            alert('Passport number is mandatory for this booking');
+            return false;
+        }
+        if (!/^[A-Z0-9]{8,9}$/.test(passport)) {
+            alert('Please enter a valid passport number');
+            return false;
+        }
     }
 
     return true;
@@ -182,24 +267,59 @@ function getCookieValues() {
 
 function generatePassengerForms() {
     const { adultCount, childCount, childAges } = getCookieValues();
+    const bookingDetails = fetchBookingDetails();
     const container = document.getElementById('passengers-container');
     container.innerHTML = '';
     
-    // Generate adult forms
+    // If requireAllPaxDetails is false, only show the first adult form
+    if (bookingDetails.requireAllPaxDetails === 'false') {
+        container.insertAdjacentHTML('beforeend', createAdultForm(0));
+        container.insertAdjacentHTML('beforeend', createFormNote());
+        container.insertAdjacentHTML('beforeend', createSubmitButton());
+        return;
+    }
+
+    // Generate all forms if requireAllPaxDetails is true
     for (let i = 0; i < adultCount; i++) {
         container.insertAdjacentHTML('beforeend', createAdultForm(i));
     }
 
-    // Generate child forms
     for (let i = 0; i < childCount; i++) {
         container.insertAdjacentHTML('beforeend', createChildForm(i, childAges[i]));
     }
 
-    // Add submit button
     container.insertAdjacentHTML('beforeend', createSubmitButton());
 }
 
+function createFormNote() {
+    return `
+        <div style="margin: 20px 0; padding: 10px; background-color: #f8f9fa; border-radius: 4px; border-left: 4px solid #0d6efd;">
+            <p style="margin: 0; color: #666;">
+                Only lead passenger details are required for this booking. 
+                Other passenger details can be provided at the hotel during check-in.
+            </p>
+        </div>
+    `;
+}
+
 function createAdultForm(index) {
+    const bookingDetails = fetchBookingDetails();
+    const panField = `
+        <input type="text" 
+            name="PAN" 
+            placeholder="PAN Number ${bookingDetails.isPanMandatory === 'true' ? '(Required)' : '(Optional)'}" 
+            ${bookingDetails.isPanMandatory === 'true' ? 'required' : ''} 
+            style="width: 100%; padding: 10px; margin-top: 15px; border: 1px solid #ddd; border-radius: 4px;">
+    `;
+    
+    const passportField = `
+        <input type="text" 
+            name="PASSPORT" 
+            placeholder="Passport Number ${bookingDetails.isPassportMandatory === 'true' ? '(Required)' : '(Optional)'}" 
+            ${bookingDetails.isPassportMandatory === 'true' ? 'required' : ''} 
+            style="width: 100%; padding: 10px; margin-top: 15px; border: 1px solid #ddd; border-radius: 4px;">
+    `;
+
     return `
         <div class="passenger-form" data-type="adult" style="border: 1px solid #ddd; padding: 15px; margin-bottom: 20px; border-radius: 4px;">
             <h3>Adult Passenger ${index + 1}</h3>
@@ -228,36 +348,40 @@ function createAdultForm(index) {
 
                 <input type="hidden" name="PaxType" value="Adult">
                 
-                <input type="text" name="PAN" placeholder="PAN Number" 
-                    style="width: 100%; padding: 10px; margin-top: 15px; border: 1px solid #ddd; border-radius: 4px;">
-                    
-                     <input type="text" name="PASSPORT" placeholder="PASSPORT NUMBER" 
-                    style="width: 100%; padding: 10px; margin-top: 15px; border: 1px solid #ddd; border-radius: 4px;">
+                ${panField}
+                ${passportField}
 
-               ${index === 0 ? `
-    <div style="margin-top: 15px;">
-        <input 
-            type="checkbox" 
-            name="LeadPassenger" 
-            id="lead-passenger-${index}" 
-            value="true"
-            checked 
-            disabled
-        >
-        <label for="lead-passenger-${index}">Lead Passenger</label>
-        <input 
-            type="hidden" 
-            name="IsLeadPax" 
-            value="true"
-        >
-    </div>
+                ${index === 0 ? `
+                    <div style="margin-top: 15px;">
+                        <input type="checkbox" name="LeadPassenger" id="lead-passenger-${index}" value="true" checked disabled>
+                        <label for="lead-passenger-${index}">Lead Passenger</label>
+                        <input type="hidden" name="IsLeadPax" value="true">
+                    </div>
                 ` : ''}
             </form>
         </div>
     `;
 }
 
+// Update createChildForm to handle mandatory fields
 function createChildForm(index, age) {
+    const bookingDetails = fetchBookingDetails();
+    const panField = `
+        <input type="text" 
+            name="PAN" 
+            placeholder="PAN Number ${bookingDetails.isPanMandatory === 'true' ? '(Required)' : '(Optional)'}" 
+            ${bookingDetails.isPanMandatory === 'true' ? 'required' : ''} 
+            style="width: 100%; padding: 10px; margin-top: 15px; border: 1px solid #ddd; border-radius: 4px;">
+    `;
+    
+    const passportField = `
+        <input type="text" 
+            name="PASSPORT" 
+            placeholder="Passport Number ${bookingDetails.isPassportMandatory === 'true' ? '(Required)' : '(Optional)'}" 
+            ${bookingDetails.isPassportMandatory === 'true' ? 'required' : ''} 
+            style="width: 100%; padding: 10px; margin-top: 15px; border: 1px solid #ddd; border-radius: 4px;">
+    `;
+
     return `
         <div class="passenger-form" data-type="child" style="border: 1px solid #ddd; padding: 15px; margin-bottom: 20px; border-radius: 4px;">
             <h3>Child Passenger ${index + 1} (Age: ${age || 'N/A'})</h3>
@@ -274,22 +398,19 @@ function createChildForm(index, age) {
                     
                     <input type="text" name="LastName" placeholder="Last Name" required 
                         style="flex: 1; min-width: 200px; padding: 10px; border: 1px solid #ddd; border-radius: 4px;">
-                         <input type="email" name="Email" placeholder="Email Address" required 
+                </div>
+
+                <input type="email" name="Email" placeholder="Email Address" required 
                     style="width: 100%; padding: 10px; margin-top: 15px; border: 1px solid #ddd; border-radius: 4px;">
 
                 <input type="tel" name="Phoneno" placeholder="Phone Number" required 
                     style="width: 100%; padding: 10px; margin-top: 15px; border: 1px solid #ddd; border-radius: 4px;">
 
-                      <input type="text" name="PAN" placeholder="PAN Number" 
-                    style="width: 100%; padding: 10px; margin-top: 15px; border: 1px solid #ddd; border-radius: 4px;">
-                
-                       <input type="text" name="PASSPORT" placeholder="PASSPORT NUMBER"
-                    style="width: 100%; padding: 10px; margin-top: 15px; border: 1px solid #ddd; border-radius: 4px;">
-                
-                    </div>
-
                 <input type="hidden" name="PaxType" value="Child">
                 <input type="hidden" name="Age" value="${age || ''}">
+                
+                ${panField}
+                ${passportField}
             </form>
         </div>
     `;
@@ -310,12 +431,20 @@ function createSubmitButton() {
         window.generatePassengerForms = generatePassengerForms;
 
 
-function submitAllPassengers() {
+        function submitAllPassengers() {
+    const bookingDetails = fetchBookingDetails();
     const forms = document.querySelectorAll('.passenger-details-form');
     const passengerData = [];
     let isValid = true;
 
-    forms.forEach(form => {
+    forms.forEach((form, index) => {
+        const isFirstAdult = index === 0 && form.querySelector('[name="PaxType"]').value === 'Adult';
+        
+        // If requireAllPaxDetails is false, only validate and collect the first adult's data
+        if (bookingDetails.requireAllPaxDetails === 'false' && !isFirstAdult) {
+            return; // Skip validation for non-lead passengers
+        }
+
         if (!form.checkValidity()) {
             isValid = false;
             form.reportValidity();
@@ -340,7 +469,9 @@ function submitAllPassengers() {
         console.error('Error checking balance:', error);
         window.passengerDetails = [];
     });
-}// Update the form submit handler
+}
+
+
 document.getElementById('passenger-form').addEventListener('submit', function(event) {
     event.preventDefault();
     addNewPassengerForm();

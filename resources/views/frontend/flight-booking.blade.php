@@ -373,9 +373,77 @@
         console.log('Infants:', infantCount);
 
 
+        function validatePassengerForms() {
+    const fareQuoteData = JSON.parse(sessionStorage.getItem('fareQuoteData'));
+    const forms = document.querySelectorAll('.passenger-form');
+    let isValid = true;
+
+    forms.forEach(form => {
+        const passengerType = form.getAttribute('data-passenger-type'); // Adult, Child, or Infant
+        const typeValue = parseInt(form.querySelector('[name$="[PassengerType]"]').value);
+
+        // Basic validation for required fields
+        const requiredFields = ['Title', 'FirstName', 'LastName', 'Gender', 'ContactNo', 'Email'];
+        for (const field of requiredFields) {
+            const input = form.querySelector(`[name$="[${field}]"]`);
+            if (!input.value) {
+                alert(`Please fill in ${field} for ${passengerType}`);
+                isValid = false;
+                return;
+            }
+        }
+
+        // DOB validation based on passenger type
+        const dobInput = form.querySelector('[name$="[DateOfBirth]"]');
+        if ((typeValue === 1 && fareQuoteData.AdultDobRequired) ||
+            (typeValue === 2 && fareQuoteData.ChildDobRequired) ||
+            (typeValue === 3 && fareQuoteData.InfantDobRequired)) {
+            if (!dobInput.value) {
+                alert(`Date of Birth is required for ${passengerType}`);
+                isValid = false;
+                return;
+            }
+        }
+
+        // Passport validation
+        const passportNo = form.querySelector('[name$="[PassportNo]"]');
+        const passportExpiry = form.querySelector('[name$="[PassportExpiry]"]');
+        const passportIssueDate = form.querySelector('[name$="[PassportIssueDate]"]');
+
+        if (fareQuoteData.IsPassportRequiredAtBook) {
+            // Only validate passport number and expiry date
+            if (!passportNo.value) {
+                alert(`Passport Number is required for ${passengerType}`);
+                isValid = false;
+                return;
+            }
+            if (!passportExpiry.value) {
+                alert(`Passport Expiry Date is required for ${passengerType}`);
+                isValid = false;
+                return;
+            }
+        }
+
+        if (fareQuoteData.IsPassportFullDetailRequiredAtBook) {
+            // Validate all passport fields
+            if (!passportNo.value || !passportExpiry.value || !passportIssueDate.value) {
+                alert(`All passport details are required for ${passengerType}`);
+                isValid = false;
+                return;
+            }
+        }
+    });
+
+    return isValid;
+}
+
 
        function createPassengerForm(passengerType, count, typeValue) {
-    for (let i = 1; i <= count; i++) {
+        const fareQuoteData = JSON.parse(sessionStorage.getItem('fareQuoteData'));
+    const dynamicSections = document.getElementById('dynamicSections');
+
+   
+        for (let i = 1; i <= count; i++) {
         let titleOptions = (typeValue === 1) // Check if passenger is an Adult
             ? `<option value="Mr">Mr</option>
                <option value="Mrs">Mrs</option>
@@ -383,25 +451,59 @@
             : `<option value="Miss">Miss</option>
                <option value="Master">Mstr</option>`;
 
+
+               const isDobRequired = (
+            (typeValue === 1 && fareQuoteData.AdultDobRequired) ||
+            (typeValue === 2 && fareQuoteData.ChildDobRequired) ||
+            (typeValue === 3 && fareQuoteData.InfantDobRequired)
+        );
+
+        const passportRequired = fareQuoteData.IsPassportRequiredAtBook;
+        const fullPassportRequired = fareQuoteData.IsPassportFullDetailRequiredAtBook;
+
         // Create passport details section only for Adult and Child
         let passportSection = (typeValue === 1 || typeValue === 2 ||typeValue === 3 ) ? `
-            <div class="passport-details mt-3">
-                <h6 class="mb-3">Passport Details</h6>
-                <div class="row">
-                    <div class="col-md-4 mb-3">
-                        <label class="form-label">Passport Number</label>
-                        <input type="text" class="form-control" name="${passengerType}[${i}][PassportNo]" required>
+                  <div class="passport-details mt-3">
+                    <h6 class="mb-3">Passport Details ${passportRequired || fullPassportRequired ? '(Required)' : '(Optional)'}</h6>
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label">
+                                Passport Number
+                                ${passportRequired || fullPassportRequired ? 
+                                    '<span class="text-danger">*</span>' : 
+                                    '<span class="text-muted">(Optional)</span>'}
+                            </label>
+                            <input type="text" 
+                                class="form-control" 
+                                name="${passengerType}[${i}][PassportNo]"
+                                ${passportRequired || fullPassportRequired ? 'required' : ''}>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label">
+                                Passport Expiry
+                                ${passportRequired || fullPassportRequired ? 
+                                    '<span class="text-danger">*</span>' : 
+                                    '<span class="text-muted">(Optional)</span>'}
+                            </label>
+                            <input type="date" 
+                                class="form-control" 
+                                name="${passengerType}[${i}][PassportExpiry]"
+                                ${passportRequired || fullPassportRequired ? 'required' : ''}>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label">
+                                Passport Issue Date
+                                ${fullPassportRequired ? 
+                                    '<span class="text-danger">*</span>' : 
+                                    '<span class="text-muted">(Optional)</span>'}
+                            </label>
+                            <input type="date" 
+                                class="form-control" 
+                                name="${passengerType}[${i}][PassportIssueDate]"
+                                ${fullPassportRequired ? 'required' : ''}>
+                        </div>
                     </div>
-                    <div class="col-md-4 mb-3">
-                        <label class="form-label">Passport Expiry</label>
-                        <input type="date" class="form-control" name="${passengerType}[${i}][PassportExpiry]" required>
-                    </div>
-                    <div class="col-md-4 mb-3">
-                        <label class="form-label">Passport Issue Date</label>
-                        <input type="date" class="form-control" name="${passengerType}[${i}][PassportIssueDate]" required>
-                    </div>
-                </div>
-            </div>` : '';
+                </div>` : '';
 
         let ssrOptions = '';
         
@@ -470,8 +572,17 @@
                         </div>
                         
                         <div class="col-md-4 mb-3">
-                            <label class="form-label">Date of Birth</label>
-                            <input type="date" class="form-control" name="${passengerType}[${i}][DateOfBirth]" required>
+                                                       <label class="form-label">
+                                Date of Birth
+                                ${isDobRequired ? 
+                                    '<span class="text-danger">*</span>' : 
+                                    '<span class="text-muted">(Optional)</span>'}
+                            </label>
+                            <input type="date" 
+                                class="form-control" 
+                                name="${passengerType}[${i}][DateOfBirth]"
+                                ${isDobRequired ? 'required' : ''}>
+
                         </div>
                         <div class="col-md-4 mb-3">
                             <label class="form-label">Contact Number</label>
@@ -617,7 +728,7 @@ if (fareQuoteData) {
         // Optional: Set total fare in a hidden input for later use
         const totalFareInput = document.getElementById('totalFare');
         if (totalFareInput) {
-            totalFareInput.value = fareQuoteData.Fare.OfferedFare || 0;
+            totalFareInput.value = fareQuoteData.Fare.PublishedFare || 0;
         }
     } else {
         console.error('Fare Quote Data Not Found in Session Storage');
@@ -1257,7 +1368,7 @@ function calculateTotalPrice() {
     let total = 0;
 
     // Add base fare from fareQuoteData
-    const baseFare = window.fareQuoteData?.Fare?.OfferedFare || 0;
+    const baseFare = window.fareQuoteData?.Fare?.PublishedFare|| 0;
     total += parseFloat(baseFare);
 
     console.log('total fare and price',total);
@@ -1288,15 +1399,15 @@ function calculateTotalPrice() {
     return total;
 }
 
-
-
 function updateTotalFare() {
-    const total = calculateTotalPrice();
+    const totalPriceDetails = calculateTotalPriceWithDetails();
+    const total = totalPriceDetails.grandTotal;
     
     // Update the total in the UI with enhanced styling
     const totalPriceElement = document.getElementById('totalPrice');
     if (totalPriceElement) {
         totalPriceElement.innerHTML = `
+        ₹${totalPriceDetails.grandTotal.toFixed(2)}
             `;
     }
 
@@ -1325,7 +1436,7 @@ function updateTotalFare() {
                                     <div class="text-primary mb-2">
                                         <i class="fas fa-plane fa-2x"></i>
                                     </div>
-                                    <h5 class="text-success mb-0">₹${parseFloat(window.fareQuoteData?.Fare?.OfferedFare || 0).toFixed(2)}</h5>
+                                    <h5 class="text-success mb-0">₹${parseFloat(window.fareQuoteData?.Fare?.PublishedFare || 0).toFixed(2)}</h5>
                                 </div>
                             </div>
                         </div>
@@ -1337,9 +1448,14 @@ function updateTotalFare() {
                                     <i class="fas fa-users me-2"></i>Passenger Selections
                                 </h5>
                             </div>`;
+                 const allPassengerIds = new Set([
+            ...Object.keys(window.passengerSelections.seats || {}),
+            ...Object.keys(window.passengerSelections.meals || {}),
+            ...Object.keys(window.passengerSelections.baggage || {})
+        ]);
 
-        // Add passenger selections breakdown with enhanced styling
-        for (const passengerId in window.passengerSelections.seats) {
+        // Generate breakdown for each passenger
+        allPassengerIds.forEach(passengerId => {
             breakdown += `
                 <div class="passenger-card mb-4 border rounded-bottom p-3">
                     <div class="passenger-header bg-light p-2 rounded mb-3">
@@ -1404,23 +1520,18 @@ function updateTotalFare() {
                         })()}
                     </div>
                 </div>`;
-        }
+        });
 
         breakdown += `
-                        </div>
-                        
-                        <!-- Grand Total -->
-                        <div class="grand-total-section mt-4">
-                            <div class="card bg-success bg-gradient text-white">
-                                <div class="card-body p-4 text-center">
-                                    <h5 class="mb-2">Grand Total</h5>
-                                    <h2 class="mb-0">₹${total.toFixed(2)}</h2>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>`;
+                     <!-- Grand Total -->
+           <div class="grand-total-section mt-4">
+    <div class="card bg-success bg-gradient text-white">
+        <div class="card-body p-4 text-center">
+            <h5 class="mb-2">Grand Total</h5>
+            <h2 class="mb-0">₹${totalPriceDetails.grandTotal.toFixed(2)}</h2>
+        </div>
+    </div>
+</div>`;
         
         breakdownElement.innerHTML = breakdown;
     }
@@ -1431,8 +1542,6 @@ if (typeof window !== 'undefined') {
     window.updateTotalFare = updateTotalFare;
     console.log('updated proice',calculateTotalPrice);
 }
-
-
 // First, add this function at the beginning to calculate total price
 function calculateTotalPriceWithDetails() {
     // Get base fare from fareQuoteData
@@ -1446,7 +1555,14 @@ function calculateTotalPriceWithDetails() {
 
     // Calculate SSR costs
     let totalSSRCost = 0;
-    for (const passengerId in window.passengerSelections.seats) {
+    const allPassengerIds = new Set([
+        ...Object.keys(window.passengerSelections.seats || {}),
+        ...Object.keys(window.passengerSelections.meals || {}),
+        ...Object.keys(window.passengerSelections.baggage || {})
+    ]);
+
+    // Calculate total SSR costs for all selections
+    allPassengerIds.forEach(passengerId => {
         // Add seat prices
         const seatSelection = window.passengerSelections.seats[passengerId];
         if (seatSelection && seatSelection.amount) {
@@ -1466,7 +1582,7 @@ function calculateTotalPriceWithDetails() {
         if (baggageSelection && baggageSelection.Price) {
             totalSSRCost += parseFloat(baggageSelection.Price);
         }
-    }
+    });
 
     // Calculate grand total
     const grandTotal = baseFare + tax + yqTax + transactionFee + 
@@ -1485,7 +1601,6 @@ function calculateTotalPriceWithDetails() {
         airTransFee
     };
 }
-
 
 
 // Function to check flight balance
@@ -1529,7 +1644,7 @@ function checkFlightBalance() {
                 throw new Error(data.message || 'Failed to check balance');
             }
 
-            const totalFare = fareQuoteData.Fare.OfferedFare || 0;
+            const totalFare = fareQuoteData.Fare.PublishedFare || 0;
 
             // Check if balance is sufficient
             if (data.balance < totalFare) {
@@ -1583,7 +1698,7 @@ document.getElementById('submitButton').addEventListener('click', async function
                 resultIndex: resultIndex,
                 srdvIndex: srdvIndex,
                 traceId: traceId,
-                totalFare: fareQuoteData.Fare.OfferedFare || 0,
+                totalFare: fareQuoteData.Fare.PublishedFare || 0,
                 grandTotal: totalPriceDetails.grandTotal,
             };
 

@@ -1089,6 +1089,14 @@ function renderMealOptions(mealData, container, passengerId) {
             padding-top: 8px;
             border-top: 1px solid #dee2e6;
         }
+                 .btn-close-meal {
+        border: none;
+        background: none;
+        color: #dc3545;
+        font-weight: bold;
+        cursor: pointer;
+        margin-left: 8px;
+    }
     `;
     document.head.appendChild(style);
 }
@@ -1423,10 +1431,9 @@ function calculateTotalPrice() {
     const outboundBaseFare = window.outboundFareQuoteData?.Fare?.OfferedFare || 0;
     const returnBaseFare = window.returnFareQuoteData?.Fare?.OfferedFare || 0;
     total += parseFloat(outboundBaseFare) + parseFloat(returnBaseFare);
-    console.log('total fare and price',total);
-    console.log('outbound baseFare',outboundBaseFare);
-    console.log('return baseFare',returnBaseFare);
-
+    console.log('total fare and price', total);
+    console.log('outbound baseFare', outboundBaseFare);
+    console.log('return baseFare', returnBaseFare);
 
     // Iterate through all passenger selections for both flights
     ['outbound', 'return'].forEach(direction => {
@@ -1438,14 +1445,16 @@ function calculateTotalPrice() {
             }
         });
 
-        // Add meal prices
-        const mealSelections = window.passengerSelections.meals[direction] || {};
+        // Add meal prices - FIXED: Properly calculate meal prices with quantity
+        const mealSelections = window.passengerSelections.meals[direction]?.[passengerId] || [];
         Object.entries(mealSelections).forEach(([passengerId, meals]) => {
-            meals.forEach(meal => {
-                if (meal.Price && meal.Quantity) {
-                    total += (parseFloat(meal.Price) * parseInt(meal.Quantity));
-                }
-            });
+            if (Array.isArray(meals)) {  // ADDED: Check if meals is an array
+                meals.forEach(meal => {
+                    if (meal && meal.Price && meal.Quantity) {
+                        total += (parseFloat(meal.Price) * parseInt(meal.Quantity, 10));
+                    }
+                });
+            }
         });
 
         // Add baggage prices
@@ -1460,8 +1469,8 @@ function calculateTotalPrice() {
     return total;
 }
 
+// No changes needed in getPassengerTypes()
 function getPassengerTypes() {
-    // Get all unique passenger IDs from selections
     const passengerIds = new Set();
     ['outbound', 'return'].forEach(direction => {
         Object.keys(window.passengerSelections.seats[direction] || {}).forEach(id => passengerIds.add(id));
@@ -1472,8 +1481,8 @@ function getPassengerTypes() {
 }
 
 function calculateTotalPriceWithDetails() {
-    const outboundFare = outboundFareQuoteData?.Fare || {};
-    const returnFare = returnFareQuoteData?.Fare || {};
+    const outboundFare = window.outboundFareQuoteData?.Fare || {};  // FIXED: Added window.
+    const returnFare = window.returnFareQuoteData?.Fare || {};      // FIXED: Added window.
 
     // Calculate base components for both flights
     const baseFare = (parseFloat(outboundFare.OfferedFare) || 0) + (parseFloat(returnFare.OfferedFare) || 0);
@@ -1490,29 +1499,40 @@ function calculateTotalPriceWithDetails() {
 
     passengerIds.forEach(passengerId => {
         passengerCosts[passengerId] = {
-            outbound: { seats: 0, meals: 0, baggage: 0 },
-            return: { seats: 0, meals: 0, baggage: 0 }
+            outbound: { seats: 0, meals: 0, baggage: 0, seatDetails: '', baggageDetails: '', mealDetails: [] },
+            return: { seats: 0, meals: 0, baggage: 0, seatDetails: '', baggageDetails: '', mealDetails: [] }
         };
 
+
         ['outbound', 'return'].forEach(direction => {
-            // Add seat costs
+            // Add seat costs and details
             const seat = window.passengerSelections.seats[direction]?.[passengerId];
             if (seat?.amount) {
                 passengerCosts[passengerId][direction].seats = parseFloat(seat.amount);
+                passengerCosts[passengerId][direction].seatDetails = seat.seatNumber || '';  // ADDED: Store seat number
             }
 
-            // Add meal costs
+            // Add meal costs and details - FIXED: Proper meal calculation with details
             const meals = window.passengerSelections.meals[direction]?.[passengerId] || [];
-            meals.forEach(meal => {
-                if (meal.Price && meal.Quantity) {
-                    passengerCosts[passengerId][direction].meals += parseFloat(meal.Price) * parseInt(meal.Quantity);
-                }
-            });
+            if (Array.isArray(meals)) {  // ADDED: Check if meals is an array
+                meals.forEach(meal => {
+                    if (meal?.Price && meal?.Quantity) {
+                        const mealCost = parseFloat(meal.Price) * parseInt(meal.Quantity, 10);
+                        passengerCosts[passengerId][direction].meals += mealCost;
+                        passengerCosts[passengerId][direction].mealDetails.push({  // ADDED: Store meal details
+                            name: meal.Name || 'Meal',
+                            quantity: meal.Quantity,
+                            price: mealCost
+                        });
+                    }
+                });
+            }
 
-            // Add baggage costs
+            // Add baggage costs and details
             const baggage = window.passengerSelections.baggage[direction]?.[passengerId];
             if (baggage?.Price) {
                 passengerCosts[passengerId][direction].baggage = parseFloat(baggage.Price);
+                passengerCosts[passengerId][direction].baggageDetails = baggage.Weight || '';  // ADDED: Store baggage weight
             }
         });
     });
@@ -1548,9 +1568,7 @@ function updateTotalFare() {
     const totalPriceElement = document.getElementById('totalPrice');
     if (totalPriceElement) {
         totalPriceElement.innerHTML = `
-            <div class="price-badge bg-success bg-gradient p-3 rounded-pill text-white text-center">
-                <h4 class="mb-0">Total Fare: ₹${priceDetails.grandTotal.toFixed(2)}</h4>
-            </div>`;
+            `;
     }
 
     // Update the breakdown section
@@ -1595,11 +1613,11 @@ function updateTotalFare() {
 
         // Passenger-wise Breakdown
         breakdown += `<div class="passenger-selections">
-            <div class="section-header bg-light p-3 rounded-top border-start border-4 border-primary">
-                <h5 class="mb-0 text-primary">
-                    <i class="fas fa-users me-2"></i>Passenger Selections
-                </h5>
-            </div>`;
+                    <div class="section-header bg-light p-3 rounded-top border-start border-4 border-primary">
+                        <h5 class="mb-0 text-primary">
+                            <i class="fas fa-users me-2"></i>Passenger Selections
+                        </h5>
+                    </div>`;
 
         Object.entries(priceDetails.passengerCosts).forEach(([passengerId, costs]) => {
             breakdown += `
@@ -1623,23 +1641,23 @@ function updateTotalFare() {
                                             <div class="icon-wrapper me-2">
                                                 <i class="fas fa-chair text-success"></i>
                                             </div>
-                                            <div class="flex-grow-1">Seat Selection</div>
+                                            <div class="flex-grow-1">Seat ${costs.outbound.seatDetails}</div>
                                             <div class="price text-success">₹${costs.outbound.seats.toFixed(2)}</div>
                                         </div>` : ''}
-                                    ${costs.outbound.meals > 0 ? `
+                                    ${costs.outbound.mealDetails.map(meal => `
                                         <div class="selection-item d-flex align-items-center mb-2">
                                             <div class="icon-wrapper me-2">
                                                 <i class="fas fa-utensils text-warning"></i>
                                             </div>
-                                            <div class="flex-grow-1">Meal Selection</div>
-                                            <div class="price text-success">₹${costs.outbound.meals.toFixed(2)}</div>
-                                        </div>` : ''}
+                                            <div class="flex-grow-1">${meal.name} x${meal.quantity}</div>
+                                            <div class="price text-success">₹${meal.price.toFixed(2)}</div>
+                                        </div>`).join('')}
                                     ${costs.outbound.baggage > 0 ? `
                                         <div class="selection-item d-flex align-items-center">
                                             <div class="icon-wrapper me-2">
                                                 <i class="fas fa-suitcase text-info"></i>
                                             </div>
-                                            <div class="flex-grow-1">Baggage Selection</div>
+                                            <div class="flex-grow-1">Baggage ${costs.outbound.baggageDetails}</div>
                                             <div class="price text-success">₹${costs.outbound.baggage.toFixed(2)}</div>
                                         </div>` : ''}
                                 </div>
@@ -1658,23 +1676,23 @@ function updateTotalFare() {
                                             <div class="icon-wrapper me-2">
                                                 <i class="fas fa-chair text-success"></i>
                                             </div>
-                                            <div class="flex-grow-1">Seat Selection</div>
+                                            <div class="flex-grow-1">Seat ${costs.return.seatDetails}</div>
                                             <div class="price text-success">₹${costs.return.seats.toFixed(2)}</div>
                                         </div>` : ''}
-                                    ${costs.return.meals > 0 ? `
+                                    ${costs.return.mealDetails.map(meal => `
                                         <div class="selection-item d-flex align-items-center mb-2">
                                             <div class="icon-wrapper me-2">
                                                 <i class="fas fa-utensils text-warning"></i>
                                             </div>
-                                            <div class="flex-grow-1">Meal Selection</div>
-                                            <div class="price text-success">₹${costs.return.meals.toFixed(2)}</div>
-                                        </div>` : ''}
+                                            <div class="flex-grow-1">${meal.name} x${meal.quantity}</div>
+                                            <div class="price text-success">₹${meal.price.toFixed(2)}</div>
+                                        </div>`).join('')}
                                     ${costs.return.baggage > 0 ? `
                                         <div class="selection-item d-flex align-items-center">
                                             <div class="icon-wrapper me-2">
                                                 <i class="fas fa-suitcase text-info"></i>
                                             </div>
-                                            <div class="flex-grow-1">Baggage Selection</div>
+                                            <div class="flex-grow-1">Baggage ${costs.return.baggageDetails}</div>
                                             <div class="price text-success">₹${costs.return.baggage.toFixed(2)}</div>
                                         </div>` : ''}
                                 </div>
@@ -1685,8 +1703,7 @@ function updateTotalFare() {
         });
 
         breakdown += `</div>
-                
-                <!-- Grand Total -->
+                <!-- Grand Total section remains the same -->
                 <div class="grand-total-section mt-4">
                     <div class="card bg-success bg-gradient text-white">
                         <div class="card-body p-4 text-center">
@@ -1702,15 +1719,23 @@ function updateTotalFare() {
     }
 }
 
+// Event listener for real-time updates
+function addSelectionListeners() {
+    const selectionTypes = ['seats', 'meals', 'baggage'];
+    selectionTypes.forEach(type => {
+        document.addEventListener(`${type}Selection`, () => {
+            updateTotalFare();
+        });
+    });
+}
 
 // Make functions available globally
 if (typeof window !== 'undefined') {
     window.calculateTotalPrice = calculateTotalPrice;
     window.calculateTotalPriceWithDetails = calculateTotalPriceWithDetails;
     window.updateTotalFare = updateTotalFare;
+    window.addSelectionListeners = addSelectionListeners;
 }
-
-
 
 
 // Function to check flight balance

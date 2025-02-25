@@ -315,6 +315,7 @@
           slidesPerView: 3,
           spaceBetween: 20
         }
+        
       }
 
     });
