@@ -68,41 +68,43 @@
   <div class="container">
     <div class="row">
       <div class="card search-engine-card py-5 px-4" style="position: relative">
-        <ul class="nav nav-tabs border-0" style="position: absolute; top:0; left:1%; transform:translateY(-50%);"
-          id="myTab" role="tablist">
-          <li class="nav-item" role="presentation">
-            <button class="nav-link px-4 shadow border-0" id="flight-tab" data-bs-toggle="tab" data-bs-target="#flight"
+      <ul class="nav nav-tabs border-0 flex-wrap" 
+            style="position: absolute; top:0; left:1%; transform:translateY(-50%); width: 95%;"
+            id="myTab" role="tablist">
+          <!-- Modified: Reduced margin to just enough space between wrapped items -->
+          <li class="nav-item mb-1 me-1" role="presentation">
+            <button class="nav-link px-3 px-md-4 shadow border-0" id="flight-tab" data-bs-toggle="tab" data-bs-target="#flight"
               type="button" role="tab" aria-controls="flight" aria-selected="false">
               <i class="fa-solid fa-plane-departure d-block"></i>
-              <small>Flight</small>
+              <small class="d-none d-md-block">Flight</small>
             </button>
           </li>
-          <li class="nav-item" role="presentation">
-            <button class="nav-link  px-4 shadow border-0" id="profile-tab" data-bs-toggle="tab"
+          <li class="nav-item mb-1 me-1" role="presentation">
+            <button class="nav-link px-3 px-md-4 shadow border-0" id="profile-tab" data-bs-toggle="tab"
               data-bs-target="#profile" type="button" role="tab" aria-controls="profile" aria-selected="false">
               <i class="fa-solid fa-building d-block"></i>
-              <small>Hotel</small>
+              <small class="d-none d-md-block">Hotel</small>
             </button>
           </li>
-          <li class="nav-item" role="presentation">
-            <button class="nav-link active px-4 border-0 shadow" id="contact-tab" data-bs-toggle="tab"
+          <li class="nav-item mb-1 me-1" role="presentation">
+            <button class="nav-link active px-3 px-md-4 border-0 shadow" id="contact-tab" data-bs-toggle="tab"
               data-bs-target="#contact" type="button" role="tab" aria-controls="contact" aria-selected="false">
               <i class="fa-solid fa-umbrella-beach d-block"></i>
-              <small>Holidays</small>
+              <small class="d-none d-md-block">Holidays</small>
             </button>
           </li>
-          <li class="nav-item" role="presentation">
-            <button class="nav-link px-4 shadow border-0" id="bus-tab" data-bs-toggle="tab" data-bs-target="#bus"
+          <li class="nav-item mb-1 me-1" role="presentation">
+            <button class="nav-link px-3 px-md-4 shadow border-0" id="bus-tab" data-bs-toggle="tab" data-bs-target="#bus"
               type="button" role="tab" aria-controls="bus" aria-selected="false">
-              <i class="fa-solid fa-bus"></i><br>
-              <small>Bus</small>
+              <i class="fa-solid fa-bus d-block"></i>
+              <small class="d-none d-md-block">Bus</small>
             </button>
           </li>
-          <li class="nav-item" role="presentation">
-            <button class="nav-link px-4 shadow border-0" id="car-tab" data-bs-toggle="tab" data-bs-target="#car"
+          <li class="nav-item mb-1" role="presentation">
+            <button class="nav-link px-3 px-md-4 shadow border-0" id="car-tab" data-bs-toggle="tab" data-bs-target="#car"
               type="button" role="tab" aria-controls="car" aria-selected="false">
-              <i class="fa-solid fa-car"></i><br>
-              <small>Car</small>
+              <i class="fa-solid fa-car d-block"></i>
+              <small class="d-none d-md-block">Car</small>
             </button>
           </li>
         </ul>
@@ -125,9 +127,11 @@
         <div class="row">
             <div class="mb-3 col-md-3">
                 <div class="date-caption">Enter City</div>
+                <div class="position-relative">
                 <input type="text" class="form-control rounded-0 py-3" name="CityName" id="hotelSearchCity" placeholder="Enter City Name" required style="text-align: center;" >
                 <input type="hidden" name="CityId" id="cityIdInput" value="" >
-                <div id="hotelSearchCityList" class="card" ></div>
+                <div id="hotelSearchCityList" class="card" style="position: absolute; width: 100%; max-height: 150px; overflow-y: scroll; z-index: 1000;"></div>
+           </div>
             </div>
             <!-- Check-in Date -->
             <div class="mb-3 col-md-2">
@@ -244,20 +248,23 @@
         </div>
 
         <div class="row">
-        <div class="mb-2 col-md-2">
+        <div class="mb-2 col-md-2 position-relative">
     <div class="date-caption">From</div>
+    <div class="position-relative">
     <input type="text" class="form-control rounded-0 py-3" id="flightFromCity" placeholder="Enter Departure City" required>
     <!-- Note: removed 'name' attribute from display input and added it to hidden input -->
     <input type="hidden" id="flightFromCityCode" name="origin" required>
-    <div id="flightFromCityList" class="card" style="position: absolute; width: 23%; max-height: 150px; overflow-y: scroll;"></div>
+    <div id="flightFromCityList" class="card" style="position: absolute; width: 100%; max-height: 150px; overflow-y: scroll; z-index: 1000;"></div>
 </div>
-            
-<div class="mb-2 col-md-2">
+</div>          
+<div class="mb-2 col-md-2 position-relative">
     <div class="date-caption">To</div>
+    <div class="position-relative">
     <input type="text" class="form-control rounded-0 py-3" id="flightToCity" placeholder="Enter Destination City" required>
     <!-- Note: removed 'name' attribute from display input and added it to hidden input -->
     <input type="hidden" id="flightToCityCode" name="destination" required>
-    <div id="flightToCityList" class="card" style="position: absolute; width: 23%; max-height: 150px; overflow-y: scroll;"></div>
+    <div id="flightToCityList" class="card" style="position: absolute; width: 100%; max-height: 150px; overflow-y: scroll; z-index: 1000;"></div>
+</div>
 </div>
             <div class="mb-2 col-md-2">
                 <div class="date-caption">Departure </div>
@@ -337,25 +344,22 @@
             <label class="form-check-label" for="armedForceFare">Armed Force Fare</label>
         </div>
     </div>
+</div> 
+</form>
 </div>
 
-
-      
-    </form>
-</div>
-
-
-
-                        <!-- Car Booking -->
-                        <div class="tab-pane fade mt-5" id="car" role="tabpanel" aria-labelledby="car-tab">
+<!-- Car Booking -->
+<div class="tab-pane fade mt-5" id="car" role="tabpanel" aria-labelledby="car-tab">
                             <h4 class="mb-5" id="car-title">Book Cars</h4>
                             <hr class="searchline">
-                            <form action="{{ route('cars.index') }}" method="GET">
+                            <form action="{{ route('cars.index') }}" method="GET" id="carSearchForm">
+                                @csrf
                                 <div class="row">
                                     <div class="mb-3 col-md-3">
                                         <div class="date-caption">Pickup Location</div>
-                                        <input type="text" class="form-control rounded-0 py-3" name="pickupLocation"
-                                            id="carPickupLocation" placeholder="Enter Pickup Location" required>
+                                        <input type="text" class="form-control rounded-0 py-3"
+                                            name="pickupLocation" id="carPickupLocation"
+                                            placeholder="Enter Pickup Location" required>
                                         <input type="hidden" name="pickupLocationCode" id="carPickupLocationCode">
                                         <div id="carPickupLocationList" class="card"
                                             style="position: absolute; width: 23%; max-height: 150px; overflow-y: scroll;">
@@ -363,8 +367,9 @@
                                     </div>
                                     <div class="mb-3 col-md-3">
                                         <div class="date-caption">Drop-off Location</div>
-                                        <input type="text" class="form-control rounded-0 py-3" name="dropoffLocation"
-                                            id="carDropoffLocation" placeholder="Enter Drop-off Location" required>
+                                        <input type="text" class="form-control rounded-0 py-3"
+                                            name="dropoffLocation" id="carDropoffLocation"
+                                            placeholder="Enter Drop-off Location" required>
                                         <input type="hidden" name="dropoffLocationCode" id="carDropoffLocationCode">
                                         <div id="carDropoffLocationList" class="card"
                                             style="position: absolute; width: 23%; max-height: 150px; overflow-y: scroll;">
@@ -378,7 +383,8 @@
                                     </div>
                                     <div class="mb-3 col-md-2">
                                         <label>Trip Type</label>
-                                        <select name="trip_type" id="carTripType" class="form-control rounded-0 py-3">
+                                        <select name="trip_type" id="carTripType"
+                                            class="form-control rounded-0 py-3">
                                             <option value="0">One Way</option>
                                             <option value="1">Return</option>
                                             <option value="2">Local</option>
@@ -386,8 +392,8 @@
                                     </div>
                                     <div class="mb-3 col-md-2">
                                         <div class="date-caption" style="visibility: hidden">Search</div>
-                                        <button type="submit" class="btn btn-warning w-100 rounded-0 py-3 fw-bold">Search
-                                            Cars</button>
+                                        <button type="submit" class="btn btn-warning w-100 rounded-0 py-3 fw-bold"
+                                            id="searchButton">Search Cars</button>
                                     </div>
                                 </div>
                             </form>
@@ -404,18 +410,22 @@
         <!-- Source City -->
         <div class="mb-3 col-md-3">
             <div class="date-caption">From</div>
+            <div class="position-relative">
             <input type="text" class="form-control rounded-0 py-3" name="source_city" id="busFromCity" placeholder="Enter Departure City" required>
             <input type="hidden" name="source_code" id="busFromCode"> <!-- Hidden field to store source city code -->
-            <div id="busFromCityList" class="card" style="position: absolute; width: 23%; max-height: 200px; overflow-y: scroll;"></div>
+            <div id="busFromCityList" class="card" style="position: absolute; width: 100%; max-height: 150px; overflow-y: scroll; z-index: 1000;"></div>
         </div>
+</div>
 
         <!-- Destination City -->
         <div class="mb-3 col-md-3">
             <div class="date-caption">To</div>
+            <div class="position-relative">
             <input type="text" class="form-control rounded-0 py-3" name="destination_city" id="busToCity" placeholder="Enter Destination City" required>
             <input type="hidden" name="destination_code" id="busToCode"> <!-- Hidden field to store destination city code -->
-            <div id="busToCityList" class="card" style="position: absolute; width: 23%; max-height: 150px; overflow-y: scroll;"></div>
+            <div id="busToCityList" class="card" style="position: absolute; width: 100%; max-height: 150px; overflow-y: scroll; z-index: 1000;"></div>
         </div>
+</div>
 
         <!-- Journey Date -->
         <div class="mb-3 col-md-3">
@@ -434,8 +444,7 @@
 <!-- holiday booking  -->
           <div class="tab-pane fade mt-5 show active" id="contact" role="tabpanel" aria-labelledby="contact-tab">
             {{-- holiday packages searches --}}
-            <h4 class="mb-5" id="tour-title">Book Domestic and International Holiday Packages
-            </h4>
+            <h4 class="mb-5" id="tour-title">Book Holiday Packages</h4>
             <hr class="searchline">
             <form action="{{ route('searchPackages') }}" method="GET">
               <div class="row">
@@ -1361,17 +1370,10 @@ console.log('Cookies:', document.cookie);
     }
 });
 
-     // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+        // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
         // +                  Car Script                                   +
         // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
         document.addEventListener('DOMContentLoaded', function() {
-            flatpickr("#carPickupDate", {
-                dateFormat: "d/m/Y",
-                minDate: "today",
-                defaultDate: 'today'
-            });
-        });
-
         function fetchCities(inputId, suggestionId) {
             const query = document.getElementById(inputId).value;
             if (query.length < 2) {
@@ -1395,13 +1397,12 @@ console.log('Cookies:', document.cookie);
                     data.forEach(city => {
                         const option = document.createElement('div');
                         option.className = 'suggestion-item';
-                        option.textContent =
-                        `${city.caoncitlst_city_name}, ${city.caoncitlst_id}`; // Display city name and code
+                        option.textContent = `${city.caoncitlst_city_name}, ${city.caoncitlst_id}`;
                         option.onclick = () => {
                             document.getElementById(inputId).value = city.caoncitlst_city_name;
                             document.getElementById(inputId === 'carPickupLocation' ?
-                                    'carPickupLocationCode' : 'carDropoffLocationCode').value = city
-                                .caoncitlst_id; // Set city code
+                                    'carPickupLocationCode' : 'carDropoffLocationCode').value =
+                                city.caoncitlst_id;
                             suggestionList.innerHTML = '';
                         };
                         suggestionList.appendChild(option);
@@ -1417,10 +1418,86 @@ console.log('Cookies:', document.cookie);
             fetchCities('carDropoffLocation', 'carDropoffLocationList');
         });
 
+        const form = document.getElementById('carSearchForm');
+        const searchButton = document.getElementById('searchButton');
 
-        
+        if (form) {
+            form.addEventListener('submit', async function(event) {
+                event.preventDefault();
 
+                // Validate required fields
+                const pickupLocation = document.getElementById('carPickupLocationCode').value;
+                const dropoffLocation = document.getElementById('carDropoffLocationCode').value;
+                const pickupDate = document.getElementById('carPickupDate').value;
+                const tripType = document.getElementById('carTripType').value;
 
+                if (!pickupLocation || !dropoffLocation || !pickupDate || !tripType) {
+                    alert('Please fill all required fields before searching.');
+                    return;
+                }
+
+                // Show loading state
+                searchButton.disabled = true;
+                searchButton.innerHTML =
+                    '<span class="spinner-border spinner-border-sm me-2"></span>Searching...';
+
+                try {
+                    // Prepare the search parameters
+                    const searchParams = {
+                        pickupLocation: document.getElementById('carPickupLocation').value,
+                        dropoffLocation: document.getElementById('carDropoffLocation').value,
+                        pickupLocationCode: pickupLocation,
+                        dropoffLocationCode: dropoffLocation,
+                        pickupDate: pickupDate,
+                        tripType: tripType
+                    };
+                    const apiRequestBody = {
+                        EndUserIp: "1.1.1.1",
+                        ClientId: "{{ env('CAR_API_CLIENT_ID') }}",
+                        UserName: "{{ env('CAR_API_USER_NAME') }}",
+                        Password: "{{ env('CAR_API_PASSWORD') }}",
+                        FormCity: pickupLocation,
+                        ToCity: dropoffLocation,
+                        PickUpDate: pickupDate,
+                        DropDate: "",
+                        Hours: "8",
+                        TripType: tripType,
+                        searchParams: searchParams
+                    };
+
+                    // Make API request
+                    const response = await fetch("{{ route('searchCars') }}", {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': document.querySelector(
+                                'meta[name="csrf-token"]').getAttribute('content')
+                        },
+                        body: JSON.stringify(apiRequestBody)
+                    });
+
+                    if (!response.ok) {
+                        throw new Error(HTTP error! status: ${response.status});
+                    }
+                    const data = await response.json();
+
+                    if (data.success) {
+                        // Redirect to cars page
+                        window.location.href = "{{ route('cars.index') }}";
+                    } else {
+                        throw new Error(data.message || 'Search failed');
+                    }
+
+                } catch (error) {
+                    console.error('Error:', error);
+                    alert('An error occurred while searching for cars. Please try again.');
+                } finally {
+                    searchButton.disabled = false;
+                    searchButton.innerHTML = 'Search Cars';
+                }
+            });
+        }
+    });
 
 
 
