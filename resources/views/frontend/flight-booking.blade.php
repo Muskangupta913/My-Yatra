@@ -273,16 +273,16 @@
                     <div id="dynamicSections"></div>
 
                     <!-- Options -->
-                    <div class="option-selection">
+                    <div class="option-selection" style="display: none;">
                         <button type="button" class="btn btn-primary" id="baggage-btn">Baggage Options</button>
                         <button type="button" class="btn btn-secondary" id="meal-btn">Meal Options</button>
                     </div>
-                    <div id="options-container">
+                    <div id="options-container" style="display: none;">
                         <p>Please select an option to view details.</p>
                     </div>
 
                     <!-- Seat Selection -->
-                    <div class="seat-selection-section mb-3">
+                    <div class="seat-selection-section mb-3" style="display: none;">
                         <h6>Seat Selection</h6>
                         <button type="button" class="btn btn-secondary" id="selectSeatBtn">Select Seat</button>
                         <span id="seatInfo" class="ms-2" style="font-size: 14px;"></span>
@@ -290,7 +290,7 @@
                     <div id="seatMapContainer" class="mt-3" style="display: none;"></div>
 
                     <!-- Fare Details -->
-                    <div class="card mb-3">
+                    <div class="card mb-3" style="display: none;">
                         <div class="card-header">
                             <h6 class="mb-0">Fare Details</h6>
                         </div>
@@ -303,6 +303,11 @@
                             </div>
                         </div>
                     </div>
+
+                    <div class="total-price-container">
+    <h5>Total Price: <span id="totalPrice">₹0.00</span></h5>
+    <div id="priceBreakdown"></div>
+</div>
 
                     <!-- Submit Button -->
                     <button type="button" id="submitButton" class="btn btn-primary">Submit Booking</button>
@@ -325,13 +330,23 @@
     const resultIndex = urlParams.get('resultIndex');
     const encodedDetails = urlParams.get('details');
     const origin = getCookie('origin') ;
-    console.log(' ORIGIN Details:');
-        console.log('ORIGIN:', origin);
-        const outboundFareQuoteData = JSON.parse(sessionStorage.getItem('outboundFareQuoteData'));
-        const returnFareQuoteData = JSON.parse(sessionStorage.getItem('returnFareQuoteData'));
+    // console.log(' ORIGIN Details:');
+    //     console.log('ORIGIN:', origin);
+        // const outboundFareQuoteData = JSON.parse(sessionStorage.getItem('outboundFareQuoteData'));
+        // const returnFareQuoteData = JSON.parse(sessionStorage.getItem('returnFareQuoteData'));
 
-        console.log('outbount fetched data ',outboundFareQuoteData);
-        console.log('return fetched data ',returnFareQuoteData);
+        // console.log('outbount fetched data ',outboundFareQuoteData);
+        // console.log('return fetched data ',returnFareQuoteData);
+
+
+        const fareQuoteData = JSON.parse(sessionStorage.getItem('fareQuoteData'));
+        console.log('AdultDOB required ', fareQuoteData.AdultDobRequired);
+        console.log('childDOB required ', fareQuoteData.ChildDobRequired);
+        console.log('infantDOB required ', fareQuoteData.InfantDobRequired);
+        console.log('SeatSelectAllowed required ', fareQuoteData.SeatSelectAllowed);
+        console.log('IsPassportRequiredAtBook required ', fareQuoteData.IsPassportRequiredAtBook);
+        console.log('fareqoutes ',fareQuoteData);
+
          
 
     function getCookie(name) {
@@ -483,9 +498,7 @@ createPassengerForm("Child", childCount, 2);
 createPassengerForm("Infant", infantCount, 3);
    
 
-    const fareQuoteData = JSON.parse(sessionStorage.getItem('fareQuoteData'));
-    console.log('fareqoutes segment',fareQuoteData?.Segments )
-
+  
     function renderFareQuoteSegments(fareQuoteData) {
     const segmentsContainer = document.getElementById('segmentsContainer');
     segmentsContainer.innerHTML = '';
@@ -499,57 +512,98 @@ createPassengerForm("Infant", infantCount, 3);
         return;
     }
 
-    fareQuoteData.Segments.forEach((segmentGroup) => {
-        const card = document.createElement('div');
-        card.classList.add(
-            'bg-white',
-            'rounded-lg',
-            'shadow-sm',
-            'border',
-            'border-gray-200',
-            'p-4',
-            'mb-4'
-        );
+    fareQuoteData.Segments.forEach((segmentGroup, groupIndex) => {
+    const card = document.createElement('div');
+    card.style.cssText = 'background-color: white; border-radius: 0.75rem; box-shadow: 0 1px 3px rgba(0,0,0,0.1); border: 1px solid #E5E7EB; padding: 1.5rem; margin-bottom: 1.5rem; max-width: 1200px; width: 100%;';
 
-        let segmentsHtml = '';
-        segmentGroup.forEach((segment, index) => {
-            const departureTime = new Date(segment.DepTime);
-            const arrivalTime = new Date(segment.ArrTime);
+    let segmentsHtml = `
+        <div style="margin-bottom: 1rem; padding-bottom: 0.75rem; border-bottom: 1px solid #E5E7EB; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem;">
+            <span style="background-color: #F3F4F6; color: #4B5563; padding: 0.375rem 0.75rem; border-radius: 9999px; font-size: 0.875rem; font-weight: 500;">
+                ${groupIndex === 0 ? 'OUTBOUND' : 'RETURN'}
+            </span>
+            <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+                <span style="background-color: #EFF6FF; color: #1E40AF; padding: 0.375rem 0.75rem; border-radius: 9999px; font-size: 0.875rem;">
+                    <span style="font-weight: 500;">Baggage:</span> ${segmentGroup[0].Baggage}
+                </span>
+                <span style="background-color: #EFF6FF; color: #1E40AF; padding: 0.375rem 0.75rem; border-radius: 9999px; font-size: 0.875rem;">
+                    <span style="font-weight: 500;">Cabin:</span> ${segmentGroup[0].CabinBaggage}
+                </span>
+            </div>
+        </div>`;
 
-            segmentsHtml += `
-                <div class="flex items-center ${index < segmentGroup.length - 1 ? 'mb-2' : ''}">
-                    <div class="w-24 text-center">
-                        <p class="font-bold">${departureTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
-                        <p class="text-sm text-gray-600">${segment.Origin.CityCode}</p>
+    segmentGroup.forEach((segment, index) => {
+        const departureTime = new Date(segment.DepTime);
+        const arrivalTime = new Date(segment.ArrTime);
+        const duration = segment.Duration;
+        const hours = Math.floor(duration / 60);
+        const minutes = duration % 60;
+
+        // Format airport and terminal information
+      const originAirportInfo = `${segment.Origin.AirportName}${segment.Origin.Terminal ? '-Terminal ' + segment.Origin.Terminal : ''}`;
+const destAirportInfo = `${segment.Destination.AirportName}${segment.Destination.Terminal ? '-Terminal ' + segment.Destination.Terminal : ''}`;
+
+        segmentsHtml += `
+            <div style="display: flex; flex-direction: column; ${index < segmentGroup.length - 1 ? 'margin-bottom: 1rem;' : ''}">
+                <div style="display: flex; align-items: center; flex-wrap: wrap; gap: 1rem;">
+                    <div style="min-width: 120px; flex: 1;">
+                        <p style="margin: 0 0 0.25rem 0; font-size: 1.25rem; font-weight: 600; color: #111827;">
+                            ${departureTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                        </p>
+                        <p style="margin: 0; font-size: 1rem; color: #374151;">
+                            ${segment.Origin.CityCode}
+                        </p>
+                        <p style="margin: 0; font-size: 0.875rem; color: #6B7280;">
+                            ${originAirportInfo}
+                        </p>
                     </div>
-                    
-                    <div class="flex-1 px-4">
-                        <div class="relative flex items-center">
-                            <div class="h-0.5 w-full bg-gray-300"></div>
-                            <div class="absolute w-full text-center">
-                                <span class="bg-white px-2 text-xs text-gray-600">
-                                    ${segment.Airline.AirlineCode} ${segment.Airline.FlightNumber}
+
+                    <div style="flex: 2; min-width: 200px; padding: 0 1rem; position: relative;">
+                        <div style="height: 2px; background-color: #E5E7EB; position: relative;">
+                            <div style="position: absolute; width: 100%; text-align: center; top: -20px;">
+                                <span style="font-size: 0.875rem; color: #4B5563; display: block;">
+                                    ${segment.Airline.AirlineCode}-${segment.Airline.FlightNumber}
+                                </span>
+                                <span style="font-size: 0.75rem; color: #6B7280; display: block; margin-top: 0.125rem;">
+                                    ${segment.Airline.AirlineName || segment.Airline.Name || 'Airline'}
+                                </span>
+                                <span style="font-size: 0.75rem; color: #6B7280; display: block; margin-top: 0.125rem;">
+                                    ${hours}h ${minutes}m 
                                 </span>
                             </div>
                         </div>
                     </div>
-                    
-                    <div class="w-24 text-center">
-                        <p class="font-bold">${arrivalTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
-                        <p class="text-sm text-gray-600">${segment.Destination.CityCode}</p>
+
+                    <div style="min-width: 120px; flex: 1; text-align: right;">
+                        <p style="margin: 0 0 0.25rem 0; font-size: 1.25rem; font-weight: 600; color: #111827;">
+                            ${arrivalTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                        </p>
+                        <p style="margin: 0; font-size: 1rem; color: #374151;">
+                            ${segment.Destination.CityCode}
+                        </p>
+                        <p style="margin: 0; font-size: 0.875rem; color: #6B7280;">
+                            ${destAirportInfo}
+                        </p>
                     </div>
                 </div>
-                ${index < segmentGroup.length - 1 ? `
-                    <div class="my-2 px-3 py-1 bg-orange-50 rounded text-sm text-center text-orange-700">
-                        Change planes at ${segment.Destination.CityCode}
-                    </div>
-                ` : ''}
-            `;
-        });
+            </div>`;
 
-        card.innerHTML = segmentsHtml;
-        segmentsContainer.appendChild(card);
+            if (index < segmentGroup.length - 1) {
+                const nextSegment = segmentGroup[index + 1];
+            const groundTime = parseInt(nextSegment.GroundTime) || 0;
+            const groundHours = Math.floor(groundTime / 60);
+            const groundMinutes = groundTime % 60;
+            
+            segmentsHtml += `
+                <div style="margin: 1rem 0; padding: 0.75rem; background-color: #FFEDD5; border-radius: 0.375rem; text-align: center; color: #9A3412;">
+                    <p style="margin: 0; font-weight: 500;">Change planes at ${segment.Destination.CityCode}</p>
+                    <p style="margin: 0.25rem 0 0 0; font-size: 0.875rem;">Layover: ${groundHours}h ${groundMinutes}m</p>
+                </div>`;
+        }
     });
+
+    card.innerHTML = segmentsHtml;
+    segmentsContainer.appendChild(card);
+});
 }
 
 
@@ -563,7 +617,7 @@ if (fareQuoteData) {
         // Optional: Set total fare in a hidden input for later use
         const totalFareInput = document.getElementById('totalFare');
         if (totalFareInput) {
-            totalFareInput.value = fareQuoteData.Fare.OfferedFare || 0;
+            totalFareInput.value = fareQuoteData.Fare.PublishedFare || 0;
         }
     } else {
         console.error('Fare Quote Data Not Found in Session Storage');
@@ -724,68 +778,134 @@ if (typeof window !== 'undefined') {
         </table>
     `;
 }
-
 window.updateBaggageSelection = function(radio, passengerId) {
-    const baggageOption = {
-        Code: radio.value,
-        Weight: radio.getAttribute('data-weight'),
-        Price: radio.getAttribute('data-price'),
+if (window.passengerSelections.baggage[passengerId]?.Code === radio.value) {
+        radio.checked = false;
+        delete window.passengerSelections.baggage[passengerId];
+    } else {
+        window.passengerSelections.baggage[passengerId] = {
+            Code: radio.value,
+            Weight: radio.getAttribute('data-weight'),
+            Price: radio.getAttribute('data-price'),
         Origin: radio.getAttribute('data-origin'),
         Destination: radio.getAttribute('data-destination'),
         Description: radio.getAttribute('data-description'),
         WayType: radio.getAttribute('data-wayType'),
         Currency: radio.getAttribute('data-currency')
-    };
-    
-    window.passengerSelections.baggage[passengerId] = baggageOption;
+        };
+    }
     showBaggageAlert(radio, passengerId);
+    updateTotalFare();
 };
-
 
 function renderMealOptions(mealData, container, passengerId) {
     container.innerHTML = `
         <div class="meal-options-container">
-            <h6 class="mb-4">Meal Options (Select Multiple)</h6>
             <div class="selected-meals-summary mb-3">
                 <strong>Selected Meals: </strong>
                 <div id="selectedMealsDisplay_${passengerId}" class="mt-2">
                     <em class="text-muted">No meals selected</em>
                 </div>
             </div>
-            ${mealData.map(meal => `
-                <div class="meal-option">
-                    <input 
-                        type="checkbox" 
-                        name="meal_option_${passengerId}" 
-                        value="${meal.Code}" 
-                        data-wayType="${meal.WayType}"
-                        data-descript="${meal.Description || 'No Description'}"
-                        data-description="${meal.AirlineDescription || 'No Description'}"
-                        data-origin="${meal.Origin}"
-                        data-quantity="${meal.Quantity}"
-                        data-currency="${meal.Currency}"
-                        data-destination="${meal.Destination}"
-                        data-price="${meal.Price}"
-                        onchange="updateMealSelections(this, '${passengerId}')"
-                    >
-                    <label>
-                        ${meal.AirlineDescription || 'No Meal'} 
-                        (₹${meal.Price || 0})
-                        <div class="meal-quantity">
+            <div class="meal-list">
+                ${mealData.map(meal => `
+                    <div class="meal-option">
+                        <div class="meal-selection">
+                            <input 
+                                type="checkbox" 
+                                name="meal_option_${passengerId}" 
+                                value="${meal.Code}" 
+                                data-wayType="${meal.WayType}"
+                                data-descript="${meal.Description || 'No Description'}"
+                                data-description="${meal.AirlineDescription || 'No Description'}"
+                                data-origin="${meal.Origin}"
+                                data-quantity="${meal.Quantity}"
+                                data-currency="${meal.Currency}"
+                                data-destination="${meal.Destination}"
+                                data-price="${meal.Price}"
+                                onchange="updateMealSelections(this, '${passengerId}')"
+                                id="meal_${meal.Code}_${passengerId}"
+                            >
+                            <label for="meal_${meal.Code}_${passengerId}" class="meal-label">
+                                ${meal.AirlineDescription || 'No Meal'} 
+                                <span class="meal-price">₹${meal.Price || 0}</span>
+                            </label>
+                        </div>
+                        <div class="meal-quantity compact">
                             <button type="button" class="quantity-btn" onclick="adjustQuantity(this, -1, '${passengerId}')" ${meal.Price ? '' : 'disabled'}>-</button>
                             <input type="number" min="1" max="5" value="1" class="quantity-input" 
                                 onchange="updateMealQuantity(this, '${passengerId}')" ${meal.Price ? '' : 'disabled'}>
                             <button type="button" class="quantity-btn" onclick="adjustQuantity(this, 1, '${passengerId}')" ${meal.Price ? '' : 'disabled'}>+</button>
                         </div>
-                    </label>
-                </div>
-            `).join('')}
+                    </div>
+                `).join('')}
+            </div>
         </div>
     `;
 
-    // Add some styling for the selected meals display
+    // Add styling for the new compact meal list
     const style = document.createElement('style');
     style.textContent = `
+        .meal-list {
+            max-height: 300px;
+            overflow-y: auto;
+            border: 1px solid #e0e0e0;
+            border-radius: 4px;
+        }
+        .meal-option {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 12px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        .meal-option:last-child {
+            border-bottom: none;
+        }
+        .meal-option:hover {
+            background-color: #f9f9f9;
+        }
+        .meal-selection {
+            display: flex;
+            align-items: center;
+            flex: 1;
+        }
+        .meal-label {
+            margin-left: 8px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            flex: 1;
+            max-width: 70%;
+        }
+        .meal-price {
+            font-weight: bold;
+            color: #2c5282;
+            margin-left: 8px;
+        }
+        .meal-quantity.compact {
+            display: flex;
+            align-items: center;
+        }
+        .quantity-btn {
+            width: 25px;
+            height: 25px;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid #ccc;
+            background: #f8f9fa;
+            border-radius: 3px;
+        }
+        .quantity-input {
+            width: 35px;
+            text-align: center;
+            margin: 0 4px;
+            padding: 2px;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+        }
         .selected-meals-display-item {
             background-color: #f8f9fa;
             border: 1px solid #dee2e6;
@@ -802,10 +922,17 @@ function renderMealOptions(mealData, container, passengerId) {
             padding-top: 8px;
             border-top: 1px solid #dee2e6;
         }
+             .btn-close-meal {
+        border: none;
+        background: none;
+        color: #dc3545;
+        font-weight: bold;
+        cursor: pointer;
+        margin-left: 8px;
+    }
     `;
     document.head.appendChild(style);
 }
-
 // Store selected meals in an array
 window.selectedMealOptions = [];
 
@@ -876,9 +1003,12 @@ function updateMealDisplay(passengerId) {
         const mealTotal = meal.Price * meal.Quantity;
         totalPrice += mealTotal;
         return `
-            <div class="selected-meals-display-item">
+           <div class="selected-meals-display-item">
                 <span>${meal.AirlineDescription} (Qty: ${meal.Quantity})</span>
-                <span>₹${mealTotal.toFixed(2)}</span>
+                <div>
+                    <span>₹${mealTotal.toFixed(2)}</span>
+                    <button type="button" class="btn-close-meal" onclick="removeMeal('${meal.Code}', '${passengerId}')">×</button>
+                </div>
             </div>
         `;
     }).join('');
@@ -892,7 +1022,18 @@ function updateMealDisplay(passengerId) {
 
     displayElement.innerHTML = mealsHtml;
 }
-
+window.removeMeal = function(mealCode, passengerId) {
+    // Uncheck the checkbox
+    document.getElementById(`meal_${mealCode}_${passengerId}`).checked = false;
+    
+    // Remove from selections array
+    window.passengerSelections.meals[passengerId] = 
+        window.passengerSelections.meals[passengerId].filter(meal => meal.Code !== mealCode);
+    
+    // Update displays
+    updateMealDisplay(passengerId);
+    updateTotalFare();
+};
 // Update quantity handling to refresh the display
 window.updateMealQuantity = function(input, passengerId) {
     const checkbox = input.closest('.meal-option').querySelector(`input[name="meal_option_${passengerId}"]`);
@@ -949,6 +1090,8 @@ function showBaggageAlert(radio) {
     } else {
         alert(`Baggage: ${weight > 0 ? weight + ' kg' : 'No Baggage'} - ${price > 0 ? '₹' + price : 'Free'}`);
     }
+   
+    
 }
 
 
@@ -968,6 +1111,7 @@ window.showBaggageAlert = function(radio) {
     } else {
         alert(`Baggage: ${weight > 0 ? weight + ' kg' : 'No Baggage'} - ${price > 0 ? '₹' + price : 'Free'}`);
     }
+   
 };
 
     // Seat Selection
@@ -1092,6 +1236,7 @@ function selectSeat(code, seatNumber, amount, airlineName, airlineCode, airlineN
         showConfirmButton: false,
         timer: 1500
     });
+    updateTotalFare();
 }
 
 
@@ -1106,7 +1251,245 @@ if (typeof window !== 'undefined') {
     window.selectSeat = selectSeat;
 }
 
+window.fareQuoteData = fareQuoteData;
 
+function calculateTotalPrice() {
+    let total = 0;
+
+    // Add base fare from fareQuoteData
+    const baseFare = window.fareQuoteData?.Fare?.PublishedFare|| 0;
+    total += parseFloat(baseFare);
+
+    console.log('total fare and price',total);
+
+    // Iterate through all passenger selections
+    for (const passengerId in window.passengerSelections.seats) {
+        // Add seat prices
+        const seatSelection = window.passengerSelections.seats[passengerId];
+        if (seatSelection && seatSelection.amount) {
+            total += parseFloat(seatSelection.amount);
+        }
+
+        // Add meal prices
+        const mealSelections = window.passengerSelections.meals[passengerId] || [];
+        mealSelections.forEach(meal => {
+            if (meal.Price && meal.Quantity) {
+                total += (parseFloat(meal.Price) * parseInt(meal.Quantity));
+            }
+        });
+
+        // Add baggage prices
+        const baggageSelection = window.passengerSelections.baggage[passengerId];
+        if (baggageSelection && baggageSelection.Price) {
+            total += parseFloat(baggageSelection.Price);
+        }
+    }
+
+    return total;
+}
+
+function updateTotalFare() {
+    const totalPriceDetails = calculateTotalPriceWithDetails();
+    const total = totalPriceDetails.grandTotal;
+    
+    // Update the total in the UI with enhanced styling
+    const totalPriceElement = document.getElementById('totalPrice');
+    if (totalPriceElement) {
+        totalPriceElement.innerHTML = `
+        ₹${totalPriceDetails.grandTotal.toFixed(2)}
+            `;
+    }
+
+    // Enhanced breakdown section with better styling
+    const breakdownElement = document.getElementById('priceBreakdown');
+    if (breakdownElement) {
+        let breakdown = `
+            <div class="price-breakdown-container">
+                <div class="card shadow-lg border-0 rounded-lg">
+                    <div class="card-header bg-primary bg-gradient text-white py-3">
+                        <h4 class="card-title mb-0 text-center">
+                            <i class="fas fa-receipt me-2"></i>Price Breakdown
+                        </h4>
+                    </div>
+                    
+                    <div class="card-body p-4">
+                        <!-- Base Fare Section -->
+                        <div class="base-fare-section mb-4">
+                            <div class="section-header bg-light p-3 rounded-top border-start border-4 border-primary">
+                                <h5 class="mb-0 text-primary">
+                                    <i class="fas fa-ticket-alt me-2"></i>Base Fare
+                                </h5>
+                            </div>
+                            <div class="section-content p-3 border rounded-bottom">
+                                <div class="fare-card bg-light p-3 rounded text-center">
+                                    <div class="text-primary mb-2">
+                                        <i class="fas fa-plane fa-2x"></i>
+                                    </div>
+                                    <h5 class="text-success mb-0">₹${parseFloat(window.fareQuoteData?.Fare?.PublishedFare || 0).toFixed(2)}</h5>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Passenger Selections -->
+                        <div class="passenger-selections">
+                            <div class="section-header bg-light p-3 rounded-top border-start border-4 border-primary">
+                                <h5 class="mb-0 text-primary">
+                                    <i class="fas fa-users me-2"></i>Passenger Selections
+                                </h5>
+                            </div>`;
+                 const allPassengerIds = new Set([
+            ...Object.keys(window.passengerSelections.seats || {}),
+            ...Object.keys(window.passengerSelections.meals || {}),
+            ...Object.keys(window.passengerSelections.baggage || {})
+        ]);
+
+        // Generate breakdown for each passenger
+        allPassengerIds.forEach(passengerId => {
+            breakdown += `
+                <div class="passenger-card mb-4 border rounded-bottom p-3">
+                    <div class="passenger-header bg-light p-2 rounded mb-3">
+                        <h6 class="mb-0 text-primary">
+                            <i class="fas fa-user-circle me-2"></i>Passenger ${passengerId}
+                        </h6>
+                    </div>
+                    
+                    <div class="selections-container">
+                        <!-- Seat Selection -->
+                        ${(() => {
+                            const seat = window.passengerSelections.seats[passengerId];
+                            if (seat && seat.amount) {
+                                return `
+                                    <div class="selection-item d-flex align-items-center p-2 mb-2 bg-light rounded">
+                                        <div class="icon-wrapper me-3">
+                                            <i class="fas fa-chair text-success"></i>
+                                        </div>
+                                        <div class="flex-grow-1">
+                                            <div class="fw-semibold">Seat ${seat.seatNumber}</div>
+                                        </div>
+                                        <div class="price text-success">₹${parseFloat(seat.amount).toFixed(2)}</div>
+                                    </div>`;
+                            }
+                            return '';
+                        })()}
+
+                        <!-- Meal Selections -->
+                        ${(() => {
+                            const meals = window.passengerSelections.meals[passengerId] || [];
+                            return meals.map(meal => `
+                                <div class="selection-item d-flex align-items-center p-2 mb-2 bg-light rounded">
+                                    <div class="icon-wrapper me-3">
+                                        <i class="fas fa-utensils text-warning"></i>
+                                    </div>
+                                    <div class="flex-grow-1">
+                                        <div class="fw-semibold">${meal.AirlineDescription}</div>
+                                        <div class="text-muted small">Quantity: ${meal.Quantity}</div>
+                                    </div>
+                                    <div class="price text-success">₹${(parseFloat(meal.Price) * parseInt(meal.Quantity)).toFixed(2)}</div>
+                                </div>`
+                            ).join('');
+                        })()}
+
+                        <!-- Baggage Selection -->
+                        ${(() => {
+                            const baggage = window.passengerSelections.baggage[passengerId];
+                            if (baggage && baggage.Price) {
+                                return `
+                                    <div class="selection-item d-flex align-items-center p-2 mb-2 bg-light rounded">
+                                        <div class="icon-wrapper me-3">
+                                            <i class="fas fa-suitcase text-info"></i>
+                                        </div>
+                                        <div class="flex-grow-1">
+                                            <div class="fw-semibold">Extra Baggage</div>
+                                            <div class="text-muted small">${baggage.Weight}kg</div>
+                                        </div>
+                                        <div class="price text-success">₹${parseFloat(baggage.Price).toFixed(2)}</div>
+                                    </div>`;
+                            }
+                            return '';
+                        })()}
+                    </div>
+                </div>`;
+        });
+
+        breakdown += `
+                     <!-- Grand Total -->
+           <div class="grand-total-section mt-4">
+    <div class="card bg-success bg-gradient text-white">
+        <div class="card-body p-4 text-center">
+            <h5 class="mb-2">Grand Total</h5>
+            <h2 class="mb-0">₹${totalPriceDetails.grandTotal.toFixed(2)}</h2>
+        </div>
+    </div>
+</div>`;
+        
+        breakdownElement.innerHTML = breakdown;
+    }
+}
+
+if (typeof window !== 'undefined') {
+    window.calculateTotalPrice = calculateTotalPrice;
+    window.updateTotalFare = updateTotalFare;
+    console.log('updated proice',calculateTotalPrice);
+}
+// First, add this function at the beginning to calculate total price
+function calculateTotalPriceWithDetails() {
+    // Get base fare from fareQuoteData
+    const baseFare = parseFloat(fareQuoteData.Fare.BaseFare) || 0;
+    const tax = parseFloat(fareQuoteData.Fare.Tax) || 0;
+    const yqTax = parseFloat(fareQuoteData.Fare.YQTax) || 0;
+    const transactionFee = parseFloat(fareQuoteData.Fare.TransactionFee) || 0;
+    const additionalTxnFeeOfrd = parseFloat(fareQuoteData.Fare.AdditionalTxnFeeOfrd) || 0;
+    const additionalTxnFeePub = parseFloat(fareQuoteData.Fare.AdditionalTxnFeePub) || 0;
+    const airTransFee = parseFloat(fareQuoteData.Fare.AirTransFee) || 0;
+
+    // Calculate SSR costs
+    let totalSSRCost = 0;
+    const allPassengerIds = new Set([
+        ...Object.keys(window.passengerSelections.seats || {}),
+        ...Object.keys(window.passengerSelections.meals || {}),
+        ...Object.keys(window.passengerSelections.baggage || {})
+    ]);
+
+    // Calculate total SSR costs for all selections
+    allPassengerIds.forEach(passengerId => {
+        // Add seat prices
+        const seatSelection = window.passengerSelections.seats[passengerId];
+        if (seatSelection && seatSelection.amount) {
+            totalSSRCost += parseFloat(seatSelection.amount);
+        }
+
+        // Add meal prices
+        const mealSelections = window.passengerSelections.meals[passengerId] || [];
+        mealSelections.forEach(meal => {
+            if (meal.Price && meal.Quantity) {
+                totalSSRCost += (parseFloat(meal.Price) * parseInt(meal.Quantity));
+            }
+        });
+
+        // Add baggage prices
+        const baggageSelection = window.passengerSelections.baggage[passengerId];
+        if (baggageSelection && baggageSelection.Price) {
+            totalSSRCost += parseFloat(baggageSelection.Price);
+        }
+    });
+
+    // Calculate grand total
+    const grandTotal = baseFare + tax + yqTax + transactionFee + 
+                      additionalTxnFeeOfrd + additionalTxnFeePub + 
+                      airTransFee + totalSSRCost;
+
+    return {
+        grandTotal,
+        totalSSRCost,
+        baseFare,
+        tax,
+        yqTax,
+        transactionFee,
+        additionalTxnFeeOfrd,
+        additionalTxnFeePub,
+        airTransFee
+    };
+}
 
 
 // Function to check flight balance
@@ -1150,7 +1533,7 @@ function checkFlightBalance() {
                 throw new Error(data.message || 'Failed to check balance');
             }
 
-            const totalFare = fareQuoteData.Fare.OfferedFare || 0;
+            const totalFare = fareQuoteData.Fare.PublishedFare || 0;
 
             // Check if balance is sufficient
             if (data.balance < totalFare) {
@@ -1182,10 +1565,17 @@ function checkFlightBalance() {
     });
 }
 
+
+
+
+// Make functions available globally
+
 document.getElementById('submitButton').addEventListener('click', async function(event) {
     event.preventDefault();
     
     try {
+
+        const totalPriceDetails = calculateTotalPriceWithDetails();
         await checkFlightBalance();
         const isLCC = flightDetails.isLCC;
         console.log('Checking isLCC status:', isLCC);
@@ -1197,7 +1587,8 @@ document.getElementById('submitButton').addEventListener('click', async function
                 resultIndex: resultIndex,
                 srdvIndex: srdvIndex,
                 traceId: traceId,
-                totalFare: fareQuoteData.Fare.OfferedFare || 0
+                totalFare: fareQuoteData.Fare.PublishedFare || 0,
+                grandTotal: totalPriceDetails.grandTotal,
             };
 
             // Initialize passengers array
@@ -1228,7 +1619,7 @@ document.getElementById('submitButton').addEventListener('click', async function
                     title: form.querySelector('[name$="[Title]"]').value.trim(),
                     firstName: form.querySelector('[name$="[FirstName]"]').value.trim(),
                     lastName: form.querySelector('[name$="[LastName]"]').value.trim(),
-                    gender: parseInt(form.querySelector('[name$="[Gender]"]').value),
+                    gender: (form.querySelector('[name$="[Gender]"]').value),
                     contactNo: form.querySelector('[name$="[ContactNo]"]')?.value.trim() || "",
                     email: form.querySelector('[name$="[Email]"]')?.value.trim() || "",
                     dateOfBirth: form.querySelector('[name$="[DateOfBirth]"]').value,
@@ -1338,19 +1729,19 @@ document.getElementById('submitButton').addEventListener('click', async function
                 return email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/);
             }
 
-            function validatePassenger(passengerData) {
-                const errors = [];
+            // function validatePassenger(passengerData) {
+            //     const errors = [];
                 
-                if (!passengerData.firstName.trim()) errors.push('First name is required');
-                if (!passengerData.lastName.trim()) errors.push('Last name is required');
-                if (!passengerData.passportNo.trim()) errors.push('Passport number is required');
-                if (!passengerData.passportExpiry) errors.push('Passport expiry date is required');
-                if (!passengerData.dateOfBirth) errors.push('Date of birth is required');
-                if (!validateEmail(passengerData.email)) errors.push('Valid email is required');
-                if (!passengerData.contactNo.trim()) errors.push('Contact number is required');
+            //     if (!passengerData.firstName.trim()) errors.push('First name is required');
+            //     if (!passengerData.lastName.trim()) errors.push('Last name is required');
+            //     if (!passengerData.passportNo.trim()) errors.push('Passport number is required');
+            //     if (!passengerData.passportExpiry) errors.push('Passport expiry date is required');
+            //     if (!passengerData.dateOfBirth) errors.push('Date of birth is required');
+            //     if (!validateEmail(passengerData.email)) errors.push('Valid email is required');
+            //     if (!passengerData.contactNo.trim()) errors.push('Contact number is required');
                 
-                return errors;
-            }
+            //     return errors;
+            // }
 
             let passengers = [];
             
@@ -1371,7 +1762,6 @@ document.getElementById('submitButton').addEventListener('click', async function
                 let passenger = {
                     title: form.querySelector('[name$="[Title]"]').value.trim(),
                     firstName: form.querySelector('[name$="[FirstName]"]').value.trim(),
-                    lastName: form.querySelector('[name$="[LastName]"]').value.trim(),
                     gender: (form.querySelector('[name$="[Gender]"]').value),
                     contactNo: form.querySelector('[name$="[ContactNo]"]')?.value.trim() || "",
                     email: form.querySelector('[name$="[Email]"]')?.value.trim() || "",
@@ -1408,10 +1798,10 @@ document.getElementById('submitButton').addEventListener('click', async function
                 };
 
                 // Validate passenger data
-                const validationErrors = validatePassenger(passenger);
-                if (validationErrors.length > 0) {
-                    throw new Error(`Validation failed for ${passengerTypeString}: ${validationErrors.join(', ')}`);
-                }
+                // const validationErrors = validatePassenger(passenger);
+                // if (validationErrors.length > 0) {
+                //     throw new Error(`Validation failed for ${passengerTypeString}: ${validationErrors.join(', ')}`);
+                // }
 
                 passengers.push(passenger);
             });
@@ -1451,7 +1841,8 @@ document.getElementById('submitButton').addEventListener('click', async function
                         bookingId: data.booking_details.booking_id,
                         pnr: data.booking_details.pnr,
                         srdvIndex: data.booking_details.srdvIndex,
-                        traceId: data.booking_details.trace_id
+                        traceId: data.booking_details.trace_id,
+                        grandTotal: totalPriceDetails.grandTotal
                     });
                     window.location.href = `/payment?${queryParams.toString()}`;
                 } else {
@@ -1481,20 +1872,6 @@ document.getElementById('submitButton').addEventListener('click', async function
 
 
 // ALL CODE REALTED TO ROUND TRIP FLIGHT BOOKING
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
