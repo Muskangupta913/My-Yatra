@@ -78,7 +78,7 @@
                         <a href="{{ route('loginView') }}" 
                            class="btn btn-warning btn-sm rounded-0 fw-bold" 
                            style="padding: 6px 15px; font-size: 13px;">
-                            <i class="fa-regular fa-user"></i>
+                            <!-- <i class="fa-regular fa-user"></i> -->
                             <span >LOGIN</span>
                         </a>
                     @else
@@ -87,7 +87,7 @@
                             <button type="submit" 
                                     class="btn btn-warning btn-sm rounded-0 fw-bold" 
                                     style="padding: 6px 15px; font-size: 13px;">
-                                <i class="fa-solid fa-sign-out-alt"></i>
+                                <!-- <i class="fa-solid fa-sign-out-alt"></i> -->
                                 <span>LOGOUT</span>
                             </button>
                         </form>

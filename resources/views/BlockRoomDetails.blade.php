@@ -83,7 +83,10 @@
     </div>
 
 </div>
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
     <script>
+
+
         document.getElementById('passenger-form').addEventListener('submit', async function(event) {
     event.preventDefault();
     
@@ -340,10 +343,10 @@ function createAdultForm(index) {
                         style="flex: 1; min-width: 200px; padding: 10px; border: 1px solid #ddd; border-radius: 4px;">
                 </div>
 
-                <input type="email" name="Email" placeholder="Email Address" required 
+                <input type="email" id="email" name="Email" placeholder="Email Address" required 
                     style="width: 100%; padding: 10px; margin-top: 15px; border: 1px solid #ddd; border-radius: 4px;">
 
-                <input type="tel" name="Phoneno" placeholder="Phone Number" required 
+                <input type="tel" id="phone" name="Phoneno" placeholder="Phone Number" required 
                     style="width: 100%; padding: 10px; margin-top: 15px; border: 1px solid #ddd; border-radius: 4px;">
 
                 <input type="hidden" name="PaxType" value="Adult">
@@ -400,10 +403,10 @@ function createChildForm(index, age) {
                         style="flex: 1; min-width: 200px; padding: 10px; border: 1px solid #ddd; border-radius: 4px;">
                 </div>
 
-                <input type="email" name="Email" placeholder="Email Address" required 
+                <input type="email" id="email" name="Email" placeholder="Email Address" required 
                     style="width: 100%; padding: 10px; margin-top: 15px; border: 1px solid #ddd; border-radius: 4px;">
 
-                <input type="tel" name="Phoneno" placeholder="Phone Number" required 
+                <input type="tel" id="phoneno" name="Phoneno" placeholder="Phone Number" required 
                     style="width: 100%; padding: 10px; margin-top: 15px; border: 1px solid #ddd; border-radius: 4px;">
 
                 <input type="hidden" name="PaxType" value="Child">
@@ -428,11 +431,18 @@ function createSubmitButton() {
 }
     
 
+
         window.generatePassengerForms = generatePassengerForms;
 
-
         function submitAllPassengers() {
+    const email = document.getElementById('email').value;
+    const phone = document.getElementById('phone').value;
+
     const bookingDetails = fetchBookingDetails();
+    const amount = bookingDetails.roomDetails.OfferedPrice;
+    const currency = bookingDetails.roomDetails.Currency;
+    const bookingId = 'BKG-' + Date.now() + '-' + Math.floor(Math.random() * 1000);
+
     const forms = document.querySelectorAll('.passenger-details-form');
     const passengerData = [];
     let isValid = true;
@@ -469,8 +479,100 @@ function createSubmitButton() {
         console.error('Error checking balance:', error);
         window.passengerDetails = [];
     });
-}
+   
+    if (!amount || parseFloat(amount) <= 0) {
+        alert('Please enter a valid amount');
+        return;
+    }
+    
+    // Create order via AJAX
+    fetch('{{ route("payment.create") }}', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': '{{ csrf_token() }}'
+        },
+        body: JSON.stringify({
+            amount: amount,
+            currency: currency,
+            customerEmail: email,
+            customerPhone: phone,
+            hotelCode: bookingDetails.hotelCode,
+            hotelName: bookingDetails.hotelName,
+            traceId: bookingDetails.traceId,
+            bookingId: bookingId 
 
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            const options = {
+                key: data.key_id,
+                amount: data.amount * 100, // The server should provide the amount already converted to the correct format
+                currency: data.currency,
+                order_id: data.order_id,
+                name: "MAKE MY BHARAT YATRA",
+                description: "Payment for services",
+                image: "https://your-logo-url.com/logo.png",
+                handler: function(response) {
+                    console.log('Payment successful:', response);
+                    // On successful payment - submit the form data
+                    const form = document.createElement('form');
+                    form.method = 'POST';
+                    form.action = '{{ route("payment.verify") }}';
+                    
+                    // Add CSRF token
+                    const csrfField = document.createElement('input');
+                    csrfField.type = 'hidden';
+                    csrfField.name = '_token';
+                    csrfField.value = '{{ csrf_token() }}';
+                    form.appendChild(csrfField);
+                    
+                    // Add payment response fields
+                    const fields = {
+                        'razorpay_payment_id': response.razorpay_payment_id,
+                        'razorpay_order_id': response.razorpay_order_id,
+                        'razorpay_signature': response.razorpay_signature
+                    };
+                    
+                    for (const [name, value] of Object.entries(fields)) {
+                        const field = document.createElement('input');
+                        field.type = 'hidden';
+                        field.name = name;
+                        field.value = value;
+                        form.appendChild(field);
+                    }
+                    
+                    document.body.appendChild(form);
+                    form.submit();
+                },
+                prefill: {
+                    name: "",
+                    email: email,
+                    contact: phone
+                },
+                theme: {
+                    color: "#3399cc"
+                },
+                modal: {
+                    ondismiss: function() {
+                        console.log('Payment cancelled');
+                    }
+                }
+            };
+            
+            const rzp = new Razorpay(options);
+            rzp.open();
+        } else {
+            alert('Failed to create order: ' + data.message);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('An error occurred. Please try again.');
+    });
+}
 
 document.getElementById('passenger-form').addEventListener('submit', function(event) {
     event.preventDefault();
@@ -509,6 +611,7 @@ function fetchBookingDetails() {
     const hotelCode = urlParams.get('hotelCode');
     const hotelName = decodeURIComponent(urlParams.get('hotelName') || '');
     const roomDetails = JSON.parse(decodeURIComponent(urlParams.get('roomDetails') || '{}'));
+    console.log('room details', roomDetails);
 
     // Fetch the new required fields
     const isPassportMandatory = urlParams.get('isPassportMandatory');
@@ -746,7 +849,7 @@ function cycleImages(clickedImage) {
                     roomDetails: JSON.stringify(roomDetailsWithChildCount),
                     passengerDetails: JSON.stringify(passengerDetails)
                 });
-                        window.location.href = `/payment?${paymentParams}`;
+                        // window.location.href = `/payment?${paymentParams}`;
                     }
                 } else {
                     throw new Error(data.message || 'Failed to fetch balance');

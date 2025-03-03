@@ -7,6 +7,10 @@ use Carbon\Carbon;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use \Illuminate\Support\Facades\DB;
+use Razorpay\Api\Api;
+use App\Models\RazorpayPayment;
+use Exception;
+
 
 
 
@@ -777,6 +781,408 @@ public function cancelRoom(Request $request)
         ], 500);
     }
 }
+
+
+
+
+//ORDER BASED API CALLS
+public function createOrder(Request $request)
+{
+    try {
+        // Validate the request
+        $request->validate([
+            'amount' => 'required|numeric|min:1',
+            'currency' => 'nullable|string|size:3',
+            'receipt' => 'nullable|string',
+            'hotelCode' => 'nullable|string',
+            'hotelName' => 'nullable|string',
+            'traceId' => 'nullable|string',
+            'customerEmail' => 'nullable|email',
+            'customerPhone' => 'nullable|string',
+            'bookingId' => 'nullable|string'
+        ]);
+
+        // Initialize Razorpay API
+        $api = new Api('rzp_test_cvVugPSRGGLWtS', 'xHoRXawt9gYD7vitghKq1l5c');
+
+        
+        // Create order
+        $orderData = [
+            'receipt' => $request->receipt ?? 'receipt_' . time(),
+            'amount' => round($request->amount * 100), // Convert to paise
+            'currency' => $request->currency ?? 'INR',
+            'notes' => [
+                'hotelCode' => $request->hotelCode ?? '',
+                'hotelName' => $request->hotelName ?? '',
+                'traceId' => $request->traceId ?? '',
+                'customerEmail' => $request->customerEmail ?? '',
+                'customerPhone' => $request->customerPhone ?? '',
+                'bookingId' => $request->bookingId ?? 'BKG-' . time() . '-' . rand(100, 999), 
+            ]
+        ];
+        
+        $razorpayOrder = $api->order->create($orderData);
+        
+        // Create a payment record with pending status
+        $payment = new RazorpayPayment([
+            'razorpay_order_id' => $razorpayOrder->id,
+            'razorpay_payment_id' => 'pending_' . uniqid(), // Temporary unique identifier
+            'amount' => $request->amount,
+            'currency' => $request->currency ?? 'INR',
+            'trace_id' => $request->traceId,
+            'hotel_code' => $request->hotelCode,
+            'hotel_name' => $request->hotelName,
+            'customer_email' => $request->customerEmail,
+            'customer_phone' => $request->customerPhone,
+            'status' => 'pending',
+            'booking_id' => $request->bookingId ?? $orderData['notes']['bookingId'],
+        ]);
+        
+        $payment->save();
+        
+        return response()->json([
+            'success' => true,
+            'order_id' => $razorpayOrder->id,
+            'amount' => $request->amount,
+            'currency' => $request->currency ?? 'INR',
+            'key_id' => env('rzp_test_cvVugPSRGGLWtS')
+        ]);
+        
+    } catch (Exception $e) {
+        Log::error('Failed to create Razorpay order', [
+            'error' => $e->getMessage()
+        ]);
+        
+        return response()->json([
+            'success' => false,
+            'message' => 'Failed to create order: ' . $e->getMessage()
+        ], 500);
+    }
+}
+
+/**
+ * Verify Razorpay payment
+ */
+public function verifyPayment(Request $request)
+{
+    try {
+        // Validate the request
+        $request->validate([
+            'razorpay_payment_id' => 'required|string',
+            'razorpay_order_id' => 'required|string',
+            'razorpay_signature' => 'required|string',
+        ]);
+
+        // Initialize Razorpay API
+        $api = new Api('rzp_test_cvVugPSRGGLWtS', 'xHoRXawt9gYD7vitghKq1l5c');
+
+        // Get payment data from request
+        $razorpay_payment_id = $request->razorpay_payment_id;
+        $razorpay_order_id = $request->razorpay_order_id;
+        $razorpay_signature = $request->razorpay_signature;
+        
+        // Find existing payment record or create a new one
+        $payment = RazorpayPayment::where('razorpay_order_id', $razorpay_order_id)->first();
+        
+        if (!$payment) {
+            // Log this unusual situation
+            Log::warning('Payment record not found for verification', [
+                'order_id' => $razorpay_order_id,
+                'payment_id' => $razorpay_payment_id
+            ]);
+            
+            // Fetch order details to get amount
+            try {
+                $order = $api->order->fetch($razorpay_order_id);
+                
+                $payment = new RazorpayPayment([
+                    'razorpay_order_id' => $razorpay_order_id,
+                    'razorpay_payment_id' => $razorpay_payment_id,
+                    'razorpay_signature' => $razorpay_signature,
+                    'amount' => $order->amount / 100, // Convert from paise
+                    'currency' => $order->currency,
+                    'status' => 'pending'
+                ]);
+            } catch (Exception $orderFetchError) {
+                Log::error('Failed to fetch order details', [
+                    'error' => $orderFetchError->getMessage(),
+                    'order_id' => $razorpay_order_id
+                ]);
+                
+                // Create a payment record with basic info
+                $payment = new RazorpayPayment([
+                    'razorpay_order_id' => $razorpay_order_id,
+                    'razorpay_payment_id' => $razorpay_payment_id,
+                    'razorpay_signature' => $razorpay_signature,
+                    'status' => 'pending'
+                ]);
+            }
+        } else {
+            // Update existing record
+            $payment->razorpay_payment_id = $razorpay_payment_id;
+            $payment->razorpay_signature = $razorpay_signature;
+        }
+        
+        // Save initial record
+        $payment->save();
+        
+        try {
+            // Generate signature for verification
+            $attributes = [
+                'razorpay_payment_id' => $razorpay_payment_id,
+                'razorpay_order_id' => $razorpay_order_id
+            ];
+            
+            // Verify signature
+            $api->utility->verifyPaymentSignature($attributes + ['razorpay_signature' => $razorpay_signature]);
+            
+            // If verification passes, fetch payment details
+            try {
+                $razorpayPayment = $api->payment->fetch($razorpay_payment_id);
+                
+                // Update payment status to success
+                $payment->status = 'success';
+                $payment->payment_method = $razorpayPayment->method ?? null;
+                
+                // Update customer info if available
+                if (!$payment->customer_email && isset($razorpayPayment->email)) {
+                    $payment->customer_email = $razorpayPayment->email;
+                }
+                
+                if (!$payment->customer_phone && isset($razorpayPayment->contact)) {
+                    $payment->customer_phone = $razorpayPayment->contact;
+                }
+            } catch (Exception $paymentFetchError) {
+                // Log error but still consider payment successful if signature verification passed
+                Log::warning('Failed to fetch payment details but signature verified', [
+                    'error' => $paymentFetchError->getMessage(),
+                    'payment_id' => $razorpay_payment_id
+                ]);
+                
+                $payment->status = 'success';
+            }
+            
+            $payment->save();
+            
+            // Log successful payment
+            Log::info('Payment verified successfully', [
+                'payment_id' => $razorpay_payment_id,
+                'amount' => $payment->amount,
+                'currency' => $payment->currency
+            ]);
+            
+            // For API calls, return JSON
+            if ($request->wantsJson()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Payment verified successfully',
+                    'payment_id' => $razorpay_payment_id
+                ]);
+            }
+            
+            // For web requests, redirect to success page
+            return redirect()->route('payment.success', ['payment_id' => $razorpay_payment_id])
+                ->with('success', 'Payment processed successfully');
+            
+        } catch (Exception $verificationError) {
+            // Update payment status to failed
+            $payment->status = 'failed';
+            $payment->error_message = $verificationError->getMessage();
+            $payment->save();
+            
+            // Log verification error
+            Log::error('Payment verification failed', [
+                'payment_id' => $razorpay_payment_id,
+                'error' => $verificationError->getMessage()
+            ]);
+            
+            // For API calls, return JSON
+            if ($request->wantsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Payment verification failed: ' . $verificationError->getMessage()
+                ], 400);
+            }
+            
+            // For web requests, redirect to failure page
+            return redirect()->route('payment.failed')
+                ->with('error', 'Payment verification failed: ' . $verificationError->getMessage());
+        }
+        
+    } catch (Exception $e) {
+        // Log general error
+        Log::error('Payment processing error', [
+            'error' => $e->getMessage(),
+            'trace' => $e->getTraceAsString()  // Add stack trace for better debugging
+        ]);
+        
+        // Check if we have payment data in the request
+        if ($request->has('razorpay_payment_id') && $request->has('razorpay_order_id')) {
+            // Try to verify payment status directly with Razorpay
+            try {
+                $api = new Api('rzp_test_cvVugPSRGGLWtS', 'xHoRXawt9gYD7vitghKq1l5c');
+                $paymentInfo = $api->payment->fetch($request->razorpay_payment_id);
+                
+                // If payment is authorized or captured, consider it successful
+                if (in_array($paymentInfo->status, ['authorized', 'captured'])) {
+                    // Create or update payment record
+                    $payment = RazorpayPayment::updateOrCreate(
+                        ['razorpay_order_id' => $request->razorpay_order_id],
+                        [
+                            'razorpay_payment_id' => $request->razorpay_payment_id,
+                            'razorpay_signature' => $request->razorpay_signature,
+                            'status' => 'success',
+                            'amount' => $paymentInfo->amount / 100,
+                            'currency' => $paymentInfo->currency
+                        ]
+                    );
+                    
+                    // Redirect to success page
+                    return redirect()->route('payment.success', ['payment_id' => $request->razorpay_payment_id])
+                        ->with('success', 'Payment processed successfully');
+                }
+            } catch (Exception $razorpayError) {
+                Log::error('Failed to verify payment with Razorpay directly', [
+                    'error' => $razorpayError->getMessage()
+                ]);
+            }
+        }
+        
+        // For API calls, return JSON
+        if ($request->wantsJson()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Payment processing error: ' . $e->getMessage()
+            ], 500);
+        }
+        
+        // For web requests, redirect to failure page
+        return redirect()->route('payment.failed')
+            ->with('error', 'Payment processing error: ' . $e->getMessage());
+    }
+}
+
+/**
+ * Show payment success page
+ */
+public function showSuccessPage(Request $request)
+{
+    $payment = null;
+    $paymentId = $request->payment_id;
+    
+    if ($paymentId) {
+        $payment = RazorpayPayment::where('razorpay_payment_id', $paymentId)->first();
+    }
+    
+    return view('frontend.payments_success', ['payment' => $payment]);
+}
+
+/**
+ * Show payment failed page
+ */
+public function showFailedPage()
+{
+    return view('frontend.payments_failed');
+}
+
+/**
+ * Update booking details for a payment
+ */
+public function updateBookingDetails(Request $request)
+{
+    try {
+        // Validate the request
+        $request->validate([
+            'payment_id' => 'required|string',
+            'booking_id' => 'required|string',
+            'booking_details' => 'nullable|array'
+        ]);
+        
+        $payment = RazorpayPayment::where('razorpay_payment_id', $request->payment_id)->first();
+        
+        if (!$payment) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Payment record not found'
+            ], 404);
+        }
+        
+        $payment->booking_id = $request->booking_id;
+        
+        if ($request->has('booking_details')) {
+            $payment->booking_details = $request->booking_details;
+        }
+        
+        $payment->save();
+        
+        return response()->json([
+            'success' => true,
+            'message' => 'Payment updated with booking details'
+        ]);
+        
+    } catch (Exception $e) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Error updating payment: ' . $e->getMessage()
+        ], 500);
+    }
+}
+
+/**
+ * Get payment details by ID
+ */
+public function getPaymentDetails($paymentId)
+{
+    $payment = RazorpayPayment::where('razorpay_payment_id', $paymentId)->first();
+    
+    if (!$payment) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Payment not found'
+        ], 404);
+    }
+    
+    return response()->json([
+        'success' => true,
+        'payment' => $payment
+    ]);
+}
+
+/**
+ * Get payment history for a particular contact (email or phone)
+ */
+public function getPaymentHistory(Request $request)
+{
+    $request->validate([
+        'email' => 'nullable|email',
+        'phone' => 'nullable|string'
+    ]);
+    
+    $query = RazorpayPayment::query();
+    
+    if ($request->has('email')) {
+        $query->where('customer_email', $request->email);
+    }
+    
+    if ($request->has('phone')) {
+        $query->where('customer_phone', $request->phone);
+    }
+    
+    if (!$request->has('email') && !$request->has('phone')) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Either email or phone is required'
+        ], 400);
+    }
+    
+    $payments = $query->orderBy('created_at', 'desc')->get();
+        
+    return response()->json([
+        'success' => true,
+        'payments' => $payments
+    ]);
+}
+
 
 
 }

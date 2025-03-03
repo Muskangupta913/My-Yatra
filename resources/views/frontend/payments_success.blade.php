@@ -1,0 +1,881 @@
+
+
+@section('content')
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header bg-success text-white">Payment Successful</div>
+
+                <div class="card-body text-center">
+                    <i class="fa fa-check-circle fa-5x text-success mb-3"></i>
+                    <h2>Thank You!</h2>
+                    <p class="lead">Your payment has been processed successfully.</p>
+                    
+                    @if($payment)
+                    <div class="mt-4">
+                        <div class="alert alert-info">
+                            <strong>Payment Details</strong>
+                            <p>Payment ID: {{ $payment->razorpay_payment_id }}</p>
+                            <p>Amount: {{ $payment->amount }} {{ $payment->currency }}</p>
+                            <p>Date: {{ $payment->created_at->format('M d, Y H:i') }}</p>
+                        </div>
+                    </div>
+                    @endif
+                    
+                    <div class="mt-4">
+                        <a href="{{ route('home') }}" class="btn btn-primary">Back to Home</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        processHotelBooking();
+        fetchBalanceLogAndBookLCC();
+        bookLCC();
+        fetchBalanceLogAndBookGDS();
+        processGdsTicket();
+        BookGdsTickte();
+        
+});
+// document.getElementById("payNowButton").addEventListener("click", function (event) {
+//     event.preventDefault();
+
+    const boardingPoint = JSON.parse(sessionStorage.getItem("BoardingPoint"));
+const droppingPoint = JSON.parse(sessionStorage.getItem("DroppingPoint"));
+
+console.log(boardingPoint); // { Id: value, Name: "value" }
+console.log(droppingPoint); // { Id: value, Name: "value" }
+
+const boardingPointId = boardingPoint ? boardingPoint.Id : null;
+const droppingPointId = droppingPoint ? droppingPoint.Id : null;
+
+
+    // Extract URL parameters
+    const urlParams = new URLSearchParams(window.location.search);
+    const traceId = urlParams.get('TraceId');
+    const amount = urlParams.get("amount");
+    const passengerDataStr = urlParams.get('PassengerData');
+    const resultIndex = urlParams.get('ResultIndex');
+    
+    if (!traceId || !amount || !passengerDataStr) {
+        // alert("Missing required parameters!");
+        return;
+    }
+
+    // Parse the passenger data
+    let passengerData;
+    try {
+        passengerData = JSON.parse(decodeURIComponent(passengerDataStr));
+    } catch (e) {
+        console.error("Error parsing passenger data:", e);
+        alert("Invalid passenger data format");
+        return;
+    }
+
+    // First call the balance log API
+    fetch(`/balance-log?TraceId=${traceId}&amount=${amount}`, {
+        method: "GET",
+        headers: {
+            "Content-Type": "application/json",
+        },
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            const balanceLog = data.balanceLogs[0];
+            
+            if (balanceLog) {
+                // After successful balance log, prepare booking request
+                const bookingData = {
+                    ResultIndex: resultIndex, // Replace with actual value
+                    TraceId: traceId,
+                    BoardingPointId: boardingPointId, // Dynamically set from sessionStorage
+                    DroppingPointId: droppingPointId, // Dynamically set from sessionStorage
+                    RefID: "1",
+                    Passenger: [{
+                        LeadPassenger: true,
+                        PassengerId: 0,
+                        Title: passengerData.Title,
+                        FirstName: passengerData.FirstName,
+                        LastName: passengerData.LastName,
+                        Email: passengerData.Email,
+                        Phoneno: passengerData.Phoneno,
+                        Gender: passengerData.Gender,
+                        IdType: null,
+                        IdNumber: null,
+                        Address: passengerData.Address,
+                        Age: passengerData.Age,
+                        Seat: passengerData.SeatDetails || passengerData.Seat
+                    }]
+                };
+
+                // Get CSRF token
+                const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
+
+                // Make the booking API call
+                return fetch('/bookbus', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': csrfToken
+                    },
+                    body: JSON.stringify(bookingData)
+                });
+            } else {
+                throw new Error("No balance log found");
+            }
+        } else {
+            throw new Error(data.errorMessage || "Balance log failed");
+        }
+    })
+    .then(response => response.json())
+    .then(bookingResult => {
+        if (bookingResult.status === 'success') {
+            alert(`Booking Successful!\nTicket Number: ${bookingResult.data.TicketNo}\nStatus: ${bookingResult.data.BusBookingStatus}`);
+        } else {
+            alert(`Booking Failed: ${bookingResult.message}`);
+        }
+    })
+    .catch(error => {
+        console.error("Error:", error);
+        alert("An error occurred: " + error.message);
+    });
+});
+
+  
+    // Replace the existing cancel booking event listener with this
+document.getElementById("cancelBookingButton").addEventListener("click", function (event) {
+    event.preventDefault();
+
+    // Get TraceId and passenger data from URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const passengerDataStr = urlParams.get('PassengerData');
+    
+    if (!passengerDataStr) {
+        alert("Missing passenger data!");
+        return;
+    }
+
+    // Parse the passenger data
+    let passengerData;
+    try {
+        passengerData = JSON.parse(decodeURIComponent(passengerDataStr));
+    } catch (e) {
+        console.error("Error parsing passenger data:", e);
+        alert("Invalid passenger data format");
+        return;
+    }
+
+    // Extract BusId and SeatId from passenger data
+    const busId = String(passengerData.Seat?.SeatIndex || passengerData.SeatDetails?.SeatIndex);
+    const seatId = passengerData.Seat?.SeatName || passengerData.SeatDetails?.SeatName;
+    console.log(typeof busId, busId);
+
+    if (!busId || !seatId) {
+        alert("Required booking information not found!");
+        return;
+    }
+
+    // Show confirmation dialog
+    if (!confirm("Are you sure you want to cancel this booking?")) {
+        return;
+    }
+
+    // Prepare payload for cancel API
+    const payload = {
+        "EndUserIp": "1.1.1.1", // You might want to get actual IP
+        ClientId: apiConfig.client_id, // Use embedded config values
+    UserName: apiConfig.username,
+    Password: apiConfig.password,
+        'BusId': "11836",
+        'SeatId': seatId,
+        'Remarks': "User requested cancellation"
+    };
+
+    // Get CSRF token
+    const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
+
+    // Make the cancel API call
+    fetch("/cancelBus", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "X-CSRF-TOKEN": csrfToken
+        },
+        body: JSON.stringify(payload)
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        return response.json();
+    })
+    .then(data => {
+        if (data.status === 'success') {
+            alert("Booking cancelled successfully!");
+            // Optionally redirect to a different page
+            // window.location.href = '/booking-history';
+        } else {
+            alert("Failed to cancel booking: " + (data.message || "Unknown error"));
+        }
+    })
+    .catch(error => {
+        console.error("Error:", error);
+        alert("An error occurred while canceling the booking. Please try again later.");
+    });
+});
+
+
+
+
+
+//HOTEL RELATED FUNCTION 
+
+function getUrlParameters() {
+    const urlParams = new URLSearchParams(window.location.search);
+
+    // Parse room details JSON
+    const roomDetailsStr = urlParams.get('roomDetails');
+    console.log("Raw room details string:", roomDetailsStr);
+    const roomDetails = roomDetailsStr ? JSON.parse(decodeURIComponent(roomDetailsStr)) : null;
+    console.log("Room Details:", roomDetails);
+    console.log("Room Childcount:", roomDetails.childCount);
+
+    // Parse passenger details JSON with detailed logging
+    const passengerDetailsStr = urlParams.get('passengerDetails');
+    console.log("Raw passenger details string:", passengerDetailsStr);
+
+    let passengerDetails = [];
+    
+    try {
+        // First decode the URI component
+        const decodedStr = decodeURIComponent(passengerDetailsStr);
+        console.log("Decoded passenger details string:", decodedStr);
+        
+        // Then parse the JSON
+        const parsedData = JSON.parse(decodedStr);
+        console.log("Parsed passenger data type:", typeof parsedData);
+        console.log("Is Array?", Array.isArray(parsedData));
+        
+        // Handle both array and single object cases
+        if (Array.isArray(parsedData)) {
+            passengerDetails = parsedData;
+            console.log("Passenger details is already an array:", passengerDetails);
+        } else if (typeof parsedData === 'object' && parsedData !== null) {
+            passengerDetails = [parsedData];
+            console.log("Converted single object to array:", passengerDetails);
+        } else {
+            console.error("Invalid passenger data format:", parsedData);
+            passengerDetails = [];
+        }
+
+        // Validate array contents
+        console.log("Final passenger details array length:", passengerDetails.length);
+        passengerDetails.forEach((passenger, index) => {
+            console.log(`Passenger ${index + 1}:`, passenger);
+        });
+
+    } catch (error) {
+        console.error("Error parsing passenger details:", error);
+        console.log("Defaulting to empty array");
+        passengerDetails = [];
+    }
+
+    // Final validation
+    if (!Array.isArray(passengerDetails)) {
+        console.error("Final check - Passenger details is not an array!");
+        alert("Error: Passenger details are not in the expected format.");
+        passengerDetails = [];
+    }
+
+    const result = {
+        hotelDetails: {
+            traceId: urlParams.get('traceId'),
+            resultIndex: urlParams.get('resultIndex'),
+            hotelCode: urlParams.get('hotelCode'),
+            hotelName: urlParams.get('hotelName')
+        },
+        roomDetails: roomDetails,
+        passengerDetails: passengerDetails
+    };
+
+    console.log("Final returned object:", result);
+    return result;
+}
+async function processHotelBooking(bookingData) {
+    try {
+        // Prepare balance payload
+        const balancePayload = {
+          
+            amount: (bookingData.roomDetails.OfferedPrice),
+            TraceId: bookingData.hotelDetails.traceId,
+          
+        };
+
+        console.log("Balance Payload:", balancePayload);
+
+        // Call Balance API
+        const balanceResponse = await fetch('/balancelog', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+            },
+            body: JSON.stringify(balancePayload),
+        });
+
+        const balanceData = await balanceResponse.json();
+        console.log("Balance Data:", balanceData);
+
+        if (!balanceData.success) {
+            throw new Error(balanceData.errorMessage || 'Insufficient balance or payment failed.');
+        }
+
+        const hotelPassengers = bookingData.passengerDetails.map(passenger => ({
+    Title: passenger.Title,  // Correct capitalization
+    FirstName: passenger.FirstName,  // Correct capitalization
+    LastName: passenger.LastName,  // Correct capitalization
+    Phoneno: passenger.Phoneno || "",  // Ensure it doesn't return undefined
+    Email: passenger.Email || "",  // Ensure it doesn't return undefined
+    PaxType: passenger.PaxType || "1",  // Default to "1" (Adult) if missing
+    LeadPassenger: passenger.LeadPassenger || false,  // Ensure it defaults to false
+    PAN: passenger.PAN || "" // Ensure it doesn't return undefined
+}));
+
+
+        const roomDetail = {
+            RoomId: bookingData.roomDetails.RoomId,
+            RoomStatus: "Active",
+            RoomIndex: bookingData.roomDetails.RoomIndex,
+            RoomTypeCode: bookingData.roomDetails.RoomTypeCode,
+            RoomTypeName: bookingData.roomDetails.RoomTypeName,
+            RatePlanCode: bookingData.roomDetails.RatePlanCode,
+            RatePlan: bookingData.roomDetails.RatePlan,
+            InfoSource: bookingData.roomDetails.InfoSource || "",
+            SequenceNo: bookingData.roomDetails.SequenceNo || "",
+            SmokingPreference: "0",
+            ChildCount: hotelPassengers.filter(p => p.PaxType === "Child").length, // Corrected
+            RequireAllPaxDetails: false,
+            HotelPassenger: hotelPassengers,
+            Currency: bookingData.roomDetails.Currency,
+            OfferedPrice: bookingData.roomDetails.OfferedPrice
+        };
+
+        const bookingPayload = {
+            ResultIndex: bookingData.hotelDetails.resultIndex,
+            HotelCode: bookingData.hotelDetails.hotelCode,
+            HotelName: bookingData.hotelDetails.hotelName,
+            GuestNationality: "IN",
+            NoOfRooms: bookingData.roomDetails.NoOfRooms || 1,
+            ClientReferenceNo: 0,
+            IsVoucherBooking: true,
+            HotelRoomsDetails: [roomDetail],
+            SrdvType: "MixAPI",
+            SrdvIndex: "15",
+            TraceId: bookingData.hotelDetails.traceId,
+            EndUserIp: "1.1.1.1",
+            ClientId: "180133",
+            UserName: "MakeMy91",
+            Password: "MakeMy@910"
+        };
+
+        console.log("Hotel Booking Payload:", bookingPayload);
+
+        // Call Booking API
+        const bookingResponse = await fetch('/book-room', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+            },
+            body: JSON.stringify(bookingPayload),
+        });
+
+        const bookingDataResponse = await bookingResponse.json();
+        console.log("Booking Data Response:", bookingDataResponse);
+
+        if (!bookingDataResponse.success) {
+            throw new Error(bookingDataResponse.errorMessage || 'Booking failed after successful payment.');
+        }
+
+        const bookingDetails = bookingDataResponse.bookingDetails;
+
+        // Show final success message
+        alert(`Payment and Booking Successful!\n\n` +
+              `Payment Details:\n` +
+              `Debited Amount: ₹${balanceData.balanceLogs[0].Debit}\n` +
+              `Updated Balance: ₹${balanceData.balanceLogs[0].Balance}\n\n` +
+              `Booking Details:\n` +
+              `Hotel: ${bookingDetails.HotelName || bookingPayload.HotelName}\n` +
+              `Booking ID: ${bookingDetails.BookingId}\n` +
+              `Confirmation No: ${bookingDetails.ConfirmationNo}\n` +
+              `Status: ${bookingDetails.Status}`);
+    } catch (error) {
+        console.error('Error during hotel booking:', error);
+        alert(`Error: ${error.message}`);
+    }
+}
+
+
+
+
+
+//FLIGHT RELATED FUNCTION
+function getCookie(name) {
+            let nameEQ = name + "=";
+            let ca = document.cookie.split(';');
+            for(let i = 0; i < ca.length; i++) {
+                let c = ca[i].trim();
+                if (c.indexOf(nameEQ) === 0) {
+                    return c.substring(nameEQ.length);
+                }
+            }
+            return null;
+        }
+
+        // Get passenger counts from cookies with default values
+        const origin = getCookie('origin') ;
+
+        // Log the values
+        console.log('Payment Page - ORIGIN Details:');
+        console.log('ORIGIN:', origin);
+      
+
+        function getBookingDetailsFromURL() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const encodedDetails = urlParams.get('details');
+
+    console.log('1. Raw encoded details from URL:', encodedDetails);
+
+    if (!encodedDetails) {
+        console.error('❌ No booking details found in URL');
+        return null;
+    }
+
+    try {
+        const flightDetails = JSON.parse(decodeURIComponent(encodedDetails));
+        console.log('2. Decoded booking details:', flightDetails);
+
+        // Extract main booking details
+        const {
+            resultIndex,
+            srdvIndex,
+            traceId,
+            totalFare,
+            fare,
+            grandTotal
+        } = flightDetails;
+
+        // Extract passengers correctly
+        const passengers = flightDetails.passengers || [];
+
+        // Log each passenger's details
+        passengers.forEach((pax, index) => {
+            console.log(`3.${index + 1} Passenger Details:`, pax);
+        });
+
+        // Construct extracted details
+        const extractedDetails = {
+            resultIndex,
+            srdvIndex,
+            traceId,
+            totalFare,
+            grandTotal,
+
+            // Passenger details as an array
+            passengers: passengers.map((pax, index) => ({
+                title: pax.title,
+                firstName: pax.firstName,
+                lastName: pax.lastName,
+                gender: pax.gender,
+                contactNo: pax.contactNo || "",
+                email: pax.email || "",
+                paxType: pax.paxType,
+                addressLine1: origin,
+                city: origin,
+                passportNo: pax.passportNo || "",
+                passportExpiry: pax.passportExpiry || "",
+                passportIssueDate: pax.passportIssueDate || "",
+                dateOfBirth: pax.dateOfBirth || "",
+                countryCode: "IN",
+                countryName: "INDIA",
+
+                // Selected services
+                selectedServices: {
+                    seat: pax.selectedServices?.seat || null,
+                    baggage: pax.selectedServices?.baggage || null,
+                    meals: pax.selectedServices?.meals || []
+                },
+
+                // Log selected services
+                seatDetails: pax.selectedServices?.seat || null,
+                baggageDetails: pax.selectedServices?.baggage || null,
+                mealDetails: pax.selectedServices?.meals || []
+            })),
+
+            // Fare details
+            baseFare: fare?.baseFare,
+            tax: fare?.tax,
+            yqTax: fare?.yqTax,
+            transactionFee: fare?.transactionFee,
+            additionalTxnFeeOfrd: fare?.additionalTxnFeeOfrd,
+            additionalTxnFeePub: fare?.additionalTxnFeePub,
+            airTransFee: fare?.airTransFee
+        };
+
+        // Log each passenger's extracted services separately
+        extractedDetails.passengers.forEach((pax, index) => {
+            console.log(`4.${index + 1} Passenger Selected Services:`, {
+                seat: pax.seatDetails,
+                baggage: pax.baggageDetails,
+                meals: pax.mealDetails
+            });
+        });
+
+        console.log('5. Final Extracted Booking Details:', extractedDetails);
+
+        return extractedDetails;
+    } catch (error) {
+        console.error('❌ Error parsing booking details:', error);
+        return null;
+    }
+}
+
+function fetchBalanceLogAndBookLCC() {
+    const bookingDetails = getBookingDetailsFromURL();
+    if (!bookingDetails?.traceId || !bookingDetails?.grandTotal) {
+        showError('Booking details are missing or incomplete!');
+        return;
+    }
+
+    console.log('Processing balance log for:', {
+        traceId: bookingDetails.traceId,
+        amount: bookingDetails.grandTotal
+    });
+
+    // Send as POST request with JSON body
+    fetch('/flight/balance-log', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+        },
+        body: JSON.stringify({
+            TraceId: bookingDetails.traceId,
+            amount: bookingDetails.grandTotal
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            console.log('Balance log processed:', data.balanceLog);
+            // Proceed with booking only if balance deduction was successful
+            bookLCC(bookingDetails);
+        } else {
+            showError(data.errorMessage || 'Failed to process balance log');
+        }
+    })
+    .catch(error => {
+        console.error('Balance log error:', error);
+        showError('Failed to process balance check. Please try again.');
+    });
+}
+
+function showError(message) {
+    console.error('Error:', message);
+    alert('❌ ' + message);
+}
+
+
+function bookLCC(bookingDetails) {
+//     const bookingDetails = getBookingDetailsFromURL(); // Fetch data from URL
+//  console.log('grandTotal :', bookingDetails.grandTotal);
+//     if (!bookingDetails || !bookingDetails.passengers || !Array.isArray(bookingDetails.passengers)) {
+//         console.error("❌ Passenger details are missing or not in array format!");
+//         return;
+//     }
+
+//     console.log("🚀 Booking Details Extracted:", bookingDetails);
+
+    // Prepare payload using extracted data
+    const payload = {
+        srdvIndex: bookingDetails.srdvIndex,
+        traceId: bookingDetails.traceId,
+        resultIndex: bookingDetails.resultIndex,
+
+        // Map each passenger with all available details, including fare
+        passenger: bookingDetails.passengers.map(pax => ({
+            title: pax.title,
+            firstName: pax.firstName,
+            lastName: pax.lastName,
+            gender: pax.gender,
+            contactNo: pax.contactNo,
+            email: pax.email,
+            paxType: pax.paxType,
+            dateOfBirth: pax.dateOfBirth,
+            passportNo: pax.passportNo,
+            passportExpiry: pax.passportExpiry,
+            passportIssueDate: pax.passportIssueDate,
+            addressLine1: pax.addressLine1,
+            city: pax.city,
+            countryCode: pax.countryCode,
+            countryName: pax.countryName,
+
+            // Handle baggage with null check
+            baggage: pax.selectedServices?.baggage ? [{
+                Code: pax.selectedServices.baggage.Code,
+                Weight: pax.selectedServices.baggage.Weight,
+                Price: pax.selectedServices.baggage.Price,
+                Origin: pax.selectedServices.baggage.Origin,
+                Destination: pax.selectedServices.baggage.Destination,
+                WayType: pax.selectedServices.baggage.WayType,
+                Currency: pax.selectedServices.baggage.Currency
+            }] : [],
+
+            // Handle meals with null check
+            mealDynamic: pax.selectedServices?.meals ? pax.selectedServices.meals.map(meal => ({
+                Code: meal.Code,
+                AirlineDescription: meal.AirlineDescription,
+                Price: meal.Price,
+                Origin: meal.Origin,
+                Destination: meal.Destination,
+                WayType: meal.WayType,
+                Quantity: meal.Quantity,
+                Currency: meal.Currency
+            })) : [],
+
+            // Handle seat with null check
+            seat: pax.selectedServices?.seat ? [{
+                Code: pax.selectedServices.seat.code,
+                SeatNumber: pax.selectedServices.seat.seatNumber,
+                Amount: pax.selectedServices.seat.amount,
+                AirlineName: pax.selectedServices.seat.airlineName,
+                AirlineCode: pax.selectedServices.seat.airlineCode,
+                AirlineNumber: pax.selectedServices.seat.airlineNumber
+            }] : [],
+
+            // Assign individual fare for each passenger
+            fare: {
+            baseFare: bookingDetails.baseFare,
+            tax: bookingDetails.tax,
+            yqTax: bookingDetails.yqTax,
+            transactionFee: parseFloat(bookingDetails.transactionFee || 0),
+            additionalTxnFeeOfrd: bookingDetails.additionalTxnFeeOfrd,
+            additionalTxnFeePub: bookingDetails.additionalTxnFeePub,
+            airTransFee: parseFloat(bookingDetails.airTransFee || 0)
+        }
+        }))
+    };
+
+    console.log("✅ Final Payload Ready for Booking:", payload);
+
+    // Send booking request
+    fetch('/flight/bookLCC', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': "{{ csrf_token() }}"
+        },
+        body: JSON.stringify(payload)
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.status === 'success') {
+            alert('✅ Booking successful!');
+            console.log("✅ Booking successful!");
+        } else {
+            alert('❌ Booking failed: ' + (data.message || 'Unknown error'));
+            console.error("❌ Booking Failure:", data);
+        }
+    })
+    .catch(error => {
+        console.error('❌ Error:', error);
+        alert('An error occurred during booking');
+    });
+}
+
+
+
+function showError(message) {
+    console.error('Error:', message);
+    alert('❌ ' + message);
+}
+
+
+function BookGdsTickte() {
+    const queryParams = new URLSearchParams(window.location.search);
+    const traceId = queryParams.get("traceId");
+    const resultIndex = queryParams.get("resultIndex");
+    const bookingId = queryParams.get("bookingId");
+    const pnr = queryParams.get("pnr");
+    const srdvIndex = queryParams.get("srdvIndex");
+    const grandTotal =  queryParams.get("grandTotal");
+
+    console.log("Result Index:", resultIndex);
+    console.log("Booking ID:", bookingId);
+    console.log("PNR:", pnr);
+    console.log("SRDV Index:", srdvIndex);
+    console.log("Trace ID:", traceId);
+    console.log("grandTotal:", grandTotal);
+
+    if (traceId && resultIndex && bookingId && pnr && srdvIndex && grandTotal) {
+        return { resultIndex, bookingId, pnr, srdvIndex, traceId, grandTotal }; // Ensure grandTotal is returned
+    } else {
+        console.error("❌ Missing required parameters for GDS ticket booking.");
+        return null;
+    }
+}
+
+function fetchBalanceLogAndBookGDS() {
+    const  gdsTicketDetails =  BookGdsTickte();
+    
+    if (!gdsTicketDetails) {
+        console.error('❌ Booking details are missing or incomplete!');
+        return;
+    }
+
+    console.log('🚀 Fetching Balance Log for:', {
+        traceId: gdsTicketDetails.traceId,
+        amount: gdsTicketDetails.grandTotal
+    });
+   
+
+    // Send as POST request with JSON body
+    fetch('/flight/balance-log', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+        },
+        body: JSON.stringify({
+    TraceId: gdsTicketDetails.traceId,  // Changed to uppercase 'T'
+    amount: gdsTicketDetails.grandTotal
+})
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            console.log('Balance log processed:', data.balanceLog);
+            // Proceed with booking only if balance deduction was successful
+            processGdsTicket(gdsTicketDetails);
+        } else {
+            showError(data.errorMessage || 'Failed to process balance log');
+        }
+    })
+    .catch(error => {
+        console.error('Balance log error:', error);
+        showError('Failed to process balance check. Please try again.');
+    });
+}
+
+// Function to process the GDS Ticket booking
+function processGdsTicket(gdsTicketDetails) {
+    // const gdsTicketDetails = BookGdsTickte();
+
+    // if (!gdsTicketDetails) {
+    //     console.error("Missing required parameters for GDS ticket booking.");
+    //     return;
+    // }
+
+    const payload = {
+        EndUserIp: "1.1.1.1",
+        ClientId: "180133",
+        UserName: "MakeMy91",
+        Password: "MakeMy@910",
+        srdvType: "MixAPI",
+        srdvIndex: gdsTicketDetails.srdvIndex,
+        traceId: gdsTicketDetails.traceId,
+        pnr: gdsTicketDetails.pnr,
+        bookingId: gdsTicketDetails.bookingId
+    };
+
+    console.log("Sending payload:", payload);
+
+    fetch("/flight/bookGdsTicket", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').content
+        },
+        body: JSON.stringify(payload)
+    })
+    .then(response => response.json())
+    .then(data => {
+        console.log("API Response:", data);
+        if (data.status === "success") {
+            console.log("Booking successful:", {
+                bookingId: data.data.bookingId,
+                pnr: data.data.pnr,
+                ticketStatus: data.data.ticketStatus,
+                passengers: data.data.passengers
+            });
+        } else {
+            console.error("Booking failed:", data.message);
+        }
+    })
+    .catch(error => {
+        console.error("API Error:", error);
+    });
+}
+
+
+
+
+// Event listener for the "Pay Now" button
+document.getElementById("payNowButton").addEventListener("click", async function (event) {
+    event.preventDefault();
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const flightDetailsStr = urlParams.get("details");
+    const roomDetailsStr = urlParams.get("roomDetails");
+
+    try {
+        // Check for GDS ticket details and process if found
+        const gdsTicketDetails = BookGdsTickte();
+        if (gdsTicketDetails) {
+            console.log("Processing GDS ticket booking...");
+            fetchBalanceLogAndBookGDS();
+            return; // Exit the function if GDS booking is found
+        }
+
+        // Process flight booking if applicable
+        if (flightDetailsStr) {
+            console.log("Processing flight booking...");
+            const bookingDetails = getBookingDetailsFromURL();
+            if (bookingDetails) {
+                fetchBalanceLogAndBookLCC();
+            } else {
+                throw new Error("Invalid or missing flight booking details.");
+            }
+        } 
+        // Process hotel booking if applicable
+        else if (roomDetailsStr) {
+            console.log("Processing hotel booking...");
+            const bookingData = getUrlParameters(); // Use existing hotel-related function
+            if (!bookingData.roomDetails || !bookingData.passengerDetails) {
+                throw new Error("Missing hotel booking details. Please check and try again.");
+            }
+            await processHotelBooking(bookingData);
+        } 
+        // If no valid booking details are found
+        else {
+            throw new Error("Unable to determine booking type. Missing required parameters.");
+        }
+    } catch (error) {
+        console.error("Booking error:", error);
+        alert(`Error: ${error.message}`);
+    }
+});
+</script>
+
+
+
+
+
+
+@endsection

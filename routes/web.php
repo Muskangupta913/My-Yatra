@@ -397,6 +397,19 @@ Route::get('/fetch-hotelcity', [CityController::class, 'hotelFetchAllCities'])->
 Route::get('/autocomplete-hotel', [CityController::class, 'hotelautocomplete'])->name('autocomplete.hotelcities');
 
 
+// Razorpay Payment Routes
+// Route::get('/payment', [HotelController::class, 'showPaymentPage'])->name('payment.form');
+Route::post('/payment/create', [HotelController::class, 'createOrder'])->name('payment.create');
+Route::post('/payment/verify', [HotelController::class, 'verifyPayment'])->name('payment.verify');
+Route::get('/payment/success', [HotelController::class, 'showSuccessPage'])->name('payment.success');
+Route::get('/payment/failed', [HotelController::class, 'showFailedPage'])->name('payment.failed');
+
+// API Routes (you might want to move these to api.php)
+Route::post('/api/payment/update-booking', [HotelController::class, 'updateBookingDetails']);
+Route::get('/api/payment/{paymentId}', [HotelController::class, 'getPaymentDetails']);
+Route::get('/api/payment-history', [HotelController::class, 'getPaymentHistory']);
+
+
 
 
 
@@ -434,7 +447,7 @@ Route::get('/kashmir', function () {
 Route::get('/rishikesh', function () {
   return view('rishikesh'); // Replace 'rishikesh' with the actual Blade file name without the .blade.php extension.
 })->name('rishikesh');
-
+Route::get('/travel-bharat', [TravelController::class, 'index'])->name('travel.bharat');
 // Car Route
 Route::get('/cars', [CarController::class, 'index'])->name('cars');
 Route::get('/cars', [HomeController::class, 'cars']);
