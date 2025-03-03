@@ -887,8 +887,22 @@ function setupMobileResponsiveness() {
     window.scrollTo(0, scrollPosition);
 }
 
-// Remove the window resize event listener that changes grid columns
-// The layout will now be handled purely by CSS
-window.removeEventListener('resize', handleViewChange);
+function viewHotelDetails(resultIndex, hotelCode) {
+            const traceId = sessionStorage.getItem('traceId');
+            if (!traceId) {
+                console.error('TraceId not found');
+                return;
+            }
+            sessionStorage.setItem('selectedHotelResultIndex', resultIndex);
+            sessionStorage.setItem('selectedHotelTraceId', traceId);
+            sessionStorage.setItem('selectedHotelCode', hotelCode);
+            window.location.href = `/hotel-info?traceId=${traceId}&resultIndex=${resultIndex}&hotelCode=${hotelCode}`;
+        }
+
+        // Handle window resize
+        window.addEventListener('resize', () => {
+            const grid = document.getElementById('hotelGrid');
+            grid.style.gridTemplateColumns = window.innerWidth > 1200 ? 'repeat(3, 1fr)' : window.innerWidth > 768 ? 'repeat(2, 1fr)' : '1fr';
+        });
     </script>
         @endsection

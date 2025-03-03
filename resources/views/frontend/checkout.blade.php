@@ -105,6 +105,172 @@
             0% { background-color: #ffd700; }
             100% { background-color: transparent; }
         }
+        @media (max-width: 640px) {
+    .checkout-container {
+        padding: 0.5rem;
+        margin: 1rem auto;
+    }
+    
+    .details-card, 
+    .summary-card {
+        padding: 1rem;
+        width: 100%;
+    }
+    
+    .destination-item {
+        padding: 0.75rem;
+    }
+    
+    .destination-item img {
+        width: 80px;
+        height: 80px;
+    }
+    
+    .destination-item .flex {
+        flex-direction: column;
+    }
+    
+    .checkout-button {
+        padding: 0.5rem;
+        font-size: 1rem;
+    }
+    
+    .total-price {
+        font-size: 1.25rem;
+    }
+    
+    /* Make adults/children inputs stack on mobile */
+    .destination-item .flex-wrap {
+        flex-direction: column;
+        gap: 1rem;
+    }
+    
+    .destination-item .flex-1 {
+        width: 100%;
+    }
+}
+
+/* Small tablets */
+@media (min-width: 641px) and (max-width: 768px) {
+    .checkout-container {
+        flex-direction: column;
+    }
+    
+    .details-card, 
+    .summary-card {
+        width: 100%;
+    }
+    
+    .summary-card {
+        margin-top: 1rem;
+    }
+    
+    .destination-item img {
+        width: 90px;
+        height: 90px;
+    }
+}
+
+/* Tablets and small laptops */
+@media (min-width: 769px) and (max-width: 1024px) {
+    .checkout-container {
+        max-width: 90%;
+    }
+    
+    .details-card {
+        flex: 3;
+    }
+    
+    .summary-card {
+        flex: 2;
+    }
+}
+
+/* Larger screens */
+@media (min-width: 1025px) and (max-width: 1280px) {
+    .checkout-container {
+        max-width: 1024px;
+    }
+}
+
+/* Extra large screens */
+@media (min-width: 1281px) {
+    .checkout-container {
+        max-width: 1200px;
+    }
+    
+    .destination-item {
+        padding: 1.5rem;
+    }
+}
+
+/* Fix for flexbox issues in Safari */
+@supports (-webkit-appearance:none) {
+    .checkout-container {
+        display: flex;
+        flex-direction: row;
+    }
+    
+    @media (max-width: 768px) {
+        .checkout-container {
+            flex-direction: column;
+        }
+    }
+}
+
+/* Print styles for receipts */
+@media print {
+    body {
+        background: none !important;
+        color: black !important;
+    }
+    
+    .checkout-container {
+        box-shadow: none;
+        margin: 0;
+        padding: 0;
+        width: 100%;
+    }
+    
+    .checkout-button {
+        display: none;
+    }
+    
+    .destination-item {
+        break-inside: avoid;
+        page-break-inside: avoid;
+    }
+}
+
+/* Fix for the cart items overflow */
+@media (max-width: 480px) {
+    .destination-item .flex.items-start {
+        flex-direction: column;
+    }
+    
+    .destination-item img {
+        margin-bottom: 0.5rem;
+    }
+    
+    /* Position the trash icon properly on mobile */
+    .destination-item .absolute {
+        position: absolute;
+        top: 0.5rem;
+        right: 0.5rem;
+    }
+}
+
+/* Fix for buttons on small screens */
+@media (max-width: 380px) {
+    button {
+        padding: 0.4rem 0.75rem !important;
+        font-size: 0.875rem !important;
+    }
+    
+    .total-price {
+        font-size: 1.125rem;
+    }
+}
     </style>
 </head>
 <body>
@@ -162,58 +328,63 @@
                 const basePrice = parseFloat(pkg.offer_price || pkg.ragular_price);
                 
                 html += `
-                    <div class="destination-item" id="item-${item.id}">
-                        <div class="flex items-start gap-4">
-                            <img src="/uploads/packages/${pkg.photo}" alt="${pkg.package_name}" class="w-24 h-24 object-cover rounded">
-                            <div class="flex-1">
-                                <h4 class="text-lg font-semibold">${pkg.package_name}</h4>
-                                 <p class="text-sm text-gray-600">Duration: ${pkg.duration}</p>
-                        <p class="text-sm text-gray-600">Start Date: ${pkg.start_date}</p>
-                                <p class="text-gray-600">Base Price: ₹${basePrice.toFixed(2)}</p>
-                                <div class="flex flex-wrap gap-4 mt-3">
-                                    <div class="flex-1">
-                                        <label class="block text-sm font-medium text-gray-700">Adults</label>
-                                        <input 
-                                            type="number" 
-                                            id="adults-${item.id}" 
-                                            value="${booking.adults || 1}" 
-                                            min="1" 
-                                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
-                                            data-base-price="${basePrice}"
-                                            onchange="previewPrice(${item.id})"
-                                        >
-                                    </div>
-                                    <div class="flex-1">
-                                        <label class="block text-sm font-medium text-gray-700">Children</label>
-                                        <input 
-                                            type="number" 
-                                            id="children-${item.id}" 
-                                            value="${booking.children || 0}" 
-                                            min="0" 
-                                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
-                                            data-base-price="${basePrice}"
-                                            onchange="previewPrice(${item.id})"
-                                        >
-                                    </div>
-                                </div>
-                                <div class="mt-3">
-                                    <p class="text-lg font-semibold">
-                                        Item Total: <span id="price-${item.id}" class="text-blue-600">
-                                            ₹${calculateItemPrice(basePrice, booking.adults || 1, booking.children || 0).toFixed(2)}
-                                        </span>
-                                    </p>
-                                    <button 
-                                        onclick="updateCartItem(${item.id})" 
-                                        class="mt-2 px-4 py-2 bg-yellow-500 text-white rounded hover:bg-yellow-600 transition"
-                                    >
-                                        Update Booking
-                                    </button>
-                                </div>
-                                  <i class="fas fa-trash remove-item" onclick="removeCartItem(${item.id})"></i>
-                            </div>
-                        </div>
+    <div class="destination-item relative" id="item-${item.id}">
+        <div class="flex items-start gap-4">
+            <img src="/uploads/packages/${pkg.photo}" alt="${pkg.package_name}" class="w-24 h-24 object-cover rounded">
+            <div class="flex-1">
+                <h4 class="text-lg font-semibold">${pkg.package_name}</h4>
+                <p class="text-sm text-gray-600">Duration: ${pkg.duration}</p>
+                <p class="text-sm text-gray-600">Start Date: ${pkg.start_date}</p>
+                <p class="text-gray-600">Base Price: ₹${basePrice.toFixed(2)}</p>
+                <div class="flex flex-wrap gap-4 mt-3">
+                    <div class="flex-1">
+                        <label class="block text-sm font-medium text-gray-700">Adults</label>
+                        <input 
+                            type="number" 
+                            id="adults-${item.id}" 
+                            value="${booking.adults || 1}" 
+                            min="1" 
+                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
+                            data-base-price="${basePrice}"
+                            onchange="previewPrice(${item.id})"
+                        >
                     </div>
-                `;
+                    <div class="flex-1">
+                        <label class="block text-sm font-medium text-gray-700">Children</label>
+                        <input 
+                            type="number" 
+                            id="children-${item.id}" 
+                            value="${booking.children || 0}" 
+                            min="0" 
+                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
+                            data-base-price="${basePrice}"
+                            onchange="previewPrice(${item.id})"
+                        >
+                    </div>
+                </div>
+                <div class="mt-3">
+                    <p class="text-lg font-semibold">
+                        Item Total: <span id="price-${item.id}" class="text-blue-600">
+                            ₹${calculateItemPrice(basePrice, booking.adults || 1, booking.children || 0).toFixed(2)}
+                        </span>
+                    </p>
+                    <button 
+                        onclick="updateCartItem(${item.id})" 
+                        class="mt-2 px-4 py-2 bg-yellow-500 text-white rounded hover:bg-yellow-600 transition"
+                    >
+                        Update Booking
+                    </button>
+                </div>
+            </div>
+        </div>
+        <button 
+            class="absolute top-0 right-0 p-2 text-red-500 hover:text-red-700 transition-colors" 
+            onclick="removeCartItem(${item.id})"
+        >
+            <i class="fas fa-trash"></i>
+        </button>
+    </div>
+`;
             });
 
             $('#cart-items').html(html);

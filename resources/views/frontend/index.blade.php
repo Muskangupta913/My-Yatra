@@ -128,7 +128,7 @@
             <div class="mb-3 col-md-3">
                 <div class="date-caption">Enter City</div>
                 <div class="position-relative">
-                <input type="text" class="form-control rounded-0 py-3" name="CityName" id="hotelSearchCity" placeholder="Enter City Name" required style="text-align: center;" >
+                <input type="text" class="form-control rounded-0 py-3" name="CityName" id="hotelSearchCity" placeholder="Enter City " required style="text-align: center;" >
                 <input type="hidden" name="CityId" id="cityIdInput" value="" >
                 <div id="hotelSearchCityList" class="card" style="position: absolute; width: 100%; max-height: 150px; overflow-y: scroll; z-index: 1000;"></div>
            </div>
@@ -251,7 +251,7 @@
         <div class="mb-2 col-md-2 position-relative">
     <div class="date-caption">From</div>
     <div class="position-relative">
-    <input type="text" class="form-control rounded-0 py-3" id="flightFromCity" placeholder="Enter Departure City" required>
+    <input type="text" class="form-control rounded-0 py-3" id="flightFromCity" placeholder="Origin" required>
     <!-- Note: removed 'name' attribute from display input and added it to hidden input -->
     <input type="hidden" id="flightFromCityCode" name="origin" required>
     <div id="flightFromCityList" class="card" style="position: absolute; width: 100%; max-height: 150px; overflow-y: scroll; z-index: 1000;"></div>
@@ -260,7 +260,7 @@
 <div class="mb-2 col-md-2 position-relative">
     <div class="date-caption">To</div>
     <div class="position-relative">
-    <input type="text" class="form-control rounded-0 py-3" id="flightToCity" placeholder="Enter Destination City" required>
+    <input type="text" class="form-control rounded-0 py-3" id="flightToCity" placeholder="Arriving" required>
     <!-- Note: removed 'name' attribute from display input and added it to hidden input -->
     <input type="hidden" id="flightToCityCode" name="destination" required>
     <div id="flightToCityList" class="card" style="position: absolute; width: 100%; max-height: 150px; overflow-y: scroll; z-index: 1000;"></div>
@@ -270,13 +270,13 @@
                 <div class="date-caption">Departure </div>
                 <input type="text" id="flightDepartureDate" name="departureDate"
                     class="form-control rounded-0 py-3 datepicker"
-                    placeholder="Select Departure Date" required>
+                    placeholder="Departure" required>
             </div>
             <div class="mb-2 col-md-2">
                 <div class="date-caption">Return </div>
                 <input type="text" id="flightReturnDate" name="returnDate"
                     class="form-control rounded-0 py-3 datepicker"
-                    placeholder="Select Return Date">
+                    placeholder="Return On">
             </div>
             <div class="mb-2 col-md-2">
     <div class="date-caption">Passengers</div>
@@ -284,7 +284,7 @@
         <button class="form-control rounded-0 py-3 text-start" type="button" id="passengerDropdown" data-bs-toggle="dropdown">
             Select
         </button>
-        <div class="dropdown-menu p-3" style="width: 250px;">
+        <div class="dropdown-menu p-3" style="position: absolute; width: 100%; max-height: 150px; overflow-y: scroll; z-index: 1000;">
             <div class="mb-2">
                 <label for="adultCount">Adults</label>
                 <input type="number" 
@@ -357,23 +357,23 @@
                                 <div class="row">
                                     <div class="mb-3 col-md-3">
                                         <div class="date-caption">Pickup Location</div>
+                                        <div class="position-relative">
                                         <input type="text" class="form-control rounded-0 py-3"
                                             name="pickupLocation" id="carPickupLocation"
                                             placeholder="Enter Pickup Location" required>
                                         <input type="hidden" name="pickupLocationCode" id="carPickupLocationCode">
-                                        <div id="carPickupLocationList" class="card"
-                                            style="position: absolute; width: 23%; max-height: 150px; overflow-y: scroll;">
-                                        </div>
+                                        <div id="carPickupLocationList" class="card" style="position: absolute; width: 100%; max-height: 150px; overflow-y: scroll; z-index: 1000;"></div>
                                     </div>
+                                     </div>
                                     <div class="mb-3 col-md-3">
                                         <div class="date-caption">Drop-off Location</div>
+                                        <div class="position-relative">
                                         <input type="text" class="form-control rounded-0 py-3"
                                             name="dropoffLocation" id="carDropoffLocation"
                                             placeholder="Enter Drop-off Location" required>
                                         <input type="hidden" name="dropoffLocationCode" id="carDropoffLocationCode">
-                                        <div id="carDropoffLocationList" class="card"
-                                            style="position: absolute; width: 23%; max-height: 150px; overflow-y: scroll;">
-                                        </div>
+                                        <div id="carDropoffLocationList" class="card" style="position: absolute; width: 100%; max-height: 150px; overflow-y: scroll; z-index: 1000;"></div>
+                                    </div>
                                     </div>
                                     <div class="mb-3 col-md-2">
                                         <div class="date-caption">Pickup Date</div>
@@ -382,7 +382,7 @@
                                             placeholder="Select Pickup Date" required>
                                     </div>
                                     <div class="mb-3 col-md-2">
-                                        <label>Trip Type</label>
+                                    <div class="date-caption">Trip Type</div>
                                         <select name="trip_type" id="carTripType"
                                             class="form-control rounded-0 py-3">
                                             <option value="0">One Way</option>
@@ -393,7 +393,7 @@
                                     <div class="mb-3 col-md-2">
                                         <div class="date-caption" style="visibility: hidden">Search</div>
                                         <button type="submit" class="btn btn-warning w-100 rounded-0 py-3 fw-bold"
-                                            id="searchButton">Search Cars</button>
+                                            id="searchButton">Search </button>
                                     </div>
                                 </div>
                             </form>
@@ -411,7 +411,7 @@
         <div class="mb-3 col-md-3">
             <div class="date-caption">From</div>
             <div class="position-relative">
-            <input type="text" class="form-control rounded-0 py-3" name="source_city" id="busFromCity" placeholder="Enter Departure City" required>
+            <input type="text" class="form-control rounded-0 py-3" name="source_city" id="busFromCity" placeholder="From" required>
             <input type="hidden" name="source_code" id="busFromCode"> <!-- Hidden field to store source city code -->
             <div id="busFromCityList" class="card" style="position: absolute; width: 100%; max-height: 150px; overflow-y: scroll; z-index: 1000;"></div>
         </div>
@@ -421,7 +421,7 @@
         <div class="mb-3 col-md-3">
             <div class="date-caption">To</div>
             <div class="position-relative">
-            <input type="text" class="form-control rounded-0 py-3" name="destination_city" id="busToCity" placeholder="Enter Destination City" required>
+            <input type="text" class="form-control rounded-0 py-3" name="destination_city" id="busToCity" placeholder="To" required>
             <input type="hidden" name="destination_code" id="busToCode"> <!-- Hidden field to store destination city code -->
             <div id="busToCityList" class="card" style="position: absolute; width: 100%; max-height: 150px; overflow-y: scroll; z-index: 1000;"></div>
         </div>
@@ -436,7 +436,7 @@
         <!-- Submit Button -->
         <div class="mb-3 col-md-3">
             <div class="date-caption" style="visibility: hidden">Search</div>
-            <button type="submit" class="btn btn-warning w-100 rounded-0 py-3 fw-bold">Search Buses</button>
+            <button type="submit" class="btn btn-warning w-100 rounded-0 py-3 fw-bold">Search</button>
         </div>
     </div>
   </form>
@@ -779,6 +779,7 @@
   </script>
    -->
    <script>
+    
     // Add this JavaScript after your HTML
 document.addEventListener('DOMContentLoaded', function() {
     const passengerDropdown = document.getElementById('passengerDropdown');
@@ -1370,10 +1371,12 @@ console.log('Cookies:', document.cookie);
     }
 });
 
-        // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-        // +                  Car Script                                   +
-        // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-        document.addEventListener('DOMContentLoaded', function() {
+
+    // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    // +                  Car Script                                   +
+    // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    document.addEventListener('DOMContentLoaded', function() {
+        
         function fetchCities(inputId, suggestionId) {
             const query = document.getElementById(inputId).value;
             if (query.length < 2) {
@@ -1477,7 +1480,7 @@ console.log('Cookies:', document.cookie);
                     });
 
                     if (!response.ok) {
-                        throw new Error(HTTP error! status: ${response.status});
+                        throw new Error(`HTTP error! status: ${response.status}`);
                     }
                     const data = await response.json();
 
@@ -1493,12 +1496,11 @@ console.log('Cookies:', document.cookie);
                     alert('An error occurred while searching for cars. Please try again.');
                 } finally {
                     searchButton.disabled = false;
-                    searchButton.innerHTML = 'Search Cars';
+                    searchButton.innerHTML = 'Search ';
                 }
             });
         }
     });
-
 
 
 
@@ -1824,8 +1826,6 @@ console.log('journeytypt is this ',journeyType )
     }
 });
     });
-
-
     // Initialize components
     initializeAirportSearch();
     $('input[name="journeyType"]').on('change', handleTripTypeChange);
@@ -1833,6 +1833,4 @@ console.log('journeytypt is this ',journeyType )
 });
 
 </script>
-
-
 @endsection 
