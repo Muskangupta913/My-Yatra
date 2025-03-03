@@ -865,7 +865,7 @@ function handleContinue() {
     }
 
     // Update the passenger form container with forms for each selected seat
-    const formContainer = document.getElementById('passengerFormContinear');
+    const formContainer = document.getElementById('passengerFormContainer');
     formContainer.innerHTML = selectedSeats.map((seat, index) => 
         generatePassengerForm(seat.SeatName, index)
     ).join('');
