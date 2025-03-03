@@ -463,37 +463,28 @@ Route::get('/fetch-all-states', [HomeController::class, 'fetchAllStates'])->name
 // Searching Packages
 Route::get('/search-packages', [HomeController::class, 'searchPackages'])->name('searchPackages');
 
-// Car city fatch
-Route::get('/fetch-cities', [CityController::class, 'fetchCities'])->name('fetch.cities');
-
-// Car Wallet Balance
-Route::get('/wallet-balance', [CarController::class, 'walletBalance']);
-
-//Car booking form
-Route::get('/car-booking', [CarController::class, 'showBookingForm'])->name('car.booking');
-Route::get('/cars', [CarController::class, 'showCars'])->name('car.cars');
-
-// Carbalance Log
-Route::post('/car/process-to-pay', [CarController::class, 'processToPay'])->name('car.processToPay');
-Route::get('/check-wallet-balance', [CarController::class, 'checkWalletBalance'])->name('wallet.check');
-//Car Booking form
-Route::post('/process-booking', [CarController::class, 'processBooking'])->name('car.processBooking');
+// car Route
+Route::post('/fetch-cities', [CarController::class, 'fetchCities'])->name('fetchCities');
 Route::get('/cars', [CarController::class, 'index'])->name('cars');
-Route::get('/car-booking/success', function () {
-    return view('frontend.car_booking');
-})->name('car.booking.success');
-// Route::get('/car/booking-success', [CarController::class, 'bookingSuccess'])->name('car.bookingSuccess');
-Route::post('/car/process-payment', [CarController::class, 'processPayment'])->name('car.book');
-
-// Card pay
-Route::post('/cardpay', [CardpayController::class, 'store'])->name('cardpay.store');
-Route::post('/car/check-wallet', [CarController::class, 'checkWalletBalance'])->name('car.checkWallet');
-Route::post('/book-car', [CarController::class, 'bookCar']);
-Route::post('/save-car-booking', [CarController::class, 'saveCarBooking']);
-Route::post('/car/process-payment', [CarController::class, 'processPayment'])->name('car.process.payment');
-Route::get('/car/booking-success', [CarController::class, 'bookingSuccess'])->name('car.booking.success');
-Route::post('/car/book', [CarController::class, 'processPayment'])->name('car.book');
-Route::get('/car/booking-success', [CarController::class, 'bookingSuccess'])->name('car.bookingSuccess');
+Route::get('/cars', [CarController::class, 'index'])->name('cars.index');
+Route::post('/search-cars', [CarController::class, 'searchCars']);
+Route::post('/search-cars', [CarController::class, 'apiSearchCars']);
+Route::post('/search-cars', [CarController::class, 'searchCars'])->name('searchCars');
+Route::get('/car-booking-form', function () {
+  return view('frontend.car_booking_form');
+})->name('car.booking.form');
+Route::get('/booking/create/{car}', [CarController::class, 'create'])->name('booking.create');
+Route::post('/booking/store', [CarController::class, 'store'])->name('booking.store');
+Route::post('/car/book', [CarController::class, 'bookCar'])->name('car.book');
+Route::post('/check-balance', [CarController::class, 'checkBalance'])->name('check.balance');
+Route::post('/car/booking/submit', [CarController::class, 'submitBooking'])->name('car.submit');
+Route::get('/car/payment', [CarController::class, 'showPayment'])->name('car.payment');
+Route::post('/car/payment', [CarController::class, 'processPayment'])->name('car.payment.process');
+Route::get('/car-booking-form', function () {
+    return view('frontend.car_booking_form');
+})->name('car.booking.form');
+Route::post('/car/payment', [CarController::class, 'processPayment'])->name('car.payment');
+Route::get('/car/payment', [CarController::class, 'showPayment'])->name('car.payment.show');
 
 
 // Flight Route

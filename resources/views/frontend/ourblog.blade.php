@@ -388,7 +388,7 @@
 
 <section 
   class="relative min-h-[150vh] bg-fixed bg-cover bg-center text-white text-center py-4 px-2 mt-2" 
-  style="background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('{{ asset('images/blog-s1-img.jpg') }}');">
+  style="background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('/assets/images/background.jpeg'); background-size: cover; background-position: center; background-repeat: no-repeat;">
   
   <!-- Overlay to create the filler effect if additional overlay needed -->
   <div class="absolute inset-0 bg-black opacity-50 z-0"></div>
@@ -397,7 +397,7 @@
   <div class="relative z-10 p-4">
     <h1 class="text-4xl font-bold">Top 5 Off beat Travel Destinations in India</h1>
     <p class="text-lg">Discover Hidden Gems and Explore India Differently</p>
-    <small class="text-gray-300">Published on: {{ $postDate ?? 'September 16, 2024' }} | By: {{ $author ?? 'Make My Bharat Yatra Team' }}</small>
+    <small class="text-gray-300"> By: {{ $author ?? 'Make My Bharat Yatra Team' }}</small>
   </div>
   
   <!-- Scrolling content that moves with the page -->

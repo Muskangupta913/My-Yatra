@@ -13,50 +13,149 @@ use App\Http\Requests\BookCarRequest;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\View\View;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Session;
+
 
 class CarController extends Controller
 {
     protected $carApiService;
 
-    public function __construct(CarApiService $carApiService)
+    public function __construct()
     {
-        $this->carApiService = $carApiService;
+        $this->apiConfig = [
+            'url' => config('car.api_url'),
+            'token' => config('car.api_token'),
+            'client_id' => config('car.client_id'),
+            'username' => config('car.username'),
+            'password' => config('car.password')
+        ];
     }
 
-    public function index(Request $request)
-    {
-        // Example search parameters, define how to retrieve them based on the request
-        $searchParams = [
-            // Add logic to set search params based on request data
-        ];
 
+    public function searchCars(Request $request)
+    {
         try {
-            // Fetch car data from the API
-            $response = $this->carApiService->searchCars($searchParams);
-    
-            // Check for API errors
-            if (isset($response['Error']) && $response['Error']['ErrorCode'] != 0) {
-                return view('frontend.cars', [
-                    'cars' => [], // Pass an empty array if no cars
-                    'error' => $response['Error']['ErrorMessage']
-                ]);
-            }
-    
-            // Extract car data
-            $cars = $response['Result']['TaxiData'] ?? [];
-    
-            // Return the view with cars
-            return view('frontend.cars', [
-                'cars' => $cars // Explicitly pass the cars array
+            // Log the incoming request data
+            Log::info('Car Search Request:', $request->all());
+
+            // Format the pickup date properly
+            $pickupDate = date('d/m/Y', strtotime($request->input('searchParams.pickupDate')));
+
+            $requestBody = [
+                "EndUserIp" => "1.1.1.1",
+                "ClientId" => $this->apiConfig['client_id'],
+                "UserName" => $this->apiConfig['username'],
+                "Password" => $this->apiConfig['password'],
+                "FormCity" => $request->input('searchParams.pickupLocationCode'),
+                "ToCity" => $request->input('searchParams.dropoffLocationCode'),
+                "PickUpDate" => $pickupDate,
+                "DropDate" => "",
+                "Hours" => "8",
+                "TripType" => $request->input('searchParams.tripType', "0")
+            ];
+
+
+            // Log the API request
+            Log::info('API Request:', $requestBody);
+
+            $response = Http::withHeaders([
+                'API-Token' => $this->apiConfig['token'],
+                'Content-Type' => 'application/json',
+            ])->post($this->apiConfig['url'] . 'Search', $requestBody);
+
+             // Log the raw API response
+             Log::info('Raw API Response:', ['response' => $response->body()]);
+
+            $responseData = $response->json();
+            
+           
+           // Check for API error response
+           if (isset($responseData['Error']) && $responseData['Error']['ErrorCode'] !== "0") {
+            throw new \Exception($responseData['Error']['ErrorMessage'] ?? 'API Error occurred');
+        }
+
+        // Validate response structure
+        if (!isset($responseData['Result']) || !isset($responseData['Result']['TaxiData'])) {
+            throw new \Exception('Invalid API response structure');
+        }
+
+
+             // Store search results in session
+             session([
+                'carSearchResults' => [
+                    'TaxiData' => $responseData['Result']['TaxiData'],
+                    'PaymentMethods' => $responseData['Result']['PaymentMethods'] ?? [],
+                    'RequestData' => $responseData['Result']['RequestData'] ?? []
+                ],
+                'carSearchParams' => $request->input('searchParams')
             ]);
+
+          
+            return response()->json([
+                'success' => true,
+                'message' => 'Cars found successfully'
+            ]);
+
         } catch (\Exception $e) {
-            // Return view with empty cars array in case of exception
-            return view('frontend.cars', [
-                'cars' => [],
-                'error' => 'Unable to fetch car search results'
+            Log::error('Car Search Error:', [
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
             ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'An error occurred: ' . $e->getMessage()
+            ], 500);
         }
     }
+
+    public function index()
+    {
+        try {
+            // Get data from session
+            $results = session('carSearchResults');
+            $searchParams = session('carSearchParams');
+    
+            if (!$results) {
+                return redirect()->route('home')->with('error', 'Please search for cars first.');
+            }
+    
+            // Process the car data
+            $cars = collect($results['TaxiData'])->map(function($car) {
+                return [
+                    'id' => $car['SrdvIndex'] ?? null,
+                    'category' => $car['Category'] ?? 'Unknown',
+                    'image' => $car['Image'] ?? asset('images/default-car.jpg'),
+                    'seatingCapacity' => $car['SeatingCapacity'] ?? 4,
+                    'luggageCapacity' => $car['LuggageCapacity'] ?? 2,
+                    'hasAC' => $car['AirConditioner'] ?? false,
+                    'availability' => $car['Availability'] ?? 0,
+                    'carType' => $car['Category'] ? str_replace('_', ' ', $car['Category']) : 'Standard',
+                    'totalAmount' => $car['Fare']['TotalAmount'] ?? 0,
+                    'baseFare' => $car['Fare']['BaseFare'] ?? 0,
+                    'serviceTax' => $car['Fare']['TotalServiceTax'] ?? 0,
+                    'isRefundable' => $car['Fare']['Refundable'] ?? false
+                ];
+            })->toArray();
+    
+            // Log the final processed data
+            Log::info('Passing to view:', [
+                'cars' => $cars,
+                'searchParams' => $searchParams
+            ]);
+    
+            return view('frontend.cars', compact('cars', 'searchParams'));
+    
+        } catch (\Exception $e) {
+            Log::error('Error in index method:', [
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            
+            return redirect()->route('home')->with('error', 'An error occurred while loading cars.');
+        }
+    }
+
 
     public function fetchCityDetails(Request $request)
     {
@@ -81,32 +180,14 @@ class CarController extends Controller
         ], 404);
     }
 
-    protected function processCars($cars)
-    {
-        return array_map(function($car) {
-            return [
-                'Category' => $car['Category'] ?? 'Unknown',
-                'Image' => $car['Image'] ?? 'default-car.jpg',
-                'SeatingCapacity' => $car['SeatingCapacity'] ?? 0,
-                'Availability' => $car['Availability'] ?? 0,
-                'TotalAmount' => $car['Fare']['TotalAmount'] ?? 0,
-                'CarNos' => $car['CarNos'] ?? [],
-            ];
-        }, $cars);
-    }
 
-    /**
-     * Fetch the city code.
-     */
     private function getCityCode($cityName)
     {
         $city = CarCity::where('caoncitlst_city_name', $cityName)->first();
         return $city ? $city->caoncitlst_id : null;
     }
 
-    /**
-     * Fetch cities based on search query.
-     */
+   
     public function fetchCities(Request $request)
     {
         $validated = $request->validate([
@@ -127,262 +208,190 @@ class CarController extends Controller
         }
     }
 
-       public function searchCars(Request $request)
+    public function cars()
+    {
+        return view('frontend.cars'); 
+    }
+    public function bookCar(Request $request) {
+        $validated = $request->validate([
+            'car_id' => 'required',
+            'name' => 'required|string',
+            'email' => 'required|email',
+            'phone' => 'required',
+            'booking_date' => 'required|date',
+        ]);
+    
+        Booking::create([
+            'car_id' => $request->car_id,
+            'user_name' => $request->name,
+            'email' => $request->email,
+            'phone' => $request->phone,
+            'booking_date' => $request->booking_date,
+        ]);
+    
+        return redirect()->route('booking.success')->with('message', 'Car booked successfully!');
+    }
+    public function payment(Request $request)
     {
         try {
-            // Validate request
+            // Validate the request
             $validated = $request->validate([
-                'FormCity' => 'required|string',
-                'ToCity' => 'required|string',
-                'PickUpDate' => 'required|date_format:d/m/Y',
-                // 'DropDate' => 'nullable|date_format:d/m/Y',
-                'Hours' => 'nullable|integer',
-                'TripType' => 'required|string'
+                'name' => 'required|string|min:3',
+                'email' => 'required|email',
+                'phone' => 'required|string|min:10',
+                'pickup_address' => 'required|string',
+                'drop_address' => 'required|string',
+                'booking_date' => 'required|date',
+                'terms' => 'required|accepted'
             ]);
 
-            // Prepare the payload for the API request
-            $payload = [
-                'EndUserIp' => '1.1.1.1', 
-                'ClientId' => '180133',
-                'UserName' => 'MakeMy91',
-                'Password' => 'MakeMy@910',
-                'FormCity' => trim($request->input('FormCity')),
-                'ToCity' => trim($request->input('ToCity')),
-                'PickUpDate' => trim($request->input('PickUpDate')),
-                'DropDate' => trim($request->input('DropDate', '')),
-                'Hours' => trim($request->input('Hours', '8')),
-                'TripType' => trim($request->input('TripType')),
-            ];
-
-            Log::info('Car Search Request', $payload);
-
-            // Send API request
-            $response = Http::withHeaders([
-                'Content-Type' => 'application/json',
-                'Api-Token' => 'MakeMy@910@23', // Consider using env for API token
-            ])->withBody(json_encode($payload), 'application/json')
-            ->post('https://car.srdvtest.com/v5/rest/Search');
+            // Process payment and booking logic here
             
-            // Decode the response
-            $data = $response->json();
-
-            Log::info('Car Search Response', $data);
-
-            // Check if the response is successful and handle errors
-            if (!$response->successful() || !isset($data['Error']['ErrorCode']) || $data['Error']['ErrorCode'] !== '0') {
-                Log::error('Car API Error', ['response' => $data]);
-                return response()->json([
-                    'status' => false,
-                    'message' => $data['Error']['ErrorMessage'] ?? 'Failed to fetch car data'
-                ], 400);
-            }
-
-            // Format and map the API response
-            $formattedResponse = [
-                'status' => true,
-                'data' => collect($data['Result']['TaxiData'] ?? [])->map(function ($car) use ($data) {
-                    return [
-                        'SrdvIndex' => $car['SrdvIndex'] ?? null,
-                        'Category' => $car['Category'] ?? null,
-                        'Image' => $car['Image'] ?? null,
-                        'SeatingCapacity' => $car['SeatingCapacity'] ?? null,
-                        'LuggageCapacity' => $car['LuggageCapacity'] ?? null,
-                        'AirConditioner' => $car['AirConditioner'] ?? null,
-                        'CarNumbers' => $car['CarNos'] ?? null,
-                        'Fare' => [
-                            'TotalAmount' => $car['Fare']['TotalAmount'] ?? null,
-                            'AdvanceAmount' => $car['Fare']['AdvanceAmount'] ?? null,
-                            'BaseFare' => $car['Fare']['BaseFare'] ?? null,
-                            'ServiceTax' => $car['Fare']['TotalServiceTax'] ?? null,
-                            'DriverAllowance' => $car['Fare']['OutStationDriverAllowance'] ?? null
-                        ],
-                        'TraceID' => $data['Result']['TraceID'] ?? null,
-                        'RefID' => uniqid('CAR_')
-                    ];
-                })->all(),
-                'cities' => [
-                    'pickup' => $data['Result']['RequestData']['CityData'][0]['Name'] ?? '',
-                    'dropoff' => $data['Result']['RequestData']['CityData'][1]['Name'] ?? ''
-                ],
-                'paymentMethods' => $data['Result']['PaymentMethods'] ?? null
-            ];
-
-            return response()->json($formattedResponse);
-
-        } catch (\Exception $e) {
-            // Log the exception if something goes wrong
-            Log::error('Car Search Error', [
-                'message' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
+            return response()->json([
+                'success' => true,
+                'redirectUrl' => route('car.payment'),
+                'message' => 'Booking confirmed successfully'
             ]);
 
-            return response()->json([
-                'status' => false,
-                'message' => 'An error occurred while searching for cars'
-            ], 500);
-        }
-    }
-   
-    public function showBookingForm(Request $request)
-    {
-        // If there's a success or error message passed, show the response
-        return view('frontend.car_booking', ['response' => $request->session()->get('response')]);
-    }
-
-    public function showCars()
-    {
-        return view('frontend.cars');  
-    }
-      
-
-    // Balance of the code
-    public function checkWalletBalance(Request $request)
-    {
-        try {
-            $carApiService = new CarApiService();
-            $walletBalance = $carApiService->getWalletBalance();
-    
-            $amount = $request->input('amount', 0);
-    
-            if ($walletBalance >= $amount) {
-                return response()->json([
-                    'success' => true,
-                    'message' => 'Sufficient wallet balance. Proceeding to payment.',
-                ]);
-            } else {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Insufficient wallet balance. Please recharge your wallet.',
-                ]);
-            }
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Failed to check wallet balance. Please try again later.',
-            ], 500);
+                'message' => $e->getMessage()
+            ], 422);
         }
     }
-// Save the data in database 
-public function saveCarBooking(Request $request)
-    {
-        // Validate the incoming data
-        $validatedData = $request->validate([
-            'car' => 'required|string',
-            'totalAmount' => 'required|numeric',
-            'customerName' => 'required|string',
-            'customerPhone' => 'required|string',
-            'customerEmail' => 'required|email',
-            'customerAddress' => 'required|string',
+    
+public function checkBalance(Request $request)
+{
+    try {
+        $response = Http::withHeaders([
+            'API-Token' => 'MakeMy@910@23',
+            'Content-Type' => 'application/json',
+        ])->post('https://car.srdvapi.com/v5/rest/Balance', [
+            "EndUserIp" => "1.1.1.1",
+            "ClientId" => $request->input('ClientId'),
+            "UserName" => $request->input('UserName'),
+            "Password" => $request->input('Password'),
         ]);
 
-        // Save the data to the database
-        try {
-            $carBooking = CarBooking::create([
-                'customer_name' => $validatedData['customerName'],
-                'phone' => $validatedData['customerPhone'],
-                'email' => $validatedData['customerEmail'],
-                'total_price' => $validatedData['totalAmount'],
-                'booking_status' => 'pending', // You can change this as per your requirement
-            ]);
+        $data = $response->json();
+        
+                // Log the API response
+                Log::info('Balance API Response:', $data);
 
+
+        if (!isset($data['Error']) || $data['Error']['ErrorCode'] !== "0") {
             return response()->json([
-                'status' => true,
-                'message' => 'Car booking saved successfully.',
-                'booking_id' => $carBooking->id
-            ]);
-        } catch (\Exception $e) {
-            \Log::error('Booking Save Error', ['message' => $e->getMessage()]);
-            return response()->json([
-                'status' => false,
-                'message' => 'An error occurred while saving the booking.'
-            ]);
+                'success' => false,
+                'message' => 'Failed to verify wallet balance'
+            ], 400);
         }
-    }    
 
+         // Log successful balance check
+         Log::info('Balance check successful:', [
+            'balance' => $data['Balance'],
+            'credit_limit' => $data['CreditLimit'] ?? 0
+        ]);
 
-//     public function checkWalletBalance()
-//     {
-//     try {
-//         $wallet = app(CarApiService::class)->getWalletBalance();
+        return response()->json([
+            'success' => true,
+            'balance' => $data['Balance']
+        ]);
 
-//         if (!$wallet['status'] || $wallet['balance'] <= 0) {
-//             return response()->json([
-//                 'status' => false,
-//                 'message' => 'Insufficient wallet balance. Please recharge your wallet.'
-//             ]);
-//         }
-
-//         return response()->json([
-//             'status' => true,
-//             'balance' => $wallet['balance']
-//         ]);
-
-//     } catch (\Exception $e) {
-//         Log::error('Wallet Balance Check Failed:', ['error' => $e->getMessage()]);
-//         return response()->json([
-//             'status' => false,
-//             'message' => 'Failed to check wallet balance. Please try again later.'
-//         ]);
-//     }
-//   }
-  public function processPayment(Request $request)
-  {
-      try {
-          $payload = [
-              'EndUserIp' => $request->input('EndUserIp'),
-              'ClientId' => env('CAR_API_CLIENT_ID'), 
-              'UserName' => env('CAR_API_USERNAME'),   
-              'Password' => env('CAR_API_PASSWORD'),
-              'SrdvIndex' => $request->input('SrdvIndex'),
-              'TraceID' => $request->input('TraceID'),
-              'PickUpTime' => $request->input('PickUpTime'),
-              'DropUpTime' => $request->input('DropUpTime'),
-              'RefID' => $request->input('RefID'),
-              'CustomerName' => $request->input('CustomerName'),
-              'CustomerPhone' => $request->input('CustomerPhone'),
-              'CustomerEmail' => $request->input('CustomerEmail'),
-              'CustomerAddress' => $request->input('CustomerAddress'),
-              'amount' => $request->input('amount') ?? 1000 // Set a default or dynamic amount
-          ];
-  
-          // Pass the API Token in the request header
-          $headers = [
-              'Api-Token' => 'MakeMy@910@23'
-          ];
-  
-          // Step 1: Debit Wallet and Book Car
-          $paymentResponse = $this->carApiService->processPaymentAndBook($payload, $headers);
-  
-          if ($paymentResponse['status'] === true) {
-              return response()->json([
-                  'status' => true,
-                  'message' => 'Payment and Booking Successful!',
-                  'data' => $paymentResponse
-              ]);
-          } else {
-              \Log::error('Payment or Booking Failed: ' . $paymentResponse['message']);
-              return response()->json([
-                  'status' => false,
-                  'message' => $paymentResponse['message']
-              ]);
-          }
-  
-      } catch (\Exception $e) {
-          \Log::error('Payment Processing Error: ' . $e->getMessage());
-          return response()->json([
-              'status' => false,
-              'message' => 'An error occurred during payment processing.'
-          ]);
-      }
-  }
-  
-  
-
-  public function bookingSuccess()
-{
-    return view('frontend.car_booking_success');
+    } catch (\Exception $e) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Failed to check balance: ' . $e->getMessage()
+        ], 500);
+    }
 }
 
-  
+public function processPayment(Request $request)
+{
+    try {
+        $validated = $request->validate([
+            'name' => 'required|string|min:3',
+            'email' => 'required|email',
+            'phone' => 'required|string|min:10',
+            'pickup_address' => 'required|string',
+            'drop_address' => 'required|string',
+            'booking_date' => 'required|date',
+            'terms' => 'required|accepted',
+              // Add validation for car details
+              'car_id' => 'required',
+              'car_category' => 'required',
+              'car_seating' => 'required',
+              'car_luggage' => 'required',
+              'car_price' => 'required',
+              // Add validation for trip details
+              'pickup_location' => 'required',
+              'dropoff_location' => 'required',
+              'trip_type' => 'required'
+        ]);
+
+         // Restructure the data to match the view's expectations
+         $bookingDetails = [
+            'personal_info' => [
+                'name' => $validated['name'],
+                'email' => $validated['email'],
+                'phone' => $validated['phone']
+            ],
+            'trip_info' => [
+                'pickup_location' => $validated['pickup_location'],
+                'dropoff_location' => $validated['dropoff_location'],
+                'pickup_address' => $validated['pickup_address'],
+                'drop_address' => $validated['drop_address'],
+                'booking_date' => $validated['booking_date'],
+                'trip_type' => $validated['trip_type']
+            ],
+            'car_info' => [
+                'id' => $validated['car_id'],
+                'category' => $validated['car_category'],
+                'seating' => $validated['car_seating'],
+                'luggage' => $validated['car_luggage'],
+                'price' => $validated['car_price']
+            ]
+        ];
+
+        // Store the restructured booking details in session
+        Session::put('booking_details', $bookingDetails);
+
+        return response()->json([
+            'success' => true,
+            'redirectUrl' => route('car.payment'),
+            'message' => 'Redirecting to payment page'
+        ]);
+
+    } catch (\Exception $e) {
+        return response()->json([
+            'success' => false,
+            'message' => $e->getMessage()
+        ], 422);
+    }
+}
+
+public function showPayment()
+{
+    // Get booking details from session
+    $bookingDetails = Session::get('booking_details');
+    
+    if (!$bookingDetails) {
+        return redirect()->route('cars.index')
+                        ->with('error', 'Please complete booking form first');
+    }
+
+    // Ensure all required arrays exist
+    if (!isset($bookingDetails['personal_info']) || 
+        !isset($bookingDetails['trip_info']) || 
+        !isset($bookingDetails['car_info'])) {
+        return redirect()->route('cars.index')
+                        ->with('error', 'Invalid booking information');
+    }
+
+    return view('frontend.car_payment', compact('bookingDetails'));
+}
+
+
+
 }
 

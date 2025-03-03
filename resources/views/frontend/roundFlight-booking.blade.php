@@ -954,6 +954,10 @@ window.updateBaggageSelection = function(radio, passengerId) {
     
     console.log(`Updated baggage selection for ${direction}:`, window.passengerSelections.baggage[direction]);
     showBaggageAlert(radio);
+    
+    // Update the total fare immediately after baggage selection
+    updateTotalFare();
+    
     const container = document.getElementById(`options-container-${passengerId}`);
     if (container) {
         container.style.display = 'none';
@@ -1099,12 +1103,25 @@ function renderMealOptions(mealData, container, passengerId) {
 window.selectedMealOptions = [];
 
 window.updateMealSelections = function(checkbox, passengerId) {
-    if (!window.passengerSelections.meals[passengerId]) {
-        window.passengerSelections.meals[passengerId] = [];
+    // Extract direction (outbound/return) from passengerId
+    const [type, index, direction] = passengerId.split('-');
+    
+    // Initialize meals structure if it doesn't exist
+    if (!window.passengerSelections.meals[direction]) {
+        window.passengerSelections.meals[direction] = {};
+    }
+    
+    // Create a key for this passenger
+    const passengerKey = `${type}-${index}`;
+    
+    // Initialize array for this passenger if it doesn't exist
+    if (!window.passengerSelections.meals[direction][passengerKey]) {
+        window.passengerSelections.meals[direction][passengerKey] = [];
     }
 
     const mealData = {
         Code: checkbox.value,
+        Name: checkbox.getAttribute('data-description'),
         AirlineDescription: checkbox.getAttribute('data-description'),
         Origin: checkbox.getAttribute('data-origin'),
         Destination: checkbox.getAttribute('data-destination'),
@@ -1116,16 +1133,19 @@ window.updateMealSelections = function(checkbox, passengerId) {
     };
 
     if (checkbox.checked) {
-        window.passengerSelections.meals[passengerId].push(mealData);
+        // Add the meal to the array
+        window.passengerSelections.meals[direction][passengerKey].push(mealData);
     } else {
-        window.passengerSelections.meals[passengerId] = 
-            window.passengerSelections.meals[passengerId].filter(meal => meal.Code !== mealData.Code);
+        // Remove the meal from the array
+        window.passengerSelections.meals[direction][passengerKey] = 
+            window.passengerSelections.meals[direction][passengerKey].filter(meal => meal.Code !== mealData.Code);
     }
 
     updateMealDisplay(passengerId);
     updateTotalFare();
     showMealSelectionAlert(passengerId);
 };
+
 // Function to adjust quantity
 window.adjustQuantity = function(button, change) {
     const input = button.parentElement.querySelector('.quantity-input');
@@ -1137,23 +1157,40 @@ window.adjustQuantity = function(button, change) {
 };
 
 // Function to update meal quantity
-window.updateMealQuantity = function(input) {
-    const checkbox = input.closest('.meal-option').querySelector('input[type="checkbox"]');
+window.updateMealQuantity = function(input, passengerId) {
+    // Extract direction (outbound/return) from passengerId
+    const [type, index, direction] = passengerId.split('-');
+    const passengerKey = `${type}-${index}`;
+    
+    const checkbox = input.closest('.meal-option').querySelector(`input[name="meal_option_${passengerId}"]`);
     if (checkbox.checked) {
-        const mealIndex = window.selectedMealOptions.findIndex(meal => meal.Code === checkbox.value);
-        if (mealIndex !== -1) {
-            window.selectedMealOptions[mealIndex].Quantity = parseInt(input.value);
-          
-            showMealSelectionAlert();
+        // Find the meal in the passenger's selections
+        if (window.passengerSelections.meals[direction] && 
+            window.passengerSelections.meals[direction][passengerKey]) {
+            
+            const mealIndex = window.passengerSelections.meals[direction][passengerKey]
+                .findIndex(meal => meal.Code === checkbox.value);
+            
+            if (mealIndex !== -1) {
+                // Update the quantity
+                window.passengerSelections.meals[direction][passengerKey][mealIndex].Quantity = parseInt(input.value);
+                updateMealDisplay(passengerId);
+                updateTotalFare();
+            }
         }
     }
 };
+
 
 function updateMealDisplay(passengerId) {
     const displayElement = document.getElementById(`selectedMealsDisplay_${passengerId}`);
     if (!displayElement) return;
 
-    const selectedMeals = window.passengerSelections.meals[passengerId] || [];
+    // Extract direction (outbound/return) from passengerId
+    const [type, index, direction] = passengerId.split('-');
+    const passengerKey = `${type}-${index}`;
+    
+    const selectedMeals = window.passengerSelections.meals[direction]?.[passengerKey] || [];
     
     if (selectedMeals.length === 0) {
         displayElement.innerHTML = '<em class="text-muted">No meals selected</em>';
@@ -1181,17 +1218,47 @@ function updateMealDisplay(passengerId) {
 
     displayElement.innerHTML = mealsHtml;
 }
-
+window.removeMeal = function(mealCode, passengerId) {
+    // Extract direction (outbound/return) from passengerId
+    const [type, index, direction] = passengerId.split('-');
+    const passengerKey = `${type}-${index}`;
+    
+    // Uncheck the checkbox
+    document.getElementById(`meal_${mealCode}_${passengerId}`).checked = false;
+    
+    // Remove from selections array
+    if (window.passengerSelections.meals[direction] && 
+        window.passengerSelections.meals[direction][passengerKey]) {
+        
+        window.passengerSelections.meals[direction][passengerKey] = 
+            window.passengerSelections.meals[direction][passengerKey].filter(meal => meal.Code !== mealCode);
+    }
+    
+    // Update displays
+    updateMealDisplay(passengerId);
+    updateTotalFare();
+};
 // Update quantity handling to refresh the display
 window.updateMealQuantity = function(input, passengerId) {
+    // Extract direction (outbound/return) from passengerId
+    const [type, index, direction] = passengerId.split('-');
+    const passengerKey = `${type}-${index}`;
+    
     const checkbox = input.closest('.meal-option').querySelector(`input[name="meal_option_${passengerId}"]`);
     if (checkbox.checked) {
-        const selectedMeals = window.passengerSelections.meals[passengerId] || [];
-        const mealIndex = selectedMeals.findIndex(meal => meal.Code === checkbox.value);
-        if (mealIndex !== -1) {
-            selectedMeals[mealIndex].Quantity = parseInt(input.value);
-            updateMealDisplay(passengerId);
-            updateTotalFare();
+        // Find the meal in the passenger's selections
+        if (window.passengerSelections.meals[direction] && 
+            window.passengerSelections.meals[direction][passengerKey]) {
+            
+            const mealIndex = window.passengerSelections.meals[direction][passengerKey]
+                .findIndex(meal => meal.Code === checkbox.value);
+            
+            if (mealIndex !== -1) {
+                // Update the quantity
+                window.passengerSelections.meals[direction][passengerKey][mealIndex].Quantity = parseInt(input.value);
+                updateMealDisplay(passengerId);
+                updateTotalFare();
+            }
         }
     }
 };
@@ -1199,17 +1266,26 @@ window.updateMealQuantity = function(input, passengerId) {
 window.adjustQuantity = function(button, change, passengerId) {
     const input = button.parentElement.querySelector('.quantity-input');
     const newValue = parseInt(input.value) + change;
+    
+    // Set limits (1-5)
     if (newValue >= 1 && newValue <= 5) {
         input.value = newValue;
-        updateMealQuantity(input, passengerId);
+        
+        // Call the updateMealQuantity function to update the selection data
+        window.updateMealQuantity(input, passengerId);
     }
 };
 
-
 // Function to show meal selection alert
-function showMealSelectionAlert() {
-    if (window.Swal && window.selectedMealOptions.length > 0) {
-        const mealSummary = window.selectedMealOptions.map(meal => 
+function showMealSelectionAlert(passengerId) {
+    // Extract direction (outbound/return) from passengerId
+    const [type, index, direction] = passengerId.split('-');
+    const passengerKey = `${type}-${index}`;
+    
+    const selectedMeals = window.passengerSelections.meals[direction]?.[passengerKey] || [];
+    
+    if (window.Swal && selectedMeals.length > 0) {
+        const mealSummary = selectedMeals.map(meal => 
             `${meal.AirlineDescription} (Qty: ${meal.Quantity}) - ₹${(meal.Price * meal.Quantity).toFixed(2)}`
         ).join('\n');
 
@@ -1473,10 +1549,9 @@ function getPassengerTypes() {
     });
     return Array.from(passengerIds);
 }
-
 function calculateTotalPriceWithDetails() {
-    const outboundFare = window.outboundFareQuoteData?.Fare || {};  // FIXED: Added window.
-    const returnFare = window.returnFareQuoteData?.Fare || {};      // FIXED: Added window.
+    const outboundFare = window.outboundFareQuoteData?.Fare || {};
+    const returnFare = window.returnFareQuoteData?.Fare || {};
 
     // Calculate base components for both flights
     const baseFare = (parseFloat(outboundFare.OfferedFare) || 0) + (parseFloat(returnFare.OfferedFare) || 0);
@@ -1487,34 +1562,51 @@ function calculateTotalPriceWithDetails() {
     const additionalTxnFeePub = (parseFloat(outboundFare.AdditionalTxnFeePub) || 0) + (parseFloat(returnFare.AdditionalTxnFeePub) || 0);
     const airTransFee = (parseFloat(outboundFare.AirTransFee) || 0) + (parseFloat(returnFare.AirTransFee) || 0);
 
+    // Get all passenger IDs from all selection types
+    const passengerKeys = new Set();
+    ['outbound', 'return'].forEach(direction => {
+        // Collect from seats
+        if (window.passengerSelections.seats[direction]) {
+            Object.keys(window.passengerSelections.seats[direction]).forEach(key => passengerKeys.add(key));
+        }
+        
+        // Collect from meals
+        if (window.passengerSelections.meals[direction]) {
+            Object.keys(window.passengerSelections.meals[direction]).forEach(key => passengerKeys.add(key));
+        }
+        
+        // Collect from baggage
+        if (window.passengerSelections.baggage[direction]) {
+            Object.keys(window.passengerSelections.baggage[direction]).forEach(key => passengerKeys.add(key));
+        }
+    });
+
     // Calculate SSR costs by passenger
     const passengerCosts = {};
-    const passengerIds = getPassengerTypes();
-
-    passengerIds.forEach(passengerId => {
+    
+    passengerKeys.forEach(passengerId => {
         passengerCosts[passengerId] = {
             outbound: { seats: 0, meals: 0, baggage: 0, seatDetails: '', baggageDetails: '', mealDetails: [] },
             return: { seats: 0, meals: 0, baggage: 0, seatDetails: '', baggageDetails: '', mealDetails: [] }
         };
-
 
         ['outbound', 'return'].forEach(direction => {
             // Add seat costs and details
             const seat = window.passengerSelections.seats[direction]?.[passengerId];
             if (seat?.amount) {
                 passengerCosts[passengerId][direction].seats = parseFloat(seat.amount);
-                passengerCosts[passengerId][direction].seatDetails = seat.seatNumber || '';  // ADDED: Store seat number
+                passengerCosts[passengerId][direction].seatDetails = seat.seatNumber || '';
             }
 
-            // Add meal costs and details - FIXED: Proper meal calculation with details
+            // Add meal costs and details
             const meals = window.passengerSelections.meals[direction]?.[passengerId] || [];
-            if (Array.isArray(meals)) {  // ADDED: Check if meals is an array
+            if (Array.isArray(meals)) {
                 meals.forEach(meal => {
                     if (meal?.Price && meal?.Quantity) {
                         const mealCost = parseFloat(meal.Price) * parseInt(meal.Quantity, 10);
                         passengerCosts[passengerId][direction].meals += mealCost;
-                        passengerCosts[passengerId][direction].mealDetails.push({  // ADDED: Store meal details
-                            name: meal.Name || 'Meal',
+                        passengerCosts[passengerId][direction].mealDetails.push({
+                            name: meal.AirlineDescription || 'Meal',
                             quantity: meal.Quantity,
                             price: mealCost
                         });
@@ -1526,7 +1618,7 @@ function calculateTotalPriceWithDetails() {
             const baggage = window.passengerSelections.baggage[direction]?.[passengerId];
             if (baggage?.Price) {
                 passengerCosts[passengerId][direction].baggage = parseFloat(baggage.Price);
-                passengerCosts[passengerId][direction].baggageDetails = baggage.Weight || '';  // ADDED: Store baggage weight
+                passengerCosts[passengerId][direction].baggageDetails = baggage.Weight ? baggage.Weight + ' kg' : '';
             }
         });
     });
@@ -1548,8 +1640,8 @@ function calculateTotalPriceWithDetails() {
         additionalTxnFeeOfrd,
         additionalTxnFeePub,
         airTransFee,
-        outboundBaseFare: outboundFare.BaseFare || 0,
-        returnBaseFare: returnFare.BaseFare || 0,
+        outboundBaseFare: parseFloat(outboundFare.BaseFare) || 0,
+        returnBaseFare: parseFloat(returnFare.BaseFare) || 0,
         passengerCosts,
         totalSSRCost
     };
@@ -1643,7 +1735,7 @@ function updateTotalFare() {
                                             <div class="icon-wrapper me-2">
                                                 <i class="fas fa-utensils text-warning"></i>
                                             </div>
-                                            <div class="flex-grow-1">${meal.name} x${meal.quantity}</div>
+                                            <div class="flex-grow-1">${meal.name}(Qty:${meal.quantity})</div>
                                             <div class="price text-success">₹${meal.price.toFixed(2)}</div>
                                         </div>`).join('')}
                                     ${costs.outbound.baggage > 0 ? `
@@ -1678,7 +1770,7 @@ function updateTotalFare() {
                                             <div class="icon-wrapper me-2">
                                                 <i class="fas fa-utensils text-warning"></i>
                                             </div>
-                                            <div class="flex-grow-1">${meal.name} x${meal.quantity}</div>
+                                            <div class="flex-grow-1">${meal.name} (Qty:${meal.quantity})</div>
                                             <div class="price text-success">₹${meal.price.toFixed(2)}</div>
                                         </div>`).join('')}
                                     ${costs.return.baggage > 0 ? `

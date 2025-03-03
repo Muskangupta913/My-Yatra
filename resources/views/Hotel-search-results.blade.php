@@ -904,9 +904,5 @@ function viewHotelDetails(resultIndex, hotelCode) {
             const grid = document.getElementById('hotelGrid');
             grid.style.gridTemplateColumns = window.innerWidth > 1200 ? 'repeat(3, 1fr)' : window.innerWidth > 768 ? 'repeat(2, 1fr)' : '1fr';
         });
-
-// Remove the window resize event listener that changes grid columns
-// The layout will now be handled purely by CSS
-window.removeEventListener('resize', handleViewChange);
     </script>
         @endsection
