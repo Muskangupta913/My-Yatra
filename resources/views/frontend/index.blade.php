@@ -1059,12 +1059,16 @@ function generateAgeOptions() {
     }
         // Collect form data
         const data = {
-            source_city: $('#busFromCity').val(),
-            source_code: $('#busFromCode').val(),
-            destination_city: $('#busToCity').val(),
-            destination_code: $('#busToCode').val(),
-            depart_date: formattedDate // Use the formatted date
-        };
+    ClientId: "180133",
+    UserName: "MakeMy91",
+    Password: "MakeMy@910",
+    source_city: $("#busFromCity").val(),
+    source_code: $("#busFromCode").val(),
+    destination_city: $("#busToCity").val(),
+    destination_code: $("#busToCode").val(),
+    depart_date: formattedDate // Use the formatted date
+};
+
 
         console.log('Search Buses Request Data:', data);
 

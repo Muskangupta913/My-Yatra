@@ -867,11 +867,18 @@ function createSubmitButton() {
                     
                     // Add payment response fields
                     const fields = {
-                        'razorpay_payment_id': response.razorpay_payment_id,
-                        'razorpay_order_id': response.razorpay_order_id,
-                        'razorpay_signature': response.razorpay_signature
-                    };
-                    
+        'razorpay_payment_id': response.razorpay_payment_id,
+        'razorpay_order_id': response.razorpay_order_id,
+        'razorpay_signature': response.razorpay_signature,
+        // Add all the booking details you want to pass to the success page
+        'traceId': bookingDetails.traceId,
+        'resultIndex': bookingDetails.resultIndex,
+        'hotelCode': bookingDetails.hotelCode,
+        'hotelName': bookingDetails.hotelName,
+        'roomDetails': JSON.stringify(bookingDetails.roomDetails),
+        'passengerDetails': JSON.stringify(window.passengerDetails),
+        'redirectToSuccess': true // Flag to indicate redirect to success page
+    };
                     for (const [name, value] of Object.entries(fields)) {
                         const field = document.createElement('input');
                         field.type = 'hidden';
