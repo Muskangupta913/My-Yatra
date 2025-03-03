@@ -122,9 +122,9 @@ class BusController extends Controller
         ]);
     
         $payload = json_encode([
-            'ClientId' => $this->ClientId,
-            'UserName' => $this->UserName,
-            'Password' => $this->Password,
+            'ClientId' => '180133',
+            'UserName' => 'MakeMy91',
+            'Password' => 'MakeMy@910',
             "TraceId" => $request->TraceId,
             "ResultIndex" => $request->ResultIndex,
         ], JSON_UNESCAPED_SLASHES);
@@ -132,7 +132,7 @@ class BusController extends Controller
         try {
             $response = Http::withHeaders([
                 'Content-Type' => 'application/json',
-                'Api-Token' => $this->ApiToken,
+                'Api-Token' => 'MakeMy@910@23',
             ])->withBody($payload, 'application/json')
               ->post('https://bus.srdvtest.com/v8/rest/GetSeatLayOut');
     
@@ -250,9 +250,9 @@ class BusController extends Controller
         // Full payload with all required parameters
         $payload = [
             'EndUserIp' => '1.1.1.1',
-            'ClientId' => $this->ClientId,
-            'UserName' => $this->UserName,
-            'Password' => $this->Password,
+            'ClientId' => '180133',
+            'UserName' => 'MakeMy91',
+            'Password' => 'MakeMy@910',
             'TraceId' => $request->TraceId,
             'ResultIndex' => $request->ResultIndex
         ];
@@ -264,7 +264,7 @@ class BusController extends Controller
             // Make the API call
             $response = Http::withHeaders([
                 'Content-Type' => 'application/json',
-                'Api-Token' => $this->ApiToken,  // Use the class property
+                'Api-Token' => 'MakeMy@910@23',  // Use the class property
             ])->post('https://bus.srdvtest.com/v8/rest/GetBoardingPointDetails', $payload);
     
             $data = $response->json();
@@ -357,9 +357,9 @@ class BusController extends Controller
     
         // Prepare payload with credentials
         $payload = array_merge([
-            'ClientId' => $this->ClientId,
-            'UserName' => $this->UserName,
-            'Password' => $this->Password,
+            'ClientId' => '180133',
+            'UserName' => 'MakeMy91',
+            'Password' => 'MakeMy@910',
         ], $request->all());
     
         try {
@@ -369,7 +369,7 @@ class BusController extends Controller
             // Make API request
             $response = Http::withHeaders([
                 'Content-Type' => 'application/json',
-                'Api-Token' => $this->ApiToken,
+                'Api-Token' => 'MakeMy@910@23',
             ])->post('https://bus.srdvtest.com/v8/rest/Block', $payload);
     
             $data = $response->json();
@@ -450,15 +450,15 @@ public function bookBus(Request $request)
         ]);
 
         $payload = array_merge([
-            'ClientId' => $this->ClientId,
-            'UserName' => $this->UserName,
-            'Password' => $this->Password,
+            'ClientId' => '180133',
+            'UserName' => 'MakeMy91',
+            'Password' => 'MakeMy@910',
         ], $request->all());
 
         try {
             $response = Http::withHeaders([
                 'Content-Type' => 'application/json',
-                'Api-Token' => $this->ApiToken,  // Use the class property
+                'Api-Token' => 'MakeMy@910@23',  // Use the class property
             ])->post('https://bus.srdvtest.com/v5/rest/Book', $payload);
 
             $data = $response->json();
@@ -576,14 +576,14 @@ public function bookBus(Request $request)
     {
         $payload = [
             'EndUser Ip' => '1.1.1.1',
-            'ClientId' => $this->ClientId,
-            'UserName' => $this->UserName,
-            'Password' => $this->Password
+            'ClientId' => '180133',
+            'UserName' => 'MakeMy91',
+            'Password' => 'MakeMy@910',
         ];
 
         $response = Http::withHeaders([
             'Content-Type' => 'application/json',
-             'Api-Token' => $this->ApiToken,  // Use the class property
+             'Api-Token' => 'MakeMy@910@23',  // Use the class property
         ])->post('https://bus.srdvtest.com/v5/rest/Balance', $payload);
 
         if ($response->successful()) {
@@ -653,9 +653,9 @@ public function balanceLog(Request $request)
     // Balance Log API request data
     $requestData = [
         'EndUserIp' => '1.1.1.1',
-        'ClientId' => $this->ClientId,
-        'UserName' => $this->UserName,
-        'Password' => $this->Password
+        'ClientId' => '180133',
+        'UserName' => 'MakeMy91',
+        'Password' => 'MakeMy@910',
     ];
 
     // Make API call

@@ -980,8 +980,30 @@ public function verifyPayment(Request $request)
                 ]);
             }
             
-            // For web requests, redirect to success page
-            return redirect()->route('payment.success', ['payment_id' => $razorpay_payment_id])
+            // Collect all booking details to pass to success page
+            $successParams = [
+                'payment_id' => $razorpay_payment_id,
+            ];
+            
+            // Add additional booking details if provided
+            if ($request->has('traceId')) {
+                $successParams['traceId'] = $request->traceId;
+            }
+            if ($request->has('hotelCode')) {
+                $successParams['hotelCode'] = $request->hotelCode;
+            }
+            if ($request->has('hotelName')) {
+                $successParams['hotelName'] = $request->hotelName;
+            }
+            if ($request->has('roomDetails')) {
+                $successParams['roomDetails'] = $request->roomDetails;
+            }
+            if ($request->has('passengerDetails')) {
+                $successParams['passengerDetails'] = $request->passengerDetails;
+            }
+            
+            // For web requests, redirect to success page with all parameters
+            return redirect()->route('payment.success', $successParams)
                 ->with('success', 'Payment processed successfully');
             
         } catch (Exception $verificationError) {
@@ -1037,8 +1059,34 @@ public function verifyPayment(Request $request)
                         ]
                     );
                     
-                    // Redirect to success page
-                    return redirect()->route('payment.success', ['payment_id' => $request->razorpay_payment_id])
+                    // Collect all booking details to pass to success page
+                    $successParams = [
+                        'payment_id' => $request->razorpay_payment_id,
+                    ];
+                    
+                    // Add additional booking details if provided
+                    if ($request->has('traceId')) {
+                        $successParams['traceId'] = $request->traceId;
+                    }
+                    if ($request->has('resultIndex')) {
+                        $successParams['resultIndex'] = $request->resultIndex;
+                    }
+
+                    if ($request->has('hotelCode')) {
+                        $successParams['hotelCode'] = $request->hotelCode;
+                    }
+                    if ($request->has('hotelName')) {
+                        $successParams['hotelName'] = $request->hotelName;
+                    }
+                    if ($request->has('roomDetails')) {
+                        $successParams['roomDetails'] = $request->roomDetails;
+                    }
+                    if ($request->has('passengerDetails')) {
+                        $successParams['passengerDetails'] = $request->passengerDetails;
+                    }
+                    
+                    // Redirect to success page with all parameters
+                    return redirect()->route('payment.success', $successParams)
                         ->with('success', 'Payment processed successfully');
                 }
             } catch (Exception $razorpayError) {
@@ -1061,7 +1109,6 @@ public function verifyPayment(Request $request)
             ->with('error', 'Payment processing error: ' . $e->getMessage());
     }
 }
-
 /**
  * Show payment success page
  */
@@ -1069,12 +1116,25 @@ public function showSuccessPage(Request $request)
 {
     $payment = null;
     $paymentId = $request->payment_id;
+    $bookingDetails = [
+        'traceId' => $request->traceId,
+        'resultIndex' => $request->resultIndex,
+        'hotelCode' => $request->hotelCode,
+        'hotelName' => $request->hotelName,
+        'roomDetails' => $request->roomDetails,
+        'passengerDetails' => $request->passengerDetails,
+        'payment_id' => $paymentId
+    ];
+    
     
     if ($paymentId) {
         $payment = RazorpayPayment::where('razorpay_payment_id', $paymentId)->first();
     }
     
-    return view('frontend.payments_success', ['payment' => $payment]);
+    return view('frontend.payments_success', [
+        'payment' => $payment,
+        'bookingDetails' => $bookingDetails
+    ]);
 }
 
 /**

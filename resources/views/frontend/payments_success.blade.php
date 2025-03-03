@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="csrf-token" content="your-csrf-token-value">
+    <meta name="csrf-token" content="{{ csrf_token() }}"> 
     <title>Payment Successful</title>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
@@ -43,6 +43,18 @@
         const roomDetailsStr = urlParams.get("roomDetails");
         const traceId = urlParams.get("traceId");
         const busParams = urlParams.get("PassengerData");
+        console.log('room details', roomDetailsStr);
+
+         // Parse room details JSON
+    
+    console.log("Raw room details string:", roomDetailsStr);
+    const roomDetails = roomDetailsStr ? JSON.parse(decodeURIComponent(roomDetailsStr)) : null;
+    console.log("Room Details:", roomDetails);
+    console.log("Room Childcount:", roomDetails.childCount);
+
+    // Parse passenger details JSON with detailed logging
+    const passengerDetailsStr = urlParams.get('passengerDetails');
+    console.log("Raw passenger details string:", passengerDetailsStr);
         
         // Process the appropriate booking type
         if (flightDetailsStr) {
@@ -239,13 +251,14 @@
                 amount: bookingData.roomDetails.OfferedPrice,
                 TraceId: bookingData.hotelDetails.traceId
             };
+            
 
             // Call Balance API
             const balanceResponse = await fetch('/balancelog', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
                 },
                 body: JSON.stringify(balancePayload),
             });
@@ -302,13 +315,13 @@
                 UserName: "MakeMy91",
                 Password: "MakeMy@910"
             };
-
+ console.log('payload data', bookingPayload);
             // Call Booking API
             const bookingResponse = await fetch('/book-room', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
                 },
                 body: JSON.stringify(bookingPayload),
             });
