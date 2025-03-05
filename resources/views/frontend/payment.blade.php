@@ -342,9 +342,9 @@ form {
 
 
 document.getElementById("payNowButton").addEventListener("click", function (event) {
-    event.preventDefault();
+event.preventDefault();
 
-    const boardingPoint = JSON.parse(sessionStorage.getItem("BoardingPoint"));
+const boardingPoint = JSON.parse(sessionStorage.getItem("BoardingPoint"));
 const droppingPoint = JSON.parse(sessionStorage.getItem("DroppingPoint"));
 
 console.log(boardingPoint); // { Id: value, Name: "value" }

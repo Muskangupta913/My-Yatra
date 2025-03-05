@@ -285,13 +285,6 @@
               </div>
               </div>
               </section>
-
- <!-- Top Attractions Section end -->
-
-
-
-
- 
 <!-- mussoorie tour packages Section  start-->
 
 <section class="bg-light">
@@ -308,7 +301,7 @@
             <p class="card-text"> Discover landmarks like Lal Tibba and Kellogg Church, showcasing colonial charm.</p>
             <p><strong>Duration:</strong> 3 Days / 2 Nights</p>
             <p><strong>Price:</strong> ₹5,000 per person</p>
-            <a href="#" class="btn btn-primary">Book Now</a>
+            <!-- <a href="#" class="btn btn-primary">Book Now</a> -->
           </div>
         </div>
       </div>
@@ -323,7 +316,7 @@
             <p class="card-text">Discover Mussoorie vibrant culture, shop in local markets, and indulge in street food.</p>
             <p><strong>Duration:</strong> 2 Days / 1 Night</p>
             <p><strong>Price:</strong> ₹5,999 per person</p>
-            <a href="#" class="btn btn-primary">Book Now</a>
+            <!-- <a href="#" class="btn btn-primary">Book Now</a> -->
           </div>
         </div>
       </div>
@@ -356,7 +349,7 @@ Find peace at serene spots like Jwala Devi Temple and Shedup Choepelling Tibetan
 Experience thrilling activities like trekking to George Everest, paragliding, and exploring the Kempty Falls.</p>
             <p><strong>Duration:</strong> 3 Days / 2 Nights</p>
             <p><strong>Price:</strong> ₹6,000 per person</p>
-            <a href="#" class="btn btn-primary">Book Now</a>
+            <!-- <a href="#" class="btn btn-primary">Book Now</a> -->
           </div>
         </div>
       </div>

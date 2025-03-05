@@ -67,10 +67,10 @@
 <section class="hero">
   <div class="container">
     <div class="row">
-      <div class="card search-engine-card py-5 px-4" style="position: relative">
+      <div class="card search-engine-card py-5 px-4" style="position: relative; margin-top: 30px;">
       <ul class="nav nav-tabs border-0 flex-wrap" 
-            style="position: absolute; top:0; left:1%; transform:translateY(-50%); width: 95%;"
-            id="myTab" role="tablist">
+      style="position: absolute; top:-25px; left:1%; width: 95%; z-index: 10;"
+      id="myTab" role="tablist">
           <!-- Modified: Reduced margin to just enough space between wrapped items -->
           <li class="nav-item mb-1 me-1" role="presentation">
             <button class="nav-link px-3 px-md-4 shadow border-0" id="flight-tab" data-bs-toggle="tab" data-bs-target="#flight"

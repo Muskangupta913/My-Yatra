@@ -324,6 +324,175 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.1.3/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/limonte-sweetalert2/11.4.8/sweetalert2.min.js"></script>
     <script>
+
+function validatePassengerForm() {
+    // Clear previous errors
+    document.querySelectorAll('.validation-error').forEach(el => el.remove());
+    
+    let isValid = true;
+    
+    // Process each passenger form
+    document.querySelectorAll("#dynamicSections .card").forEach(card => {
+        const form = card.querySelector('.card-body');
+        const passengerType = card.querySelector('.card-header h6').textContent.match(/(Adult|Child|Infant)/)?.[1] || 'Unknown';
+        
+        // Define validation rules based on passenger type
+        const validators = {
+            '[FirstName]': { required: true },
+            '[LastName]': { required: true },
+            '[DateOfBirth]': { 
+                required: true,
+                custom: (value) => {
+                    const birthDate = new Date(value);
+                    const age = calculateAge(birthDate, new Date());
+                    
+                    if (passengerType === 'Adult' && age < 12)
+                        return 'Adult must be 12 years or older';
+                    if (passengerType === 'Child' && (age < 2 || age >= 12))
+                        return 'Child must be between 2 and 11 years old';
+                    if (passengerType === 'Infant' && age >= 2)
+                        return 'Infant must be under 2 years old';
+                    return null;
+                }
+            },
+            '[ContactNo]': { 
+                required: true, 
+                pattern: /^\+?[0-9\s\-()]{8,20}$/,
+                message: 'Please enter a valid phone number'
+            },
+            '[Email]': { 
+                required: true, 
+                pattern: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+                message: 'Please enter a valid email address'
+            }
+        };
+        
+        // Add passport validators for all passenger types
+        if (['Adult', 'Child', 'Infant'].includes(passengerType)) {
+            validators['[PassportNo]'] = { 
+                required: true, 
+                pattern: /^[A-Z][0-9]{7}$/,
+                message: 'Please enter a valid Indian passport number (one letter followed by 7 digits)'
+            };
+            validators['[PassportExpiry]'] = { 
+                required: true,
+                custom: (value) => {
+                    return new Date(value) <= new Date() ? 'Passport has expired' : null;
+                }
+            };
+            validators['[PassportIssueDate]'] = { 
+                required: true,
+                custom: (value, formData) => {
+                    const expiryDate = new Date(formData.find(f => f.name.includes('[PassportExpiry]'))?.value || 0);
+                    return new Date(value) >= expiryDate ? 'Issue date cannot be after expiry date' : null;
+                }
+            };
+        }
+        
+        // Get all form fields
+        const formData = Array.from(form.querySelectorAll('input, select'))
+            .map(field => ({ field, name: field.getAttribute('name'), value: field.value.trim() }));
+        
+        // Validate each field
+        Object.entries(validators).forEach(([fieldSuffix, rules]) => {
+            const fieldData = formData.find(f => f.name && f.name.includes(fieldSuffix));
+            if (!fieldData) return;
+            
+            const { field, value } = fieldData;
+            field.classList.remove('is-invalid');
+            
+            // Required check
+            if (rules.required && !value) {
+                showError(field, `${fieldSuffix.replace(/[\[\]]/g, '')} is required`);
+                isValid = false;
+                return;
+            }
+            
+            // Pattern check
+            if (rules.pattern && value && !rules.pattern.test(value)) {
+                showError(field, rules.message);
+                isValid = false;
+                return;
+            }
+            
+            // Custom validation
+            if (rules.custom && value) {
+                const errorMessage = rules.custom(value, formData);
+                if (errorMessage) {
+                    showError(field, errorMessage);
+                    isValid = false;
+                }
+            }
+        });
+    });
+    
+    return isValid;
+}
+
+// Helper functions
+function calculateAge(birthDate, currentDate) {
+    let age = currentDate.getFullYear() - birthDate.getFullYear();
+    const monthDiff = currentDate.getMonth() - birthDate.getMonth();
+    
+    if (monthDiff < 0 || (monthDiff === 0 && currentDate.getDate() < birthDate.getDate())) {
+        age--;
+    }
+    
+    return age;
+}
+
+function showError(element, message) {
+    // Remove existing error
+    const existingError = element.nextElementSibling;
+    if (existingError && existingError.classList.contains('validation-error')) {
+        existingError.remove();
+    }
+    
+    // Create and insert error message
+    const errorDiv = document.createElement('div');
+    errorDiv.className = 'validation-error text-danger small mt-1';
+    errorDiv.textContent = message;
+    element.parentNode.insertBefore(errorDiv, element.nextSibling);
+    
+    // Highlight input
+    element.classList.add('is-invalid');
+}
+
+function setupInputListeners() {
+    document.querySelectorAll('#dynamicSections input, #dynamicSections select').forEach(element => {
+        // Use 'input' for text fields and 'change' for selects/dates
+        const eventType = element.tagName === 'SELECT' || element.type === 'date' ? 'change' : 'input';
+        element.addEventListener(eventType, () => validateSingleField(element));
+    });
+}
+
+function validateSingleField(field) {
+    // Get field name and value
+    const name = field.getAttribute('name');
+    const value = field.value.trim();
+    
+    // Clear previous error
+    const nextElement = field.nextElementSibling;
+    if (nextElement && nextElement.classList.contains('validation-error')) {
+        nextElement.remove();
+    }
+    
+    field.classList.remove('is-invalid');
+    
+    // Skip if empty (full form validation will catch required fields)
+    if (!value) return;
+    
+    // Validate based on field type
+    if (name.includes('[Email]') && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
+        showError(field, 'Please enter a valid email address');
+    } else if (name.includes('[ContactNo]') && !/^\+?[0-9\s\-()]{8,20}$/.test(value)) {
+        showError(field, 'Please enter a valid phone number');
+    } else if (name.includes('[PassportNo]') && !/^[A-Z][0-9]{7}$/.test(value)) {
+        showError(field, 'Please enter a valid Indian passport number (one letter followed by 7 digits)');
+    } else if (name.includes('[PassportExpiry]') && new Date(value) <= new Date()) {
+        showError(field, 'Passport has expired');
+    }
+}
           document.addEventListener('DOMContentLoaded', function() {
             const urlParams = new URLSearchParams(window.location.search);
     const traceId = urlParams.get('traceId');
@@ -559,6 +728,7 @@ returnFlights.forEach(returnFlight => {
         `;
         dynamicSections.insertAdjacentHTML('beforeend', passengerForm);
     }
+    setupInputListeners();
 }
 // Generate Passenger Forms with automatic PassengerType
 createPassengerForm("Adult", adultCount, 1);
@@ -1904,6 +2074,16 @@ function checkFlightBalance() {
 
 document.getElementById('submitButton').addEventListener('click', async function(event) {
     event.preventDefault();
+
+     // Validate the form first
+     if (!validatePassengerForm()) {
+        // Scroll to the first error
+        const firstError = document.querySelector('.validation-error');
+        if (firstError) {
+            firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+        return; // Stop form submission
+    }
     
     try {
         await checkFlightBalance();
