@@ -9,6 +9,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Booking Details</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -382,7 +383,7 @@
     </div>
 </div>
 
-
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
          // Parse URL parameters
@@ -586,51 +587,186 @@ document.getElementById('seatDetails').innerHTML = seatDetailsHTML;
         </div>
     `;
 
-// Set the href for Pay Now button with all necessary parameters
-// Set the href for Pay Now button with all necessary parameters
-document.getElementById('payNowButton').href = `/payment?TraceId=${traceId}&amount=${invoiceAmount}&PassengerData=${encodeURIComponent(encodedpassengers)}&ResultIndex=${resultIndex}&BoardingPointName=${encodeURIComponent(boardingPoint)}&DroppingPointName=${encodeURIComponent(droppingPoint)}`;
+// Replace the existing click event handler for the payNowButton with this code
+document.getElementById('payNowButton').addEventListener('click', function(e) {
+        e.preventDefault();
+        const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+        
+        // Extract email and phone from first passenger
+        const email = passengers[0].Email || '';
+        const phone = passengers[0].Mobile || '';
 
-// Handle payment click event
-document.getElementById('payNowButton').addEventListener('click', function (e) {
-            e.preventDefault();
+        const payload = {
+            TraceId: traceId,
+            Amount: invoiceAmount,
+            PassengerData: passengers,
+            BoardingPointName: boardingPoint.Name,
+            DroppingPointName: droppingPoint.Name,
+            SeatNumber: passengers[0].SeatDetails.SeatNumber || '',
+             ResultIndex: resultIndex
+        };
 
-            const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
-            
-            const payload = {
-                TraceId: traceId,
-                Amount: invoiceAmount,
-                PassengerData: passengers,
-                BoardingPointName: boardingPoint.Name,
-                DroppingPointName: droppingPoint.Name,
-                SeatNumber: passengers[0].SeatDetails.SeatName
-            };
+        console.log('Payload for balance API:', payload);
 
-            // Add console logs for debugging
-            console.log('Payload:', payload);
+        // Step 1: Call the balance API first
+        fetch('/busbalance', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': csrfToken
+            },
+            body: JSON.stringify(payload)
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Balance check failed');
+            }
+            return response.json();
+        })
+        .then(balanceData => {
+            if (balanceData.success) {
+                console.log('Balance check successful');
+                
+                // Step 2: Now proceed with payment initialization
+                return fetch('/initialize-payment', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': csrfToken
+                    },
+                    body: JSON.stringify(payload)
+                });
+            } else {
+                throw new Error(balanceData.errorMessage || 'Balance check failed');
+            }
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Payment initialization failed');
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.success && data.navigateToPayment) {
+                // Initialize Razorpay
+                const options = {
+                    key: data.key_id,
+                    amount: data.amount,
+                    currency: data.currency,
+                    name: "MAKE MY BHARAT YATRA",
+                    description: "Payment for bus tickets",
+                    image: "https://your-logo-url.com/logo.png",
+                    order_id: data.order_id,
+                    
+                    handler: function(response) {
+                        console.log('Payment Response:', response);
+                        // Send payment verification to server
+                        const form = document.createElement('form');
+                        form.method = 'POST';
+                        form.action = '/payment-callback';
 
-            fetch('/busbalance', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': csrfToken
-                },
-                body: JSON.stringify(payload)
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success && data.navigateToPayment) {
-                    // Navigate to payment page with all necessary parameters
-                    window.location.href = `${data.url}&PassengerData=${encodedpassengers}&ResultIndex=${resultIndex}&BoardingPointName=${encodeURIComponent(boardingPoint)}&DroppingPointName=${encodeURIComponent(droppingPoint)}`;
-                } else if (!data.success) {
-                    alert(data.errorMessage || 'Something went wrong. Please try again.');
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                alert('Error: ' + error.message);
-            });
+                        const csrfField = document.createElement('input');
+                        csrfField.type = 'hidden';
+                        csrfField.name = '_token';
+                        csrfField.value = csrfToken;
+                        form.appendChild(csrfField);
+
+                        // Add payment response fields
+                        const fields = {
+                            razorpay_payment_id: response.razorpay_payment_id,
+                            razorpay_order_id: response.razorpay_order_id,
+                            razorpay_signature: response.razorpay_signature,
+                            
+                            trace_id: traceId,
+                            amount: invoiceAmount,
+                            passenger_data: passengers,
+                            result_index: resultIndex,
+                            boarding_point_name: encodeURIComponent(JSON.stringify(boardingPoint)),
+                            dropping_point_name: encodeURIComponent(JSON.stringify(droppingPoint))
+                        };
+                            
+                        for (const [name, value] of Object.entries(fields)) {
+                            const field = document.createElement('input');
+                            field.type = 'hidden';
+                            field.name = name;
+                            field.value = value;
+                            form.appendChild(field);
+                        }
+                        
+                        document.body.appendChild(form);
+                        form.submit();
+                    },
+                    prefill: {
+                        name: passengers[0].FirstName || '',
+                        email: email,
+                        contact: phone  // Razorpay uses 'contact' for phone number
+                    },
+                    theme: {
+                        color: "#3399cc"
+                    },
+                    modal: {
+                        ondismiss: function() {
+                            console.log('Payment cancelled');
+                        }
+                    }
+                };      
+                
+                const rzp = new Razorpay(options);
+                rzp.open();
+            } else {
+                alert(data.errorMessage || 'Something went wrong. Please try again.');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error: ' + error.message);
         });
     });
+});
+// document.getElementById('payNowButton').href = `/payment?TraceId=${traceId}&amount=${invoiceAmount}&PassengerData=${encodeURIComponent(encodedpassengers)}&ResultIndex=${resultIndex}&BoardingPointName=${encodeURIComponent(boardingPoint)}&DroppingPointName=${encodeURIComponent(droppingPoint)}`;
+
+// Handle payment click event
+// document.getElementById('payNowButton').addEventListener('click', function (e) {
+//             e.preventDefault();
+
+//             const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+            
+//             const payload = {
+//                 TraceId: traceId,
+//                 Amount: invoiceAmount,
+//                 PassengerData: passengers,
+//                 BoardingPointName: boardingPoint.Name,
+//                 DroppingPointName: droppingPoint.Name,
+//                 SeatNumber: passengers[0].SeatDetails.SeatName
+//             };
+
+//             // Add console logs for debugging
+//             console.log('Payload:', payload);
+
+//             fetch('/busbalance', {
+//                 method: 'POST',
+//                 headers: {
+//                     'Content-Type': 'application/json',
+//                     'X-CSRF-TOKEN': csrfToken
+//                 },
+//                 body: JSON.stringify(payload)
+//             })
+//             .then(response => response.json())
+//             .then(data => {
+//                 if (data.success && data.navigateToPayment) {
+//                     // Navigate to payment page with all necessary parameters
+//                     // window.location.href = `${data.url}&PassengerData=${encodedpassengers}&ResultIndex=${resultIndex}&BoardingPointName=${encodeURIComponent(boardingPoint)}&DroppingPointName=${encodeURIComponent(droppingPoint)}`;
+//                 } else if (!data.success) {
+//                     alert(data.errorMessage || 'Something went wrong. Please try again.');
+//                 }
+//             })
+//             .catch(error => {
+//                 console.error('Error:', error);
+//                 alert('Error: ' + error.message);
+//             });
+//         });
+//     });
+// });
 </script>
 
 @endsection

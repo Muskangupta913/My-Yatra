@@ -840,7 +840,8 @@ function createSubmitButton() {
 
         })
     })
-    .then(response => response.json())
+    .t 
+    hen(response => response.json())
     .then(data => {
         if (data.success) {
             const options = {

@@ -8,6 +8,10 @@ use Illuminate\Support\Facades\Http;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Carbon\Carbon;
+use Razorpay\Api\Api;
+use App\Models\BusPayment;
+
+use Exception;
 
 class BusController extends Controller
 {
@@ -459,7 +463,7 @@ public function bookBus(Request $request)
             $response = Http::withHeaders([
                 'Content-Type' => 'application/json',
                 'Api-Token' => 'MakeMy@910@23',  // Use the class property
-            ])->post('https://bus.srdvtest.com/v5/rest/Book', $payload);
+            ])->post('https://bus.srdvtest.com/v8/rest/Book', $payload);
 
             $data = $response->json();
             Log::info('Book API Response:', ['response' => $data]);
@@ -720,5 +724,220 @@ public function balanceLog(Request $request)
 }
 
 
+//PAYMENT REALTED CONTROLLER 
+
+public function initializePayment(Request $request)
+{
+    // Validate request
+    $validatedData = $request->validate([
+        'TraceId' => 'required|string',
+        'Amount' => 'required|numeric',
+        'PassengerData' => 'required',
+        'BoardingPointName' => 'required|string',
+        'DroppingPointName' => 'required|string',
+        'SeatNumber' => 'required|string',
+    ]);
+    
+    try {
+        // Initialize Razorpay API
+        $api = new Api('rzp_test_cvVugPSRGGLWtS', 'xHoRXawt9gYD7vitghKq1l5c');
+        
+        // Convert amount to paise (Razorpay uses paise)
+        $amountInPaise = $validatedData['Amount'] * 100;
+        
+        // Create order
+        $order = $api->order->create([
+            'receipt' => 'BUS_' . time(),
+            'amount' => $amountInPaise,
+            'currency' => 'INR',
+            'payment_capture' => 1 // Auto capture
+        ]);
+        
+        // Store payment details in database
+        $payment = BusPayment::create([
+            'order_id' => $order->id,
+            'payment_id' =>  'pending_' . uniqid(), // Will be updated after payment
+            'trace_id' => $validatedData['TraceId'],
+            'amount' => $validatedData['Amount'],
+            'passenger_data' => $validatedData['PassengerData'],
+            'boarding_point' => $validatedData['BoardingPointName'],
+            'dropping_point' => $validatedData['DroppingPointName'],
+            'seat_number' => $validatedData['SeatNumber'],
+            'status' => 'pending',
+            'payment_response' => null
+        ]);
+        
+        // Return success response with order details
+        return response()->json([
+            'success' => true,
+            'navigateToPayment' => true,
+           'key_id' => env('rzp_test_cvVugPSRGGLWtS'),
+            'order_id' => $order->id,
+            'amount' => $amountInPaise,
+            'currency' => 'INR'
+        ]);
+    } catch (\Exception $e) {
+        return response()->json([
+            'success' => false,
+            'errorMessage' => $e->getMessage()
+        ], 500);
+    }
+}
+
+/**
+ * Handle payment callback
+ */
+public function paymentCallback(Request $request)
+{
+    \Log::info('Payment Callback Received', $request->all());
+
+    try {
+        // Validate key incoming parameters
+        $validatedData = $request->validate([
+            'razorpay_payment_id' => 'required|string',
+            'razorpay_order_id' => 'required|string',
+            'razorpay_signature' => 'required|string',
+            'trace_id' => 'sometimes|nullable|string',
+            'amount' => 'sometimes|nullable|numeric',
+            'result_index' => 'sometimes|nullable',
+        ]);
+
+        // Initialize Razorpay API
+        $api = new Api('rzp_test_cvVugPSRGGLWtS', 'xHoRXawt9gYD7vitghKq1l5c');
+        
+        // Verify payment signature
+        $api->utility->verifyPaymentSignature([
+            'razorpay_order_id' => $validatedData['razorpay_order_id'],
+            'razorpay_payment_id' => $validatedData['razorpay_payment_id'],
+            'razorpay_signature' => $validatedData['razorpay_signature']
+        ]);
+        
+        // Find payment record
+        $payment = BusPayment::where('order_id', $validatedData['razorpay_order_id'])->first();
+        
+        if (!$payment) {
+            \Log::error('Payment record not found', [
+                'order_id' => $validatedData['razorpay_order_id']
+            ]);
+            return redirect()->route('booking.failed')
+                ->with('error', 'Payment record could not be located');
+        }
+
+        // Update payment record with comprehensive details
+        $payment->update([
+            'payment_id' => $validatedData['razorpay_payment_id'],
+            'status' => 'completed',
+            'payment_response' => $request->all(),
+            'trace_id' => $request->input('trace_id'),
+            'result_index' => $request->input('result_index')
+        ]);
+
+        // Prepare success parameters
+        $successParams = [
+            'payment_id' => $validatedData['razorpay_payment_id'],
+            'trace_id' => $request->input('trace_id'),
+            'result_index' => $request->input('result_index'),
+            'amount' => $payment->amount, // Add the payment amount
+    'passenger_data' => $payment->passenger_data, // Add passenger details
+    'boarding_point' => $payment->boarding_point, // Optional: include boarding point
+    'dropping_point' => $payment->dropping_point // Optional: include dropping point
+        ];
+
+        // Log successful payment
+        \Log::info('Payment Successfully Processed', $successParams);
+
+        // Redirect to success page with all necessary parameters
+        return redirect()->route('payments.success', $successParams)
+            ->with('success', 'Payment processed successfully');
+
+    } catch (\Exception $e) {
+        // Comprehensive error logging
+        \Log::error('Payment Verification Failed', [
+            'message' => $e->getMessage(),
+            'trace' => $e->getTraceAsString()
+        ]);
+
+        return redirect()->route('booking.failed')
+            ->with('error', 'Payment verification failed: ' . $e->getMessage());
+    }
+}
+
+/**
+ * Show payment success page
+ * 
+ * 
+ */
+
+ public function success(Request $request)
+{
+    \Log::info('Success Page Access', [
+        'payment_id' => $request->payment_id,
+        'trace_id' => $request->trace_id,
+        'result_index' => $request->result_index,
+        'full_request' => $request->all()
+    ]);
+    
+    try {
+        // Find payment record with multiple lookup methods
+        $payment = BusPayment::where('payment_id', $request->payment_id)
+            ->orWhere('order_id', $request->payment_id)
+            ->first();
+        
+        if (!$payment) {
+            \Log::error('No payment found', [
+                'payment_id' => $request->payment_id
+            ]);
+            return redirect()->route('home')
+                ->with('error', 'Invalid payment details');
+        }
+
+        // Ensure passenger data is properly decoded
+        $passengerData = is_string($payment->passenger_data) 
+            ? json_decode($payment->passenger_data, true) 
+            : $payment->passenger_data;
+
+        // Prepare comprehensive payment details
+        $paymentDetails = [
+            'payment_id' => $payment->payment_id,
+            'order_id' => $payment->order_id,
+            'amount' => $payment->amount,
+            'status' => $payment->status,
+            'trace_id' => $payment->trace_id,
+            'result_index' => $request->result_index,
+            'boarding_point' => $payment->boarding_point,
+            'dropping_point' => $payment->dropping_point,
+            'seat_number' => $payment->seat_number,
+            'passengers' => $passengerData
+        ];
+
+        // Log payment details for verification
+        \Log::info('Payment Details for Success Page', $paymentDetails);
+
+        // Return view with comprehensive payment information
+        return view('frontend.payment_success', [
+            'payment' => $payment,
+            'paymentDetails' => $paymentDetails
+        ]);
+
+    } catch (\Exception $e) {
+        \Log::error('Success Page Error', [
+            'message' => $e->getMessage(),
+            'trace' => $e->getTraceAsString()
+        ]);
+
+        return redirect()->route('home')
+            ->with('error', 'An unexpected error occurred');
+    }
+}
+
+/**
+ * Show payment failed page
+ */
+public function failed()
+{
+    return view('frontend.buspayment_failed');
+}
+
 
 }
+
