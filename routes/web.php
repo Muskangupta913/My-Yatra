@@ -208,7 +208,8 @@ Route::post('/job-apply', [HomeController::class, 'jobApply'])->name('jobApply')
 
 Route::get('/payment',[HomeController::class, 'payment'])->name('payment');
 Route::get('/blog',[HomeController::class, 'ourblog'])->name('blog');
-
+Route::get('/destination', [HomeController::class, 'destination'])->name('destination');
+Route::get('/travel-tips', [HomeController::class, 'Traveltips'])->name('Traveltips');
 
 
 

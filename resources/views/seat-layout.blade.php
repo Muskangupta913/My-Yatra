@@ -376,6 +376,7 @@
 #continueButton:hover {
   background-color: #218838; /* Darker green on hover */
 }
+
 </style>
 @endsection
 
@@ -435,7 +436,6 @@
 <!-- Continue Button Section -->
 <div class="mt-4 text-center" id="continueButtonContainer">
     <button class="btn btn-success d-none" id="continueButton">Continue</button>
-    <a href="#" class="btn btn-success mt-2 d-none" id="review">Review Details</a>
 </div>
         </div>
       </div>
@@ -882,7 +882,7 @@ function generatePassengerForm(seatNumber, index) {
             <h6 class="mb-3">Passenger Details for Seat ${seatNumber}</h6>
             <div class="form-group mb-2">
                 <label>Title</label>
-                <select class="form-control" name="passenger[${index}][Title]" required>
+                <select class="form-control" name="passenger[${index}][Title]" required >
                     <option value="">Select</option>
                     <option value="Mr">Mr</option>
                     <option value="Mrs">Mrs</option>
@@ -1348,15 +1348,15 @@ function blockMultipleSeats(passengers) {
 
             const bookingPageUrl = `/booking?${urlParameters.toString()}`;
 
-            document.getElementById('review').setAttribute('href', bookingPageUrl);
-            document.getElementById('continueButton').classList.add('d-none');
-            document.getElementById('review').classList.remove('d-none');
-
+            document.getElementById('continueButton').setAttribute('href', bookingPageUrl);
             toastr.success('Seats successfully blocked!', 'Success');
-        } else {
-            throw new Error(data.message || 'Failed to block seat');
-        }
-    })
+            setTimeout(() => {
+            window.location.href = bookingPageUrl;
+        }, 1500);
+    } else {
+        throw new Error(data.message || 'Failed to block seat');
+    }
+})
     .catch(error => {
         hideLoadingSpinner();
         console.error('Error:', error);

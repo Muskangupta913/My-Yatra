@@ -21,6 +21,7 @@ use Illuminate\Support\Facades\Log;
 
 class HomeController extends Controller
 {
+    
     public function index(){
 
          $destinations = DB::table('destination')
@@ -56,7 +57,6 @@ class HomeController extends Controller
     // Any logic for fetching data for Kashmir packages can go here
     return view('Kashmir'); // This loads the Kashmir.blade.php file
 }
-
     public function packages(Request $request, $slug){
 
         $destinations = Destination::where('slug', $slug)->first();
@@ -798,5 +798,13 @@ public function store(Request $request)
         ], 500);
     }
 }
-// hotels controllerr
+
+public function destination()
+{
+    return view('frontend.destination');
+}
+public function Traveltips()
+{
+    return view('frontend.Traveltips');
+}
 }

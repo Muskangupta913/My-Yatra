@@ -1,6 +1,3 @@
-
- 
-
 @extends('frontend.layouts.master')
 
 @section('content')
@@ -330,19 +327,20 @@
 <section id="featured-posts" class="featured-posts">
     <div class="container-fluid blog-second">
         <div class="row">
-            <div class="col-md-4 post-card">
-                <div class="card">
-                    <img src="{{ asset('images/blog-s1-img.jpg') }}" class="card-img-top" alt="Taj Mahal">
-                    <div class="card-body">
-                        <h5 class="card-title">6 Must-Visit Destinations in India</h5>
-                        <p class="card-text">
-                            Explore India's top ten must-see locations that offer life-changing experiences, 
-                            from the magnificent Taj Mahal to the energetic streets of Jaipur.
-                        </p>
-                        <!-- <a href="{{ url('link-to-full-post.html') }}" class="btn btn-primary">Read More</a> -->
-                    </div>
-                </div>
+        <div class="col-md-4 post-card">
+    <a href="{{ url('destination') }}" class="text-decoration-none">
+        <div class="card">
+            <img src="{{ asset('images/blog-s1-img.jpg') }}" class="card-img-top" alt="Taj Mahal">
+            <div class="card-body">
+                <h5 class="card-title">6 Must-Visit Destinations in India</h5>
+                <p class="card-text">
+                Discover the timeless beauty of the Taj Mahal, a UNESCO World Heritage Site and one of the world's most iconic monuments. 
+                Built by Mughal Emperor Shah Jahan in memory of his wife Mumtaz Mahal, this breathtaking masterpiece symbolizes love and architectural brilliance.
+                </p>
             </div>
+        </div>
+    </a>
+</div>
 
             <div class="col-md-4 post-card">
                 <div class="card">

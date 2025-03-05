@@ -121,7 +121,7 @@
         <div class="card shadow rounded-0 card-body border-0">
             <h4 class="mb-3">Upcoming Services:</h4>
             <ul>
-                <li class="mb-3"> <span class="fw-bold">Flight Booking:</span> We are in the process of expanding our services to include domestic and international flight bookings, making your travel planning even more convenient.</li>
+                <li class="mb-3"> <span class="fw-bold">Train Booking:</span> We are in the process of expanding our services to include domestic and international flight bookings, making your travel planning even more convenient.</li>
 
                 <li class="mb-3"> <span class="fw-bold"> Hotel Booking:</span> Soon, we will be offering hotel booking services, ensuring that your accommodation needs are taken care of effortlessly.</li>
 
