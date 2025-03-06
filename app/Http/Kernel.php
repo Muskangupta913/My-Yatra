@@ -69,4 +69,6 @@ class Kernel extends HttpKernel
         'onlyauthenticated' => \App\Http\Middleware\OnlyAuthenticated::class,
         
     ];
+    // In app/Http/Kernel.php
+
 }

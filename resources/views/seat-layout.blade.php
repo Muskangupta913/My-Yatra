@@ -1299,24 +1299,23 @@ function blockMultipleSeats(passengers) {
                         SeatNumber: selectedSeat.SeatNo || selectedSeat.SeatName,
                         SeatType: selectedSeat.SeatType === 2 ? 'Sleeper' : 'Seater',
                         Deck: selectedSeat.IsUpper ? 'Upper' : 'Lower',
-                        Price: selectedSeat.Price?.PublishedPriceRoundedOff || 
-                              selectedSeat.Price?.FareRoundedOff || 
-                              selectedSeat.FareRoundedOff || 0,
+                        Price: selectedSeat.Price?.OfferedPrice,     
                         SeatIndex: selectedSeat.SeatIndex
                     }
                 };
             });
+            sessionStorage.setItem("passengerDetails", JSON.stringify(passengerDetails));
 
 
             sessionStorage.setItem("BoardingPoint", JSON.stringify({
-    Id: selectedBoardingPointId,
-    Name: selectedBoardingPointName
-}));
+            Id: selectedBoardingPointId,
+            Name: selectedBoardingPointName
+           }));
 
-sessionStorage.setItem("DroppingPoint", JSON.stringify({
-    Id: selectedDroppingPointId,
-    Name: selectedDroppingPointName
-}));
+           sessionStorage.setItem("DroppingPoint", JSON.stringify({
+           Id: selectedDroppingPointId,
+           Name: selectedDroppingPointName
+          }));
 
 
 
@@ -1344,6 +1343,8 @@ sessionStorage.setItem("DroppingPoint", JSON.stringify({
                 Price: JSON.stringify(data.data.Price),
                 CancellationPolicy: JSON.stringify(data.data.CancellationPolicy)
             });
+
+            console.log('all blocked details', urlParameters);
 
             const bookingPageUrl = `/booking?${urlParameters.toString()}`;
 

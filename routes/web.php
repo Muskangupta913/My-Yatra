@@ -5,6 +5,7 @@ use App\Http\Controllers\SalesController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\HotelController;
 use App\Http\Controllers\BusController;
+use App\Http\Controllers\TravelController;
 use App\Http\Controllers\CarController;
 use App\Http\Controllers\FlightController;
 use App\Http\Controllers\CityController;
@@ -376,7 +377,21 @@ Route::get('/balance', [BusController::class, 'fetchBalance']);
 Route::post('/busbalance', [BusController::class, 'balance']);
 Route::get('/balance-log', [BusController::class, 'balanceLog'])->name('balance.log');
 Route::get('/autocomplete', [CityController::class, 'autocomplete'])->name('autocomplete.cities');
+Route::post('/initialize-payment', [BusController::class, 'initializePayment']);
+Route::post('/payment-callback', [BusController::class, 'paymentCallback'])->name('payment.callback');
+Route::get('/payments/success', [BusController::class, 'success'])->name('payments.success');
+Route::get('/booking/failed', [BusController::class, 'failed'])->name('booking.failed');
+Route::get('/test-success', function() {
+  return view('frontend.buspayment_success');
+});
 
+Route::get('/debug-success', function(Request $request) {
+  dd([
+      'full_request' => $request->all(),
+      'payment_id' => $request->input('payment_id'),
+      'query_params' => $request->query()
+  ]);
+});
 
 
 
@@ -403,7 +418,7 @@ Route::get('/autocomplete-hotel', [CityController::class, 'hotelautocomplete'])-
 // Route::get('/payment', [HotelController::class, 'showPaymentPage'])->name('payment.form');
 Route::post('/payment/create', [HotelController::class, 'createOrder'])->name('payment.create');
 Route::post('/payment/verify', [HotelController::class, 'verifyPayment'])->name('payment.verify');
-Route::get('/payment/success', [HotelController::class, 'showSuccessPage'])->name('payment.success');
+// Route::get('/payment/success', [HotelController::class, 'showSuccessPage'])->name('payment.success');
 Route::get('/payment/failed', [HotelController::class, 'showFailedPage'])->name('payment.failed');
 
 // API Routes (you might want to move these to api.php)
