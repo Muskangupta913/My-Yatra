@@ -343,6 +343,7 @@
 </div>
 
             <div class="col-md-4 post-card">
+            <a href="{{ url('travel-tips') }}" class="text-decoration-none">
                 <div class="card">
                     <img src="{{ asset('images/blog-s3-img.jfif') }}" class="card-img-top" alt="Travel Tips">
                     <div class="card-body">
@@ -354,6 +355,7 @@
                         <!-- <a href="{{ url('link-to-full-post.html') }}" class="btn btn-primary">Read More</a> -->
                     </div>
                 </div>
+                </a>
             </div>
 
             <div class="col-md-4 post-card">

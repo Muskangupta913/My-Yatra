@@ -1,6 +1,8 @@
 @extends('frontend.layouts.master')
+@section('styles')
 <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
 <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+@endsection
 @section('content')
 <div class="bg-gradient-to-b from-blue-100 to-white min-h-screen">
     <div class="container mx-auto px-4 py-12">
@@ -194,9 +196,9 @@
             <p class="text-xl text-gray-700 mb-6">
                 Ready to embark on an unforgettable journey through India?
             </p>
-            <a href="#" class="bg-blue-700 text-white px-8 py-3 rounded-full text-lg font-semibold hover:bg-blue-800 transition shadow-lg">
+            <!-- <a href="#" class="bg-blue-700 text-white px-8 py-3 rounded-full text-lg font-semibold hover:bg-blue-800 transition shadow-lg">
                 Plan Your Trip
-            </a>
+            </a> -->
         </div>
     </div>
 </div>

@@ -807,4 +807,8 @@ public function Traveltips()
 {
     return view('frontend.Traveltips');
 }
+public function Wildlife()
+{
+    return view('frontend.Wildlife');
+}
 }
