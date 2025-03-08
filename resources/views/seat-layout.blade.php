@@ -459,7 +459,7 @@
         <div id="passengerFormContainer">
             <!-- Dynamic passenger forms will be inserted here -->
         </div>
-        <button type="submit" id="blockSeatButton" class="btn btn-success w-100 mt-4">Block Selected Seats</button>
+        <button type="submit" id="blockSeatButton" class="btn btn-success w-100 mt-4">Submit</button>
     </form>
       </div>
     </div>

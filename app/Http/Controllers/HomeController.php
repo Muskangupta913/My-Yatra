@@ -809,6 +809,6 @@ public function Traveltips()
 }
 public function Wildlife()
 {
-    return view('frontend.Wildlife');
+    return view('frontend.wildlife');
 }
 }

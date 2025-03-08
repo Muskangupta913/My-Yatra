@@ -7,19 +7,70 @@
     <title>Payment Successful</title>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        /* Processing overlay styles */
+    .processing-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.7); /* Darker background for better hiding */
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 9999; /* High z-index to ensure it's on top */
+        backdrop-filter: blur(3px); /* Adding blur effect for better hiding */
+    }
+    
+    .processing-content {
+        background-color: white;
+        padding: 30px;
+        border-radius: 10px;
+        text-align: center;
+        max-width: 500px;
+        width: 90%;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    }
+    
+    .spinner {
+        margin: 20px auto;
+        width: 50px;
+        height: 50px;
+        border: 5px solid #f3f3f3;
+        border-top: 5px solid #3498db;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+    }
+    
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+    </style>
 </head>
 <body>
+<!-- ADDED: Processing overlay -->
+<div id="processingOverlay" class="processing-overlay">
+    <div class="processing-content">
+        <h3>Please wait...</h3>
+        <div class="spinner"></div>
+        <p id="processingMessage">Please wait while we process your booking...
 
+Don't close this window</p>
+        <p id="processingStatus">Processing...</p>
+    </div>
+</div>
 <div class="container">
     <div class="row justify-content-center">
         <div class="col-md-8">
             <div class="card mt-5">
-                <div class="card-header bg-success text-white">Payment Successful</div>
+                <div class="card-header bg-success text-white">Booking Successful</div>
 
                 <div class="card-body text-center">
                     <i class="fa fa-check-circle fa-5x text-success mb-3"></i>
                     <h2>Thank You!</h2>
-                    <p class="lead">Your payment has been processed successfully.</p>
+                    <p class="lead">Your booking has been confirmed.</p>
                     
                     <div class="mt-4">
                         <a href="index.html" class="btn btn-primary">Back to Home</a>
@@ -34,6 +85,9 @@
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
 
 <script>
+     function hideProcessingOverlay() {
+    document.getElementById('processingOverlay').style.display = 'none';
+}
     document.addEventListener('DOMContentLoaded', () => {
         console.log("DOM fully loaded - Starting processing...");
         
@@ -88,109 +142,6 @@
             console.log("No specific booking details found - displaying payment confirmation only");
         }
     });
-
-    // Function to process bus booking
-    function processBusBooking() {
-        const urlParams = new URLSearchParams(window.location.search);
-        const traceId = urlParams.get('TraceId');
-        const amount = urlParams.get("amount");
-        const passengerDataStr = urlParams.get('PassengerData');
-        const resultIndex = urlParams.get('ResultIndex');
-        
-        if (!traceId || !amount || !passengerDataStr) {
-            console.error("Missing required bus booking parameters");
-            return;
-        }
-
-        // Parse boarding and dropping points from sessionStorage
-        let boardingPoint, droppingPoint, boardingPointId, droppingPointId;
-        
-        try {
-            boardingPoint = JSON.parse(sessionStorage.getItem("BoardingPoint"));
-            droppingPoint = JSON.parse(sessionStorage.getItem("DroppingPoint"));
-            boardingPointId = boardingPoint ? boardingPoint.Id : null;
-            droppingPointId = droppingPoint ? droppingPoint.Id : null;
-        } catch (e) {
-            console.error("Error parsing boarding/dropping points:", e);
-        }
-
-        // Parse the passenger data
-        let passengerData;
-        try {
-            passengerData = JSON.parse(decodeURIComponent(passengerDataStr));
-        } catch (e) {
-            console.error("Error parsing passenger data:", e);
-            return;
-        }
-
-        // First call the balance log API
-        fetch(`/balance-log?TraceId=${traceId}&amount=${amount}`, {
-            method: "GET",
-            headers: {
-                "Content-Type": "application/json",
-            },
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                const balanceLog = data.balanceLogs[0];
-                
-                if (balanceLog) {
-                    // After successful balance log, prepare booking request
-                    const bookingData = {
-                        ResultIndex: resultIndex,
-                        TraceId: traceId,
-                        BoardingPointId: boardingPointId,
-                        DroppingPointId: droppingPointId,
-                        RefID: "1",
-                        Passenger: [{
-                            LeadPassenger: true,
-                            PassengerId: 0,
-                            Title: passengerData.Title,
-                            FirstName: passengerData.FirstName,
-                            LastName: passengerData.LastName,
-                            Email: passengerData.Email,
-                            Phoneno: passengerData.Phoneno,
-                            Gender: passengerData.Gender,
-                            IdType: null,
-                            IdNumber: null,
-                            Address: passengerData.Address,
-                            Age: passengerData.Age,
-                            Seat: passengerData.SeatDetails || passengerData.Seat
-                        }]
-                    };
-
-                    // Get CSRF token
-                    const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
-
-                    // Make the booking API call
-                    return fetch('/bookbus', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'X-CSRF-TOKEN': csrfToken
-                        },
-                        body: JSON.stringify(bookingData)
-                    });
-                } else {
-                    throw new Error("No balance log found");
-                }
-            } else {
-                throw new Error(data.errorMessage || "Balance log failed");
-            }
-        })
-        .then(response => response.json())
-        .then(bookingResult => {
-            if (bookingResult.status === 'success') {
-                console.log(`Bus Booking Successful - Ticket Number: ${bookingResult.data.TicketNo}`);
-            } else {
-                console.error(`Bus Booking Failed: ${bookingResult.message}`);
-            }
-        })
-        .catch(error => {
-            console.error("Bus booking error:", error);
-        });
-    }
 
     // HOTEL RELATED FUNCTIONS
     function getUrlParameters() {
@@ -329,319 +280,17 @@
             const bookingDataResponse = await bookingResponse.json();
             
             if (!bookingDataResponse.success) {
-                throw new Error(bookingDataResponse.errorMessage || 'Booking failed after successful payment.');
+                const errorMessage = bookingDataResponse.errorMessage || 'Booking failed after successful payment.';
+            window.location.href = `/payments/failed?message=${encodeURIComponent(errorMessage)}`;
+            return;
             }
-
             console.log("Hotel booking completed successfully:", bookingDataResponse.bookingDetails);
+            hideProcessingOverlay();
         } catch (error) {
             console.error('Error during hotel booking:', error);
+            window.location.href = `/payments/failed?message=${encodeURIComponent(error.message || "An unexpected error occurred")}`;
         }
     }
-
-    // FLIGHT RELATED FUNCTIONS
-    function getCookie(name) {
-        let nameEQ = name + "=";
-        let ca = document.cookie.split(';');
-        for(let i = 0; i < ca.length; i++) {
-            let c = ca[i].trim();
-            if (c.indexOf(nameEQ) === 0) {
-                return c.substring(nameEQ.length);
-            }
-        }
-        return null;
-    }
-
-    function getBookingDetailsFromURL() {
-        const urlParams = new URLSearchParams(window.location.search);
-        const encodedDetails = urlParams.get('details');
-
-        if (!encodedDetails) {
-            console.error('No booking details found in URL');
-            return null;
-        }
-
-        try {
-            const flightDetails = JSON.parse(decodeURIComponent(encodedDetails));
-            
-            // Extract main booking details
-            const {
-                resultIndex,
-                srdvIndex,
-                traceId,
-                totalFare,
-                fare,
-                grandTotal
-            } = flightDetails;
-
-            // Extract passengers
-            const passengers = flightDetails.passengers || [];
-
-            // Construct extracted details
-            return {
-                resultIndex,
-                srdvIndex,
-                traceId,
-                totalFare,
-                grandTotal,
-                passengers: passengers.map(pax => ({
-                    title: pax.title,
-                    firstName: pax.firstName,
-                    lastName: pax.lastName,
-                    gender: pax.gender,
-                    contactNo: pax.contactNo || "",
-                    email: pax.email || "",
-                    paxType: pax.paxType,
-                    addressLine1: getCookie('origin') || "",
-                    city: getCookie('origin') || "",
-                    passportNo: pax.passportNo || "",
-                    passportExpiry: pax.passportExpiry || "",
-                    passportIssueDate: pax.passportIssueDate || "",
-                    dateOfBirth: pax.dateOfBirth || "",
-                    countryCode: "IN",
-                    countryName: "INDIA",
-                    selectedServices: {
-                        seat: pax.selectedServices?.seat || null,
-                        baggage: pax.selectedServices?.baggage || null,
-                        meals: pax.selectedServices?.meals || []
-                    }
-                })),
-                baseFare: fare?.baseFare,
-                tax: fare?.tax,
-                yqTax: fare?.yqTax,
-                transactionFee: fare?.transactionFee,
-                additionalTxnFeeOfrd: fare?.additionalTxnFeeOfrd,
-                additionalTxnFeePub: fare?.additionalTxnFeePub,
-                airTransFee: fare?.airTransFee
-            };
-        } catch (error) {
-            console.error('Error parsing booking details:', error);
-            return null;
-        }
-    }
-
-    function fetchBalanceLogAndBookLCC() {
-        const bookingDetails = getBookingDetailsFromURL();
-        if (!bookingDetails?.traceId || !bookingDetails?.grandTotal) {
-            console.error('Booking details are missing or incomplete!');
-            return;
-        }
-
-        // Send as POST request with JSON body
-        fetch('/flight/balance-log', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-            },
-            body: JSON.stringify({
-                TraceId: bookingDetails.traceId,
-                amount: bookingDetails.grandTotal
-            })
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                console.log('Balance log processed:', data.balanceLog);
-                // Proceed with booking only if balance deduction was successful
-                bookLCC(bookingDetails);
-            } else {
-                console.error(data.errorMessage || 'Failed to process balance log');
-            }
-        })
-        .catch(error => {
-            console.error('Balance log error:', error);
-        });
-    }
-
-    function bookLCC(bookingDetails) {
-        if (!bookingDetails || !bookingDetails.passengers || !Array.isArray(bookingDetails.passengers)) {
-            console.error("Passenger details are missing or not in array format!");
-            return;
-        }
-
-        // Prepare payload using extracted data
-        const payload = {
-            srdvIndex: bookingDetails.srdvIndex,
-            traceId: bookingDetails.traceId,
-            resultIndex: bookingDetails.resultIndex,
-
-            // Map each passenger with all available details, including fare
-            passenger: bookingDetails.passengers.map(pax => ({
-                title: pax.title,
-                firstName: pax.firstName,
-                lastName: pax.lastName,
-                gender: pax.gender,
-                contactNo: pax.contactNo,
-                email: pax.email,
-                paxType: pax.paxType,
-                dateOfBirth: pax.dateOfBirth,
-                passportNo: pax.passportNo,
-                passportExpiry: pax.passportExpiry,
-                passportIssueDate: pax.passportIssueDate,
-                addressLine1: pax.addressLine1,
-                city: pax.city,
-                countryCode: pax.countryCode,
-                countryName: pax.countryName,
-
-                // Handle baggage with null check
-                baggage: pax.selectedServices?.baggage ? [{
-                    Code: pax.selectedServices.baggage.Code,
-                    Weight: pax.selectedServices.baggage.Weight,
-                    Price: pax.selectedServices.baggage.Price,
-                    Origin: pax.selectedServices.baggage.Origin,
-                    Destination: pax.selectedServices.baggage.Destination,
-                    WayType: pax.selectedServices.baggage.WayType,
-                    Currency: pax.selectedServices.baggage.Currency
-                }] : [],
-
-                // Handle meals with null check
-                mealDynamic: pax.selectedServices?.meals ? pax.selectedServices.meals.map(meal => ({
-                    Code: meal.Code,
-                    AirlineDescription: meal.AirlineDescription,
-                    Price: meal.Price,
-                    Origin: meal.Origin,
-                    Destination: meal.Destination,
-                    WayType: meal.WayType,
-                    Quantity: meal.Quantity,
-                    Currency: meal.Currency
-                })) : [],
-
-                // Handle seat with null check
-                seat: pax.selectedServices?.seat ? [{
-                    Code: pax.selectedServices.seat.code,
-                    SeatNumber: pax.selectedServices.seat.seatNumber,
-                    Amount: pax.selectedServices.seat.amount,
-                    AirlineName: pax.selectedServices.seat.airlineName,
-                    AirlineCode: pax.selectedServices.seat.airlineCode,
-                    AirlineNumber: pax.selectedServices.seat.airlineNumber
-                }] : [],
-
-                // Assign individual fare for each passenger
-                fare: {
-                    baseFare: bookingDetails.baseFare,
-                    tax: bookingDetails.tax,
-                    yqTax: bookingDetails.yqTax,
-                    transactionFee: parseFloat(bookingDetails.transactionFee || 0),
-                    additionalTxnFeeOfrd: bookingDetails.additionalTxnFeeOfrd,
-                    additionalTxnFeePub: bookingDetails.additionalTxnFeePub,
-                    airTransFee: parseFloat(bookingDetails.airTransFee || 0)
-                }
-            }))
-        };
-
-        // Send booking request
-        fetch('/flight/bookLCC', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-            },
-            body: JSON.stringify(payload)
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.status === 'success') {
-                console.log("Flight LCC booking successful!");
-            } else {
-                console.error("Flight LCC booking failure:", data);
-            }
-        })
-        .catch(error => {
-            console.error('Error during flight LCC booking:', error);
-        });
-    }
-
-    function BookGdsTickte() {
-        const queryParams = new URLSearchParams(window.location.search);
-        const traceId = queryParams.get("traceId");
-        const resultIndex = queryParams.get("resultIndex");
-        const bookingId = queryParams.get("bookingId");
-        const pnr = queryParams.get("pnr");
-        const srdvIndex = queryParams.get("srdvIndex");
-        const grandTotal = queryParams.get("grandTotal");
-
-        if (traceId && resultIndex && bookingId && pnr && srdvIndex && grandTotal) {
-            return { resultIndex, bookingId, pnr, srdvIndex, traceId, grandTotal };
-        } else {
-            console.error("Missing required parameters for GDS ticket booking.");
-            return null;
-        }
-    }
-
-    function fetchBalanceLogAndBookGDS() {
-        const gdsTicketDetails = BookGdsTickte();
-        
-        if (!gdsTicketDetails) {
-            console.error('Booking details are missing or incomplete!');
-            return;
-        }
-
-        // Send as POST request with JSON body
-        fetch('/flight/balance-log', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-            },
-            body: JSON.stringify({
-                TraceId: gdsTicketDetails.traceId,
-                amount: gdsTicketDetails.grandTotal
-            })
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                console.log('Balance log processed:', data.balanceLog);
-                // Proceed with booking only if balance deduction was successful
-                processGdsTicket(gdsTicketDetails);
-            } else {
-                console.error(data.errorMessage || 'Failed to process balance log');
-            }
-        })
-        .catch(error => {
-            console.error('Balance log error:', error);
-        });
-    }
-
-    // Function to process the GDS Ticket booking
-    function processGdsTicket(gdsTicketDetails) {
-        const payload = {
-            EndUserIp: "1.1.1.1",
-            ClientId: "180133",
-            UserName: "MakeMy91",
-            Password: "MakeMy@910",
-            srdvType: "MixAPI",
-            srdvIndex: gdsTicketDetails.srdvIndex,
-            traceId: gdsTicketDetails.traceId,
-            pnr: gdsTicketDetails.pnr,
-            bookingId: gdsTicketDetails.bookingId
-        };
-
-        fetch("/flight/bookGdsTicket", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').content
-            },
-            body: JSON.stringify(payload)
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.status === "success") {
-                console.log("GDS ticket booking successful:", {
-                    bookingId: data.data.bookingId,
-                    pnr: data.data.pnr,
-                    ticketStatus: data.data.ticketStatus
-                });
-            } else {
-                console.error("GDS ticket booking failed:", data.message);
-            }
-        })
-        .catch(error => {
-            console.error("GDS ticket API error:", error);
-        });
-    }
-
    
 </script>
 </body>

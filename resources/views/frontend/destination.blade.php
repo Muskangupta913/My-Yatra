@@ -1,9 +1,11 @@
 @extends('frontend.layouts.master')
+
+@section('content')
 @section('styles')
 <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
 <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
 @endsection
-@section('content')
+
 <div class="bg-gradient-to-b from-blue-100 to-white min-h-screen">
     <div class="container mx-auto px-4 py-12">
         <div class="text-center mb-16">
@@ -111,7 +113,7 @@
                 ],
                 [
                     'name' => 'Ladakh',
-                    'location' => 'Jammu and Kashmir',
+                    'location' => 'Leh and Ladakh',
                     'image' => 'ladakh.jpg',
                     'description' => 'A high-altitude desert with breathtaking Himalayan landscapes and unique Buddhist culture.',
                     'highlights' => [

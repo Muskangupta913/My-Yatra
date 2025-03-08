@@ -819,7 +819,7 @@ public function paymentCallback(Request $request)
             \Log::error('Payment record not found', [
                 'order_id' => $validatedData['razorpay_order_id']
             ]);
-            return redirect()->route('booking.failed')
+            return redirect()->route('payments.failed')
                 ->with('error', 'Payment record could not be located');
         }
 
@@ -840,7 +840,8 @@ public function paymentCallback(Request $request)
             'amount' => $payment->amount, // Add the payment amount
     'passenger_data' => $payment->passenger_data, // Add passenger details
     'boarding_point' => $payment->boarding_point, // Optional: include boarding point
-    'dropping_point' => $payment->dropping_point // Optional: include dropping point
+    'dropping_point' => $payment->dropping_point ,// Optional: include dropping point
+    'processing' => true // ADDED: Flag to indicate processing state
         ];
 
         // Log successful payment
@@ -857,8 +858,8 @@ public function paymentCallback(Request $request)
             'trace' => $e->getTraceAsString()
         ]);
 
-        return redirect()->route('booking.failed')
-            ->with('error', 'Payment verification failed: ' . $e->getMessage());
+        return redirect()->route('payments.failed')
+            ->with('error', 'Payment verification failed: '. $e->getMessage());
     }
 }
 
@@ -907,7 +908,8 @@ public function paymentCallback(Request $request)
             'boarding_point' => $payment->boarding_point,
             'dropping_point' => $payment->dropping_point,
             'seat_number' => $payment->seat_number,
-            'passengers' => $passengerData
+            'passengers' => $passengerData,
+            'processing' => $request->has('processing') ? true : false // ADDED: Flag to indicate processing state
         ];
 
         // Log payment details for verification
@@ -933,9 +935,10 @@ public function paymentCallback(Request $request)
 /**
  * Show payment failed page
  */
+
 public function failed()
 {
-    return view('frontend.buspayment_failed');
+    return view('frontend.payments_failed');
 }
 
 
