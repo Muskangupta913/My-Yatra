@@ -352,71 +352,97 @@
     }
 
     function getBookingDetailsFromURL() {
-        const urlParams = new URLSearchParams(window.location.search);
-        const encodedDetails = urlParams.get('details');
+        const bookingDetailsString = sessionStorage.getItem('bookingDetails');
+    
+    console.log('1. Raw booking details from session storage:', bookingDetailsString);
 
-        if (!encodedDetails) {
-            console.error('No booking details found in URL');
-            return null;
-        }
+    if (!bookingDetailsString) {
+        console.error('❌ No booking details found in session storage');
+        return null;
+    }
 
-        try {
-            const flightDetails = JSON.parse(decodeURIComponent(encodedDetails));
-            
-            // Extract main booking details
-            const {
-                resultIndex,
-                srdvIndex,
-                traceId,
-                totalFare,
-                fare,
-                grandTotal
-            } = flightDetails;
+    try {
+        const flightDetails = JSON.parse(bookingDetailsString);
+        console.log('2. Parsed booking details:', flightDetails);
 
-            // Extract passengers
-            const passengers = flightDetails.passengers || [];
+        // Extract main booking details
+        const {
+            resultIndex,
+            srdvIndex,
+            traceId,
+            totalFare,
+            fare,
+            grandTotal
+        } = flightDetails;
 
-            // Construct extracted details
-            return {
-                resultIndex,
-                srdvIndex,
-                traceId,
-                totalFare,
-                grandTotal,
-                passengers: passengers.map(pax => ({
-                    title: pax.title,
-                    firstName: pax.firstName,
-                    lastName: pax.lastName,
-                    gender: pax.gender,
-                    contactNo: pax.contactNo || "",
-                    email: pax.email || "",
-                    paxType: pax.paxType,
-                    addressLine1: getCookie('origin') || "",
-                    city: getCookie('origin') || "",
-                    passportNo: pax.passportNo || "",
-                    passportExpiry: pax.passportExpiry || "",
-                    passportIssueDate: pax.passportIssueDate || "",
-                    dateOfBirth: pax.dateOfBirth || "",
-                    countryCode: "IN",
-                    countryName: "INDIA",
-                    selectedServices: {
-                        seat: pax.selectedServices?.seat || null,
-                        baggage: pax.selectedServices?.baggage || null,
-                        meals: pax.selectedServices?.meals || []
-                    }
-                })),
-                baseFare: fare?.baseFare,
-                tax: fare?.tax,
-                yqTax: fare?.yqTax,
-                transactionFee: fare?.transactionFee,
-                additionalTxnFeeOfrd: fare?.additionalTxnFeeOfrd,
-                additionalTxnFeePub: fare?.additionalTxnFeePub,
-                airTransFee: fare?.airTransFee
-            };
-        } catch (error) {
-            console.error('Error parsing booking details:', error);
-            return null;
-        }
+        // Extract passengers correctly
+        const passengers = flightDetails.passengers || [];
+
+        // Log each passenger's details
+        passengers.forEach((pax, index) => {
+            console.log(`3.${index + 1} Passenger Details:`, pax);
+        });
+
+        // Construct extracted details
+        const extractedDetails = {
+            resultIndex,
+            srdvIndex,
+            traceId,
+            totalFare,
+            grandTotal,
+
+            // Passenger details as an array
+            passengers: passengers.map((pax, index) => ({
+                title: pax.title,
+                firstName: pax.firstName,
+                lastName: pax.lastName,
+                gender: pax.gender,
+                contactNo: pax.contactNo || "",
+                email: pax.email || "",
+                paxType: pax.paxType,
+                addressLine1: getCookie('origin') || "",
+                city: getCookie('origin') || "",
+                passportNo: pax.passportNo || "",
+                passportExpiry: pax.passportExpiry || "",
+                passportIssueDate: pax.passportIssueDate || "",
+                dateOfBirth: pax.dateOfBirth || "",
+                countryCode: "IN",
+                countryName: "INDIA",
+
+                // Selected services
+                selectedServices: {
+                    seat: pax.selectedServices?.seat || null,
+                    baggage: pax.selectedServices?.baggage || null,
+                    meals: pax.selectedServices?.meals || []
+                }
+            })),
+
+            // Fare details
+            baseFare: fare?.baseFare,
+            tax: fare?.tax,
+            yqTax: fare?.yqTax,
+            transactionFee: fare?.transactionFee,
+            additionalTxnFeeOfrd: fare?.additionalTxnFeeOfrd,
+            additionalTxnFeePub: fare?.additionalTxnFeePub,
+            airTransFee: fare?.airTransFee
+        };
+
+        // Log each passenger's extracted services separately
+        extractedDetails.passengers.forEach((pax, index) => {
+            console.log(`4.${index + 1} Passenger Selected Services:`, {
+                seat: pax.selectedServices.seat,
+                baggage: pax.selectedServices.baggage,
+                meals: pax.selectedServices.meals
+            });
+        });
+
+        console.log('5. Final Extracted Booking Details:', extractedDetails);
+
+        return extractedDetails;
+    } catch (error) {
+        console.error('❌ Error parsing booking details:', error);
+        return null;
+    }
     }
 
     function fetchBalanceLogAndBookLCC() {
@@ -641,6 +667,405 @@
             console.error("GDS ticket API error:", error);
         });
     }
+
+
+    function getCookie(name) {
+            let nameEQ = name + "=";
+            let ca = document.cookie.split(';');
+            for(let i = 0; i < ca.length; i++) {
+                let c = ca[i].trim();
+                if (c.indexOf(nameEQ) === 0) {
+                    return c.substring(nameEQ.length);
+                }
+            }
+            return null;
+        }
+
+        // Get passenger counts from cookies with default values
+        const origin = getCookie('origin') ;
+
+        // Log the values
+        console.log('Payment Page - ORIGIN Details:');
+        console.log('ORIGIN:', origin);
+      
+
+        function getBookingDetailsFromURL() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const encodedDetails = urlParams.get('details');
+
+    console.log('1. Raw encoded details from URL:', encodedDetails);
+
+    if (!encodedDetails) {
+        console.error('❌ No booking details found in URL');
+        return null;
+    }
+
+    try {
+        const flightDetails = JSON.parse(decodeURIComponent(encodedDetails));
+        console.log('2. Decoded booking details:', flightDetails);
+
+        // Extract main booking details
+        const {
+            resultIndex,
+            srdvIndex,
+            traceId,
+            totalFare,
+            fare,
+            grandTotal
+        } = flightDetails;
+
+        // Extract passengers correctly
+        const passengers = flightDetails.passengers || [];
+
+        // Log each passenger's details
+        passengers.forEach((pax, index) => {
+            console.log(`3.${index + 1} Passenger Details:`, pax);
+        });
+
+        // Construct extracted details
+        const extractedDetails = {
+            resultIndex,
+            srdvIndex,
+            traceId,
+            totalFare,
+            grandTotal,
+
+            // Passenger details as an array
+            passengers: passengers.map((pax, index) => ({
+                title: pax.title,
+                firstName: pax.firstName,
+                lastName: pax.lastName,
+                gender: pax.gender,
+                contactNo: pax.contactNo || "",
+                email: pax.email || "",
+                paxType: pax.paxType,
+                addressLine1: origin,
+                city: origin,
+                passportNo: pax.passportNo || "",
+                passportExpiry: pax.passportExpiry || "",
+                passportIssueDate: pax.passportIssueDate || "",
+                dateOfBirth: pax.dateOfBirth || "",
+                countryCode: "IN",
+                countryName: "INDIA",
+
+                // Selected services
+                selectedServices: {
+                    seat: pax.selectedServices?.seat || null,
+                    baggage: pax.selectedServices?.baggage || null,
+                    meals: pax.selectedServices?.meals || []
+                },
+
+                // Log selected services
+                seatDetails: pax.selectedServices?.seat || null,
+                baggageDetails: pax.selectedServices?.baggage || null,
+                mealDetails: pax.selectedServices?.meals || []
+            })),
+
+            // Fare details
+            baseFare: fare?.baseFare,
+            tax: fare?.tax,
+            yqTax: fare?.yqTax,
+            transactionFee: fare?.transactionFee,
+            additionalTxnFeeOfrd: fare?.additionalTxnFeeOfrd,
+            additionalTxnFeePub: fare?.additionalTxnFeePub,
+            airTransFee: fare?.airTransFee
+        };
+
+        // Log each passenger's extracted services separately
+        extractedDetails.passengers.forEach((pax, index) => {
+            console.log(`4.${index + 1} Passenger Selected Services:`, {
+                seat: pax.seatDetails,
+                baggage: pax.baggageDetails,
+                meals: pax.mealDetails
+            });
+        });
+
+        console.log('5. Final Extracted Booking Details:', extractedDetails);
+
+        return extractedDetails;
+    } catch (error) {
+        console.error('❌ Error parsing booking details:', error);
+        return null;
+    }
+}
+
+function fetchBalanceLogAndBookLCC() {
+    const bookingDetails = getBookingDetailsFromURL();
+    if (!bookingDetails?.traceId || !bookingDetails?.grandTotal) {
+        showError('Booking details are missing or incomplete!');
+        return;
+    }
+
+    console.log('Processing balance log for:', {
+        traceId: bookingDetails.traceId,
+        amount: bookingDetails.grandTotal
+    });
+
+    // Send as POST request with JSON body
+    fetch('/flight/balance-log', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+        },
+        body: JSON.stringify({
+            TraceId: bookingDetails.traceId,
+            amount: bookingDetails.grandTotal
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            console.log('Balance log processed:', data.balanceLog);
+            // Proceed with booking only if balance deduction was successful
+            bookLCC(bookingDetails);
+        } else {
+            showError(data.errorMessage || 'Failed to process balance log');
+        }
+    })
+    .catch(error => {
+        console.error('Balance log error:', error);
+        showError('Failed to process balance check. Please try again.');
+    });
+}
+
+function showError(message) {
+    console.error('Error:', message);
+    alert('❌ ' + message);
+}
+
+
+function bookLCC(bookingDetails) {
+//     const bookingDetails = getBookingDetailsFromURL(); // Fetch data from URL
+//  console.log('grandTotal :', bookingDetails.grandTotal);
+//     if (!bookingDetails || !bookingDetails.passengers || !Array.isArray(bookingDetails.passengers)) {
+//         console.error("❌ Passenger details are missing or not in array format!");
+//         return;
+//     }
+
+//     console.log("🚀 Booking Details Extracted:", bookingDetails);
+
+    // Prepare payload using extracted data
+    const payload = {
+        srdvIndex: bookingDetails.srdvIndex,
+        traceId: bookingDetails.traceId,
+        resultIndex: bookingDetails.resultIndex,
+
+        // Map each passenger with all available details, including fare
+        passenger: bookingDetails.passengers.map(pax => ({
+            title: pax.title,
+            firstName: pax.firstName,
+            lastName: pax.lastName,
+            gender: pax.gender,
+            contactNo: pax.contactNo,
+            email: pax.email,
+            paxType: pax.paxType,
+            dateOfBirth: pax.dateOfBirth,
+            passportNo: pax.passportNo,
+            passportExpiry: pax.passportExpiry,
+            passportIssueDate: pax.passportIssueDate,
+            addressLine1: pax.addressLine1,
+            city: pax.city,
+            countryCode: pax.countryCode,
+            countryName: pax.countryName,
+
+            // Handle baggage with null check
+            baggage: pax.selectedServices?.baggage ? [{
+                Code: pax.selectedServices.baggage.Code,
+                Weight: pax.selectedServices.baggage.Weight,
+                Price: pax.selectedServices.baggage.Price,
+                Origin: pax.selectedServices.baggage.Origin,
+                Destination: pax.selectedServices.baggage.Destination,
+                WayType: pax.selectedServices.baggage.WayType,
+                Currency: pax.selectedServices.baggage.Currency
+            }] : [],
+
+            // Handle meals with null check
+            mealDynamic: pax.selectedServices?.meals ? pax.selectedServices.meals.map(meal => ({
+                Code: meal.Code,
+                AirlineDescription: meal.AirlineDescription,
+                Price: meal.Price,
+                Origin: meal.Origin,
+                Destination: meal.Destination,
+                WayType: meal.WayType,
+                Quantity: meal.Quantity,
+                Currency: meal.Currency
+            })) : [],
+
+            // Handle seat with null check
+            seat: pax.selectedServices?.seat ? [{
+                Code: pax.selectedServices.seat.code,
+                SeatNumber: pax.selectedServices.seat.seatNumber,
+                Amount: pax.selectedServices.seat.amount,
+                AirlineName: pax.selectedServices.seat.airlineName,
+                AirlineCode: pax.selectedServices.seat.airlineCode,
+                AirlineNumber: pax.selectedServices.seat.airlineNumber
+            }] : [],
+
+            // Assign individual fare for each passenger
+            fare: {
+            baseFare: bookingDetails.baseFare,
+            tax: bookingDetails.tax,
+            yqTax: bookingDetails.yqTax,
+            transactionFee: parseFloat(bookingDetails.transactionFee || 0),
+            additionalTxnFeeOfrd: bookingDetails.additionalTxnFeeOfrd,
+            additionalTxnFeePub: bookingDetails.additionalTxnFeePub,
+            airTransFee: parseFloat(bookingDetails.airTransFee || 0)
+        }
+        }))
+    };
+
+    console.log("✅ Final Payload Ready for Booking:", payload);
+
+    // Send booking request
+    fetch('/flight/bookLCC', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': "{{ csrf_token() }}"
+        },
+        body: JSON.stringify(payload)
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.status === 'success') {
+            alert('✅ Booking successful!');
+            console.log("✅ Booking successful!");
+        } else {
+            alert('❌ Booking failed: ' + (data.message || 'Unknown error'));
+            console.error("❌ Booking Failure:", data);
+        }
+    })
+    .catch(error => {
+        console.error('❌ Error:', error);
+        alert('An error occurred during booking');
+    });
+}
+
+
+
+function showError(message) {
+    console.error('Error:', message);
+    alert('❌ ' + message);
+}
+
+
+function BookGdsTickte() {
+    const queryParams = new URLSearchParams(window.location.search);
+    const traceId = queryParams.get("traceId");
+    const resultIndex = queryParams.get("resultIndex");
+    const bookingId = queryParams.get("bookingId");
+    const pnr = queryParams.get("pnr");
+    const srdvIndex = queryParams.get("srdvIndex");
+    const grandTotal =  queryParams.get("grandTotal");
+
+    console.log("Result Index:", resultIndex);
+    console.log("Booking ID:", bookingId);
+    console.log("PNR:", pnr);
+    console.log("SRDV Index:", srdvIndex);
+    console.log("Trace ID:", traceId);
+    console.log("grandTotal:", grandTotal);
+
+    if (traceId && resultIndex && bookingId && pnr && srdvIndex && grandTotal) {
+        return { resultIndex, bookingId, pnr, srdvIndex, traceId, grandTotal }; // Ensure grandTotal is returned
+    } else {
+        console.error("❌ Missing required parameters for GDS ticket booking.");
+        return null;
+    }
+}
+
+function fetchBalanceLogAndBookGDS() {
+    const  gdsTicketDetails =  BookGdsTickte();
+    
+    if (!gdsTicketDetails) {
+        console.error('❌ Booking details are missing or incomplete!');
+        return;
+    }
+
+    console.log('🚀 Fetching Balance Log for:', {
+        traceId: gdsTicketDetails.traceId,
+        amount: gdsTicketDetails.grandTotal
+    });
+   
+
+    // Send as POST request with JSON body
+    fetch('/flight/balance-log', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+        },
+        body: JSON.stringify({
+    TraceId: gdsTicketDetails.traceId,  // Changed to uppercase 'T'
+    amount: gdsTicketDetails.grandTotal
+})
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            console.log('Balance log processed:', data.balanceLog);
+            // Proceed with booking only if balance deduction was successful
+            processGdsTicket(gdsTicketDetails);
+        } else {
+            showError(data.errorMessage || 'Failed to process balance log');
+        }
+    })
+    .catch(error => {
+        console.error('Balance log error:', error);
+        showError('Failed to process balance check. Please try again.');
+    });
+}
+
+// Function to process the GDS Ticket booking
+function processGdsTicket(gdsTicketDetails) {
+    // const gdsTicketDetails = BookGdsTickte();
+
+    // if (!gdsTicketDetails) {
+    //     console.error("Missing required parameters for GDS ticket booking.");
+    //     return;
+    // }
+
+    const payload = {
+        EndUserIp: "1.1.1.1",
+        ClientId: "180133",
+        UserName: "MakeMy91",
+        Password: "MakeMy@910",
+        srdvType: "MixAPI",
+        srdvIndex: gdsTicketDetails.srdvIndex,
+        traceId: gdsTicketDetails.traceId,
+        pnr: gdsTicketDetails.pnr,
+        bookingId: gdsTicketDetails.bookingId
+    };
+
+    console.log("Sending payload:", payload);
+
+    fetch("/flight/bookGdsTicket", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').content
+        },
+        body: JSON.stringify(payload)
+    })
+    .then(response => response.json())
+    .then(data => {
+        console.log("API Response:", data);
+        if (data.status === "success") {
+            console.log("Booking successful:", {
+                bookingId: data.data.bookingId,
+                pnr: data.data.pnr,
+                ticketStatus: data.data.ticketStatus,
+                passengers: data.data.passengers
+            });
+        } else {
+            console.error("Booking failed:", data.message);
+        }
+    })
+    .catch(error => {
+        console.error("API Error:", error);
+    });
+}
+
 
    
 </script>

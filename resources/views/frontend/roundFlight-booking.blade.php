@@ -2087,6 +2087,10 @@ document.getElementById('submitButton').addEventListener('click', async function
     
     try {
         await checkFlightBalance();
+
+
+       
+       
         const totalPriceDetails = calculateTotalPriceWithDetails();
         const isLCCoutbound = outboundFareQuoteData?.IsLCC ?? false;
         const isLCCreturn = returnFareQuoteData?.IsLCC ?? false;
@@ -2356,7 +2360,69 @@ try {
             urlDetails: decodedUrlDetails,
             grandTotal: totalPriceDetails.grandTotal,
         };
+    
+        const encodedDetails = encodeURIComponent(JSON.stringify(finalBookingDetails));
+        sessionStorage.setItem('finalBookingDetails', JSON.stringify(finalBookingDetails));
+sessionStorage.setItem('encodedBookingDetails', encodedDetails);
 
+console.log("Final Booking Details stored in session");
+
+        try {
+    const orderData = await processRazorpayPayment(finalBookingDetails);
+    
+    // Initialize Razorpay
+    const razorpay = new Razorpay({
+        key: orderData.key_id,
+        amount: orderData.amount * 100, // Amount in smallest currency unit
+        currency: orderData.currency,
+        name: "Travel Portal",
+        description: "Flight Booking Payment",
+        order_id: orderData.order_id,
+        prefill: {
+            name: orderData.name || '',
+            email: orderData.email || '',
+            contact: orderData.contact || ''
+        },
+        notes: {
+            payment_id: orderData.payment_id,
+            flight_type: finalBookingDetails.lcc && 
+                ((finalBookingDetails.lcc.outbound && finalBookingDetails.lcc.return) || 
+                (finalBookingDetails.nonLcc && finalBookingDetails.nonLcc.outbound && finalBookingDetails.nonLcc.return)) ? 
+                'round_trip' : 'one_way'
+        },
+        theme: {
+            color: "#3399cc"
+        },
+        modal: {
+            ondismiss: function() {
+                console.log('Payment dismissed');
+                // Handle payment dismissal (e.g., redirect to booking page)
+                window.location.href = '/flight/booking';
+            }
+        },
+        handler: function(response) {
+            // Handle successful payment
+            handlePaymentSuccess(response, orderData.payment_id);
+        }
+    });
+    
+    // Open the Razorpay payment dialog
+    razorpay.open();
+    
+} catch (paymentError) {
+    console.error("Payment failed:", paymentError);
+    if (window.Swal) {
+        Swal.fire({
+            icon: 'error',
+            title: 'Payment Failed',
+            text: paymentError.message || 'An error occurred during payment processing'
+        });
+    } else {
+        alert('Payment failed: ' + (paymentError.message || 'An error occurred'));
+    }
+}
+
+   
         console.log("Is LCC Outbound:", isLCCoutbound);
 console.log("Is LCC Return:", isLCCreturn);
 
@@ -2369,12 +2435,8 @@ console.log("Processing Non-LCC Return:", !isLCCreturn && bookingPayloads.nonLcc
 
 
 
-        // Redirect to payment pagegit 
-        const encodedDetails = encodeURIComponent(JSON.stringify(finalBookingDetails));
-        console.log("Final Booking Details:", JSON.stringify(finalBookingDetails, null, 2));
-        console.log('Encoded Details:', decodeURIComponent(new URLSearchParams(window.location.search).get('details')));
-
-        window.location.href = `/flight/payment?details=${encodedDetails}`;
+     
+        // window.location.href = `/flight/payment?details=${encodedDetails}`;
 
     } catch (error) {
         console.error('Error during booking process:', error);
@@ -2414,6 +2476,8 @@ async function processNonLCCBooking(payload) {
             isOutbound: payload.srdvIndex === outboundSrdvIndex
         };
 
+        sessionStorage.setItem('bookingDetails', bookingDetails);
+
         // Fix: Ensure we're working with an array
         let existingDetails;
         try {
@@ -2435,8 +2499,166 @@ async function processNonLCCBooking(payload) {
         throw new Error(data.message || 'Booking failed');
     }
 }
+          
 
-}); 
+
+
+async function processRazorpayPayment(bookingDetails) {
+    try {
+        // Step 1: Ensure Razorpay is loaded
+        if (typeof Razorpay === 'undefined') {
+            // Load Razorpay script if not already loaded
+            await new Promise((resolve, reject) => {
+                const script = document.createElement('script');
+                script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+                script.async = true;
+                script.onload = resolve;
+                script.onerror = () => reject(new Error('Failed to load Razorpay script'));
+                document.body.appendChild(script);
+            });
+            
+            // Double check it loaded properly
+            if (typeof Razorpay === 'undefined') {
+                throw new Error('Razorpay failed to initialize');
+            }
+        }
+
+        // Step 2: Create order on the server
+        const orderResponse = await fetch('/payment/create-order', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+            },
+            body: JSON.stringify({
+                booking_details: JSON.stringify(bookingDetails)
+            })
+        });
+
+        // Check if the response is OK
+        if (!orderResponse.ok) {
+            const errorText = await orderResponse.text();
+            console.error("Server responded with error:", orderResponse.status, errorText);
+            throw new Error(`Server error: ${orderResponse.status} ${orderResponse.statusText}`);
+        }
+
+        // Try to parse the response as JSON
+        let orderData;
+        try {
+            const responseText = await orderResponse.text();
+            console.log("Raw response:", responseText);
+            orderData = JSON.parse(responseText);
+        } catch (parseError) {
+            console.error("Failed to parse response as JSON:", parseError);
+            throw new Error("Server returned invalid JSON");
+        }
+
+        if (orderData.status !== 'success') {
+            throw new Error(orderData.message || 'Failed to create payment order');
+        }
+
+        // Step 3: Now initialize Razorpay payment
+        const razorpay = new Razorpay({
+            key: orderData.key_id,
+            amount: orderData.amount * 100, // Amount in smallest currency unit
+            currency: orderData.currency,
+            name: "Travel Portal",
+            description: "Flight Booking Payment",
+            order_id: orderData.order_id,
+            prefill: {
+                name: orderData.name || '',
+                email: orderData.email || '',
+                contact: orderData.contact || ''
+            },
+            notes: {
+                payment_id: orderData.payment_id,
+                flight_type: bookingDetails.lcc && 
+                    ((bookingDetails.lcc.outbound && bookingDetails.lcc.return) || 
+                    (bookingDetails.nonLcc && bookingDetails.nonLcc.outbound && bookingDetails.nonLcc.return)) ? 
+                    'round_trip' : 'one_way'
+            },
+            theme: {
+                color: "#3399cc"
+            },
+            modal: {
+                ondismiss: function() {
+                    console.log('Payment dismissed');
+                    // Handle payment dismissal (e.g., redirect to booking page)
+                    window.location.href = '/flight/booking';
+                }
+            },
+            handler: function(response) {
+                // Handle successful payment
+                handlePaymentSuccess(response, orderData.payment_id);
+            }
+        });
+        
+        // Open the payment dialog
+        razorpay.open();
+        return orderData;
+
+    } catch (error) {
+        console.error('Payment processing error:', error);
+        throw error; // Re-throw to be handled by the caller
+    }
+}
+// Function to handle successful payment
+// Function to handle successful payment
+async function handlePaymentSuccess(paymentResponse, paymentId) {
+    try {
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = '/payment/verify'; // This should match your verify payment route
+        
+        // Add CSRF token
+        const csrfField = document.createElement('input');
+        csrfField.type = 'hidden';
+        csrfField.name = '_token';
+        csrfField.value = document.querySelector('meta[name="csrf-token"]').content;
+        form.appendChild(csrfField);
+        
+        // Create verification data
+        const verificationData = {
+            razorpay_payment_id: paymentResponse.razorpay_payment_id,
+            razorpay_order_id: paymentResponse.razorpay_order_id,
+            razorpay_signature: paymentResponse.razorpay_signature,
+            payment_id: paymentId,
+            payment_method: 'razorpay'
+        };
+
+        // Add verification data as hidden form fields
+        for (const [name, value] of Object.entries(verificationData)) {
+            const field = document.createElement('input');
+            field.type = 'hidden';
+            field.name = name;
+            field.value = value;
+            form.appendChild(field);
+        }
+        
+        // Submit the form
+        document.body.appendChild(form);
+        form.submit();
+    } catch (error) {
+        console.error('Error handling payment success:', error);
+        alert('Payment was successful, but there was an error processing the result. Please contact support.');
+    }
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Add Razorpay script to the page
+    const razorpayScript = document.createElement('script');
+    razorpayScript.src = 'https://checkout.razorpay.com/v1/checkout.js';
+    razorpayScript.async = true;
+    document.body.appendChild(razorpayScript);
+
+    // Setup the form integration once Razorpay is loaded
+    razorpayScript.onload = function() {
+        integrateRazorpayIntoBookingForm();
+    };
+});
+          });
+
+
 
 
 

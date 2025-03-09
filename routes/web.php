@@ -417,7 +417,7 @@ Route::get('/autocomplete-hotel', [CityController::class, 'hotelautocomplete'])-
 // Route::get('/payment', [HotelController::class, 'showPaymentPage'])->name('payment.form');
 Route::post('/payment/create', [HotelController::class, 'createOrder'])->name('payment.create');
 Route::post('/payment/verify', [HotelController::class, 'verifyPayment'])->name('payment.verify');
-// Route::get('/payment/success', [HotelController::class, 'showSuccessPage'])->name('payment.success');
+Route::get('/payment/success', [HotelController::class, 'showSuccessPage'])->name('payment.success');
 Route::get('/payment/failed', [HotelController::class, 'showFailedPage'])->name('payment.failed');
 
 // API Routes (you might want to move these to api.php)
@@ -543,3 +543,16 @@ Route::post('/flight/balance', [FlightController::class, 'flightBalance']);
 Route::post('/flight/balance-log', [FlightController::class, 'flightBalanceLog']);
 Route::get('/calendar-fare', [FlightController::class, 'index'])->name('calendar.fare');
 Route::post('/get-calendar-fare', [FlightController::class, 'getCalendarFare'])->name('get.calendar.fare');
+
+
+
+Route::post('/payment/create-order', [FlightController::class, 'createOrder'])->name('flight.payment.create-order');
+Route::post('/payment/verify', [FlightController::class, 'verifyPayment'])->name('flight.payment.verify');
+Route::post('/payment/failed', [FlightController::class, 'handleFailedPayment'])->name('flight.payment.failed');
+Route::get('/payment/success', [FlightController::class, 'showSuccess'])->name('flight.payment.success');
+Route::get('/booking/failed', [FlightController::class, 'showFailed'])->name('flight.booking.failed');
+
+
+
+//round trip 
+

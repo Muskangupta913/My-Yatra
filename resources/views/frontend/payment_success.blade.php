@@ -189,11 +189,12 @@ fetch(`/balance-log?TraceId=${traceId}&amount=${amount}`, {
     } else {
         throw new Error(data.errorMessage || "Balance log failed");
     }
-})
+}) 
+
 .then(response => response.json())
 .then(bookingResult => {
     if (bookingResult.status === 'success') {
-        alert(`Booking Successful!\nTicket Number: ${bookingResult.data.TicketNo}\nStatus: ${bookingResult.data.BusBookingStatus}`);
+        // alert(`Booking Successful!\nTicket Number: ${bookingResult.data.TicketNo}\nStatus: ${bookingResult.data.BusBookingStatus}`);
     } else {
         alert(`Booking Failed: ${bookingResult.message}`);
     }
