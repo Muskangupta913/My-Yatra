@@ -85,7 +85,8 @@ class CarController extends Controller
                 'carSearchResults' => [
                     'TaxiData' => $responseData['Result']['TaxiData'],
                     'PaymentMethods' => $responseData['Result']['PaymentMethods'] ?? [],
-                    'RequestData' => $responseData['Result']['RequestData'] ?? []
+                    'RequestData' => $responseData['Result']['RequestData'] ?? [],
+                    'TraceID' => $responseData['Result']['TraceID'] ?? null
                 ],
                 'carSearchParams' => $request->input('searchParams')
             ]);
@@ -93,6 +94,8 @@ class CarController extends Controller
           
             return response()->json([
                 'success' => true,
+                'trace_id' => $responseData['Result']['TraceID'] ?? null,
+                'srdv_index' => $responseData['Result']['TaxiData'][0]['SrdvIndex'] ?? null,
                 'message' => 'Cars found successfully'
             ]);
 
@@ -267,11 +270,11 @@ public function checkBalance(Request $request)
         $response = Http::withHeaders([
             'API-Token' => 'MakeMy@910@23',
             'Content-Type' => 'application/json',
-        ])->post('https://car.srdvapi.com/v5/rest/Balance', [
+        ])->post('https://car.srdvtest.com/v5/rest/Balance', [
             "EndUserIp" => "1.1.1.1",
-            "ClientId" => $request->input('ClientId'),
-            "UserName" => $request->input('UserName'),
-            "Password" => $request->input('Password'),
+            "ClientId" => $this->apiConfig['client_id'],
+            "UserName" => $this->apiConfig['username'],
+            "Password" => $this->apiConfig['password'],
         ]);
 
         $data = $response->json();
@@ -326,7 +329,9 @@ public function processPayment(Request $request)
               // Add validation for trip details
               'pickup_location' => 'required',
               'dropoff_location' => 'required',
-              'trip_type' => 'required'
+              'trip_type' => 'required',
+              'trace_id' => 'required',
+              'srdv_index' => 'required'
         ]);
 
          // Restructure the data to match the view's expectations
@@ -350,7 +355,9 @@ public function processPayment(Request $request)
                 'seating' => $validated['car_seating'],
                 'luggage' => $validated['car_luggage'],
                 'price' => $validated['car_price']
-            ]
+            ],
+            'trace_id' => $validated['trace_id'],
+            'srdv_index' => $validated['srdv_index']
         ];
 
         // Store the restructured booking details in session
@@ -391,7 +398,10 @@ public function showPayment()
     return view('frontend.car_payment', compact('bookingDetails'));
 }
 
-
+public function showBookingForm()
+{
+    return view('frontend.car_booking_form');
+}
 
 }
 

@@ -68,6 +68,13 @@
         <span>City</span></a>
 </li>
 
+ <!-- Nav Item - Places -->
+ <li class="nav-item">
+    <a class="nav-link" href="{{ route('visit_places')}}">
+        <i class="fas fa-city"></i>
+        <span>Places</span></a>
+</li>
+
 <!-- Nav Item - Charts -->
 <li class="nav-item">
     <a class="nav-link" href="{{ route('package')}}">
@@ -75,8 +82,12 @@
         <span>Packages</span></a>
 </li>
 
-
-
+<!-- Nav Item - Tour Place -->
+<li class="nav-item">
+    <a class="nav-link" href="{{ route('tourPlace')}}">
+        <i class="fas fa-map-marker-alt"></i>
+        <span>Tour Place</span></a>
+</li>
 
 <!-- Divider -->
 <hr class="sidebar-divider d-none d-md-block">

@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Payment Page</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <style>
         :root {
             --primary-color: #2563eb;
@@ -152,22 +154,7 @@
             box-shadow: 0 2px 4px rgb(0 0 0 / 0.1);
         }
 
-        .submit-btn {
-            background: var(--primary-color);
-            color: white;
-            padding: 0.75rem 1.5rem;
-            border: none;
-            border-radius: 0.5rem;
-            cursor: pointer;
-            width: 100%;
-            font-weight: 600;
-            transition: background-color 0.2s;
-            margin-top: 1rem;
-        }
-
-        .submit-btn:hover {
-            background: var(--secondary-color);
-        }
+        
         .contact-info {
             text-align: center;
             margin-top: 2rem;
@@ -243,19 +230,7 @@
             border-color: var(--primary-color);
         }
 
-        button {
-            background: var(--primary-color);
-            color: white;
-            padding: 0.75rem 1.5rem;
-            border: none;
-            border-radius: 0.5rem;
-            cursor: pointer;
-            transition: background-color 0.2s;
-        }
-
-        button:hover {
-            background: var(--secondary-color);
-        }
+       
 
         .close {
             position: absolute;
@@ -296,7 +271,42 @@
                 grid-template-columns: 1fr;
             }
         }
-    </style>
+    .submit-btn {
+    background: linear-gradient(135deg, #007BFF, #0056b3);
+    color: white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 16px;
+    font-weight: bold;
+    padding: 12px 24px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.submit-btn:hover {
+    background: linear-gradient(135deg, #0056b3, #003d80);
+    box-shadow: 0px 6px 12px rgba(0, 0, 0, 0.2);
+    transform: translateY(-2px);
+}
+
+.submit-btn:active {
+    transform: translateY(1px);
+    box-shadow: 0px 3px 6px rgba(0, 0, 0, 0.15);
+}
+
+.button-container {
+    display: flex;
+    justify-content: center;
+    margin-top: 2rem;
+}
+
+</style>
 </head>
 <body>
     <div class="container">
@@ -305,14 +315,6 @@
             <h2 class="section-title">Trip Details</h2>
             @if(isset($bookingDetails['trip_info']))
             <div class="info-grid">
-                <!-- <div class="info-item">
-                    <span class="label">From:</span>
-                    <span class="value">{{ $bookingDetails['trip_info']['pickup_location'] ?? 'N/A' }}</span>
-                </div>
-                <div class="info-item">
-                    <span class="label">To:</span>
-                    <span class="value">{{ $bookingDetails['trip_info']['dropoff_location'] ?? 'N/A' }}</span>
-                </div> -->
                 <div class="info-item">
                     <span class="label">Pickup Address:</span>
                     <span class="value">{{ $bookingDetails['trip_info']['pickup_address'] ?? 'N/A' }}</span>
@@ -331,7 +333,9 @@
                 </div>
             </div>
             @endif
+        </div>
 
+        <div class="booking-section center-section">
             <h2 class="section-title">Vehicle Details</h2>
             @if(isset($bookingDetails['car_info']))
             <div class="info-grid">
@@ -351,64 +355,16 @@
                     <span class="label">Total Price:</span>
                     <span class="value">₹{{ $bookingDetails['car_info']['price'] ?? 'N/A' }}</span>
                 </div>
+                <div class="info-item">
+                    <span class="label">TraceID:</span>
+                    <span class="value">{{ $bookingDetails['trace_id'] ?? 'N/A' }}</span>
+                </div>
+                <div class="info-item">
+                    <span class="label">SrdvIndex:</span>
+                    <span class="value">{{ $bookingDetails['srdv_index'] ?? 'N/A' }}</span>
+                </div>
             </div>
             @endif
-        </div>
-
-        <!-- Center Section: Payment Methods -->
-        <div class="booking-section center-section">
-            <h2 class="section-title">Payment</h2>
-            
-            <form id="payment-form">
-                <div id="credit-card-alert" class="alert">
-                    <i class="fas fa-exclamation-circle"></i>
-                    Credit card payments are temporarily unavailable.
-                    <button id="showFormButton" type="button" onclick="showModal()">
-                        <b>Click Here</b>
-                    </button>
-                </div>
-
-                <div class="payment-methods">
-                    <label class="payment-method-label" onclick="togglePaymentOption('card')">
-                        <input type="radio" name="payment-method" value="card">
-                        <i class="fas fa-credit-card"></i>
-                        Credit Card
-                    </label>
-
-                    <label class="payment-method-label active" onclick="togglePaymentOption('qr')">
-                        <input type="radio" name="payment-method" value="qr" checked>
-                        <i class="fas fa-qrcode"></i>
-                        QR Code
-                    </label>
-
-                    <label class="payment-method-label" onclick="togglePaymentOption('upi')">
-                        <input type="radio" name="payment-method" value="upi">
-                        <i class="fas fa-mobile-alt"></i>
-                        UPI
-                    </label>
-                </div>
-
-                <div class="payment-option" id="card-option">
-                    <h4>Card Payment</h4>
-                    <p>Credit card payments are currently unavailable.</p>
-                </div>
-
-                <div class="payment-option active" id="qr-option">
-                    <h4>Scan QR Code</h4>
-                    <img src="{{ asset('assets/images/qr.jpeg') }}" alt="QR Code" class="qr-code">
-                    <p>Use any payment app to scan and pay</p>
-                </div>
-
-                <div class="payment-option" id="upi-option">
-                    <h4>Pay via UPI</h4>
-                    <img src="{{ asset('assets/images/upi.jpeg') }}" alt="UPI QR Code" class="qr-code">
-                    <p>Use your UPI app to make the payment</p>
-                </div>
-
-                <button id="finalsubmit" type="button" class="submit-btn">
-                    <b>Proceed to Pay</b>
-                </button>
-            </form>
         </div>
 
         <!-- Right Section: Personal Information -->
@@ -432,6 +388,12 @@
             @endif
         </div>
     </div>
+
+    <div class="button-container">
+        <button id="processToPay" class="submit-btn">Process To Pay</button>
+    </div>
+
+    
     <div class="contact-info">
         <a href="mailto:info@makemybharatyatra.com">
             <i class="fas fa-envelope"></i> info@makemybharatyatra.com
@@ -440,194 +402,81 @@
             <i class="fas fa-phone-alt"></i> +91 1204223100
         </a>
     </div>
-
-    <!-- Modal -->
-     <div id="payment-modal" class="modal">
-        <div class="modal-content">
-            <span class="close" onclick="hideModal()">&times;</span>
-            <h4>Fill the Details Below</h4>
-            <form id="modal-form" method="POST">
-                <input type="text" name="name" placeholder="Your Name" required>
-                <input type="email" name="email" placeholder="Your Email" required>
-                <input type="tel" name="mobile" placeholder="Your Mobile No." required>
-                <input type="number" name="amount" placeholder="Payment Amount" required>
-                <button type="submit">Submit</button>
-            </form>
-        </div>
+   <!-- Loading Overlay -->
+   <div id="loadingOverlay" class="loading-overlay">
+        <div class="spinner"></div>
+        <div>Processing payment...</div>
     </div>
-
     <script>
-        function togglePaymentOption(option) {
-            document.querySelectorAll('.payment-option').forEach(el => {
-                el.classList.remove('active');
-            });
-            document.getElementById(`${option}-option`).classList.add('active');
-        }
-
-        function showModal() {
-            document.getElementById('payment-modal').classList.add('active');
-        }
-
-        function hideModal() {
-            document.getElementById('payment-modal').classList.remove('active');
-        }
-
-        document.getElementById('modal-form').addEventListener('submit', function(e) {
-            e.preventDefault();
-            // Add your form submission logic here
-            alert('Form submitted successfully!');
-            hideModal();
-        });
-
-
-const API_CONFIG = {
-    url: 'https://car.srdvapi.com/v4/rest/Book',
-    headers: {
-        'API-Token': 'MakeMy@910@23',
-        'Content-Type': 'application/json'
-    },
-    credentials: {
-        EndUserIp: "1.1.1.1",
-        "ClientId" => $request->input('ClientId'),
-        "UserName" => $request->input('UserName'),
-        "Password" => $request->input('Password'),
-    }
-};
-
-const loadingState = {
-    start: () => {
-        document.getElementById('finalsubmit').disabled = true;
-        document.getElementById('finalsubmit').innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
-    },
-    end: () => {
-        document.getElementById('finalsubmit').disabled = false;
-        document.getElementById('finalsubmit').innerHTML = '<b>Submit</b>';
-    }
-};
-
-const showMessage = (message, isError = false) => {
-    const alertDiv = document.createElement('div');
-    alertDiv.className = `alert ${isError ? 'error' : 'success'}`;
-    alertDiv.style.backgroundColor = isError ? '#fee2e2' : '#dcfce7';
-    alertDiv.style.color = isError ? '#dc2626' : '#15803d';
-    alertDiv.textContent = message;
-    
-    document.querySelector('.container').insertBefore(alertDiv, document.getElementById('payment-form'));
-    
-    setTimeout(() => alertDiv.remove(), 5000);
-};
-
-// Helper function to make API calls
-const makeApiCall = async (url, data) => {
-    try {
-        const response = await fetch(url, {
-            method: 'POST',
-            headers: API_CONFIG.headers,
-            body: JSON.stringify({
-                ...API_CONFIG.credentials,
-                ...data
-            })
-        });
-
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-
-        return await response.json();
-    } catch (error) {
-        throw new Error(`API call failed: ${error.message}`);
-    }
-};
-
-// Function to check wallet balance
-const checkWalletBalance = async () => {
-    try {
-        const response = await makeApiCall(API_CONFIG.walletUrl, {});
+    document.getElementById("processToPay").addEventListener("click", function(e) {
+        e.preventDefault();
         
-        if (response.Error && response.Error.ErrorCode !== "0") {
-            throw new Error(response.Error.ErrorMessage || "Failed to fetch wallet balance");
-        }
-
-        return {
-            success: true,
-            balance: response.Balance
-        };
-    } catch (error) {
-        return {
-            success: false,
-            error: error.message
-        };
-    }
-};
-
-// Function to verify transaction
-const verifyTransaction = async (bookingId) => {
-    try {
-        const response = await makeApiCall(API_CONFIG.balanceLogUrl, {
-            BookingId: bookingId
-        });
-
-        if (response.Error && response.Error.ErrorCode !== "0") {
-            showMessage("Transaction verification failed: " + response.Error.ErrorMessage, true);
-            return false;
-        }
-        return true;
-    } catch (error) {
-        showMessage("Error verifying transaction: " + error.message, true);
-        return false;
-    }
-};
-
-const makeBookingRequest = async () => {
-    loadingState.start();
-
-    try {
-        // Check wallet balance first
-        const walletStatus = await checkWalletBalance();
-        if (!walletStatus.success) {
-            showMessage(`Wallet check failed: ${walletStatus.error}`, true);
-            loadingState.end();
-            return;
-        }
-
-        const bookingData = {
-            EndUserIp: "1.1.1.1",
-            SrdvIndex: "SRDV-2",
-            TraceID: "1",
-            PickUpTime: "18:00",
-            DropUpTime: "18:00",
-            RefID: "77894",
-            CustomerName: "Md Aiyaz",
-            CustomerPhone: "9709310868",
-            CustomerEmail: "mdaiyaz09@gmail.com",
-            CustomerAddress: "Noida",
-            PaymentType: "WALLET",
-            IsConfirmed: true,
-            DeductAmount: true,
-            BookingType: "INSTANT"
-        };
-
-        const response = await makeApiCall(API_CONFIG.url, bookingData);
-
-        if (response.Error.ErrorCode === "0") {
-            const verificationSuccess = await verifyTransaction(response.Result.BookingID);
-            if (verificationSuccess) {
-                showMessage(`Booking successful! Booking ID: ${response.Result.BookingID}`);
+        // Get amount from booking details
+        const amount = {{ $bookingDetails['car_info']['price'] ?? 0 }};
+        
+        // Step 1: Create an order via API
+        fetch('/create-payment', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+            },
+            body: JSON.stringify({ amount: amount })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.error) {
+                alert('Error: ' + data.error);
+                return;
             }
-        } else {
-            showMessage(response.Error.ErrorMessage || 'Booking failed', true);
-        }
-    } catch (error) {
-        showMessage(error.message, true);
-    } finally {
-        loadingState.end();
-    }
-};
-
-// Event listener for submit button
-document.getElementById('finalsubmit').addEventListener('click', makeBookingRequest);
-
-
+            
+            // Step 2: Initialize Razorpay Payment UI
+            var options = {
+                "key": "{{ env('RAZORPAY_KEY') }}",
+                "amount": data.amount * 100, // Convert to paise
+                "currency": data.currency,
+                "name": "Make My Bharat Yatra",
+                "description": "Car Final Payment",
+                "image": "/assets/images/MMBY_logo.jpg",
+                "order_id": data.order_id,
+                "handler": function (response) {
+                    // Step 3: Send Payment Data to Server
+                    var form = document.createElement('form');
+                    form.method = 'POST';
+                    form.action = '/verify-payment';
+                    
+                    // Add CSRF token properly
+                    var csrfTokenElement = document.querySelector('meta[name="csrf-token"]');
+                    var csrfToken = csrfTokenElement ? csrfTokenElement.getAttribute('content') : '';
+                    form.innerHTML = `
+                        <input type="hidden" name="_token" value="${csrfToken}">
+                        <input type="hidden" name="razorpay_order_id" value="${response.razorpay_order_id}">
+                        <input type="hidden" name="razorpay_payment_id" value="${response.razorpay_payment_id}">
+                        <input type="hidden" name="razorpay_signature" value="${response.razorpay_signature}">
+                        <input type="hidden" name="trace_id" value="{{ $bookingDetails['trace_id'] ?? '' }}"> <!-- Add trace_id -->
+                        <input type="hidden" name="srdv_index" value="{{ $bookingDetails['srdv_index'] ?? '' }}"> <!-- Add srdv_index -->
+                    `;
+                    document.body.appendChild(form);
+                    form.submit();
+                },
+                "prefill": {
+                    "name": "{{ $bookingDetails['personal_info']['name'] ?? '' }}",
+                    "email": "{{ $bookingDetails['personal_info']['email'] ?? '' }}",
+                    "contact": "{{ $bookingDetails['personal_info']['phone'] ?? '' }}"
+                },
+                "theme": {
+                    "color": "#2563eb"
+                }
+            };
+            var rzp1 = new Razorpay(options);
+            rzp1.open();
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Failed to create payment order. Please try again.');
+        });
+    });
 </script>
+
 </body>
 </html>

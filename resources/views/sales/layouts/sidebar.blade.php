@@ -44,6 +44,12 @@
             <i class="fas fa-city"></i>
             <span>City</span></a>
     </li>
+ <!-- Nav Item - Places -->
+ <li class="nav-item">
+    <a class="nav-link" href="{{ route('visit_places')}}">
+        <i class="fas fa-city"></i>
+        <span>Places</span></a>
+</li>
 
     <!-- Nav Item - Package -->
     <li class="nav-item">

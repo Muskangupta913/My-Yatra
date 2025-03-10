@@ -69,8 +69,8 @@
                                                     <thead>
                                                         <tr>
                                                             <th>SL</th>
-                                                            <th>Name</th>
-                                                            <th>Statte</th>
+                                                            <th>State</th>
+                                                            <th>City</th>
                                                             <th>Edit</th>
                                                             <th>Delete</th>
                                                          
@@ -85,10 +85,16 @@
                                                         @foreach ($cities as $city)
                                                         <tr>
                                                             <td>{{$i++}}</td>
-                                                            <td>{{$city->destination->destination_name}}</td>
+                                                            <td>{{ $city->destination ? $city->destination->destination_name : 'N/A' }}</td>
                                                             <td>{{$city->city_name}}</td>
                                                             <td><a href="{{ route('cityEdit', $city->id)}}" class="btn btn-warning btn-sm">Edit</a></td>
-                                                            <td><button type="button" class="btn btn-danger delete btn-sm" data-id="{{$city->id}}" >Delete</a></td>
+                                                            <td>
+                                                                <form action="{{ route('cityDelete')}}" method="POST" class="d-inline">
+                                                                    @csrf
+                                                                    <input type="hidden" name="id" value="{{$city->id}}">
+                                                                    <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                                                                </form>
+                                                            </td>
                                                         </tr>
                                                             
                                                         @endforeach
@@ -141,4 +147,3 @@
     });
 </script>
 
-        

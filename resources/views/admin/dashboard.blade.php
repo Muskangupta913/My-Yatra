@@ -183,9 +183,6 @@
                         </div>
                     </div>
                 </div>
-
-              
-
 </div>
 
 @include('admin.layouts.footer')

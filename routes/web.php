@@ -12,7 +12,9 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Artisan;
 use App\Http\Controllers\CardpayController;
-
+use App\Http\Controllers\PaymentController;
+use App\Http\Controllers\TourPlaceController;
+use App\Http\Controllers\BuildController;
 
 Route::get('/clear-cache', function() {
   Artisan::call('cache:clear');
@@ -134,8 +136,8 @@ Route::post('/search-flights', [FlightController::class, 'search'])->name('fligh
 
 Route::get('/holidays/{slug}', [HomeController::class, 'packages'])->name('packages');
 
-Route::get('/holidays/{destinationSlug}/{packageSlug}', action: [HomeController::class, 'packagesDetails'])->name('packagesDetails');
-Route::post('/book-package', action: [HomeController::class, 'store'])->name('book.package');
+Route::get('/holidays/{destinationSlug}/{packageSlug}', [HomeController::class, 'packagesDetails'])->name('packagesDetails');
+Route::post('/book-package', [HomeController::class, 'store'])->name('book.package');
 
 // Register route
 Route::post('/register', [AuthController::class, 'register'])->name('register');
@@ -257,7 +259,7 @@ Route::prefix('admin')->middleware(['onlyAuthenticated'])->group(function () {
        Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('admin.dashboard');
        Route::get('/logout', [AdminController::class, 'logout'])->name('logout');
         Route::get('/cities/{state_id}', [AdminController::class, 'getCities']);
-      
+        Route::get('/visit-places', [AdminController::class, 'index'])->name('visit_places');
         Route::prefix('tour-type')->group(function(){
         Route::get('/', [AdminController::class, 'tourType'])->name('tourType');
         Route::get('/create', [AdminController::class, 'createTourType'])->name('create_type_type');
@@ -274,6 +276,15 @@ Route::prefix('admin')->middleware(['onlyAuthenticated'])->group(function () {
       Route::post('/delete', [AdminController::class, 'cityDelete'])->name('cityDelete');
       Route::get('/edit/{id}', [AdminController::class, 'cityEdit'])->name('cityEdit');
       Route::post('/update', [AdminController::class, 'updateCity'])->name('updateCity');
+    });
+
+    //  visit places Route
+    Route::prefix('visit-places')->group(function(){
+      Route::get('/', action: [AdminController::class, 'visit_places'])->name('visit_places');
+      Route::post('/', [AdminController::class, 'createvisit_places'])->name('visit_places.create');
+      Route::post('/delete', [AdminController::class, 'visit_placesDelete'])->name('visit_placesDelete');
+      Route::get('/edit/{id}', [AdminController::class, 'visit_placesEdit'])->name('visit_placesEdit');
+      Route::post('/update', [AdminController::class, 'updatevisit_places'])->name('updatevisit_places');
     });
 
        Route::prefix('destination')->group(function(){
@@ -300,8 +311,18 @@ Route::prefix('admin')->middleware(['onlyAuthenticated'])->group(function () {
      Route::post('/videos/{id}', [AdminController::class, 'packageVideos'])->name('package.videos');
      Route::post('/photo/delete', [AdminController::class, 'packagePhotoDelete'])->name('package.photo.delete');
 
+    
     });
 
+    // Build package
+    Route::get('tour-place', [TourPlaceController::class, 'index'])->name('tourPlace');
+    Route::get('tour-place/create', [TourPlaceController::class, 'create'])->name('tourPlace.create');
+    Route::post('tour-place/store', [TourPlaceController::class, 'store'])->name('tourPlace.store');
+    Route::get('admin/cities/{state_id}', [TourPlaceController::class, 'getCitiesByState']);
+    Route::get('/api/tour-places/{cityId}', [TourPlaceController::class, 'getTourPlacesByCity']);
+    Route::get('tour-place/edit/{id}', [TourPlaceController::class, 'edit'])->name('tourPlace.edit');
+    Route::put('tour-place/update/{id}', [TourPlaceController::class, 'update'])->name('tourPlace.update');
+    
     Route::prefix('booking')->group(function(){
           Route::get('/', [AdminController::class, 'booking'])->name('booking');
           Route::get('/booking-details/{id}', [AdminController::class, 'bookingShow'])->name('booking.show');
@@ -320,7 +341,7 @@ Route::prefix('admin')->middleware(['onlyAuthenticated'])->group(function () {
        
         });
 
-        
+        Route::get('/wildlife', [HomeController::class, 'Wildlife'])->name('Wildlife');
 
         Route::get('/festivals', function () {
           $festivalRegions = [
@@ -349,6 +370,7 @@ Route::get('/manali', [CityController::class, 'manali'])->name('manali');
 Route::post('/kerala', [CityController::class, 'kerala'])->name('kerala'); 
 Route::get('/coimbatore', [CityController::class, 'coimbatore'])->name('coimbatore');
 Route::get('/mussoorie', [CityController::class, 'mussoorie'])->name('mussoorie');
+
 });
 
 
@@ -464,6 +486,28 @@ Route::get('/car-booking-form', function () {
 })->name('car.booking.form');
 Route::post('/car/payment', [CarController::class, 'processPayment'])->name('car.payment');
 Route::get('/car/payment', [CarController::class, 'showPayment'])->name('car.payment.show');
+Route::get('/car-booking-form', [CarController::class, 'showBookingForm'])->name('car.booking.form');
+Route::post('/car-booking', [CarController::class, 'bookCar'])->name('car.booking');
+Route::post('/car-payment', [CarController::class, 'processPayment'])->name('car.payment');
+Route::get('/car-payment', [CarController::class, 'showPayment'])->name('car.payment');
+Route::post('/check-balance', [CarController::class, 'checkBalance'])->name('checkBalance');
+Route::get('/car-finalpay', function () {return view('frontend.car-finalpay');})->name('car.finalpay');
+
+// Razorpay
+Route::get('/car-finalpay', [PaymentController::class, 'showPaymentPage'])->name('car.finalpay');
+Route::post('/car-finalpay', [PaymentController::class, 'processPayment']);
+Route::post('/verify-payment', [PaymentController::class, 'verifyPayment'])->name('verify.payment');
+Route::get('/car-finalpay', [PaymentController::class, 'showPaymentPage'])->name('car.finalpay');
+Route::post('/car-finalpay', [PaymentController::class, 'processPayment']);
+Route::post('/verify-payment', [PaymentController::class, 'verifyPayment'])->name('verify.payment')->middleware('web'); 
+Route::get('/success', function () {return view('frontend.success');})->name('payment.success');
+Route::get('/failed', function () {return view('frontend.failed');})->name('payment.failed');
+Route::post('/create-payment', [PaymentController::class, 'createPayment'])->name('create.payment');
+Route::post('/verify-payment', [PaymentController::class, 'verifyPayment'])->name('payment.verify');
+Route::get('/payment/success', [PaymentController::class, 'handlePaymentSuccess'])->name('payment.success');
+Route::post('/process-booking', [PaymentController::class, 'processBookingApis']);
+
+
 
 
 // Flight Route
@@ -506,3 +550,23 @@ Route::post('/flight/balance', [FlightController::class, 'flightBalance']);
 Route::post('/flight/balance-log', [FlightController::class, 'flightBalanceLog']);
 Route::get('/calendar-fare', [FlightController::class, 'index'])->name('calendar.fare');
 Route::post('/get-calendar-fare', [FlightController::class, 'getCalendarFare'])->name('get.calendar.fare');
+
+
+// build package
+Route::get('/build/{state_slug}', [HomeController::class, 'showCitiesByState'])->name('build.cities');
+Route::get('/build/{state_id}', [BuildController::class, 'index'])->name('build');
+Route::get('/api/tour-places/{city_id}', [BuildController::class, 'getTourPlacesByCity']);
+
+// In your routes/web.php
+Route::get('/tour-image/{filename}', function($filename) {
+  $path = public_path('assets/images/Places/' . $filename);
+  if (!file_exists($path)) {
+      $path = public_path('assets/images/Places/tour-places/' . $filename);
+  }
+  
+  if (!file_exists($path)) {
+      return response()->json(['error' => 'Image not found'], 404);
+  }
+  
+  return response()->file($path);
+});

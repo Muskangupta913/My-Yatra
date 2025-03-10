@@ -65,6 +65,60 @@
             overflow: hidden;
             text-overflow: ellipsis;
         }
+
+        .btn-custom {
+    background-color: rgba(18, 171, 177, 0.94);
+    color: #000103;
+    font-weight: 500;
+    border: none;
+    padding: 10px 20px;
+    font-size: 16px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.btn-custom:hover, .btn-custom:focus, .btn-custom.active {
+    background-color: rgb(207, 42, 236);
+    color: #000103;
+    transform: translateY(-3px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+}
+
+/* Adding a subtle pulse effect */
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+}
+
+.btn-custom:hover {
+    animation: pulse 0.6s ease-in-out;
+}
+
+/* Adding a ripple effect */
+.btn-custom::after {
+    content: "";
+    position: absolute;
+    width: 100px;
+    height: 100px;
+    background: rgba(255, 255, 255, 0.4);
+    display: block;
+    border-radius: 50%;
+    transform: scale(0);
+    opacity: 0;
+    transition: transform 0.5s ease, opacity 0.5s ease;
+}
+
+.btn-custom:active::after {
+    transform: scale(4);
+    opacity: 1;
+    transition: transform 0.3s ease, opacity 0.3s ease;
+}
+
+
     </style>
 @endsection
 
@@ -77,7 +131,7 @@
                     role="tablist">
                     <!-- Modified: Reduced margin to just enough space between wrapped items -->
                     <li class="nav-item mb-1 me-1" role="presentation">
-                        <button class="nav-link px-3 px-md-4 shadow border-0" id="flight-tab" data-bs-toggle="tab"
+                        <button class="nav-link px-3 px-md-4 shadow border-0 fw-bold text-primary" id="flight-tab" data-bs-toggle="tab"
                             data-bs-target="#flight" type="button" role="tab" aria-controls="flight"
                             aria-selected="false">
                             <i class="fa-solid fa-plane-departure d-block"></i>
@@ -85,7 +139,7 @@
                         </button>
                     </li>
                     <li class="nav-item mb-1 me-1" role="presentation">
-                        <button class="nav-link px-3 px-md-4 shadow border-0" id="profile-tab" data-bs-toggle="tab"
+                        <button class="nav-link px-3 px-md-4 shadow border-0 fw-bold text-primary" id="profile-tab" data-bs-toggle="tab"
                             data-bs-target="#profile" type="button" role="tab" aria-controls="profile"
                             aria-selected="false">
                             <i class="fa-solid fa-building d-block"></i>
@@ -93,7 +147,7 @@
                         </button>
                     </li>
                     <li class="nav-item mb-1 me-1" role="presentation">
-                        <button class="nav-link active px-3 px-md-4 border-0 shadow" id="contact-tab"
+                        <button class="nav-link active px-3 px-md-4 border-0 shadow fw-bold text-primary" id="contact-tab"
                             data-bs-toggle="tab" data-bs-target="#contact" type="button" role="tab"
                             aria-controls="contact" aria-selected="false">
                             <i class="fa-solid fa-umbrella-beach d-block"></i>
@@ -101,7 +155,7 @@
                         </button>
                     </li>
                     <li class="nav-item mb-1 me-1" role="presentation">
-                        <button class="nav-link px-3 px-md-4 shadow border-0" id="bus-tab" data-bs-toggle="tab"
+                        <button class="nav-link px-3 px-md-4 shadow border-0 fw-bold text-primary" id="bus-tab" data-bs-toggle="tab"
                             data-bs-target="#bus" type="button" role="tab" aria-controls="bus"
                             aria-selected="false">
                             <i class="fa-solid fa-bus d-block"></i>
@@ -109,11 +163,20 @@
                         </button>
                     </li>
                     <li class="nav-item mb-1" role="presentation">
-                        <button class="nav-link px-3 px-md-4 shadow border-0" id="car-tab" data-bs-toggle="tab"
+                        <button class="nav-link px-3 px-md-4 shadow border-0 fw-bold text-primary" id="car-tab" data-bs-toggle="tab"
                             data-bs-target="#car" type="button" role="tab" aria-controls="car"
                             aria-selected="false">
                             <i class="fa-solid fa-car d-block"></i>
                             <small class="d-none d-md-block">Car</small>
+                        </button>
+                    </li>
+
+                    <li class="nav-item mb-1 me-1" role="presentation">
+                        <button class="nav-link px-3 px-md-4 shadow border-0 fw-bold text-primary" id="build-tab" data-bs-toggle="tab"
+                            data-bs-target="#build" type="button" role="tab" aria-controls="build"
+                            aria-selected="false">
+                            <i class="fa-solid fa-pen-to-square"></i>
+                            <small class="d-none d-md-block">Build</small>
                         </button>
                     </li>
                 </ul>
@@ -124,17 +187,14 @@
           </div> -->
                     <!-- // hotel booking -->
 
-
-
                     <div class="tab-content" id="myTabContent">
-
                         <!-- Hotel Booking -->
                         <div class="tab-pane fade mt-5" id="profile" role="tabpanel" aria-labelledby="profile-tab">
                             <h4 class="mb-5" id="hotel-title">Book Hotels in India</h4>
                             <hr class="searchline">
                             <form id="hotelSearchForm">
                                 <div class="row">
-                                    <div class="mb-3 col-md-3">
+                                    <div class="mb-3 col-md-2">
                                         <div class="date-caption">Enter City</div>
                                         <div class="position-relative">
                                             <input type="text" class="form-control rounded-0 py-3" name="CityName"
@@ -161,7 +221,7 @@
                                             placeholder="No. of Nights" required style="text-align: center;">
                                     </div>
 
-                                    <div class="mb-3 col-md-3">
+                                    <div class="mb-3 col-md-2">
                                         <div class="date-caption">Room & Guests</div>
                                         <div class="dropdown">
                                             <button
@@ -255,9 +315,11 @@
                                 </div>
                             </form>
                         </div>
+
+                        
                         <!-- Flight Booking -->
 
-                        <div class="tab-pane fade mt-5" id="flight" role="tabpanel" aria-labelledby="home-tab">
+                        <div class="tab-pane fade mt-4" id="flight" role="tabpanel" aria-labelledby="home-tab">
                             <h4 class="mb-5" id="flight-title">Book Flights</h4>
                             <hr class="searchline">
 
@@ -385,8 +447,10 @@
                         <div class="tab-pane fade mt-5" id="car" role="tabpanel" aria-labelledby="car-tab">
                             <h4 class="mb-5" id="car-title">Book Cars</h4>
                             <hr class="searchline">
-                            <form action="{{ route('cars.index') }}" method="GET" id="carSearchForm">
+                            <form action="{{ route('searchCars') }}" method="POST" id="carSearchForm">
                                 @csrf
+                                <input type="hidden" name="trace_id" id="trace_id">
+                                <input type="hidden" name="srdv_index" id="srdv_index">
                                 <div class="row">
                                     <div class="mb-3 col-md-3">
                                         <div class="date-caption">Pickup Location</div>
@@ -530,6 +594,42 @@
                                 </div>
                             </form>
                         </div>
+                        
+                       <!-- Build Your Package -->
+                             <div class="tab-pane fade mt-1" id="build" role="tabpanel" aria-labelledby="build-tab">
+                                 <hr class="searchline">
+                                 <div class="state-selection mt-1">
+                                     <div class="btn-group mt-1 d-flex flex-wrap" role="group" aria-label="State selection">
+                                         <?php
+                                  // Database connection
+                                         $conn = new mysqli("localhost", "root", "", "makemybharatyatra");
+            
+                                         // Check connection
+                                         if ($conn->connect_error) {
+                                             die("Connection failed: " . $conn->connect_error);
+                                         }
+            
+                                         // Fetch states from database
+                                         $sql = "SELECT id, destination_name, state_slug FROM states ORDER BY destination_name";
+                                         $result = $conn->query($sql);
+            
+                                         if ($result->num_rows > 0) {
+                                             // Output data of each row
+                                             while($row = $result->fetch_assoc()) {
+                                                 echo '<a href="' . route('build.cities', ['state_slug' => $row["state_slug"]]) . '" class="btn btn-custom m-2 px-4 py-2 rounded-pill shadow-sm">' . $row["destination_name"] . '</a>';
+                                             }
+                                         } else {
+                                         echo "No states found";
+                                         }
+            
+                                         $conn->close();
+                                         ?>
+                                     </div>
+                                 </div>
+                             </div>
+
+
+
                     </div>
                 </div>
             </div>
@@ -609,17 +709,14 @@
                         @endif
                     @endforeach
                 </div>
-
             </div>
-
         </div>
     </div>
 </section>
 
 <section id="tour-places" class="tour-places tour-category mt-5 mb-5">
     <div class="container">
-        <h2 class="border-start border-4 mb-5 border-warning px-2" style="font-weight: 400;">Wonderful Place For
-            You<span style="font-size: 30px; font-weight:bold;"> Tour Categories</span> </h2>
+        <h2 class="border-start border-4 mb-5 border-warning px-2" style="font-weight: 400;">Wonderful Place For You<span style="font-size: 30px; font-weight:bold;"> Tour Categories</span> </h2>
 
         <div class="row">
 
@@ -757,7 +854,12 @@
                                             </a>
                                         </h5>
                                         <p class="sub-title fs-5 text-secondary">
-                                            {{ $item->destination->destination_name }}</p>
+                                            @if($item->destination)
+                                                {{ $item->destination->destination_name }}
+                                            @else
+                                                Destination not available
+                                            @endif
+                                        </p>
                                         <p class="sub-titles">Starting From</p>
                                         <div
                                             style="display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 10px;">
@@ -1385,10 +1487,10 @@
                 console.log('Cookies:', document.cookie);
 
                 const payload = {
+                    EndUserIp: "1.1.1.1",
                     ClientId: "180189",
                     UserName: "MakeMy91",
                     Password: "MakeMy@910",
-                    EndUserIp: "1.1.1.1",
                     BookingMode: "5",
                     CheckInDate: formattedCheckInDate,
                     NoOfNights: String(data.NoOfNights),
@@ -1398,8 +1500,8 @@
                     PreferredCurrency: "INR",
                     NoOfRooms: String(data.NoOfRooms),
                     RoomGuests: [{
-                        NoOfAdults: String(data["RoomGuests[0][NoOfAdults]"]),
-                        NoOfChild: String(data["RoomGuests[0][NoOfChild]"]),
+                        NoOfAdults: String(data["RoomGuests[0].NoOfAdults"]),
+                        NoOfChild: String(data["RoomGuests[0].NoOfChild"]),
                         ChildAge: childAges,
                     }, ],
                 };
@@ -1569,6 +1671,8 @@
                     const data = await response.json();
 
                     if (data.success) {
+                        sessionStorage.setItem('trace_id', data.trace_id);
+                        sessionStorage.setItem('srdv_index', data.srdv_index);
                         // Redirect to cars page
                         window.location.href = "{{ route('cars.index') }}";
                     } else {
@@ -1930,5 +2034,35 @@
         $('input[name="journeyType"]').on('change', handleTripTypeChange);
         handleTripTypeChange();
     });
+
+
+
+    //  ****************************************************
+
+    // State Featch
+    document.addEventListener('DOMContentLoaded', function() {
+    const stateButtons = document.querySelectorAll('.btn-custom');
+    
+    stateButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            // Remove active class from all buttons
+            stateButtons.forEach(btn => btn.classList.remove('active'));
+            
+            // Add active class to clicked button
+            this.classList.add('active');
+            
+            // Get state ID and slug
+            const stateId = this.getAttribute('data-state-id');
+            const stateSlug = this.getAttribute('data-state-slug');
+            
+            // You can use stateId and stateSlug to fetch related data
+            console.log('Selected state:', this.textContent);
+            console.log('State ID:', stateId);
+            console.log('State slug:', stateSlug);
+            
+            // Add your code to update the UI based on selected state
+        });
+    });
+});
 </script>
 @endsection

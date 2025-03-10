@@ -798,5 +798,23 @@ public function store(Request $request)
         ], 500);
     }
 }
+
 // hotels controllerr
+
+public function showCitiesByState($state_slug)
+{
+    $state = DB::table('states')->where('state_slug', $state_slug)->first();
+    if (!$state) {
+        abort(404);
+    }
+
+    $cities = DB::table('cities')->where('state_id', $state->id)->get();
+
+    return view('frontend.build', compact('state', 'cities'));
+}
+
+public function Wildlife()
+{
+    return view('frontend.Wildlife');
+}
 }

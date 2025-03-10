@@ -18,6 +18,7 @@ use App\Models\JobApplication;
 use App\Models\Contact;
 use App\Models\Passenger;
 use Carbon\Carbon;
+use App\Models\VisitPlace;
 
 class SalesController extends Controller
 {
@@ -25,6 +26,7 @@ class SalesController extends Controller
     public function dashboardsales(){
          // Fetch all states and their related cities
          $states = State::with('cities')->get();
+         $places = VisitPlace::with(['state', 'city'])->get();
         $packageCount = DB::table('package')->count();
         $destinationCount = DB::table('destination')->count();
         $bookingCount = DB::table('bookings')->count();
@@ -38,7 +40,7 @@ class SalesController extends Controller
          // Fetch tour types from the database
     $tourTypes = DB::table('tour_type')->get();
        
-        return view('sales.dashboard', compact('states','tourTypes','packageCount', 'destinationCount','bookingCount', 'bookings', 'cardDetailsCount', 'jobs'));
+        return view('sales.dashboard', compact('states','tourTypes','packageCount', 'destinationCount','bookingCount', 'bookings', 'cardDetailsCount', 'jobs', 'places'));
     }
     public function logout()
     {
@@ -561,6 +563,41 @@ public function contactData(){
     return view('sales.manage-contact-data', compact('contactApplication'));
 }
    
+public function store(Request $request)
+{
+    // Validate the request
+    $validated = $request->validate([
+        'travel_mode' => 'required',
+        'departure' => 'required',
+        'destination' => 'required',
+        'departure_date' => 'required|date',
+        'return_date' => 'nullable|date|after:departure_date',
+        'adults' => 'required|integer|min:1',
+        'children' => 'nullable|integer|min:0',
+        'class' => 'required|in:economy,business,first',
+        'special_requests' => 'nullable|string'
+    ]);
+
+    // Process the travel booking
+    // Add your booking logic here
+
+    return response()->json([
+        'success' => true,
+        'message' => 'Travel details submitted successfully'
+    ]);
+}
+
+public function getVisitPlaces(Request $request)
+{
+    $state_id = $request->state_id;
+    $city_id = $request->city_id;
+
+    $visitPlaces = VisitPlace::where('state_id', $state_id)
+        ->where('city_id', $city_id)
+        ->get();
+
+    return response()->json($visitPlaces);
+}
 }
 
 

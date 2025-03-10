@@ -17,6 +17,7 @@ use App\Models\JobApplication;
 use App\Models\Contact;
 use App\Models\Passenger;
 use Carbon\Carbon;
+use App\Models\VisitPlace; // Add this line to import the VisitPlace model
 
 class AdminController extends Controller
 {
@@ -588,5 +589,56 @@ public function jobData(){
 public function contactData(){
     $contactApplication = Contact::latest()->get(); 
     return view('admin.manage-contact-data', compact('contactApplication'));
+}
+
+public function visit_places()
+{
+    $states = State::all();
+    $cities = City::all();
+    $visitPlaces = VisitPlace::with('state', 'city')->get();
+    return view('admin.visit_places', compact('states', 'cities', 'visitPlaces'));
+}
+
+public function createvisit_places(Request $request)
+{
+    $request->validate([
+        'state' => 'required',
+        'city' => 'required',
+        'place_name' => 'required|string|max:255',
+    ]);
+
+    $visitPlace = new VisitPlace();
+    $visitPlace->id = Str::uuid(); // Ensure 'id' is set manually if not auto-increment
+    $visitPlace->state_id = $request->state;
+    $visitPlace->city_id = $request->city;
+    $visitPlace->place_name = $request->place_name;
+    $visitPlace->save();
+
+    return redirect()->back()->with('success', 'Visit Place Added Successfully');
+}
+
+public function visit_placesEdit($id)
+{
+    $visitPlace = VisitPlace::findOrFail($id);
+    $states = State::all();
+    $cities = City::all();
+    return view('admin.visit_places_edit', compact('visitPlace', 'states', 'cities'));
+}
+
+public function updatevisit_places(Request $request)
+{
+    $request->validate([
+        'state' => 'required',
+        'city' => 'required',
+        'place_name' => 'required|string|max:255',
+    ]);
+
+    $visitPlace = VisitPlace::findOrFail($request->id);
+    $visitPlace->state_id = $request->state;
+    $visitPlace->city_id = $request->city;
+    $visitPlace->place_name = $request->place_name;
+    $visitPlace->save();
+
+    return redirect()->route('visit_places')->with('success', 'Visit Place Updated Successfully');
 }
 }

@@ -69,8 +69,8 @@
                                                     <thead>
                                                         <tr>
                                                             <th>SL</th>
-                                                            <th>Name</th>
                                                             <th>State</th>
+                                                            <th>City</th>
                                                             <!-- <th>Edit</th>
                                                             <th>Delete</th> -->
                                                          
@@ -85,7 +85,7 @@
                                                         @foreach ($cities as $city)
                                                         <tr>
                                                             <td>{{$i++}}</td>
-                                                            <td>{{$city->destination->destination_name}}</td>
+                                                            <td>{{ $city->destination ? $city->destination->destination_name : 'N/A' }}</td>
                                                             <td>{{$city->city_name}}</td>
                                                             <!-- <td><a href="{{ route('cityEdit', $city->id)}}" class="btn btn-warning btn-sm">Edit</a></td>
                                                             <td><button type="button" class="btn btn-danger delete btn-sm" data-id="{{$city->id}}" >Delete</a></td> -->
@@ -141,4 +141,3 @@
     });
 </script>
 
-        

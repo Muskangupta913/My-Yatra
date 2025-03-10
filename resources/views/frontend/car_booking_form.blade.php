@@ -3,186 +3,587 @@
 @section('styles')
 <style>
 
-<style>
+:root {
+    --primary-color: #4f46e5;
+    --primary-light: #eef2ff;
+    --secondary-color: #10b981;
+    --error-color: #dc2626;
+    --border-color: #e5e7eb;
+    --shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    --radius: 0.5rem;
+    --transition: all 0.3s ease;
+}
+
+/* Global responsive adjustments */
+body {
+    font-size: 16px;
+    line-height: 1.5;
+}
+
+/* Layout containers */
+.booking-page {
+    max-width: 1200px;
+    width: 100%;
+    margin: 2rem auto;
+    padding: 0 1rem;
+}
+
+@media (min-width: 640px) {
+    .booking-page {
+        padding: 0 1.5rem;
+    }
+}
+
+/* Header animation */
+header h1 {
+    font-size: 1.75rem;
+    line-height: 1.2;
+    position: relative;
+    display: inline-block;
+}
+
+header h1::after {
+    content: '';
+    position: absolute;
+    width: 50%;
+    height: 3px;
+    bottom: -8px;
+    left: 0;
+    background-color: var(--primary-color);
+    transition: width 0.3s ease;
+}
+
+header h1:hover::after {
+    width: 100%;
+}
+
+@media (min-width: 768px) {
+    header h1 {
+        font-size: 2rem;
+    }
+}
+
+@media (min-width: 1024px) {
+    header h1 {
+        font-size: 2.25rem;
+    }
+}
+
+/* Booking grid layout */
+.booking-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+    margin-top: 1.5rem;
+}
+
+@media (min-width: 768px) {
+    .booking-grid {
+        grid-template-columns: 1fr;
+        gap: 2rem;
+    }
+}
+
+@media (min-width: 1024px) {
+    .booking-grid {
+        grid-template-columns: 3fr 2fr;
+    }
+}
+
+/* Car details section with enhanced styling */
+.car-details {
+    background: linear-gradient(135deg, #f6f8ff 0%, #ffffff 100%);
+    border-radius: var(--radius);
+    padding: 1.25rem;
+    height: fit-content;
+    order: 1;
+    box-shadow: var(--shadow);
+    border: 1px solid var(--border-color);
+    transition: var(--transition);
+}
+
+.car-details:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 15px rgba(79, 70, 229, 0.1);
+}
+
+@media (min-width: 768px) {
+    .car-details {
+        padding: 1.5rem;
+    }
+}
+
+@media (min-width: 1024px) {
+    .car-details {
+        position: sticky;
+        top: 2rem;
+        order: 2;
+    }
+}
+
+.car-info-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+    margin-top: 1rem;
+}
+
+@media (min-width: 480px) {
+    .car-info-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1rem;
+    }
+}
+
+/* Car info items with animation */
+.car-info-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.875rem;
+    padding: 0.75rem;
+    border-radius: var(--radius);
+    background-color: #ffffff;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.03);
+    transition: var(--transition);
+}
+
+.car-info-item:hover {
+    background-color: var(--primary-light);
+    transform: translateX(5px);
+}
+
+.car-info-item i {
+    color: var(--primary-color);
+    font-size: 1rem;
+    transition: var(--transition);
+}
+
+.car-info-item:hover i {
+    transform: scale(1.2);
+}
+
+@media (min-width: 640px) {
+    .car-info-item {
+        font-size: 1rem;
+    }
+}
+
+/* Enhanced Form styles */
+.booking-form {
+    background: white;
+    padding: 1.25rem;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    order: 2;
+    border: 1px solid var(--border-color);
+}
+
+@media (min-width: 640px) {
+    .booking-form {
+        padding: 1.5rem;
+    }
+}
+
+@media (min-width: 768px) {
+    .booking-form {
+        padding: 2rem;
+    }
+}
+
+@media (min-width: 1024px) {
+    .booking-form {
+        order: 1;
+    }
+}
+
+/* Form progress indicator */
+.form-progress {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 2rem;
+    position: relative;
+}
+
+.form-progress::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background-color: var(--border-color);
+    z-index: 1;
+}
+
+.progress-step {
+    position: relative;
+    z-index: 2;
+    background-color: white;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid var(--border-color);
+    font-weight: bold;
+    transition: var(--transition);
+}
+
+.progress-step.active {
+    background-color: var(--primary-color);
+    color: white;
+    border-color: var(--primary-color);
+}
+
+.progress-step.completed {
+    background-color: var(--secondary-color);
+    color: white;
+    border-color: var(--secondary-color);
+}
+
+.progress-step-label {
+    position: absolute;
+    top: 35px;
+    font-size: 0.75rem;
+    white-space: nowrap;
+    transform: translateX(-50%);
+    left: 50%;
+}
+
+/* Search summary section with animation */
 .search-summary {
     background: #ffffff;
     border-radius: 10px;
-    padding: 15px 20px;
+    padding: 12px;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-    transition: all 0.3s ease-in-out;
-    max-width: 600px;
-    margin: 20px auto;
+    transition: var(--transition);
+    width: 100%;
+    margin: 1rem auto;
     text-align: center;
+    border: 1px solid var(--border-color);
 }
 
 .search-summary:hover {
+    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
     transform: translateY(-3px);
-    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.15);
+}
+
+@media (min-width: 640px) {
+    .search-summary {
+        max-width: 90%;
+        padding: 15px;
+    }
+}
+
+@media (min-width: 768px) {
+    .search-summary {
+        max-width: 600px;
+        padding: 15px 20px;
+    }
 }
 
 .search-summary .flex {
-    flex-wrap: nowrap; 
-    white-space: nowrap; 
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+@media (min-width: 640px) {
+    .search-summary .flex {
+        flex-direction: row;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+}
+
+@media (min-width: 1024px) {
+    .search-summary .flex {
+        flex-wrap: nowrap;
+        white-space: nowrap;
+    }
+}
+
+.search-summary .flex > div {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
 }
 
 .search-summary span {
-    font-size: 16px;
+    font-size: 14px;
     font-weight: 500;
 }
 
-.search-summary strong {
-    color: #007bff;
+.search-summary i {
+    transition: var(--transition);
 }
 
-@media (max-width: 768px) {
-    .search-summary {
-        max-width: 100%;
-        padding: 10px;
-    }
-
-    .search-summary .flex {
-        flex-wrap: wrap; 
-        justify-content: center;
-        gap: 10px;
-    }
-}
-.search-summary strong {
-    color: #007bff;
+.search-summary:hover i {
+    transform: scale(1.2);
+    color: var(--primary-color);
 }
 
-@media (max-width: 768px) {
-    .search-summary {
-        max-width: 100%;
-        padding: 10px;
-    }
-
-    .search-summary .flex {
-        flex-direction: column;
-        gap: 10px;
+@media (min-width: 640px) {
+    .search-summary span {
+        font-size: 16px;
     }
 }
 
-    /* Common styles */
-    :root {
-        --primary-color: #4f46e5;
-        --error-color: #dc2626;
-        --border-color: #e5e7eb;
-        --shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-        --radius: 0.5rem;
-    }
+/* Enhanced Form field styling */
+.form-group {
+    margin-bottom: 1.25rem;
+    transition: var(--transition);
+}
 
-    /* Layout containers */
-    .booking-page {
-        max-width: 1200px;
-        margin: 2rem auto;
-        padding: 0 1.5rem;
-    }
-
-    .booking-grid {
-        display: grid;
-        grid-template-columns: 3fr 2fr;
-        gap: 2rem;
-        margin-top: 2rem;
-    }
-
-    /* Car details section */
-    .car-details {
-        background: linear-gradient(135deg, #f6f8ff 0%, #ffffff 100%);
-        border-radius: var(--radius);
-        padding: 1.5rem;
-        position: sticky;
-        top: 2rem;
-        height: fit-content;
-    }
-
-    .car-info-grid {
-        display: grid;
-        grid-template-columns: repeat(2, 1fr);
-        gap: 1rem;
-        margin-top: 1rem;
-    }
-
-    .car-info-item {
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-    }
-
-    /* Form styles */
-    .booking-form {
-        background: white;
-        padding: 2rem;
-        border-radius: var(--radius);
-        box-shadow: var(--shadow);
-    }
-
+@media (min-width: 768px) {
     .form-group {
         margin-bottom: 1.5rem;
     }
+}
 
-    .form-label {
-        display: block;
-        margin-bottom: 0.5rem;
-        font-weight: 500;
-        color: #374151;
-    }
+/* Interactive form fields */
+.form-control {
+    width: 100%;
+    padding: 0.625rem;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius);
+    font-size: 0.875rem;
+    transition: var(--transition);
+}
 
+.form-control:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.2);
+    outline: none;
+}
+
+.form-label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+    transition: var(--transition);
+}
+
+.form-control:focus + .form-label,
+.form-control:not(:placeholder-shown) + .form-label {
+    color: var(--primary-color);
+}
+
+@media (min-width: 640px) {
     .form-control {
-        width: 100%;
         padding: 0.75rem;
-        border: 1px solid var(--border-color);
-        border-radius: var(--radius);
-        transition: all 0.2s ease;
+        font-size: 1rem;
     }
+}
 
-    .form-control:focus {
-        border-color: var(--primary-color);
-        box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
-        outline: none;
+/* Legend in form with animation */
+fieldset legend {
+    font-size: 1.25rem;
+    margin-bottom: 1rem;
+    position: relative;
+    padding-bottom: 0.5rem;
+}
+
+fieldset legend::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 50px;
+    height: 3px;
+    background-color: var(--primary-color);
+    transition: var(--transition);
+}
+
+fieldset:hover legend::after {
+    width: 100px;
+}
+
+@media (min-width: 768px) {
+    fieldset legend {
+        font-size: 1.5rem;
+        margin-bottom: 1.25rem;
     }
+}
 
-    .error-message {
-        color: var(--error-color);
-        font-size: 0.875rem;
-        margin-top: 0.25rem;
-    }
+/* Enhanced Submit button */
+.submit-button {
+    width: 100%;
+    padding: 0.75rem;
+    font-size: 0.875rem;
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: var(--radius);
+    cursor: pointer;
+    transition: var(--transition);
+    position: relative;
+    overflow: hidden;
+}
 
+.submit-button::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: var(--transition);
+}
+
+.submit-button:hover {
+    background-color: #4338ca;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+}
+
+.submit-button:hover::before {
+    left: 100%;
+    transition: 0.7s;
+}
+
+@media (min-width: 640px) {
     .submit-button {
-        width: 100%;
         padding: 1rem;
-        background: var(--primary-color);
-        color: white;
-        border: none;
-        border-radius: var(--radius);
-        font-weight: 600;
-        cursor: pointer;
-        transition: background 0.2s ease;
+        font-size: 1rem;
     }
+}
 
-    .submit-button:hover {
-        background: #4338ca;
+/* Error messages with animation */
+.error-message {
+    color: var(--error-color);
+    font-size: 0.75rem;
+    margin-top: 0.25rem;
+    display: block;
+    animation: slideIn 0.3s ease;
+}
+
+@keyframes slideIn {
+    0% {
+        opacity: 0;
+        transform: translateY(-10px);
     }
-
-    .submit-button:disabled {
-        background: #9ca3af;
-        cursor: not-allowed;
+    100% {
+        opacity: 1;
+        transform: translateY(0);
     }
+}
 
-    /* Responsive design */
-    @media (max-width: 768px) {
-        .booking-grid {
-            grid-template-columns: 1fr;
-        }
+/* Checkbox animation */
+input[type="checkbox"] {
+    appearance: none;
+    width: 1.2rem;
+    height: 1.2rem;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    position: relative;
+    cursor: pointer;
+    transition: var(--transition);
+}
 
-        .car-details {
-            position: static;
-            margin-bottom: 2rem;
-        }
+input[type="checkbox"]:checked {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+}
 
-        .car-info-grid {
-            grid-template-columns: 1fr;
-        }
+input[type="checkbox"]:checked::after {
+    content: '✓';
+    position: absolute;
+    color: white;
+    font-size: 0.75rem;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+/* Loading animation for submit button */
+.submit-button.loading {
+    background-color: #6b7280;
+    pointer-events: none;
+}
+
+.submit-button.loading::after {
+    content: '';
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    top: calc(50% - 10px);
+    right: 10px;
+    border: 2px solid white;
+    border-top-color: transparent;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Add floating label effect */
+.input-floating-label {
+    position: relative;
+    margin-bottom: 1.5rem;
+}
+
+.input-floating-label input,
+.input-floating-label textarea {
+    width: 100%;
+    padding: 1rem 0.75rem 0.5rem;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius);
+    font-size: 1rem;
+    transition: var(--transition);
+    background-color: white;
+}
+
+.input-floating-label label {
+    position: absolute;
+    top: 0.75rem;
+    left: 0.75rem;
+    font-size: 1rem;
+    color: #6b7280;
+    transition: var(--transition);
+    pointer-events: none;
+    background-color: transparent;
+}
+
+.input-floating-label input:focus,
+.input-floating-label textarea:focus,
+.input-floating-label input:not(:placeholder-shown),
+.input-floating-label textarea:not(:placeholder-shown) {
+    border-color: var(--primary-color);
+    padding-top: 1.25rem;
+}
+
+.input-floating-label input:focus ~ label,
+.input-floating-label textarea:focus ~ label,
+.input-floating-label input:not(:placeholder-shown) ~ label,
+.input-floating-label textarea:not(:placeholder-shown) ~ label {
+    transform: translateY(-0.75rem) scale(0.8);
+    color: var(--primary-color);
+    font-weight: 500;
+}
+
+/* Touch-friendly form elements for mobile */
+@media (max-width: 640px) {
+    input, select, textarea, button {
+        font-size: 16px; /* Prevents iOS zoom on focus */
     }
+    
+    .form-control, .submit-button {
+        min-height: 44px; /* Minimum touch target size */
+    }
+    
+    input[type="checkbox"] {
+        min-width: 20px;
+        min-height: 20px;
+    }
+}
 </style>
 @endsection
 
@@ -223,6 +624,8 @@
                 <input type="hidden" name="pickup_location" id="pickup-location-input">
                 <input type="hidden" name="dropoff_location" id="dropoff-location-input">
                 <input type="hidden" name="trip_type" id="trip-type-input">
+                <input type="hidden" name="trace_id" id="trace_id">
+                <input type="hidden" name="srdv_index" id="srdv_index">
                 
                 <!-- Personal Information -->
                 <fieldset class="form-group">
@@ -351,6 +754,14 @@
                     <i class="fas fa-tag"></i>
                     <span>Price: <strong id="car-price"></strong></span>
                 </div>
+                <div class="car-info-item">
+                    <i class="fas fa-fingerprint"></i>
+                    <span>TraceID: <strong id="trace-id-display"></strong></span>
+                </div>
+                <div class="car-info-item">
+                    <i class="fas fa-barcode"></i>
+                    <span>SrdvIndex: <strong id="srdv-index-display"></strong></span>
+                </div>
             </div>
         </aside>
     </div>
@@ -443,12 +854,16 @@ document.addEventListener("DOMContentLoaded", function() {
         document.getElementById("car-seating-input").value = carData.seatingCapacity || "";
         document.getElementById("car-luggage-input").value = carData.luggageCapacity || "";
         document.getElementById("car-price-input").value = carData.totalAmount || "";
+        document.getElementById("trace_id").value = carData.traceId || "";
+        document.getElementById("srdv_index").value = carData.srdvIndex || "";
 
         // Also update visible car details
         document.getElementById("car-category").textContent = carData.category || "N/A";
         document.getElementById("car-seating").textContent = carData.seatingCapacity || "N/A";
         document.getElementById("car-luggage").textContent = carData.luggageCapacity || "Not Specified";
         document.getElementById("car-price").textContent = "₹" + parseFloat(carData.totalAmount || 0).toFixed(2);
+        document.getElementById("trace-id-display").textContent = carData.traceId || "N/A";
+        document.getElementById("srdv-index-display").textContent = carData.srdvIndex || "N/A";
     }
 
     // Populate search parameters

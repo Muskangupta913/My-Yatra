@@ -359,6 +359,7 @@
             </div>
 
             <div class="col-md-4 post-card">
+            <a href="{{ url('wildlife') }}" class="text-decoration-none">
                 <div class="card">
                     <img src="{{ asset('images/blog-s4-img.jpg') }}" class="card-img-top" alt="Wildlife Safari">
                     <div class="card-body">
