@@ -1,8 +1,6 @@
 @extends('frontend.layouts.master')
 @section('content')
 <style>
-     /* kerala-tour-destination-section-start */
-
  .kerala-section {
     background: linear-gradient(rgba(0, 0, 0, 0.382), rgba(0, 0, 0, 0.366)), url('{{ asset("assets/images/kerala-banner.jpg") }}') no-repeat center center/cover;
     height: 450px;
@@ -111,15 +109,7 @@
 
         </div>
     </div>
-
-
 <!-- About kerala Section end -->
-
-
-
-
-
-
   <!-- Top Attractions Section  start-->
   <section id="attractions " data-aos="fade-up">
 
@@ -143,9 +133,7 @@
                     width="100%" height="250px" alt="">
                     <div class="manali-content border">
                 <h3>Munnar</h3>
-                <p> This hill station is famed for its tea plantations, misty hills. Munnar is a paradise for nature lovers and trekkers, with attractions like the Eravikulam National Park,  and the scenic Mattupetty Dam Tea Gardens: Expansive tea plantations offering picturesque views.
-
-                  .</p>
+                <p> This hill station is famed for its tea plantations, misty hills. Munnar is a paradise for nature lovers and trekkers, with attractions like the Eravikulam National Park,  and the scenic Mattupetty Dam Tea Gardens: Expansive tea plantations offering picturesque views.</p>
             </div>
             </div>
 

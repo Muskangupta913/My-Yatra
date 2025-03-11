@@ -47,11 +47,16 @@
                                 </div>
                                 <div class="contact-desc col-md-10">
                                     <span class="icon-head px-4">Email </span>
-                                    <ul style="list-style: none;">
-                                        <li><a href="mailto:info@makemybharatyatra.com">info@makemybharatyatra.com</a>
-                                        </li>
-                                        <li><a href="mailto:support@makemybharatyatra.com">support@makemybharatyatra.com</a></li>
-                                    </ul>
+                                    <ul style="list-style: none; padding-left: 0.5rem; margin-right: 0.5rem; width: 90%;">
+            <li style="white-space: normal; word-break: break-all; overflow-wrap: anywhere; margin-bottom: 8px;">
+                <i class="fa-solid fa-circle-info" style="color: #666; font-size: 14px; margin-right: 5px;"></i>
+                <a href="mailto:info@makemybharatyatra.com" style="font-size: 0.9rem;">info@makemybharatyatra.com</a>
+            </li>
+            <li style="white-space: normal; word-break: break-all; overflow-wrap: anywhere;">
+                <i class="fa-solid fa-headset" style="color: #666; font-size: 14px; margin-right: 5px;"></i>
+                <a href="mailto:support@makemybharatyatra.com" style="font-size: 0.9rem;">support@makemybharatyatra.com</a>
+            </li>
+        </ul>
                                 </div>
                             </div>
 

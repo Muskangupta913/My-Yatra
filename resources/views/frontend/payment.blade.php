@@ -342,9 +342,9 @@ form {
 
 
 document.getElementById("payNowButton").addEventListener("click", function (event) {
-    event.preventDefault();
+event.preventDefault();
 
-    const boardingPoint = JSON.parse(sessionStorage.getItem("BoardingPoint"));
+const boardingPoint = JSON.parse(sessionStorage.getItem("BoardingPoint"));
 const droppingPoint = JSON.parse(sessionStorage.getItem("DroppingPoint"));
 
 console.log(boardingPoint); // { Id: value, Name: "value" }
@@ -610,16 +610,10 @@ async function processHotelBooking(bookingData) {
     try {
         // Prepare balance payload
         const balancePayload = {
-            EndUserIp: "1.1.1.1",
-            ClientId: "180133",
-            UserName: "MakeMy91",
-            Password: "MakeMy@910",
-            amount: parseFloat(bookingData.roomDetails.OfferedPrice),
+          
+            amount: (bookingData.roomDetails.OfferedPrice),
             TraceId: bookingData.hotelDetails.traceId,
-            bookingDetails: {
-                hotelName: bookingData.hotelDetails.hotelName,
-                roomType: bookingData.roomDetails.RoomTypeName
-            }
+          
         };
 
         console.log("Balance Payload:", balancePayload);
@@ -642,16 +636,16 @@ async function processHotelBooking(bookingData) {
         }
 
         const hotelPassengers = bookingData.passengerDetails.map(passenger => ({
-            Title: passenger.title,
-            ChildCount: passenger.childCount || 0,
-            FirstName: passenger.firstName,
-            LastName: passenger.lastName,
-            Phoneno: passenger.phone,
-            Email: passenger.email,
-            PaxType: passenger.paxType || "1",
-            LeadPassenger: passenger.leadPassenger || false,
-            PAN: passenger.pan || ""
-        }));
+    Title: passenger.Title,  // Correct capitalization
+    FirstName: passenger.FirstName,  // Correct capitalization
+    LastName: passenger.LastName,  // Correct capitalization
+    Phoneno: passenger.Phoneno || "",  // Ensure it doesn't return undefined
+    Email: passenger.Email || "",  // Ensure it doesn't return undefined
+    PaxType: passenger.PaxType || "1",  // Default to "1" (Adult) if missing
+    LeadPassenger: passenger.LeadPassenger || false,  // Ensure it defaults to false
+    PAN: passenger.PAN || "" // Ensure it doesn't return undefined
+}));
+
 
         const roomDetail = {
             RoomId: bookingData.roomDetails.RoomId,
@@ -664,7 +658,7 @@ async function processHotelBooking(bookingData) {
             InfoSource: bookingData.roomDetails.InfoSource || "",
             SequenceNo: bookingData.roomDetails.SequenceNo || "",
             SmokingPreference: "0",
-            ChildCount: bookingData.roomDetails.childCount || 0,
+            ChildCount: hotelPassengers.filter(p => p.PaxType === "Child").length, // Corrected
             RequireAllPaxDetails: false,
             HotelPassenger: hotelPassengers,
             Currency: bookingData.roomDetails.Currency,
@@ -1004,6 +998,14 @@ function bookLCC(bookingDetails) {
     });
 }
 
+
+
+function showError(message) {
+    console.error('Error:', message);
+    alert('❌ ' + message);
+}
+
+
 function BookGdsTickte() {
     const queryParams = new URLSearchParams(window.location.search);
     const traceId = queryParams.get("traceId");
@@ -1011,28 +1013,73 @@ function BookGdsTickte() {
     const bookingId = queryParams.get("bookingId");
     const pnr = queryParams.get("pnr");
     const srdvIndex = queryParams.get("srdvIndex");
+    const grandTotal =  queryParams.get("grandTotal");
 
     console.log("Result Index:", resultIndex);
     console.log("Booking ID:", bookingId);
     console.log("PNR:", pnr);
     console.log("SRDV Index:", srdvIndex);
     console.log("Trace ID:", traceId);
+    console.log("grandTotal:", grandTotal);
 
-    if (traceId && resultIndex && bookingId && pnr && srdvIndex) {
-        return { resultIndex, bookingId, pnr, srdvIndex, traceId };
+    if (traceId && resultIndex && bookingId && pnr && srdvIndex && grandTotal) {
+        return { resultIndex, bookingId, pnr, srdvIndex, traceId, grandTotal }; // Ensure grandTotal is returned
     } else {
-        return null; // Return null if any required parameter is missing
+        console.error("❌ Missing required parameters for GDS ticket booking.");
+        return null;
     }
 }
 
-// Function to process the GDS Ticket booking
-function processGdsTicket() {
-    const gdsTicketDetails = BookGdsTickte();
-
+function fetchBalanceLogAndBookGDS() {
+    const  gdsTicketDetails =  BookGdsTickte();
+    
     if (!gdsTicketDetails) {
-        console.error("Missing required parameters for GDS ticket booking.");
+        console.error('❌ Booking details are missing or incomplete!');
         return;
     }
+
+    console.log('🚀 Fetching Balance Log for:', {
+        traceId: gdsTicketDetails.traceId,
+        amount: gdsTicketDetails.grandTotal
+    });
+   
+
+    // Send as POST request with JSON body
+    fetch('/flight/balance-log', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+        },
+        body: JSON.stringify({
+    TraceId: gdsTicketDetails.traceId,  // Changed to uppercase 'T'
+    amount: gdsTicketDetails.grandTotal
+})
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            console.log('Balance log processed:', data.balanceLog);
+            // Proceed with booking only if balance deduction was successful
+            processGdsTicket(gdsTicketDetails);
+        } else {
+            showError(data.errorMessage || 'Failed to process balance log');
+        }
+    })
+    .catch(error => {
+        console.error('Balance log error:', error);
+        showError('Failed to process balance check. Please try again.');
+    });
+}
+
+// Function to process the GDS Ticket booking
+function processGdsTicket(gdsTicketDetails) {
+    // const gdsTicketDetails = BookGdsTickte();
+
+    // if (!gdsTicketDetails) {
+    //     console.error("Missing required parameters for GDS ticket booking.");
+    //     return;
+    // }
 
     const payload = {
         EndUserIp: "1.1.1.1",
@@ -1091,7 +1138,7 @@ document.getElementById("payNowButton").addEventListener("click", async function
         const gdsTicketDetails = BookGdsTickte();
         if (gdsTicketDetails) {
             console.log("Processing GDS ticket booking...");
-            processGdsTicket();
+            fetchBalanceLogAndBookGDS();
             return; // Exit the function if GDS booking is found
         }
 
@@ -1100,7 +1147,7 @@ document.getElementById("payNowButton").addEventListener("click", async function
             console.log("Processing flight booking...");
             const bookingDetails = getBookingDetailsFromURL();
             if (bookingDetails) {
-                bookLCC(bookingDetails);
+                fetchBalanceLogAndBookLCC();
             } else {
                 throw new Error("Invalid or missing flight booking details.");
             }

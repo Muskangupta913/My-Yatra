@@ -3,8 +3,6 @@
 
 <style>
  /*coimbatore-destination-section-start */
-
-
  .coimbatore-section{
     background-image:linear-gradient(rgba(0, 0, 0, 0.562), rgba(0, 0, 0, 0.468)), url('{{ asset("assets/images/coimbatore-destination-banner2.PNG") }}');
     background-size: cover;
@@ -488,7 +486,7 @@
             <p class="card-text">Explore Red Fort, Qutub Minar, Humayun’s Tomb, and more on this 3-day cultural journey.</p>
             <p><strong>Duration:</strong> 3 Days / 2 Nights</p>
             <p><strong>Price:</strong> ₹7,499 per person</p>
-            <a href="#" class="btn btn-primary">Book Now</a>
+            <!-- <a href="#" class="btn btn-primary">Book Now</a> -->
           </div>
         </div>
       </div>
@@ -503,7 +501,7 @@
             <p class="card-text">Discover Delhi’s vibrant culture, shop in local markets, and indulge in street food.</p>
             <p><strong>Duration:</strong> 2 Days / 1 Night</p>
             <p><strong>Price:</strong> ₹5,999 per person</p>
-            <a href="#" class="btn btn-primary">Book Now</a>
+            <!-- <a href="#" class="btn btn-primary">Book Now</a> -->
           </div>
         </div>
       </div>
@@ -532,7 +530,7 @@
             <p class="card-text">Experience nature, cycling tours, and hot air balloon rides with this adventurous package.</p>
             <p><strong>Duration:</strong> 3 Days / 2 Nights</p>
             <p><strong>Price:</strong> ₹8,999 per person</p>
-            <a href="#" class="btn btn-primary">Book Now</a>
+            <!-- <a href="#" class="btn btn-primary">Book Now</a> -->
           </div>
         </div>
       </div>
@@ -570,14 +568,6 @@
 </section>
 
 <!-- Coimbatore tour packages Section  end-->
-
-
-
-
-
-
-
-
 <!-- Travel Information Section start -->
 <section id="travel-info text-center" data-aos="zoom-in">
     <div class="container travel-information-container  bg-warning text-center py-4">

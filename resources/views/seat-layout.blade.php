@@ -376,6 +376,7 @@
 #continueButton:hover {
   background-color: #218838; /* Darker green on hover */
 }
+
 </style>
 @endsection
 
@@ -435,7 +436,6 @@
 <!-- Continue Button Section -->
 <div class="mt-4 text-center" id="continueButtonContainer">
     <button class="btn btn-success d-none" id="continueButton">Continue</button>
-    <a href="#" class="btn btn-success mt-2 d-none" id="review">Review Details</a>
 </div>
         </div>
       </div>
@@ -459,7 +459,7 @@
         <div id="passengerFormContainer">
             <!-- Dynamic passenger forms will be inserted here -->
         </div>
-        <button type="submit" id="blockSeatButton" class="btn btn-success w-100 mt-4">Block Selected Seats</button>
+        <button type="submit" id="blockSeatButton" class="btn btn-success w-100 mt-4">Submit</button>
     </form>
       </div>
     </div>
@@ -882,7 +882,7 @@ function generatePassengerForm(seatNumber, index) {
             <h6 class="mb-3">Passenger Details for Seat ${seatNumber}</h6>
             <div class="form-group mb-2">
                 <label>Title</label>
-                <select class="form-control" name="passenger[${index}][Title]" required>
+                <select class="form-control" name="passenger[${index}][Title]" required >
                     <option value="">Select</option>
                     <option value="Mr">Mr</option>
                     <option value="Mrs">Mrs</option>
@@ -1241,7 +1241,7 @@ function blockMultipleSeats(passengers) {
     const resultIndex = urlParams.get('ResultIndex');
 
     const payload = {
-        ClientId: "180189",
+        ClientId: "180133",
         UserName: "MakeMy91",
         Password: "MakeMy@910",
         TraceId: traceId,
@@ -1299,24 +1299,23 @@ function blockMultipleSeats(passengers) {
                         SeatNumber: selectedSeat.SeatNo || selectedSeat.SeatName,
                         SeatType: selectedSeat.SeatType === 2 ? 'Sleeper' : 'Seater',
                         Deck: selectedSeat.IsUpper ? 'Upper' : 'Lower',
-                        Price: selectedSeat.Price?.PublishedPriceRoundedOff || 
-                              selectedSeat.Price?.FareRoundedOff || 
-                              selectedSeat.FareRoundedOff || 0,
+                        Price: selectedSeat.Price?.OfferedPrice,     
                         SeatIndex: selectedSeat.SeatIndex
                     }
                 };
             });
+            sessionStorage.setItem("passengerDetails", JSON.stringify(passengerDetails));
 
 
             sessionStorage.setItem("BoardingPoint", JSON.stringify({
-    Id: selectedBoardingPointId,
-    Name: selectedBoardingPointName
-}));
+            Id: selectedBoardingPointId,
+            Name: selectedBoardingPointName
+           }));
 
-sessionStorage.setItem("DroppingPoint", JSON.stringify({
-    Id: selectedDroppingPointId,
-    Name: selectedDroppingPointName
-}));
+           sessionStorage.setItem("DroppingPoint", JSON.stringify({
+           Id: selectedDroppingPointId,
+           Name: selectedDroppingPointName
+          }));
 
 
 
@@ -1345,17 +1344,19 @@ sessionStorage.setItem("DroppingPoint", JSON.stringify({
                 CancellationPolicy: JSON.stringify(data.data.CancellationPolicy)
             });
 
+            console.log('all blocked details', urlParameters);
+
             const bookingPageUrl = `/booking?${urlParameters.toString()}`;
 
-            document.getElementById('review').setAttribute('href', bookingPageUrl);
-            document.getElementById('continueButton').classList.add('d-none');
-            document.getElementById('review').classList.remove('d-none');
-
+            document.getElementById('continueButton').setAttribute('href', bookingPageUrl);
             toastr.success('Seats successfully blocked!', 'Success');
-        } else {
-            throw new Error(data.message || 'Failed to block seat');
-        }
-    })
+            setTimeout(() => {
+            window.location.href = bookingPageUrl;
+        }, 1500);
+    } else {
+        throw new Error(data.message || 'Failed to block seat');
+    }
+})
     .catch(error => {
         hideLoadingSpinner();
         console.error('Error:', error);

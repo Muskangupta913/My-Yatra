@@ -470,25 +470,25 @@
     <div class="row">
       <div class="col-md-3 animated-item">
         <div class="stat-item">
-          <span class="stat-number">104</span>
+          <span class="stat-number" data-count="104">0</span>
           <span class="stat-text">National Parks</span>
         </div>
       </div>
       <div class="col-md-3 animated-item">
         <div class="stat-item">
-          <span class="stat-number">2967</span>
+          <span class="stat-number" data-count="2967">0</span>
           <span class="stat-text">Bengal Tigers</span>
         </div>
       </div>
       <div class="col-md-3 animated-item">
         <div class="stat-item">
-          <span class="stat-number">3500+</span>
+          <span class="stat-number" data-count="3500">0</span>
           <span class="stat-text">Elephant Count</span>
         </div>
       </div>
       <div class="col-md-3 animated-item">
         <div class="stat-item">
-          <span class="stat-number">1340</span>
+          <span class="stat-number" data-count="1340">0</span>
           <span class="stat-text">Bird Species</span>
         </div>
       </div>
@@ -558,6 +558,7 @@
           <div class="card-body text-center">
             <div class="wildlife-icon">
               <i class="fas fa-elephant"></i>
+            <i class="fas fa-paw"></i>
             </div>
             <h3 class="h4 mb-3">Elephant Safari</h3>
             <p>Traditional way to explore dense forests, especially in parks like Kaziranga and Corbett.</p>
@@ -862,11 +863,29 @@
 <!-- JavaScript for animations -->
 <script>
   document.addEventListener('DOMContentLoaded', function() {
+
     // Intersection Observer for animation
     const observer = new IntersectionObserver((entries) => {
       entries.forEach(entry => {
         if (entry.isIntersecting) {
           entry.target.classList.add('active');
+          // Increment numbers
+          const counters = entry.target.querySelectorAll('.stat-number');
+          counters.forEach(counter => {
+            const updateCount = () => {
+              const target = +counter.getAttribute('data-count');
+              const count = +counter.innerText;
+              const increment = target / 200;
+
+              if (count < target) {
+                counter.innerText = Math.ceil(count + increment);
+                setTimeout(updateCount, 10);
+              } else {
+                counter.innerText = target;
+              }
+            };
+            updateCount();
+          });
         }
       });
     }, {
@@ -878,5 +897,6 @@
       observer.observe(item);
     });
   });
+
 </script>
 @endsection

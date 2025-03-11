@@ -72,39 +72,52 @@
             </div>
 
             <!-- Login/Cart Section -->
-            <div class="col-6">
-                <div style="display: flex; justify-content: flex-end; align-items: center; gap: 10px;">
-                    @guest
-                        <a href="{{ route('loginView') }}" 
-                           class="btn btn-warning btn-sm rounded-0 fw-bold" 
-                           style="padding: 6px 15px; font-size: 13px;">
-                            <!-- <i class="fa-regular fa-user"></i> -->
-                            <span >LOGIN</span>
-                        </a>
-                    @else
-                        <form action="{{ route('logout') }}" method="POST" style="display: inline-block;">
+           <!-- Login/Cart Section -->
+<div class="col-6">
+    <div style="display: flex; justify-content: flex-end; align-items: center; gap: 10px;">
+        @guest
+            <a href="{{ route('loginView') }}" 
+               class="btn btn-warning btn-sm rounded-0 fw-bold" 
+               style="padding: 6px 15px; font-size: 13px;">
+                <span>LOGIN</span>
+            </a>
+        @else
+            <!-- Cart Icon -->
+            <a href="{{ route('checkout') }}" 
+               class="nav-link position-relative" 
+               style="padding: 5px;">
+                <i class="fa fa-shopping-cart" style="font-size: 18px;"></i>
+                <span id="cart-count" 
+                      class="badge bg-danger rounded-pill position-absolute" 
+                      style="top: -8px; right: -8px; font-size: 10px;">
+                    {{ $cartCount }}
+                </span>
+            </a>
+            
+            <!-- User Profile Dropdown -->
+            <div class="dropdown">
+                <a href="#" class="dropdown-toggle" data-bs-toggle="dropdown" style="text-decoration: none;">
+                    <div class="profile-circle bg-warning d-flex align-items-center justify-content-center" 
+                         style="width: 35px; height: 35px; border-radius: 50%; color: #333; font-weight: bold;">
+                        {{ strtoupper(substr(Auth::user()->name, 0, 1)) }}
+                    </div>
+                </a>
+                <ul class="dropdown-menu dropdown-menu-end">
+                    <li class="dropdown-item disabled text-muted">Hello, {{ explode(' ', Auth::user()->name)[0] }}</li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li>
+                        <form action="{{ route('logout') }}" method="POST">
                             @csrf
-                            <button type="submit" 
-                                    class="btn btn-warning btn-sm rounded-0 fw-bold" 
-                                    style="padding: 6px 15px; font-size: 13px;">
-                                <!-- <i class="fa-solid fa-sign-out-alt"></i> -->
-                                <span>LOGOUT</span>
+                            <button type="submit" class="dropdown-item text-danger">
+                                <i class="fa-solid fa-sign-out-alt me-2"></i>Logout
                             </button>
                         </form>
-                    @endguest
-                    
-                    <a href="{{ route('checkout') }}" 
-                       class="nav-link position-relative" 
-                       style="padding: 5px;">
-                        <i class="fa fa-shopping-cart" style="font-size: 18px;"></i>
-                        <span id="cart-count" 
-                              class="badge bg-danger rounded-pill position-absolute" 
-                              style="top: -8px; right: -8px; font-size: 10px;">
-                            {{ $cartCount }}
-                        </span>
-                    </a>
-                </div>
+                    </li>
+                </ul>
             </div>
+        @endguest
+    </div>
+</div>
         </div>
     </div>
 </div>

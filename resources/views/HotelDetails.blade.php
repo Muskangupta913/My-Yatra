@@ -346,10 +346,10 @@ function hideLoadingSpinner() {
     }
 }
 
-        document.addEventListener('DOMContentLoaded', function() {
-            fetchHotelInfo();
-            fetchRoomDetails();
-        });
+        // document.addEventListener('DOMContentLoaded', function() {
+        //     fetchHotelInfo();
+        //     fetchRoomDetails();
+        // });
 
         function fetchHotelInfo() {
             const urlParams = new URLSearchParams(window.location.search);
@@ -371,7 +371,7 @@ function hideLoadingSpinner() {
                 SrdvType: "MixAPI",
                 hotelCode: hotelCode,
                 traceId: traceId,
-                ClientId: "180189",
+                ClientId: "180133",
                 UserName: "MakeMy@91",
                 Password: "MakeMy@910",
             };
@@ -603,7 +603,7 @@ function hideLoadingSpinner() {
 }
 
 // Initialize the page
-document.addEventListener('DOMContentLoaded', fetchHotelInfo);
+// document.addEventListener('DOMContentLoaded', fetchHotelInfo);
 
 function fetchRoomDetails() {
     const urlParams = new URLSearchParams(window.location.search);
@@ -820,9 +820,9 @@ function updateMainImage(thumbnail) {
 }
 
 // Initialize the room details when the page loads
-document.addEventListener('DOMContentLoaded', function() {
-    fetchRoomDetails();
-});
+// document.addEventListener('DOMContentLoaded', function() {
+//     fetchRoomDetails();
+// });
 
 // Image Gallery Functions
 function changeImage(roomId, direction) {
@@ -859,9 +859,9 @@ function toggleSection(sectionId) {
 }
 
 // Call the function when the page loads
-document.addEventListener('DOMContentLoaded', function() {
-    fetchRoomDetails();
-});
+// document.addEventListener('DOMContentLoaded', function() {
+//     fetchRoomDetails();
+// });
 
 
 
@@ -978,21 +978,53 @@ function blockRoom(roomId) {
         removeToast(processingToastId);
 
         // Prepare redirect URL params
-        const redirectParams = new URLSearchParams({
-            traceId: requiredParams.traceId,
-            resultIndex: requiredParams.resultIndex,
-            hotelCode: requiredParams.hotelCode,
-            hotelName: hotelName,
-            roomDetails: JSON.stringify(roomDetails)
-        });
+        // const redirectParams = new URLSearchParams({
+        //     traceId: requiredParams.traceId,
+        //     resultIndex: requiredParams.resultIndex,
+        //     hotelCode: requiredParams.hotelCode,
+        //     hotelName: hotelName,
+        //     roomDetails: JSON.stringify(roomDetails)
+        // });
 
         // Check if BlockRoomResult exists in the response
-        if (data.data?.BlockRoomResult) {
-            const blockRoomResult = data.data.BlockRoomResult;
+        if (data.data?.HotelRoomsDetails) {
+            const blockRoomResult = data.data.HotelRoomsDetails;
+            console.log('Block Room response',blockRoomResult);
             
             showToast('success', 'Room blocked successfully!');
+
+            const roomBlock = data.data.HotelRoomsDetails[0];
+    
+    // Prepare redirect URL params
+    const redirectParams = new URLSearchParams({
+        traceId: requiredParams.traceId,
+        resultIndex: requiredParams.resultIndex,
+        hotelCode: requiredParams.hotelCode,
+        hotelName: hotelName,
+        roomDetails: JSON.stringify(roomDetails),
+        // Add the new required fields
+        isPassportMandatory: roomBlock.IsPassportMandatory,
+        isPanMandatory: roomBlock.IsPANMandatory,
+        requireAllPaxDetails: roomBlock.RequireAllPaxDetails,
+        // isPriceChanged:roomBlock.BlockRoomResult.IsPriceChanged
+    });
+
+    console.log("Redirect Params Object:", {
+    traceId: requiredParams.traceId,
+    resultIndex: requiredParams.resultIndex,
+    hotelCode: requiredParams.hotelCode,
+    hotelName: hotelName,
+    roomDetails: JSON.stringify(roomDetails),
+    isPassportMandatory: roomBlock.IsPassportMandatory,
+    isPanMandatory: roomBlock.IsPANMandatory,
+    requireAllPaxDetails: roomBlock.RequireAllPaxDetails,
+});
+
+// Log the final URLSearchParams string
+console.log("Redirect Params String:", redirectParams.toString());
+
             
-            // Redirect after a short delay to allow toast to be seen
+           // Redirect after a short delay to allow toast to be seen
             setTimeout(() => {
                 window.location.href = `/room-detail?${redirectParams.toString()}`;
             }, 1500);
@@ -1007,9 +1039,9 @@ function blockRoom(roomId) {
             // Show error message if neither condition is met
             showToast('error', data.message || 'Failed to block room');
             
-            setTimeout(() => {
-                window.location.href = `/room-detail?${redirectParams.toString()}`;
-            }, 2000);
+            // setTimeout(() => {
+            //     window.location.href = `/room-detail?${redirectParams.toString()}`;
+            // }, 2000);
         }
     })
     .catch(error => {
@@ -1026,9 +1058,9 @@ function blockRoom(roomId) {
             roomDetails: JSON.stringify(roomDetails)
         });
         
-        setTimeout(() => {
-            window.location.href = `/room-detail?${redirectParams.toString()}`;
-        }, 2000);
+        // setTimeout(() => {
+        //     window.location.href = `/room-detail?${redirectParams.toString()}`;
+        // }, 2000);
     })
     .finally(() => {
         // Reset button state

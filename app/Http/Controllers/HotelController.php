@@ -7,6 +7,10 @@ use Carbon\Carbon;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use \Illuminate\Support\Facades\DB;
+use Razorpay\Api\Api;
+use App\Models\RazorpayPayment;
+use Exception;
+
 
 
 
@@ -21,7 +25,7 @@ class HotelController extends Controller
 
     public function __construct()
     {
-         $this->ClientId = env('HOTEL_API_CLIENT_ID' , '180189');
+         $this->ClientId = env('HOTEL_API_CLIENT_ID' , '180133');
         $this->UserName = env('HOTEL_API_USERNAME', 'MakeMy91');
         $this->Password = env('HOTEL_API_PASSWORD', 'MakeMy@910');
         $this->ApiToken = env('HOTEL_API_TOKEN', 'MakeMy@910@23');
@@ -67,9 +71,9 @@ public function search(Request $request)
 
     try {
         $payload = [
-            'ClientId' => $this->ClientId,
-            'UserName' => $this->UserName,
-            'Password' => $this->Password,
+            'ClientId' => '180133',
+            'UserName' => 'MakeMy91',
+            'Password' => 'MakeMy@910',
             "EndUserIp" => "1.1.1.1",
             "BookingMode" => "5",
             "CheckInDate" => $request->input('CheckInDate'),
@@ -110,7 +114,7 @@ public function search(Request $request)
                 ]
             ])
             ->retry(3, 100)
-            ->post('https://hotel.srdvapi.com/v8/rest/Search', $payload);
+            ->post('https://hotel.srdvtest.com/v8/rest/Search', $payload);
 
         // Log the raw API response
         \Log::info('API Response:', ['status' => $response->status(), 'body' => $response->body()]);
@@ -183,9 +187,9 @@ public function hotelDetails(Request $request)
 
         // Prepare API request payload
         $payload = [
-           'ClientId' => $this->ClientId,
-            'UserName' => $this->UserName,
-            'Password' => $this->Password,
+            'ClientId' => '180133',
+            'UserName' => 'MakeMy91',
+            'Password' => 'MakeMy@910',
             "EndUserIp" => "1.1.1.1",
             "SrdvIndex" => "15",      // Static data as per API documentation
             "SrdvType" => "MixAPI",   // Static data as per API documentation
@@ -198,7 +202,7 @@ public function hotelDetails(Request $request)
             $response = Http::withHeaders([
                 'Content-Type' => 'application/json',
                 'Api-Token' => 'MakeMy@910@23'
-            ])->post('https://hotel.srdvapi.com/v8/rest/GetHotelInfo', $payload);
+            ])->post('https://hotel.srdvtest.com/v8/rest/GetHotelInfo', $payload);
     
             // Get the response from the API
            
@@ -250,16 +254,17 @@ public function hotelDetails(Request $request)
             "HotelCode" => $request->input('hotelCode'),
             "TraceId" => $request->input('traceId'),
             "EndUserIp" => "1.1.1.1",
-           'ClientId' => $this->ClientId,
-            'UserName' => $this->UserName,
-            'Password' => $this->Password,
+            'ClientId' => '180133',
+            'UserName' => 'MakeMy91',
+            'Password' => 'MakeMy@910',
+            "EndUserIp" => "1.1.1.1",
         ];
 
         try {
             $response = Http::withHeaders([
                 'Content-Type' => 'application/json',
                 'Api-Token' => 'MakeMy@910@23'
-            ])->post('https://hotel.srdvapi.com/v8/rest/GetHotelRoom', $payload);
+            ])->post('https://hotel.srdvtest.com/v8/rest/GetHotelRoom', $payload);
 
             if ($response->successful()) {
                 $roomDetails = $response->json();
@@ -316,10 +321,10 @@ public function hotelDetails(Request $request)
         $payload = array_merge($validated, [
             'IsVoucherBooking' => true,
             'ClientReferenceNo' => 0,
-           'ClientId' => $this->ClientId,
-            'UserName' => $this->UserName,
-            'Password' => $this->Password,
-            'EndUserIp' => '1.1.1.1',
+            'ClientId' => '180133',
+            'UserName' => 'MakeMy91',
+            'Password' => 'MakeMy@910',
+            "EndUserIp" => "1.1.1.1",
             'SrdvIndex' => '15',
             'SrdvType' => 'MixAPI',
         ]);
@@ -328,7 +333,7 @@ public function hotelDetails(Request $request)
         $response = Http::withHeaders([
             'Content-Type' => 'application/json',
             'Api-Token' => 'MakeMy@910@23'
-        ])->post('https://hotel.srdvapi.com/v8/rest/BlockRoom', $payload);
+        ])->post('https://hotel.srdvtest.com/v8/rest/BlockRoom', $payload);
 
         $responseData = $response->json();
 
@@ -385,10 +390,10 @@ public function handleBalance(Request $request)
     ]);
     // Prepare API request payload
     $payload = [
-       'ClientId' => $this->ClientId,
-            'UserName' => $this->UserName,
-            'Password' => $this->Password,
-            "EndUserIp" => "1.1.1.1",
+        'ClientId' => '180133',
+        'UserName' => 'MakeMy91',
+        'Password' => 'MakeMy@910',
+        "EndUserIp" => "1.1.1.1",
     ];
 
     try {
@@ -396,7 +401,7 @@ public function handleBalance(Request $request)
         $response = Http::withHeaders([
             'Content-Type' => 'application/json',
              'Api-Token' => 'MakeMy@910@23'
-        ])->post('https://hotel.srdvapi.com/v8/rest/Balance', $payload);
+        ])->post('https://hotel.srdvtest.com/v8/rest/Balance', $payload);
 
         // Handle the response
         $balanceData = $response->json();
@@ -442,47 +447,50 @@ public function handleBalance(Request $request)
 
 public function balanceLog(Request $request)
 {
-    // Extract data from the request body instead of query parameters
-    $requestBody = $request->json()->all();
-    $traceId = $requestBody['TraceId'] ?? null;
-    $amount = $requestBody['amount'] ?? null;
+    // Validate request data
+    $validated = $request->validate([
+        'TraceId' => 'required|string',
+        'amount' => 'required|numeric'
+    ]);
 
-    // Validate required parameters
-    if (!$traceId || !$amount) {
-        return response()->json([
-            'success' => false,
-            'errorMessage' => 'Missing required parameters (TraceId or amount)',
-        ]);
-    }
+    // Extract validated data
+    $traceId = $validated['TraceId'];
+    $amount = $validated['amount'];
 
     // Hotel Balance Log API request data
     $requestData = [
-        'EndUserIp' => $requestBody['EndUserIp'] ?? '1.1.1.1',
-       'ClientId' => $this->ClientId,
-            'UserName' => $this->UserName,
-            'Password' => $this->Password,
+        'ClientId' => '180133',
+        'UserName' => 'MakeMy91',
+        'Password' => 'MakeMy@910',
+        'EndUserIp' => '1.1.1.1',
     ];
 
-    // Make the API call
-    $response = Http::withHeaders([
-        'Content-Type' => 'application/json',
-        'Api-Token' => 'MakeMy@910@23'
-    ])->post('https://hotel.srdvapi.com/v8/rest/BalanceLog', $requestData);
+    try {
+        // Make the API call
+        $response = Http::withHeaders([
+            'Content-Type' => 'application/json',
+            'Api-Token' => 'MakeMy@910@23'
+        ])->post('https://hotel.srdvtest.com/v8/rest/BalanceLog', $requestData);
 
-    // Parse the API response
-    $data = $response->json();
+        // Parse the API response
+        $data = $response->json();
 
-    // Log the full API response for debugging
-    \Log::info('Hotel Balance API Response:', $data);
+        // Log the API response for debugging
+        \Log::info('Hotel Balance API Response:', ['response' => $data]);
 
-    // Check for successful response and ensure the `Result` key exists
-    if (isset($data['Error']) && $data['Error']['ErrorCode'] === '0' && isset($data['Result'])) {
-        $results = $data['Result'];
-        $processedLogs = [];
+        // Check for successful response
+        if (isset($data['Error']) && $data['Error']['ErrorCode'] === '0' && isset($data['Result']) && is_array($data['Result'])) {
+            
+            // Get the first result item (API returns array of results)
+            $result = $data['Result'][0];
+            
+            // Verify we have a valid result with required fields
+            if (!isset($result['Balance'])) {
+                throw new \Exception('Balance information not found in API response');
+            }
 
-        foreach ($results as $result) {
-            $currentBalance = ($result['Balance']);
-            $debitAmount = ($amount);
+            $currentBalance = floatval($result['Balance']);
+            $debitAmount = floatval($amount);
 
             // Debugging log
             \Log::info("Processing Hotel Log: Current Balance: {$currentBalance}, Debit Amount: {$debitAmount}");
@@ -492,42 +500,59 @@ public function balanceLog(Request $request)
 
             // Check for insufficient balance
             if ($updatedBalance < 0) {
-                \Log::warning("Insufficient Balance for Transaction. TraceID: {$traceId}");
                 return response()->json([
                     'success' => false,
                     'errorMessage' => 'Insufficient balance.',
+                    'currentBalance' => $currentBalance,
+                    'requiredAmount' => $debitAmount
                 ]);
             }
 
-            // Build the processed log entry
-            $processedLogs[] = [
+            // Prepare the processed log entry
+            $processedLog = [
                 'ID' => $result['ID'],
                 'Date' => $result['Date'],
                 'ClientID' => $result['ClientID'],
                 'ClientName' => $result['ClientName'],
                 'Detail' => $result['Detail'],
                 'Debit' => $debitAmount,
-                'Credit' => floatval($result['Credit']),
+                'Credit' => floatval($result['Credit'] ?? 0),
                 'Balance' => $updatedBalance,
                 'Module' => $result['Module'],
                 'TraceID' => $traceId,
-                'RefID' => $result['RefID'],
+                'RefID' => $result['RefID'] ?? '',
                 'UpdatedBy' => $result['UpdatedBy']
             ];
+
+            return response()->json([
+                'success' => true,
+                'balanceLog' => $processedLog,
+                'currentBalance' => $currentBalance,
+                'updatedBalance' => $updatedBalance
+            ]);
         }
 
+        // Handle API error response
+        $errorMessage = $data['Error']['ErrorMessage'] ?? 'Unknown error occurred';
+        throw new \Exception("API Error: {$errorMessage}");
+
+    } catch (\Exception $e) {
+        \Log::error('Balance Log Error: ' . $e->getMessage(), [
+            'trace_id' => $traceId,
+            'amount' => $amount
+        ]);
+
         return response()->json([
-            'success' => true,
-            'balanceLogs' => $processedLogs,
+            'success' => false,
+            'errorMessage' => $e->getMessage()
         ]);
     }
-
-    return response()->json([
-        'success' => false,
-        'errorMessage' => $data['Error']['ErrorMessage'] ?? 'Unknown error occurred.',
-    ]);
 }
 
+// Helper function to check if all keys exist in an array
+function array_key_exists_all(array $keys, array $arr) {
+    return !array_diff_key(array_flip($keys), $arr);
+}
 
 
 
@@ -611,10 +636,10 @@ public function bookRoom(Request $request)
             "SrdvType" => "MixAPI",
             "SrdvIndex" => $data['SrdvIndex'] ?? "15",
             "TraceId" => $data['TraceId'],
+            'ClientId' => '180133',
+            'UserName' => 'MakeMy91',
+            'Password' => 'MakeMy@910',
             "EndUserIp" => "1.1.1.1",
-           'ClientId' => $this->ClientId,
-            'UserName' => $this->UserName,
-            'Password' => $this->Password,
         ];
 
         // Enhanced logging
@@ -626,7 +651,7 @@ public function bookRoom(Request $request)
                 'Content-Type' => 'application/json',
                 'Api-Token' => 'MakeMy@910@23'
             ])
-            ->post('https://hotel.srdvapi.com/v8/rest/Book', $bookingRequest);
+            ->post('https://hotel.srdvtest.com/v8/rest/Book', $bookingRequest);
 
         // Log the raw response
         \Log::info('Raw API Response:', [
@@ -756,6 +781,468 @@ public function cancelRoom(Request $request)
         ], 500);
     }
 }
+
+
+
+
+//ORDER BASED API CALLS
+public function createOrder(Request $request)
+{
+    try {
+        // Validate the request
+        $request->validate([
+            'amount' => 'required|numeric|min:1',
+            'currency' => 'nullable|string|size:3',
+            'receipt' => 'nullable|string',
+            'hotelCode' => 'nullable|string',
+            'hotelName' => 'nullable|string',
+            'traceId' => 'nullable|string',
+            'customerEmail' => 'nullable|email',
+            'customerPhone' => 'nullable|string',
+            'bookingId' => 'nullable|string'
+        ]);
+
+        // Initialize Razorpay API
+        $api = new Api('rzp_test_cvVugPSRGGLWtS', 'xHoRXawt9gYD7vitghKq1l5c');
+
+        
+        // Create order
+        $orderData = [
+            'receipt' => $request->receipt ?? 'receipt_' . time(),
+            'amount' => round($request->amount * 100), // Convert to paise
+            'currency' => $request->currency ?? 'INR',
+            'notes' => [
+                'hotelCode' => $request->hotelCode ?? '',
+                'hotelName' => $request->hotelName ?? '',
+                'traceId' => $request->traceId ?? '',
+                'customerEmail' => $request->customerEmail ?? '',
+                'customerPhone' => $request->customerPhone ?? '',
+                'bookingId' => $request->bookingId ?? 'BKG-' . time() . '-' . rand(100, 999), 
+            ]
+        ];
+        
+        $razorpayOrder = $api->order->create($orderData);
+        
+        // Create a payment record with pending status
+        $payment = new RazorpayPayment([
+            'razorpay_order_id' => $razorpayOrder->id,
+            'razorpay_payment_id' => 'pending_' . uniqid(), // Temporary unique identifier
+            'amount' => $request->amount,
+            'currency' => $request->currency ?? 'INR',
+            'trace_id' => $request->traceId,
+            'hotel_code' => $request->hotelCode,
+            'hotel_name' => $request->hotelName,
+            'customer_email' => $request->customerEmail,
+            'customer_phone' => $request->customerPhone,
+            'status' => 'pending',
+            'booking_id' => $request->bookingId ?? $orderData['notes']['bookingId'],
+        ]);
+        
+        $payment->save();
+        
+        return response()->json([
+            'success' => true,
+            'order_id' => $razorpayOrder->id,
+            'amount' => $request->amount,
+            'currency' => $request->currency ?? 'INR',
+            'key_id' => env('rzp_test_cvVugPSRGGLWtS')
+        ]);
+        
+    } catch (Exception $e) {
+        Log::error('Failed to create Razorpay order', [
+            'error' => $e->getMessage()
+        ]);
+        
+        return response()->json([
+            'success' => false,
+            'message' => 'Failed to create order: ' . $e->getMessage()
+        ], 500);
+    }
+}
+
+/**
+ * Verify Razorpay payment
+ */
+public function verifyPayment(Request $request)
+{
+    try {
+        // Validate the request
+        $request->validate([
+            'razorpay_payment_id' => 'required|string',
+            'razorpay_order_id' => 'required|string',
+            'razorpay_signature' => 'required|string',
+        ]);
+
+        // Initialize Razorpay API
+        $api = new Api('rzp_test_cvVugPSRGGLWtS', 'xHoRXawt9gYD7vitghKq1l5c');
+
+        // Get payment data from request
+        $razorpay_payment_id = $request->razorpay_payment_id;
+        $razorpay_order_id = $request->razorpay_order_id;
+        $razorpay_signature = $request->razorpay_signature;
+        
+        // Find existing payment record or create a new one
+        $payment = RazorpayPayment::where('razorpay_order_id', $razorpay_order_id)->first();
+        
+        if (!$payment) {
+            // Log this unusual situation
+            Log::warning('Payment record not found for verification', [
+                'order_id' => $razorpay_order_id,
+                'payment_id' => $razorpay_payment_id
+            ]);
+            
+            // Fetch order details to get amount
+            try {
+                $order = $api->order->fetch($razorpay_order_id);
+                
+                $payment = new RazorpayPayment([
+                    'razorpay_order_id' => $razorpay_order_id,
+                    'razorpay_payment_id' => $razorpay_payment_id,
+                    'razorpay_signature' => $razorpay_signature,
+                    'amount' => $order->amount / 100, // Convert from paise
+                    'currency' => $order->currency,
+                    'status' => 'pending'
+                ]);
+            } catch (Exception $orderFetchError) {
+                Log::error('Failed to fetch order details', [
+                    'error' => $orderFetchError->getMessage(),
+                    'order_id' => $razorpay_order_id
+                ]);
+                
+                // Create a payment record with basic info
+                $payment = new RazorpayPayment([
+                    'razorpay_order_id' => $razorpay_order_id,
+                    'razorpay_payment_id' => $razorpay_payment_id,
+                    'razorpay_signature' => $razorpay_signature,
+                    'status' => 'pending'
+                ]);
+            }
+        } else {
+            // Update existing record
+            $payment->razorpay_payment_id = $razorpay_payment_id;
+            $payment->razorpay_signature = $razorpay_signature;
+        }
+        
+        // Save initial record
+        $payment->save();
+        
+        try {
+            // Generate signature for verification
+            $attributes = [
+                'razorpay_payment_id' => $razorpay_payment_id,
+                'razorpay_order_id' => $razorpay_order_id
+            ];
+            
+            // Verify signature
+            $api->utility->verifyPaymentSignature($attributes + ['razorpay_signature' => $razorpay_signature]);
+            
+            // If verification passes, fetch payment details
+            try {
+                $razorpayPayment = $api->payment->fetch($razorpay_payment_id);
+                
+                // Update payment status to success
+                $payment->status = 'success';
+                $payment->payment_method = $razorpayPayment->method ?? null;
+                
+                // Update customer info if available
+                if (!$payment->customer_email && isset($razorpayPayment->email)) {
+                    $payment->customer_email = $razorpayPayment->email;
+                }
+                
+                if (!$payment->customer_phone && isset($razorpayPayment->contact)) {
+                    $payment->customer_phone = $razorpayPayment->contact;
+                }
+            } catch (Exception $paymentFetchError) {
+                // Log error but still consider payment successful if signature verification passed
+                Log::warning('Failed to fetch payment details but signature verified', [
+                    'error' => $paymentFetchError->getMessage(),
+                    'payment_id' => $razorpay_payment_id
+                ]);
+                
+                $payment->status = 'success';
+            }
+            
+            $payment->save();
+            
+            // Log successful payment
+            Log::info('Payment verified successfully', [
+                'payment_id' => $razorpay_payment_id,
+                'amount' => $payment->amount,
+                'currency' => $payment->currency
+            ]);
+            
+            // For API calls, return JSON
+            if ($request->wantsJson()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Payment verified successfully',
+                    'payment_id' => $razorpay_payment_id
+                ]);
+            }
+            
+            // Collect all booking details to pass to success page
+            $successParams = [
+                'payment_id' => $razorpay_payment_id,
+            ];
+            
+            // Add additional booking details if provided
+            if ($request->has('traceId')) {
+                $successParams['traceId'] = $request->traceId;
+            }
+            if ($request->has('hotelCode')) {
+                $successParams['hotelCode'] = $request->hotelCode;
+            }
+            if ($request->has('hotelName')) {
+                $successParams['hotelName'] = $request->hotelName;
+            }
+            if ($request->has('roomDetails')) {
+                $successParams['roomDetails'] = $request->roomDetails;
+            }
+            if ($request->has('passengerDetails')) {
+                $successParams['passengerDetails'] = $request->passengerDetails;
+            }
+            
+            // For web requests, redirect to success page with all parameters
+            return redirect()->route('payment.success', $successParams)
+                ->with('success', 'Payment processed successfully');
+            
+        } catch (Exception $verificationError) {
+            // Update payment status to failed
+            $payment->status = 'failed';
+            $payment->error_message = $verificationError->getMessage();
+            $payment->save();
+            
+            // Log verification error
+            Log::error('Payment verification failed', [
+                'payment_id' => $razorpay_payment_id,
+                'error' => $verificationError->getMessage()
+            ]);
+            
+            // For API calls, return JSON
+            if ($request->wantsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Payment verification failed: ' . $verificationError->getMessage()
+                ], 400);
+            }
+            
+            // For web requests, redirect to failure page
+            return redirect()->route('payment.failed')
+                ->with('error', 'Payment verification failed: ' . $verificationError->getMessage());
+        }
+        
+    } catch (Exception $e) {
+        // Log general error
+        Log::error('Payment processing error', [
+            'error' => $e->getMessage(),
+            'trace' => $e->getTraceAsString()  // Add stack trace for better debugging
+        ]);
+        
+        // Check if we have payment data in the request
+        if ($request->has('razorpay_payment_id') && $request->has('razorpay_order_id')) {
+            // Try to verify payment status directly with Razorpay
+            try {
+                $api = new Api('rzp_test_cvVugPSRGGLWtS', 'xHoRXawt9gYD7vitghKq1l5c');
+                $paymentInfo = $api->payment->fetch($request->razorpay_payment_id);
+                
+                // If payment is authorized or captured, consider it successful
+                if (in_array($paymentInfo->status, ['authorized', 'captured'])) {
+                    // Create or update payment record
+                    $payment = RazorpayPayment::updateOrCreate(
+                        ['razorpay_order_id' => $request->razorpay_order_id],
+                        [
+                            'razorpay_payment_id' => $request->razorpay_payment_id,
+                            'razorpay_signature' => $request->razorpay_signature,
+                            'status' => 'success',
+                            'amount' => $paymentInfo->amount / 100,
+                            'currency' => $paymentInfo->currency
+                        ]
+                    );
+                    
+                    // Collect all booking details to pass to success page
+                    $successParams = [
+                        'payment_id' => $request->razorpay_payment_id,
+                    ];
+                    
+                    // Add additional booking details if provided
+                    if ($request->has('traceId')) {
+                        $successParams['traceId'] = $request->traceId;
+                    }
+                    if ($request->has('resultIndex')) {
+                        $successParams['resultIndex'] = $request->resultIndex;
+                    }
+
+                    if ($request->has('hotelCode')) {
+                        $successParams['hotelCode'] = $request->hotelCode;
+                    }
+                    if ($request->has('hotelName')) {
+                        $successParams['hotelName'] = $request->hotelName;
+                    }
+                    if ($request->has('roomDetails')) {
+                        $successParams['roomDetails'] = $request->roomDetails;
+                    }
+                    if ($request->has('passengerDetails')) {
+                        $successParams['passengerDetails'] = $request->passengerDetails;
+                    }
+                    
+                    // Redirect to success page with all parameters
+                    return redirect()->route('payment.success', $successParams)
+                        ->with('success', 'Payment processed successfully');
+                }
+            } catch (Exception $razorpayError) {
+                Log::error('Failed to verify payment with Razorpay directly', [
+                    'error' => $razorpayError->getMessage()
+                ]);
+            }
+        }
+        
+        // For API calls, return JSON
+        if ($request->wantsJson()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Payment processing error: ' . $e->getMessage()
+            ], 500);
+        }
+        
+        // For web requests, redirect to failure page
+        return redirect()->route('payment.failed')
+            ->with('error', 'Payment processing error: ' . $e->getMessage());
+    }
+}
+/**
+ * Show payment success page
+ */
+public function showSuccessPage(Request $request)
+{
+    $payment = null;
+    $paymentId = $request->payment_id;
+    $bookingDetails = [
+        'traceId' => $request->traceId,
+        'resultIndex' => $request->resultIndex,
+        'hotelCode' => $request->hotelCode,
+        'hotelName' => $request->hotelName,
+        'roomDetails' => $request->roomDetails,
+        'passengerDetails' => $request->passengerDetails,
+        'payment_id' => $paymentId
+    ];
+    
+    
+    if ($paymentId) {
+        $payment = RazorpayPayment::where('razorpay_payment_id', $paymentId)->first();
+    }
+    
+    return view('frontend.payments_success', [
+        'payment' => $payment,
+        'bookingDetails' => $bookingDetails
+    ]);
+}
+
+/**
+ * Show payment failed page
+ */
+public function showFailedPage()
+{
+    return view('frontend.payments_failed');
+}
+
+/**
+ * Update booking details for a payment
+ */
+public function updateBookingDetails(Request $request)
+{
+    try {
+        // Validate the request
+        $request->validate([
+            'payment_id' => 'required|string',
+            'booking_id' => 'required|string',
+            'booking_details' => 'nullable|array'
+        ]);
+        
+        $payment = RazorpayPayment::where('razorpay_payment_id', $request->payment_id)->first();
+        
+        if (!$payment) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Payment record not found'
+            ], 404);
+        }
+        
+        $payment->booking_id = $request->booking_id;
+        
+        if ($request->has('booking_details')) {
+            $payment->booking_details = $request->booking_details;
+        }
+        
+        $payment->save();
+        
+        return response()->json([
+            'success' => true,
+            'message' => 'Payment updated with booking details'
+        ]);
+        
+    } catch (Exception $e) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Error updating payment: ' . $e->getMessage()
+        ], 500);
+    }
+}
+
+/**
+ * Get payment details by ID
+ */
+public function getPaymentDetails($paymentId)
+{
+    $payment = RazorpayPayment::where('razorpay_payment_id', $paymentId)->first();
+    
+    if (!$payment) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Payment not found'
+        ], 404);
+    }
+    
+    return response()->json([
+        'success' => true,
+        'payment' => $payment
+    ]);
+}
+
+/**
+ * Get payment history for a particular contact (email or phone)
+ */
+public function getPaymentHistory(Request $request)
+{
+    $request->validate([
+        'email' => 'nullable|email',
+        'phone' => 'nullable|string'
+    ]);
+    
+    $query = RazorpayPayment::query();
+    
+    if ($request->has('email')) {
+        $query->where('customer_email', $request->email);
+    }
+    
+    if ($request->has('phone')) {
+        $query->where('customer_phone', $request->phone);
+    }
+    
+    if (!$request->has('email') && !$request->has('phone')) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Either email or phone is required'
+        ], 400);
+    }
+    
+    $payments = $query->orderBy('created_at', 'desc')->get();
+        
+    return response()->json([
+        'success' => true,
+        'payments' => $payments
+    ]);
+}
+
 
 
 }
