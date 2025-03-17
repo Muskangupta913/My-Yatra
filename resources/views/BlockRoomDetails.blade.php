@@ -1128,8 +1128,6 @@ function cycleImages(clickedImage) {
 }
 
 // Add window resize listener to update styles
-
-
         async function checkBalance() {
             const loadingOverlay = document.createElement('div');
             loadingOverlay.className = 'loading-overlay';
