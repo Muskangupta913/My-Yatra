@@ -869,8 +869,8 @@ if (outboundFareQuoteData || returnFareQuoteData) {
         // Update total fare input if it exists
         const totalFareInput = document.getElementById('totalFare');
         if (totalFareInput) {
-            const totalFare = (outboundFareQuoteData?.Fare?.OfferedFare || 0) + 
-                              (returnFareQuoteData?.Fare?.OfferedFare || 0);
+            const totalFare = (outboundFareQuoteData?.Fare?.PublishedFare || 0) + 
+                              (returnFareQuoteData?.Fare?.PublishedFare || 0);
             totalFareInput.value = totalFare;
         }
     } else {
@@ -1005,7 +1005,7 @@ function fetchSSRData(type, passengerType, resultIndex, srdvIndex, direction, pa
                 },
                 body: JSON.stringify({
                     EndUserIp: '1.1.1.1',
-                    ClientId: '180133',
+                    ClientId: '180189',
                     UserName: 'MakeMy91',
                     Password: 'MakeMy@910',
                     SrdvType: "MixAPI",
@@ -1530,7 +1530,7 @@ function fetchSeatMap(type, resultIndex, srdvIndex, direction, passengerType, pa
         },
         body: JSON.stringify({
             EndUserIp: '1.1.1.1',
-            ClientId: '180133',
+            ClientId: '180189',
             UserName: 'MakeMy91',
             Password: 'MakeMy@910',
             SrdvType: "MixAPI",
@@ -1668,8 +1668,8 @@ function calculateTotalPrice() {
     let total = 0;
 
     // Add base fares from both flights
-    const outboundBaseFare = window.outboundFareQuoteData?.Fare?.OfferedFare || 0;
-    const returnBaseFare = window.returnFareQuoteData?.Fare?.OfferedFare || 0;
+    const outboundBaseFare = window.outboundFareQuoteData?.Fare?.PublishedFare || 0;
+    const returnBaseFare = window.returnFareQuoteData?.Fare?.PublishedFare || 0;
     total += parseFloat(outboundBaseFare) + parseFloat(returnBaseFare);
     console.log('total fare and price', total);
     console.log('outbound baseFare', outboundBaseFare);
@@ -1724,7 +1724,7 @@ function calculateTotalPriceWithDetails() {
     const returnFare = window.returnFareQuoteData?.Fare || {};
 
     // Calculate base components for both flights
-    const baseFare = (parseFloat(outboundFare.OfferedFare) || 0) + (parseFloat(returnFare.OfferedFare) || 0);
+    const baseFare = (parseFloat(outboundFare.PublishedFare) || 0) + (parseFloat(returnFare.PublishedFare) || 0);
     const tax = (parseFloat(outboundFare.Tax) || 0) + (parseFloat(returnFare.Tax) || 0);
     const yqTax = (parseFloat(outboundFare.YQTax) || 0) + (parseFloat(returnFare.YQTax) || 0);
     const transactionFee = (parseFloat(outboundFare.TransactionFee) || 0) + (parseFloat(returnFare.TransactionFee) || 0);
@@ -1853,14 +1853,14 @@ function updateTotalFare() {
                                         <div class="fare-card bg-light p-3 rounded text-center">
                                             <div class="text-primary mb-2"><i class="fas fa-plane-departure fa-2x"></i></div>
                                             <h6>Outbound Flight</h6>
-                                            <h5 class="text-success mb-0">₹${window.outboundFareQuoteData?.Fare?.OfferedFare || 0}</h5>
+                                            <h5 class="text-success mb-0">₹${window.outboundFareQuoteData?.Fare?.PublishedFare || 0}</h5>
                                         </div>
                                     </div>
                                     <div class="col-md-6">
                                         <div class="fare-card bg-light p-3 rounded text-center">
                                             <div class="text-primary mb-2"><i class="fas fa-plane-arrival fa-2x"></i></div>
                                             <h6>Return Flight</h6>
-                                            <h5 class="text-success mb-0">₹${window.returnFareQuoteData?.Fare?.OfferedFare || 0}</h5>
+                                            <h5 class="text-success mb-0">₹${window.returnFareQuoteData?.Fare?.PublishedFare || 0}</h5>
                                         </div>
                                     </div>
                                 </div>
@@ -1997,8 +1997,8 @@ if (typeof window !== 'undefined') {
 // Function to check flight balance
 function checkFlightBalance() {
     return new Promise((resolve, reject) => {
-        const outboundFare = outboundFareQuoteData?.Fare?.OfferedFare || 0;
-        const returnFare = returnFareQuoteData?.Fare?.OfferedFare || 0;
+        const outboundFare = outboundFareQuoteData?.Fare?.OPublishedFare || 0;
+        const returnFare = returnFareQuoteData?.Fare?.PublishedFare || 0;
         const totalFare = outboundFare + returnFare;
         // Create loading overlay
         const loadingOverlay = document.createElement('div');
@@ -2024,7 +2024,7 @@ function checkFlightBalance() {
             },
             body: JSON.stringify({
                 EndUserIp: '1.1.1.1',
-                ClientId: '180133',
+                ClientId: '180189',
                 UserName: 'MakeMy91',
                 Password: 'MakeMy@910'
             })
@@ -2278,7 +2278,7 @@ document.getElementById('submitButton').addEventListener('click', async function
                 resultIndex: outboundResultIndex,
                 srdvIndex: outboundSrdvIndex,
                 traceId: traceId,
-                totalFare: outboundFareQuoteData.Fare.OfferedFare,
+                totalFare: outboundFareQuoteData.Fare.PublishedFare,
                 bookingId: outboundResult.bookingId,
                 pnr: outboundResult.pnr,
                 passengers: outboundResult.passengers,
@@ -2316,7 +2316,7 @@ document.getElementById('submitButton').addEventListener('click', async function
                 resultIndex: returnResultIndex,
                 srdvIndex: returnSrdvIndex,
                 traceId: traceId,
-                totalFare: returnFareQuoteData.Fare.OfferedFare,
+                totalFare: returnFareQuoteData.Fare.PublishedFare,
                 bookingId: returnResult.bookingId,
                 pnr: returnResult.pnr,
                 passengers: returnResult.passengers,
@@ -2331,14 +2331,14 @@ document.getElementById('submitButton').addEventListener('click', async function
                     resultIndex: outboundResultIndex,
                     srdvIndex: outboundSrdvIndex,
                     traceId: traceId,
-                    totalFare: outboundFareQuoteData.Fare.OfferedFare || 0,
+                    totalFare: outboundFareQuoteData.Fare.PublishedFare || 0,
                     ...bookingPayloads.lcc.outbound
                 } : null,
                 return: isLCCreturn ? {
                     resultIndex: returnResultIndex,
                     srdvIndex: returnSrdvIndex,
                     traceId: traceId,
-                    totalFare: returnFareQuoteData.Fare.OfferedFare || 0,
+                    totalFare: returnFareQuoteData.Fare.PublishedFare || 0,
                     ...bookingPayloads.lcc.return
                 } : null
             };

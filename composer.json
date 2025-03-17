@@ -13,7 +13,7 @@
         "laravel/tinker": "^2.8",
         "php-flasher/flasher-toastr-laravel": "^1.15",
         "php-flasher/flasher-toastr-symfony": "^1.15",
-        "razorpay/razorpay": "*",
+        "razorpay/razorpay": "^2.9",
         "spatie/laravel-sitemap": "^7.3"
     },
     "require-dev": {

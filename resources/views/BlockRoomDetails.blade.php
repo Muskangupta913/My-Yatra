@@ -856,7 +856,7 @@ function createSubmitButton() {
                     // On successful payment - submit the form data
                     const form = document.createElement('form');
                     form.method = 'POST';
-                    form.action = '{{ route("payment.verify") }}';
+                    form.action = 'hotel/payment/verify';
                     
                     // Add CSRF token
                     const csrfField = document.createElement('input');
@@ -1134,6 +1134,7 @@ function cycleImages(clickedImage) {
             const loadingOverlay = document.createElement('div');
             loadingOverlay.className = 'loading-overlay';
             loadingOverlay.innerHTML = '<div class="loading-spinner">Checking balance...</div>';
+            loadingOverlay.style.display = 'none';
             document.body.appendChild(loadingOverlay);
 
             try {
@@ -1165,7 +1166,7 @@ function cycleImages(clickedImage) {
                         currency: 'INR'
                     }).format(data.balance);
 
-                    if (confirm(`Available Balance: ${formattedBalance}\nDo you want to proceed with the booking?`)) {
+                    if (confirm(`Do you want to proceed with the booking?`)) {
                         const bookingDetails = fetchBookingDetails();
                         const passengerDetails = Array.isArray(window.passengerDetails) ? 
                         window.passengerDetails : [window.passengerDetails];

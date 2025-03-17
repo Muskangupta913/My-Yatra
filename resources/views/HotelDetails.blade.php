@@ -313,7 +313,7 @@ body {
 </template>
 
     <div class="room-info-container">
-        <div id="room-details" class="loading-state">Loading room details...</div>
+        <div id="room-details" class="loading-state">Kindly Refresh the page to the availabe rooms</div>
     </div>
     <!-- Include Toastr JS -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/js/toastr.min.js"></script>
@@ -787,14 +787,21 @@ function fetchRoomDetails() {
             
             document.getElementById('room-details').innerHTML = roomDetailsHtml;
         } else {
-            document.getElementById('room-details').innerHTML = 
-                '<div style="text-align: center; padding: 2rem; color: #ef4444;">Failed to load room details</div>';
-        }
+    Swal.fire({
+        icon: "error",
+        title: "Oops...",
+        text: "An error occured.Kindly Refresh the page!"
+    });
+}
     })
     .catch(error => {
         console.error('Error:', error);
         document.getElementById('room-details').innerHTML = 
-            '<div style="text-align: center; padding: 2rem; color: #ef4444;">An error occurred while loading room details</div>';
+        Swal.fire({
+        icon: "error",
+        title: "Oops...",
+        text: "An error occured.Kindly Refresh the page!"
+    });
     })
     .finally(() => {
         roomDetailsLoaded = true;

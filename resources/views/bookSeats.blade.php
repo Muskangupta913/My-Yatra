@@ -655,7 +655,7 @@ document.getElementById('payNowButton').addEventListener('click', function(e) {
                     currency: data.currency,
                     name: "MAKE MY BHARAT YATRA",
                     description: "Payment for bus tickets",
-                    image: "https://your-logo-url.com/logo.png",
+                    image:"/assets/images/mmby_logo.jpeg",
                     order_id: data.order_id,
                     
                     handler: function(response) {

@@ -1605,7 +1605,7 @@ if (typeof window !== 'undefined') {
 // First, add this function at the beginning to calculate total price
 function calculateTotalPriceWithDetails() {
     // Get base fare from fareQuoteData
-    const baseFare = parseFloat(fareQuoteData.Fare.BaseFare) || 0;
+    const baseFare = parseFloat(fareQuoteData?.Fare?.PublishedFare) || 0;
     const tax = parseFloat(fareQuoteData.Fare.Tax) || 0;
     const yqTax = parseFloat(fareQuoteData.Fare.YQTax) || 0;
     const transactionFee = parseFloat(fareQuoteData.Fare.TransactionFee) || 0;
@@ -1645,9 +1645,7 @@ function calculateTotalPriceWithDetails() {
     });
 
     // Calculate grand total
-    const grandTotal = baseFare + tax + yqTax + transactionFee + 
-                      additionalTxnFeeOfrd + additionalTxnFeePub + 
-                      airTransFee + totalSSRCost;
+    const grandTotal = baseFare + totalSSRCost;
 
     return {
         grandTotal,
@@ -2076,7 +2074,7 @@ async function createRazorpayOrder(bookingDetails) {
     
     try {
         // Make API call to create a Razorpay order using the correct route
-        const response = await fetch('/payment/create-order', {
+        const response = await fetch('flight/payment/create-order', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -2166,7 +2164,7 @@ async function handlePaymentSuccess(response, paymentId) {
         // Create form for submission to verify payment
         const form = document.createElement('form');
         form.method = 'POST';
-        form.action = '/payment/verify'; // This should match your verify payment route
+        form.action = 'flight/payment/verify'; // This should match your verify payment route
         
         // Add CSRF token
         const csrfField = document.createElement('input');

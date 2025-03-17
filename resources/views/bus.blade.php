@@ -481,7 +481,7 @@ document.addEventListener('DOMContentLoaded', function () {
                             <span style="font-size: 1rem; color: #999; text-decoration: line-through;">₹${price.PublishedPrice}</span>
                             <span style="font-size: 1.5rem; font-weight: bold; color:rgb(7, 9, 10);margin-left: 10px;">₹${price.OfferedPrice}</span>
                         </div>
-                       <div class="d-flex justify-content-between align-items-center mb-3">
+                       <div class="d-flex justify-content-between align-items-center mb-3"style="margin-top: 20px;">
                            <h5 class="card-title text-primary font-weight-bold" style="font-size: 1.5rem;">${bus.TravelName}</h5>
                        </div>
                           <p class="badge badge-pill bus-type-badge" style="background-color: #007bff; color: white; font-size: 1.1rem; padding: 0.5rem 1rem;"> ${bus.BusType}</p>
@@ -503,55 +503,57 @@ document.addEventListener('DOMContentLoaded', function () {
                             <div><strong>Max Seats per Ticket:</strong> ${bus.MaxSeatsPerTicket}</div>
                         </div>
 
-                        <!-- Pick-Up & Drop Dropdown -->
-                        <div class="d-flex justify-content-start mt-4">
-                            <label for="pickupDropDropdown-${bus.ResultIndex}" class="font-weight-bold" 
-                                style="cursor: pointer; color: #333; transition: color 0.3s;margin-right: 15px;">
-                                🛣️ Pick-Up & Drop
-                                <span class="fas fa-chevron-down"></span>
-                            </label>
-                            <label for="policiesDropdown-${bus.ResultIndex}" class="font-weight-bold" 
-                            style="cursor: pointer; color: #333; transition: color 0.3s;">
-                            📜 Policies
-                            <span class="fas fa-chevron-down"></span>
-                            </label>
-                            <div id="policiesDropdown-${bus.ResultIndex}" class="policies-details"  
-                            style="display: none; padding: 10px; background-color: #f8f9fa; border-radius: 5px; margin-top: 10px; border: 1px solid #ddd;">
-                            <div class="row">
-                                <!-- Policies Content -->
-                            <div class="col-md-12">
-                                <div>
-                                    ${bus.CancellationPolicies.map(policy => `
-                                        <p><strong>Time:</strong> ${policy.PolicyString}</p>
-                                        <p><strong>Cancellation Charge:</strong> ₹${policy.CancellationCharge}</p>
-                                        <hr>
-                                    `).join('')}
-                                </div>
-                            </div>
-                            </div>
-                        </div>
-                        <div id="pickupDropDropdown-${bus.ResultIndex}" class="pickup-drop-details"  
-                            style="display: none; padding: 10px; background-color: #f8f9fa; border-radius: 5px; margin-top: 10px; border: 1px solid #ddd;">
-                            <div class="row">
-                                <!-- Boarding Points on the left -->
-                                <div class="col-md-6">
-                                    <div><strong>Boarding Points:</strong></div>
-                                    ${bus.BoardingPoints.map(point => `
-                                        <p>${point.CityPointName} - ${new Date(point.CityPointTime).toLocaleString()}</p>
-                                    `).join('')}
-                                </div>
-                                <!-- Dropping Points on the right -->
-                                <div class="col-md-6">
-                                    <div><strong>Dropping Points:</strong></div>
-                                    ${bus.DroppingPoints.map(point => `
-                                        <p>${point.CityPointName} - ${new Date(point.CityPointTime).toLocaleString()}</p>
-                                    `).join('')}
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                    <!-- Pick-Up & Drop Dropdown -->
+<div class="d-flex flex-column flex-sm-row justify-content-start mt-4">
+    <label for="pickupDropDropdown-${bus.ResultIndex}" class="font-weight-bold mb-2 mb-sm-0 me-sm-3" 
+        style="cursor: pointer; color: #333; transition: color 0.3s;">
+        🛣️ Pick-Up & Drop
+        <span class="fas fa-chevron-down"></span>
+    </label>
+    <label for="policiesDropdown-${bus.ResultIndex}" class="font-weight-bold" 
+        style="cursor: pointer; color: #333; transition: color 0.3s;">
+        📜 Policies
+        <span class="fas fa-chevron-down"></span>
+    </label>
+</div>
 
-                    <!-- Select Seat Button in Bottom Right Corner (Fixed) -->
+<div id="policiesDropdown-${bus.ResultIndex}" class="policies-details"  
+    style="display: none; padding: 10px; background-color: #f8f9fa; border-radius: 5px; margin-top: 10px; border: 1px solid #ddd; overflow-x: auto; max-width: 100%;">
+    <div class="row">
+        <!-- Policies Content -->
+        <div class="col-12">
+            <div>
+                ${bus.CancellationPolicies.map(policy => `
+                    <p><strong>Time:</strong> ${policy.PolicyString}</p>
+                    <p><strong>Cancellation Charge:</strong> ₹${policy.CancellationCharge}</p>
+                    <hr>
+                `).join('')}
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="pickupDropDropdown-${bus.ResultIndex}" class="pickup-drop-details"  
+    style="display: none; padding: 10px; background-color: #f8f9fa; border-radius: 5px; margin-top: 10px; border: 1px solid #ddd; overflow-x: auto; max-width: 100%;">
+    <div class="row">
+        <!-- Boarding Points on the left -->
+        <div class="col-12 col-md-6 mb-3 mb-md-0">
+            <div><strong>Boarding Points:</strong></div>
+            ${bus.BoardingPoints.map(point => `
+                <p class="text-break">${point.CityPointName} - ${new Date(point.CityPointTime).toLocaleString()}</p>
+            `).join('')}
+        </div>
+        <!-- Dropping Points on the right -->
+        <div class="col-12 col-md-6">
+            <div><strong>Dropping Points:</strong></div>
+            ${bus.DroppingPoints.map(point => `
+                <p class="text-break">${point.CityPointName} - ${new Date(point.CityPointTime).toLocaleString()}</p>
+            `).join('')}
+        </div>
+    </div>
+</div>
+
+<!-- Select Seat Button in Bottom Right Corner (Fixed) -->
                     <div class="d-flex justify-content-end mt-3 fixed-seat-btn">
                         <a href="{{ route('bus.seatLayout') }}?TraceId=${traceId}&ResultIndex=${bus.ResultIndex}" 
                             class="btn btn-primary btn-block py-2 rounded" 
@@ -562,7 +564,8 @@ document.addEventListener('DOMContentLoaded', function () {
                     </div>
                 </div>
             </div>
-        `;});
+        `;
+    });
 
         document.getElementById('busListings').innerHTML = busListingsHTML;
     }

@@ -7,22 +7,73 @@
     <title>Payment Successful</title>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+      /* Processing overlay styles */
+      .processing-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.7); /* Darker background for better hiding */
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 9999; /* High z-index to ensure it's on top */
+        backdrop-filter: blur(3px); /* Adding blur effect for better hiding */
+    }
+    
+    .processing-content {
+        background-color: white;
+        padding: 30px;
+        border-radius: 10px;
+        text-align: center;
+        max-width: 500px;
+        width: 90%;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    }
+    
+    .spinner {
+        margin: 20px auto;
+        width: 50px;
+        height: 50px;
+        border: 5px solid #f3f3f3;
+        border-top: 5px solid #3498db;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+    }
+    
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+    </style>
 </head>
 <body>
+<!-- ADDED: Processing overlay -->
+<div id="processingOverlay" class="processing-overlay">
+    <div class="processing-content">
+        <h3>Please wait...</h3>
+        <div class="spinner"></div>
+        <p id="processingMessage">Please wait while we process your booking...
 
+Don't close this window</p>
+        <p id="processingStatus">Processing...</p>
+    </div>
+</div>
 <div class="container">
     <div class="row justify-content-center">
         <div class="col-md-8">
             <div class="card mt-5">
-                <div class="card-header bg-success text-white">Payment Successful</div>
+                <div class="card-header bg-success text-white">Booking Successful</div>
 
                 <div class="card-body text-center">
                     <i class="fa fa-check-circle fa-5x text-success mb-3"></i>
                     <h2>Thank You!</h2>
-                    <p class="lead">Your payment has been processed successfully.</p>
+                    <p class="lead">Your booking has been confirmed.</p>
                     
                     <div class="mt-4">
-                        <a href="index.html" class="btn btn-primary">Back to Home</a>
+                        <a href="{{ route('home') }}" class="btn btn-primary">Back to Home</a>
                     </div>
                 </div>
             </div>
@@ -33,6 +84,9 @@
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
 <script>
+    function hideProcessingOverlay() {
+    document.getElementById('processingOverlay').style.display = 'none';
+}
 // Retrieve boarding and dropping points from sessionStorage
 const boardingPoint = JSON.parse(sessionStorage.getItem("BoardingPoint"));
 const droppingPoint = JSON.parse(sessionStorage.getItem("DroppingPoint"));
@@ -194,9 +248,12 @@ fetch(`/balance-log?TraceId=${traceId}&amount=${amount}`, {
 .then(response => response.json())
 .then(bookingResult => {
     if (bookingResult.status === 'success') {
+        hideProcessingOverlay();
         // alert(`Booking Successful!\nTicket Number: ${bookingResult.data.TicketNo}\nStatus: ${bookingResult.data.BusBookingStatus}`);
-    } else {
-        alert(`Booking Failed: ${bookingResult.message}`);
+    } 
+    else {
+        // Redirect to failed page with error message
+        window.location.href = `/payments/failed?message=${encodeURIComponent(bookingResult.message || "Booking failed")}`;
     }
 })
 .catch(error => {

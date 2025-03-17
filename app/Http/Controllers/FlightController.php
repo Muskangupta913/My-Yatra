@@ -1302,7 +1302,7 @@ public function flightBalanceLog(Request $request) {
             // API Payload - Modify with actual data if needed
             $payload = [
                 'EndUserIp' => '1.1.1.1',
-                'ClientId' => '180189',
+                'ClientId' => '180133',
                 'UserName' => 'MakeMy91',
                 'Password' => 'MakeMy@910',
                 'SrdvType' => 'MixAPI',
@@ -1477,12 +1477,13 @@ public function flightBalanceLog(Request $request) {
             ], 400);
         }
 
+        // Use environment variables properly
         $api = new Api('rzp_test_cvVugPSRGGLWtS', 'xHoRXawt9gYD7vitghKq1l5c');
 
         // Calculate the amount in paise (Razorpay requires amount in smallest currency unit)
         $amount = $bookingDetails['grandTotal'] * 100;
         
-        // Determine if this is a round trip - Fixed this section for proper checking
+        // Determine if this is a round trip
         $isRoundTrip = false;
         if (isset($bookingDetails['lcc'])) {
             $isRoundTrip = isset($bookingDetails['lcc']['return']) && $bookingDetails['lcc']['return'];
@@ -1511,7 +1512,7 @@ public function flightBalanceLog(Request $request) {
         $payment->booking_details = $bookingDetails;
         $payment->is_round_trip = $isRoundTrip;
         
-        // Store booking IDs and PNRs - Fixed this section for proper null checking
+        // Store booking IDs and PNRs
         if ($isRoundTrip) {
             // For round trips, store both outbound and return details
             $outboundDetails = [];
@@ -1563,9 +1564,9 @@ public function flightBalanceLog(Request $request) {
             'status' => 'success',
             'order_id' => $razorpayOrder->id,
             'payment_id' => $payment->id,
-            'amount' => $amount / 100,
+            'amount' => $amount / 100, // Convert back to actual amount for display
             'currency' => 'INR',
-            'key_id' => env('rzp_test_cvVugPSRGGLWtS', 'rzp_test_cvVugPSRGGLWtS'),
+            'key_id' => env('HoRXawt9gYD7vitghxKq1l5c'),
             'name' => $payment->user_name ?? 'Flight Booking',
             'email' => $payment->email,
             'contact' => $payment->contact
@@ -1589,13 +1590,14 @@ public function verifyPayment(Request $request)
     $razorpay_payment_id = $request->input('razorpay_payment_id');
     $razorpay_order_id = $request->input('razorpay_order_id');
 
-    $api = new Api('rzp_test_cvVugPSRGGLWtS', 'xHoRXawt9gYD7vitghKq1l5c');
+    // Use environment variables for API keys
+    $api = new Api('rzp_test_cvVugPSRGGLWtS', 'HoRXawt9gYD7vitghxKq1l5c');
     
     try {
         $payment = FlightPayment::where('razorpay_order_id', $razorpay_order_id)->firstOrFail();
         
-        // Verify signature
-        $generatedSignature = hash_hmac('sha256', $razorpay_order_id . '|' . $razorpay_payment_id, 'xHoRXawt9gYD7vitghKq1l5c');
+        // Verify signature using the correct secret key
+        $generatedSignature = hash_hmac('sha256', $razorpay_order_id . '|' . $razorpay_payment_id, env('HoRXawt9gYD7vitghxKq1l5c'));
         
         if ($generatedSignature !== $signature) {
             throw new Exception('Invalid payment signature');
@@ -1625,12 +1627,10 @@ public function verifyPayment(Request $request)
         
     } catch (Exception $e) {
         Log::error('Payment verification failed: ' . $e->getMessage());
-        return redirect()->route('flight.booking.failed')
+        return redirect()->route('flight.payment.failed')
             ->with('error', 'Payment verification failed: ' . $e->getMessage());
     }
 }
-
-
     
     protected function processLCCBooking($payment)
     {
@@ -1669,12 +1669,12 @@ public function verifyPayment(Request $request)
             $payment->status = 'failed';
             $payment->save();
             
-            return redirect()->route('flight.booking.failed')
+            return redirect()->route('flight.payment.failed')
                 ->with('error', 'Payment failed. Please try again.');
             
         } catch (Exception $e) {
             Log::error('Failed payment handling error: ' . $e->getMessage());
-            return redirect()->route('flight.booking.failed')
+            return redirect()->route('flight.payment.failed')
                 ->with('error', 'An error occurred. Please try again.');
         }
     }

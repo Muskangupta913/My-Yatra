@@ -739,8 +739,8 @@ public function initializePayment(Request $request)
     ]);
     
     try {
-        // Initialize Razorpay API
-        $api = new Api('rzp_test_cvVugPSRGGLWtS', 'xHoRXawt9gYD7vitghKq1l5c');
+        // Initialize Razorpay API with env variables
+        $api = new Api(env('RAZORPAY_KEY_ID'), env('RAZORPAY_KEY_SECRET'));
         
         // Convert amount to paise (Razorpay uses paise)
         $amountInPaise = $validatedData['Amount'] * 100;
@@ -756,7 +756,7 @@ public function initializePayment(Request $request)
         // Store payment details in database
         $payment = BusPayment::create([
             'order_id' => $order->id,
-            'payment_id' =>  'pending_' . uniqid(), // Will be updated after payment
+            'payment_id' => 'pending_' . uniqid(), // Will be updated after payment
             'trace_id' => $validatedData['TraceId'],
             'amount' => $validatedData['Amount'],
             'passenger_data' => $validatedData['PassengerData'],
@@ -771,12 +771,18 @@ public function initializePayment(Request $request)
         return response()->json([
             'success' => true,
             'navigateToPayment' => true,
-           'key_id' => env('rzp_test_cvVugPSRGGLWtS'),
+            'key_id' => env('RAZORPAY_KEY_ID'),
             'order_id' => $order->id,
-            'amount' => $amountInPaise,
+            'amount' => $validatedData['Amount'], // Send original amount, not in paise
+            'amount_in_paise' => $amountInPaise, // Also send amount in paise for reference
             'currency' => 'INR'
         ]);
     } catch (\Exception $e) {
+        \Log::error('Payment Initialization Failed', [
+            'message' => $e->getMessage(),
+            'trace' => $e->getTraceAsString()
+        ]);
+        
         return response()->json([
             'success' => false,
             'errorMessage' => $e->getMessage()
@@ -802,15 +808,36 @@ public function paymentCallback(Request $request)
             'result_index' => 'sometimes|nullable',
         ]);
 
-        // Initialize Razorpay API
-        $api = new Api('rzp_test_cvVugPSRGGLWtS', 'xHoRXawt9gYD7vitghKq1l5c');
+        // Initialize Razorpay API with env variables
+        $api = new Api(env('RAZORPAY_KEY_ID'), env('RAZORPAY_KEY_SECRET'));
         
         // Verify payment signature
-        $api->utility->verifyPaymentSignature([
+        $attributes = [
             'razorpay_order_id' => $validatedData['razorpay_order_id'],
             'razorpay_payment_id' => $validatedData['razorpay_payment_id'],
             'razorpay_signature' => $validatedData['razorpay_signature']
-        ]);
+        ];
+        
+        try {
+            $api->utility->verifyPaymentSignature($attributes);
+        } catch (\Exception $signatureException) {
+            \Log::error('Signature Verification Failed', [
+                'message' => $signatureException->getMessage(),
+                'attributes' => $attributes
+            ]);
+            
+            // Alternative manual verification as fallback
+            $generatedSignature = hash_hmac('sha256', 
+                $validatedData['razorpay_order_id'] . '|' . $validatedData['razorpay_payment_id'], 
+                env('RAZORPAY_KEY_SECRET')
+            );
+            
+            if ($generatedSignature !== $validatedData['razorpay_signature']) {
+                throw new \Exception('Payment signature verification failed');
+            }
+            
+            \Log::info('Manual signature verification succeeded');
+        }
         
         // Find payment record
         $payment = BusPayment::where('order_id', $validatedData['razorpay_order_id'])->first();
@@ -819,7 +846,7 @@ public function paymentCallback(Request $request)
             \Log::error('Payment record not found', [
                 'order_id' => $validatedData['razorpay_order_id']
             ]);
-            return redirect()->route('booking.failed')
+            return redirect()->route('payments.failed')
                 ->with('error', 'Payment record could not be located');
         }
 
@@ -828,19 +855,20 @@ public function paymentCallback(Request $request)
             'payment_id' => $validatedData['razorpay_payment_id'],
             'status' => 'completed',
             'payment_response' => $request->all(),
-            'trace_id' => $request->input('trace_id'),
+            'trace_id' => $request->input('trace_id', $payment->trace_id),
             'result_index' => $request->input('result_index')
         ]);
 
         // Prepare success parameters
         $successParams = [
             'payment_id' => $validatedData['razorpay_payment_id'],
-            'trace_id' => $request->input('trace_id'),
+            'trace_id' => $request->input('trace_id', $payment->trace_id),
             'result_index' => $request->input('result_index'),
-            'amount' => $payment->amount, // Add the payment amount
-    'passenger_data' => $payment->passenger_data, // Add passenger details
-    'boarding_point' => $payment->boarding_point, // Optional: include boarding point
-    'dropping_point' => $payment->dropping_point // Optional: include dropping point
+            'amount' => $payment->amount,
+            'passenger_data' => $payment->passenger_data,
+            'boarding_point' => $payment->boarding_point,
+            'dropping_point' => $payment->dropping_point,
+            'processing' => true
         ];
 
         // Log successful payment
@@ -857,18 +885,15 @@ public function paymentCallback(Request $request)
             'trace' => $e->getTraceAsString()
         ]);
 
-        return redirect()->route('booking.failed')
-            ->with('error', 'Payment verification failed: ' . $e->getMessage());
+        return redirect()->route('payments.failed')
+            ->with('error', 'Payment verification failed: '. $e->getMessage());
     }
 }
 
 /**
  * Show payment success page
- * 
- * 
  */
-
- public function success(Request $request)
+public function success(Request $request)
 {
     \Log::info('Success Page Access', [
         'payment_id' => $request->payment_id,
@@ -907,7 +932,8 @@ public function paymentCallback(Request $request)
             'boarding_point' => $payment->boarding_point,
             'dropping_point' => $payment->dropping_point,
             'seat_number' => $payment->seat_number,
-            'passengers' => $passengerData
+            'passengers' => $passengerData,
+            'processing' => $request->has('processing') ? true : false
         ];
 
         // Log payment details for verification
@@ -935,9 +961,7 @@ public function paymentCallback(Request $request)
  */
 public function failed()
 {
-    return view('frontend.buspayment_failed');
+    return view('frontend.payments_failed');
 }
-
-
 }
 
