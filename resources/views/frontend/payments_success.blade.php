@@ -288,10 +288,9 @@ Don't close this window</p>
             hideProcessingOverlay();
         } catch (error) {
             console.error('Error during hotel booking:', error);
-            window.location.href = `/payments/failed?message=${encodeURIComponent(error.message || "An unexpected error occurred")}`;
         }
     }
-   
+
 </script>
 </body>
 </html>

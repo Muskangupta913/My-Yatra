@@ -856,7 +856,7 @@ function createSubmitButton() {
                     // On successful payment - submit the form data
                     const form = document.createElement('form');
                     form.method = 'POST';
-                    form.action = '{{ route("payment.verify") }}';
+                    form.action = 'hotel/payment/verify';
                     
                     // Add CSRF token
                     const csrfField = document.createElement('input');

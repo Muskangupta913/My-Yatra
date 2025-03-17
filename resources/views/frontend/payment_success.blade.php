@@ -243,7 +243,8 @@ fetch(`/balance-log?TraceId=${traceId}&amount=${amount}`, {
     } else {
         throw new Error(data.errorMessage || "Balance log failed");
     }
-})
+}) 
+
 .then(response => response.json())
 .then(bookingResult => {
     if (bookingResult.status === 'success') {

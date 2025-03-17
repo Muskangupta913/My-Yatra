@@ -416,10 +416,10 @@ Route::get('/autocomplete-hotel', [CityController::class, 'hotelautocomplete'])-
 
 // Razorpay Payment Routes
 // Route::get('/payment', [HotelController::class, 'showPaymentPage'])->name('payment.form');
-Route::post('/payment/create', [HotelController::class, 'createOrder'])->name('payment.create');
-Route::post('/payment/verify', [HotelController::class, 'verifyPayment'])->name('payment.verify');
-Route::get('/payment/success', [HotelController::class, 'showSuccessPage'])->name('payment.success');
-Route::get('/payment/failed', [HotelController::class, 'showFailedPage'])->name('payment.failed');
+Route::post('hotel/payment/create', [HotelController::class, 'createPayment'])->name('payment.create');
+Route::post('hotel/payment/verify', [HotelController::class, 'verifyPayment'])->name('payment.verify');
+Route::get('hotel/payment/success', [HotelController::class, 'showSuccessPage'])->name('payments.success');
+Route::get('hotel/payment/failed', [HotelController::class, 'showFailedPage'])->name('payments.failed');
 
 // API Routes (you might want to move these to api.php)
 Route::post('/api/payment/update-booking', [HotelController::class, 'updateBookingDetails']);
@@ -544,3 +544,16 @@ Route::post('/flight/balance', [FlightController::class, 'flightBalance']);
 Route::post('/flight/balance-log', [FlightController::class, 'flightBalanceLog']);
 Route::get('/calendar-fare', [FlightController::class, 'index'])->name('calendar.fare');
 Route::post('/get-calendar-fare', [FlightController::class, 'getCalendarFare'])->name('get.calendar.fare');
+
+
+
+Route::post('flight/payment/create-order', [FlightController::class, 'createOrder'])->name('flight.payment.create-order');
+Route::post('flight/payment/verify', [FlightController::class, 'paymentValidate'])->name('flight.payment.verify');
+Route::post('flight/payment/failed', [FlightController::class, 'handleFailedPayment'])->name('flight.payment.failed');
+Route::get('flight/payment/success', [FlightController::class, 'showSuccess'])->name('flight.payment.success');
+// Route::get('/booking/failed', [FlightController::class, 'showFailed'])->name('flight.booking.failed');
+
+
+
+//round trip 
+
