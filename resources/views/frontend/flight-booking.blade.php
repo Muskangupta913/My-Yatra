@@ -2121,8 +2121,8 @@ function openRazorpayPaymentModal(orderData, bookingDetails) {
     
     // Create Razorpay options
     const options = {
-        key: orderData.key_id,
-        amount: orderData.amount * 100, // Convert to paisa
+        key: orderData.key_id || 'rzp_test_cvVugPSRGGLWtS', // Fallback to directly using the key
+        amount: orderData.amount, // Convert to paisa
         currency: orderData.currency,
         name: "MAKE MY BHARAT YATRA",
         description: "Flight Booking Payment",
@@ -2201,31 +2201,8 @@ async function handlePaymentSuccess(response, paymentId) {
 async function handlePaymentFailure(orderId) {
     console.log('Payment failed or cancelled for order:', orderId);
     
-    try {
-        const response = await fetch('/flight/failed-payment', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-            },
-            body: JSON.stringify({ razorpay_order_id: orderId })
-        });
-        
-        if (!response.ok) {
-            throw new Error('Failed to record payment failure');
-        }
-        
-        const result = await response.json();
-        
-        if (result.status === 'success') {
-            window.location.href = '/flight/booking/failed';
-        } else {
-            throw new Error(result.message || 'Failed to record payment failure');
-        }
-    } catch (error) {
-        console.error('Error handling payment failure:', error);
-        alert('Payment was not completed. Please try again or contact support.');
-    }
+    // Redirect to the failure page with the order ID as a query parameter
+    window.location.href = 'flight/payment/failed?razorpay_order_id=' + orderId;
 }
           });
 

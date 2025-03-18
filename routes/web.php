@@ -549,7 +549,7 @@ Route::post('/get-calendar-fare', [FlightController::class, 'getCalendarFare'])-
 
 Route::post('flight/payment/create-order', [FlightController::class, 'createOrder'])->name('flight.payment.create-order');
 Route::post('flight/payment/verify', [FlightController::class, 'paymentValidate'])->name('flight.payment.verify');
-Route::post('flight/payment/failed', [FlightController::class, 'handleFailedPayment'])->name('flight.payment.failed');
+Route::get('flight/payment/failed', [FlightController::class, 'handleFailedPayment'])->name('flight.payment.failed');
 Route::get('flight/payment/success', [FlightController::class, 'showSuccess'])->name('flight.payment.success');
 // Route::get('/booking/failed', [FlightController::class, 'showFailed'])->name('flight.booking.failed');
 
