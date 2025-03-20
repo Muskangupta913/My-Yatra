@@ -46,8 +46,10 @@
     console.log("- finalBookingDetails:", finalBookingDetailsStr ? "Found" : "Not found");
     console.log("- bookingDetails:", bookingDetailsStr ? "Found" : "Not found");
     
-    // Try to parse finalBookingDetails if it exists
     let finalBookingDetails = null;
+    let bookingDetails = null;
+    
+    // Try to parse finalBookingDetails if it exists
     if (finalBookingDetailsStr && finalBookingDetailsStr !== "undefined" && finalBookingDetailsStr !== "null") {
         try {
             finalBookingDetails = JSON.parse(finalBookingDetailsStr);
@@ -58,7 +60,6 @@
     }
     
     // Try to parse bookingDetails if it exists
-    let bookingDetails = null;
     if (bookingDetailsStr && bookingDetailsStr !== "undefined" && bookingDetailsStr !== "null") {
         try {
             bookingDetails = JSON.parse(bookingDetailsStr);
@@ -68,26 +69,26 @@
         }
     }
     
-    // Determine if this is explicitly a round trip by checking for appropriate structure
-    const isRoundTrip = finalBookingDetails && (
-        (finalBookingDetails.lcc && (finalBookingDetails.lcc.outbound || finalBookingDetails.lcc.return)) || 
-        (finalBookingDetails.nonLcc && (finalBookingDetails.nonLcc.outbound || finalBookingDetails.nonLcc.return))
-    );
-    
-    // Determine if this is explicitly a one-way trip
-    const isOneWay = bookingDetails && bookingDetails.resultIndex && bookingDetails.traceId;
-    
-    if (isRoundTrip) {
-        console.log("Processing round trip booking...");
-        handleRoundTripBooking();
-    } else if (isOneWay) {
+    // Check for one-way booking first with strict conditions
+    if (bookingDetails && bookingDetails.resultIndex && bookingDetails.traceId) {
         console.log("Processing one-way booking...");
         handleOneWayBooking();
-    } else {
-        console.error("No valid booking details found in session storage");
+        return; // Important: exit the function after handling one-way booking
     }
+    
+    // Then check for round-trip booking if one-way wasn't detected
+    if (finalBookingDetails && (
+        (finalBookingDetails.lcc && (finalBookingDetails.lcc.outbound || finalBookingDetails.lcc.return)) || 
+        (finalBookingDetails.nonLcc && (finalBookingDetails.nonLcc.outbound || finalBookingDetails.nonLcc.return))
+    )) {
+        console.log("Processing round trip booking...");
+        handleRoundTripBooking();
+        return; // Important: exit the function after handling round-trip booking
+    }
+    
+    // If neither condition matched
+    console.error("No valid booking details found in session storage");
 }
-
         //start of one way flight code 
 function handleOneWayBooking() {
 
