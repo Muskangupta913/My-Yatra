@@ -25,7 +25,7 @@
   <link rel="icon" href="{{ asset('assets/img/favicon.png')}}" type="icon">
   <link rel="stylesheet" href="https://code.jquery.com/ui/1.11.2/themes/smoothness/jquery-ui.css">
   @yield('styles')
-<meta name="google-site-verification" content="l_InFcZkDV2-5fVK_Wx5m0YEH_kdV-ntTlwliOmbenA" />
+  <meta name="google-site-verification" content="27okUhkd7Uwmj87zqZEUTaXxWwNrryg_oLa0HsBoM2c" />
 <!-- Toastr CSS -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
 <!-- Toastr JS -->

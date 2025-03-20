@@ -592,12 +592,12 @@ returnFlights.forEach(returnFlight => {
                         <input type="text" class="form-control" name="${passengerType}[${i}][PassportNo]" required>
                     </div>
                     <div class="col-md-4 mb-3">
-                        <label class="form-label">Passport Expiry</label>
-                        <input type="date" class="form-control" name="${passengerType}[${i}][PassportExpiry]" required>
-                    </div>
-                    <div class="col-md-4 mb-3">
                         <label class="form-label">Passport Issue Date</label>
                         <input type="date" class="form-control" name="${passengerType}[${i}][PassportIssueDate]" required>
+                    </div>
+                       <div class="col-md-4 mb-3">
+                        <label class="form-label">Passport Expiry</label>
+                        <input type="date" class="form-control" name="${passengerType}[${i}][PassportExpiry]" required>
                     </div>
                 </div>
             </div>` : '';
@@ -2397,7 +2397,7 @@ console.log("Final Booking Details stored in session");
             ondismiss: function() {
                 console.log('Payment dismissed');
                 // Handle payment dismissal (e.g., redirect to booking page)
-                window.location.href = '/flight/booking';
+                window.location.href = 'flight/payment/failed';
             }
         },
         handler: function(response) {
@@ -2501,7 +2501,7 @@ async function processNonLCCBooking(payload) {
 }
           
 
-
+var createOrderRoute = "{{ route('flight.payment.create-order') }}";
 
 async function processRazorpayPayment(bookingDetails) {
     try {
@@ -2524,7 +2524,7 @@ async function processRazorpayPayment(bookingDetails) {
         }
 
         // Step 2: Create order on the server
-        const orderResponse = await fetch('/payment/create-order', {
+        const orderResponse =  await fetch(createOrderRoute, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -2560,7 +2560,7 @@ async function processRazorpayPayment(bookingDetails) {
         // Step 3: Now initialize Razorpay payment
         const razorpay = new Razorpay({
             key: orderData.key_id,
-            amount: orderData.amount * 100, // Amount in smallest currency unit
+            amount: orderData.amount, // Amount in smallest currency unit
             currency: orderData.currency,
             name: "Travel Portal",
             description: "Flight Booking Payment",
@@ -2584,7 +2584,7 @@ async function processRazorpayPayment(bookingDetails) {
                 ondismiss: function() {
                     console.log('Payment dismissed');
                     // Handle payment dismissal (e.g., redirect to booking page)
-                    window.location.href = '/flight/booking';
+                    // window.location.href = '/flight/booking';
                 }
             },
             handler: function(response) {
@@ -2608,7 +2608,7 @@ async function handlePaymentSuccess(paymentResponse, paymentId) {
     try {
         const form = document.createElement('form');
         form.method = 'POST';
-        form.action = '/payment/verify'; // This should match your verify payment route
+        form.action = "{{ route('flight.payment.verify') }}"; // This should match your verify payment route
         
         // Add CSRF token
         const csrfField = document.createElement('input');

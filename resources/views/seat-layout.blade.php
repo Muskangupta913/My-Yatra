@@ -1246,7 +1246,7 @@ function blockMultipleSeats(passengers) {
     const resultIndex = urlParams.get('ResultIndex');
 
     const payload = {
-        ClientId: "180133",
+        ClientId: "180189",
         UserName: "MakeMy91",
         Password: "MakeMy@910",
         TraceId: traceId,
