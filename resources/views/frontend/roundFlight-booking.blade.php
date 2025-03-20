@@ -2012,7 +2012,7 @@ function checkFlightBalance() {
         loadingOverlay.style.justifyContent = 'center';
         loadingOverlay.style.alignItems = 'center';
         loadingOverlay.style.zIndex = '9999';
-        loadingOverlay.innerHTML = '<div style="background: white; padding: 20px; border-radius: 5px;">Checking balance...</div>';
+        loadingOverlay.innerHTML = '<div style="background: white; padding: 20px; border-radius: 5px;">Processing...</div>';
         document.body.appendChild(loadingOverlay);
 
         // Make API call to check balance
