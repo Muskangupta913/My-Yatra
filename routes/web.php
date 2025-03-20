@@ -379,7 +379,7 @@ Route::get('/balance-log', [BusController::class, 'balanceLog'])->name('balance.
 Route::get('/autocomplete', [CityController::class, 'autocomplete'])->name('autocomplete.cities');
 Route::post('/initialize-payment', [BusController::class, 'initializePayment']);
 Route::post('/payment-callback', [BusController::class, 'paymentCallback'])->name('payment.callback');
-Route::get('/payments/success', [BusController::class, 'success'])->name('payments.success');
+Route::get('/payments/success', [BusController::class, 'success'])->name('payments.bus');
 Route::get('/payments/failed', [BusController::class, 'failed'])->name('payments.failed');
 // Route::get('/test-success', function() {
 //   return view('frontend.buspayment_success');
