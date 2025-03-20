@@ -37,11 +37,11 @@
     
     determineFlightTypes();
 
-
     function determineFlightTypes() {
     // Get both possible booking detail types from session storage
     const finalBookingDetailsStr = sessionStorage.getItem('finalBookingDetails');
     const bookingDetails = sessionStorage.getItem('bookingDetails');
+    
     
     console.log("Session storage check:");
     console.log("- finalBookingDetails:", finalBookingDetailsStr ? "Found" : "Not found");
@@ -69,17 +69,6 @@
         console.error("No valid booking details found in session storage");
     }
 }
-
-
-
-        
-
-
-
-
-        
-        
-
 
 
         //start of one way flight code 
@@ -506,8 +495,10 @@ function processGdsTicket(gdsTicketDetails) {
 
 
 //start of round trip code
- async function handleRoundTripBooking() {
 
+
+ async function handleRoundTripBooking() {
+    
     function getCookie(name) {
             let nameEQ = name + "=";
             let ca = document.cookie.split(';');
@@ -536,11 +527,11 @@ function processGdsTicket(gdsTicketDetails) {
         // Get passenger counts from cookies with default values
         const origin = getCookie('origin') ;
         const shortenedOrigin = shortenOrigin(origin);
-
-        // Log the values
-
         console.log('Payment Page - ORIGIN Details:');
         console.log('ORIGIN:', shortenedOrigin);
+
+        
+
 function getBookingDetailsFromURL() {
             try {
         const storedDetails = sessionStorage.getItem('finalBookingDetails');
@@ -694,18 +685,16 @@ function getBookingDetailsFromURL() {
 }
 
 
-async function processBalanceLog(flightData) {
+
+    async function processBalanceLog(flightData) {
         if (!flightData) {
             console.error('❌ No flight data provided for balance log processing');
             return false;
         }
 
-        const bookingDetails = getBookingDetailsFromURL();
-
-
         try {
             const traceId = flightData.traceId;
-            const amount = bookingDetails.grandTotal;
+            const amount = flightData.totalFare;
 
             if (!traceId) {
                 console.error('❌ Missing traceId for balance log');
@@ -744,7 +733,6 @@ async function processBalanceLog(flightData) {
         }
     }
 
-
 async function bookLCC() {
     const bookingDetails = getBookingDetailsFromURL();
 
@@ -762,16 +750,10 @@ async function bookLCC() {
             return null;
         }
         const fareDetails = flightDetails.passengers[0]?.fare?.[0] || {};
-        // Log fare details for debugging
-        // Log fare details for debugging
-    // console.log("Grand Total Value:", {
-    //     grandTotal:  bookingDetails.grandTotal,
        
-    // });
-
 
         return {
-            grandTotal:  bookingDetails.grandTotal,
+           
             srdvIndex: flightDetails.srdvIndex,
             traceId: flightDetails.traceId,
             resultIndex: flightDetails.resultIndex,
@@ -839,15 +821,20 @@ async function bookLCC() {
 
     // Book outbound flight
     try {
+
+        
         const promises = [];
 
         // Process outbound flight
         if (bookingDetails.lcc.outbound) {
+            
             const outboundPromise = (async () => {
+
                 const balanceLogSuccess = await processBalanceLog(bookingDetails.lcc.outbound);
-                if (!balanceLogSuccess) {
+                    if (!balanceLogSuccess) {
                         throw new Error("Failed to process balance log for outbound flight");
                     }
+    
                 const outboundPayload = createFlightPayload(bookingDetails.lcc.outbound);
                 if (!outboundPayload) return false;
 
@@ -871,12 +858,13 @@ async function bookLCC() {
         // Process return flight
         if (bookingDetails.lcc.return) {
             const returnPromise = (async () => {
+
+                const balanceLogSuccess = await processBalanceLog(bookingDetails.lcc.return);
+                    if (!balanceLogSuccess) {
+                        throw new Error("Failed to process balance log for return flight");
+                    }
                 const returnPayload = createFlightPayload(bookingDetails.lcc.return);
                 if (!returnPayload) return false;
-                const balanceLogSuccess = await processBalanceLog(bookingDetails.lcc.return);
-                if (!balanceLogSuccess) {
-                        throw new Error("Failed to process balance log for outbound flight");
-                    }
 
                 const response = await fetch('/flight/bookLCC', {
                     method: 'POST',
@@ -986,6 +974,14 @@ async function bookGDS() {
         // Process outbound flight
         if (bookingDetails.nonLcc.outbound) {
             const outboundPromise = (async () => {
+
+                const balanceLogSuccess = await processBalanceLog({
+                        traceId: bookingDetails.nonLcc.outbound.traceId,
+                        totalFare: bookingDetails.nonLcc.outbound.totalFare
+                    });
+                    if (!balanceLogSuccess) {
+                        throw new Error("Failed to process balance log for outbound GDS flight");
+                    }
                 const payload = {
                     EndUserIp: "1.1.1.1",
                     ClientId: "180133",
@@ -1020,6 +1016,14 @@ async function bookGDS() {
         // Process return flight
         if (bookingDetails.nonLcc.return) {
             const returnPromise = (async () => {
+
+                const balanceLogSuccess = await processBalanceLog({
+                        traceId: bookingDetails.nonLcc.return.traceId,
+                        totalFare: bookingDetails.nonLcc.return.totalFare
+                    });
+                    if (!balanceLogSuccess) {
+                        throw new Error("Failed to process balance log for return GDS flight");
+                    }
                 const payload = {
                     EndUserIp: "1.1.1.1",
                     ClientId: "180133",
@@ -1114,61 +1118,6 @@ async function executeGDSBooking(bookingDetails) {
 //     console.log("Processing LCC flight booking:", bookingDetails);
 // }
 
-// Event listener for the "Pay Now" button
-
-
-    try {
-        // Get booking details from URL
-        const bookingDetails = getBookingDetailsFromURL();
-        if (!bookingDetails) {
-            throw new Error("No valid booking details found");
-        }
-
-        console.log("Starting parallel booking process...");
-
-        try {
-            // Execute both LCC and GDS bookings in parallel
-            const [lccResult, gdsResult] = await Promise.all([
-                executeLCCBooking(bookingDetails),
-                executeGDSBooking(bookingDetails)
-            ]);
-
-            console.log("Booking Results:", {
-                lcc: lccResult,
-                gds: gdsResult
-            });
-
-            // Handle success cases
-            if (bookingDetails.lcc && !lccResult) {
-                throw new Error("LCC booking failed");
-            }
-            if (bookingDetails.nonLcc && !gdsResult) {
-                throw new Error("GDS booking failed");
-            }
-
-            // If we reach here, all required bookings were successful
-            console.log("✅ All bookings completed successfully");
-            // Redirect or show success message
-            // window.location.href = '/booking/confirmation';
-
-        } catch (error) {
-            console.error("❌ Error during parallel booking:", error);
-            throw new Error(`Booking failed: ${error.message}`);
-        }
-
-    } catch (error) {
-        console.error("Booking error:", error);
-        alert(`Error during booking: ${error.message}`);
-    }
-
-async function executeLCCBooking(bookingDetails) {
-    if (!bookingDetails?.lcc) {
-        console.log("No LCC flights to book");
-        return null;
-    }
-    console.log("🚀 Executing LCC booking");
-    return bookLCC();
-}
 
 // Helper function to execute GDS booking if needed
 async function executeGDSBooking(bookingDetails) {

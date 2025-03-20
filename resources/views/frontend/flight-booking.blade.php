@@ -305,7 +305,8 @@
                     </div>
 
                     <div class="total-price-container">
-    <h5>Total Price: <span id="totalPrice">₹0.00</span></h5>
+                    <h5>Total Price: <span id="totalPrice" style="font-weight: bold;">₹0.00</span></h5>
+
     <div id="priceBreakdown"></div>
 </div>
 
@@ -563,12 +564,12 @@ function validateSingleField(field) {
                         <input type="text" class="form-control" name="${passengerType}[${i}][PassportNo]" required>
                     </div>
                     <div class="col-md-4 mb-3">
-                        <label class="form-label">Passport Expiry</label>
-                        <input type="date" class="form-control" name="${passengerType}[${i}][PassportExpiry]" required>
-                    </div>
-                    <div class="col-md-4 mb-3">
                         <label class="form-label">Passport Issue Date</label>
                         <input type="date" class="form-control" name="${passengerType}[${i}][PassportIssueDate]" required>
+                    </div>
+                     <div class="col-md-4 mb-3">
+                        <label class="form-label">Passport Expiry</label>
+                        <input type="date" class="form-control" name="${passengerType}[${i}][PassportExpiry]" required>
                     </div>
                 </div>
             </div>` : '';
@@ -783,17 +784,17 @@ if (fareQuoteData) {
 }
     // Log fare details for verification
     if (fareQuoteData && fareQuoteData.Fare) {
-        console.log('Fare Details Successfully Fetched:', fareQuoteData.Fare);
-        
-        // Optional: Set total fare in a hidden input for later use
-        const totalFareInput = document.getElementById('totalFare');
-        if (totalFareInput) {
-            totalFareInput.value = fareQuoteData.Fare.PublishedFare || 0;
-        }
-    } else {
-        console.error('Fare Quote Data Not Found in Session Storage');
+    const publishedFare = fareQuoteData.Fare.PublishedFare || 0;
+    document.getElementById('totalPrice').textContent = `₹${publishedFare.toFixed(2)}`;
+    
+    // Optional: Set total fare in the input as you're already doing
+    const totalFareInput = document.getElementById('totalFare');
+    if (totalFareInput) {
+        totalFareInput.value = publishedFare;
     }
-
+    
+    // You might also want to show a breakdown in the priceBreakdown div
+}
     // Correctly parse details
     let flightDetails = {};
     if (encodedDetails) {
