@@ -1002,19 +1002,21 @@ function renderPickupPoints(points) {
     container.innerHTML = points.map(point => `
         <div class="pickup-point-item" data-point-index="${point.index}">
             <div class="position-relative p-3">
-                <!-- Time Badge -->
-                <span class="pickup-time position-absolute top-0 end-0 m-2">
-                    🕒 ${formatTime(point.time)}
-                </span>
-                
-                <!-- Point Name -->
-               <h5>  ${point.location}</h5>
+                   <div class="d-flex justify-content-between align-items-start mb-2">
+                    <!-- Point Name -->
+                    <h5 class="mb-0 text-break" style="max-width: 75%;">${point.location}</h5>
+                    
+                    <!-- Time Badge -->
+                    <span class="pickup-time badge bg-light text-dark ms-2 text-nowrap">
+                        🕒 ${formatTime(point.time)}
+                    </span>
+                </div>
                 
                 <!-- Details Grid -->
                 <div class="point-details">
-                    <p><i class="fas fa-building"></i> ${point.address}</p>
-                    <p><i class="fas fa-landmark"></i> ${point.landmark}</p>
-                    <p><i class="fas fa-phone"></i> ${point.contact_number}</p>
+                    <p class="text-break"><i class="fas fa-building"></i> ${point.address}</p>
+                    <p class="text-break"><i class="fas fa-landmark"></i> ${point.landmark}</p>
+                    <p class="text-break"><i class="fas fa-phone"></i> ${point.contact_number}</p>
                 </div>
                 
                 <!-- Select Button -->
@@ -1039,13 +1041,16 @@ function renderDroppingPoints(points) {
     container.innerHTML = points.map(point => `
         <div class="dropping-point-item" data-point-index="${point.index}">
             <div class="position-relative p-3">
-                <!-- Time Badge -->
-                <span class="pickup-time position-absolute top-0 end-0 m-2">
-                    🕒 ${formatTime(point.time)}
-                </span>
+               <div class="d-flex justify-content-between align-items-start mb-2">
+                    <!-- Point Name -->
+                    <h5 class="mb-0 text-break" style="max-width: 75%;">${point.location}</h5>
+                    
+                    <!-- Time Badge -->
+                    <span class="pickup-time badge bg-light text-dark ms-2 text-nowrap">
+                        🕒 ${formatTime(point.time)}
+                    </span>
+                </div>
                 
-                <!-- Point Name and Location -->
-                <h5 class="mb-3">${point.location}</h5>
                 <p><i class="fas fa-map-marker-alt"></i> ${point.location}</p>
                 
                 <!-- Select Button -->
@@ -1349,10 +1354,7 @@ function blockMultipleSeats(passengers) {
             const bookingPageUrl = `/booking?${urlParameters.toString()}`;
 
             document.getElementById('continueButton').setAttribute('href', bookingPageUrl);
-            toastr.success('Seats successfully blocked!', 'Success');
-            setTimeout(() => {
             window.location.href = bookingPageUrl;
-        }, 1500);
     } else {
         throw new Error(data.message || 'Failed to block seat');
     }

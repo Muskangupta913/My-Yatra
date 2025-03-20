@@ -118,113 +118,109 @@
 
 
           <div class="tab-content" id="myTabContent">
+<!-- Hotel Booking -->
+<div class="tab-pane fade mt-5" id="profile" role="tabpanel" aria-labelledby="profile-tab">
+  <h4 class="mb-5" id="hotel-title">Book Hotels in India</h4>
+  <hr class="searchline">
+  <form id="hotelSearchForm">
+    <div class="row">
+      <!-- Enter City -->
+      <div class="mb-3 col-md-2">
+        <div class="date-caption">Enter City</div>
+        <div class="position-relative">
+          <input type="text" class="form-control rounded-0 py-3" name="CityName" id="hotelSearchCity" placeholder="Enter City" required style="text-align: center;">
+          <input type="hidden" name="CityId" id="cityIdInput" value="">
+          <div id="hotelSearchCityList" class="card" style="position: absolute; width: 100%; max-height: 150px; overflow-y: scroll; z-index: 1000;"></div>
+        </div>
+      </div>
+      
+      <!-- Check-in Date -->
+      <div class="mb-3 col-md-2">
+        <div class="date-caption">Check-in</div>
+        <input type="text" id="checkinDatepicker" name="CheckInDate" class="form-control rounded-0 py-3 datepicker" placeholder="Select Check-in Date" required style="text-align: center;">
+      </div>
 
-  <!-- Hotel Booking -->
-  <div class="tab-pane fade mt-5" id="profile" role="tabpanel" aria-labelledby="profile-tab">
-    <h4 class="mb-5" id="hotel-title">Book Hotels in India</h4>
-    <hr class="searchline">
-    <form id="hotelSearchForm">
-        <div class="row">
-            <div class="mb-3 col-md-3">
-                <div class="date-caption">Enter City</div>
-                <div class="position-relative">
-                <input type="text" class="form-control rounded-0 py-3" name="CityName" id="hotelSearchCity" placeholder="Enter City " required style="text-align: center;" >
-                <input type="hidden" name="CityId" id="cityIdInput" value="" >
-                <div id="hotelSearchCityList" class="card" style="position: absolute; width: 100%; max-height: 150px; overflow-y: scroll; z-index: 1000;"></div>
-           </div>
-            </div>
-            <!-- Check-in Date -->
-            <div class="mb-3 col-md-2">
-                 <div class="date-caption">Check-in </div>
-                 <input type="text" id="checkinDatepicker" name="CheckInDate" class="form-control rounded-0 py-3 datepicker" placeholder="Select Check-in Date" required style="text-align: center;">
-            </div>
+      <!-- Number of Nights -->
+      <div class="mb-3 col-md-2">
+        <div class="date-caption">No. of Nights</div>
+        <input type="number" id="numberOfNights" name="NoOfNights" class="form-control rounded-0 py-3" placeholder="No. of Nights" required style="text-align: center;">
+      </div>
 
-            <!-- Number of Nights -->
-            <div class="mb-3 col-md-2">
-                <div class="date-caption">No. of Nights</div>
-                <input type="number" name="NoOfNights" class="form-control rounded-0 py-3" placeholder="No. of Nights" required style="text-align: center;">
-            </div>
-
-            <div class="mb-3 col-md-3">
-            <div class="date-caption">Room & Guests</div>
-            <div class="dropdown">
-        <button
-            class="btn btn-outline-secondary dropdown-toggle w-100 rounded-0 py-3"
-            type="button"
-            id="roomGuestsDropdown"
-            data-bs-toggle="dropdown"
-            aria-expanded="false"
-            style="background-color: white; color: #6c757d; border-color: #ced4da;">
+      <!-- Room & Guests -->
+      <div class="mb-3 col-md-2">
+        <div class="date-caption" style="white-space: nowrap;">Room & Guests</div>
+        <div class="dropdown">
+          <button class="btn btn-outline-secondary dropdown-toggle w-100 rounded-0 py-3" type="button" id="roomGuestsDropdown" data-bs-toggle="dropdown" aria-expanded="false" style="background-color: white; color: #6c757d; border-color: #ced4da;">
             1 Room, 2 Adults, 0 Children
-        </button>
-        <ul class="dropdown-menu p-3" aria-labelledby="roomGuestsDropdown" style="width: 100%; max-width: 300px;">
+          </button>
+          <ul class="dropdown-menu p-3" aria-labelledby="roomGuestsDropdown" style="width: 100%; max-width: 300px;">
             <li class="mb-3">
-                <div class="d-flex justify-content-between align-items-center">
-                    <label for="noOfRooms" class="form-label mb-0">Rooms</label>
-                    <select id="noOfRooms" name="NoOfRooms" class="form-select w-auto" onchange="updateRoomGuestsTitle()">
-                        <option value="1" selected>1</option>
-                        <option value="2">2</option>
-                        <option value="3">3</option>
-                        <option value="4">4</option>
-                    </select>
-                </div>
+              <div class="d-flex justify-content-between align-items-center">
+                <label for="noOfRooms" class="form-label mb-0">Rooms</label>
+                <select id="noOfRooms" name="NoOfRooms" class="form-select w-auto" onchange="updateRoomGuestsTitle()">
+                  <option value="1" selected>1</option>
+                  <option value="2">2</option>
+                  <option value="3">3</option>
+                  <option value="4">4</option>
+                </select>
+              </div>
             </li>
             <li class="mb-3">
-                <div class="d-flex justify-content-between align-items-center">
-                    <label for="noOfAdults" class="form-label mb-0">Adults</label>
-                    <select id="noOfAdults" name="RoomGuests[0][NoOfAdults]" class="form-select w-auto" onchange="updateRoomGuestsTitle()">
-                        <option value="1">1</option>
-                        <option value="2" selected>2</option>
-                        <option value="3">3</option>
-                        <option value="4">4</option>
-                    </select>
-                </div>
+              <div class="d-flex justify-content-between align-items-center">
+                <label for="noOfAdults" class="form-label mb-0">Adults</label>
+                <select id="noOfAdults" name="RoomGuests[0][NoOfAdults]" class="form-select w-auto" onchange="updateRoomGuestsTitle()">
+                  <option value="1">1</option>
+                  <option value="2" selected>2</option>
+                  <option value="3">3</option>
+                  <option value="4">4</option>
+                </select>
+              </div>
             </li>
             <li class="mb-3">
-                <div class="d-flex justify-content-between align-items-center">
-                    <label for="noOfChildren" class="form-label mb-0">Children</label>
-                    <select id="noOfChildren" name="RoomGuests[0][NoOfChild]" class="form-select w-auto" onchange="handleChildrenChange()">
-                        <option value="0" selected>0</option>
-                        <option value="1">1</option>
-                        <option value="2">2</option>
-                        <option value="3">3</option>
-                    </select>
-                </div>
+              <div class="d-flex justify-content-between align-items-center">
+                <label for="noOfChildren" class="form-label mb-0">Children</label>
+                <select id="noOfChildren" name="RoomGuests[0][NoOfChild]" class="form-select w-auto" onchange="handleChildrenChange()">
+                  <option value="0" selected>0</option>
+                  <option value="1">1</option>
+                  <option value="2">2</option>
+                  <option value="3">3</option>
+                </select>
+              </div>
             </li>
             <li>
-            <div id="childAgesContainer" class="mt-3" style="display: none;">
-    <label class="form-label" style="font-size: 16px; font-weight: bold; color: #333;">Child Ages</label>
-    <div id="childAgesInputs" class="d-flex flex-column gap-2">
-        <!-- Child age inputs will be dynamically added here -->
-    </div>
-</div>
-
+              <div id="childAgesContainer" class="mt-3" style="display: none;">
+                <label class="form-label" style="font-size: 16px; font-weight: bold; color: #333;">Child Ages</label>
+                <div id="childAgesInputs" class="d-flex flex-column gap-2">
+                  <!-- Child age inputs will be dynamically added here -->
+                </div>
+              </div>
             </li>
-        </ul>
-    </div>
-</div>
-            <!-- Guest Nationality -->
-            <div class="mb-3 col-md-2">
-                <div class="date-caption"style="text-align: center;">Nationality</div>
-                <select id="nationalitySelect" class="form-control rounded-0 py-3 text-center">
-                    <option value="" selected>Select</option>
-                    <option value="IN" data-nationality="Indian">INDIA</option>
-                    <option value="US" data-nationality="American">American</option>
-                    <option value="GB" data-nationality="British">British</option>
-                    <option value="CA" data-nationality="Canadian">Canadian</option>
-                </select>
-            </div>
-
-            <input type="hidden" name="CountryCode" id="countryCodeInput" value="">
-            <input type="hidden" name="SelectedNationality" id="hiddenNationality" value="">
-
-            <!-- Search Button -->
-            <div class="mb-3 col-md-2">
-                <div class="date-caption" style="visibility: hidden">Search</div>
-                <button type="button" class="btn item-center btn-warning w-100 rounded-0 py-3 fw-bold hotelbuttonsearch" id="searchButton">Search</button>
-            </div>
+          </ul>
         </div>
-    </form>
+      </div>
+
+      <!-- Guest Nationality -->
+      <div class="mb-3 col-md-2">
+        <div class="date-caption" style="text-align: center;">Nationality</div>
+        <select id="nationalitySelect" class="form-control rounded-0 py-3 text-center">
+          <option value="" selected>Select</option>
+          <option value="IN" data-nationality="Indian">INDIA</option>
+          <option value="US" data-nationality="American">American</option>
+          <option value="GB" data-nationality="British">British</option>
+          <option value="CA" data-nationality="Canadian">Canadian</option>
+        </select>
+      </div>
+
+      <input type="hidden" name="CountryCode" id="countryCodeInput" value="">
+      <input type="hidden" name="SelectedNationality" id="hiddenNationality" value="">
+
+      <!-- Search Button -->
+      <div class="mb-3 col-md-2">
+        <div class="date-caption" style="visibility: hidden">Search</div>
+        <button type="button" class="btn item-center btn-warning w-100 rounded-0 py-3 fw-bold hotelbuttonsearch" id="searchButton">Search</button>
+      </div>
+    </div>
+  </form>
 </div>
   <!-- Flight Booking -->
 
@@ -276,7 +272,7 @@
                 <div class="date-caption">Return </div>
                 <input type="text" id="flightReturnDate" name="returnDate"
                     class="form-control rounded-0 py-3 datepicker"
-                    placeholder="Return On">
+                    placeholder="Return ">
             </div>
             <div class="mb-2 col-md-2">
     <div class="date-caption">Passengers</div>
@@ -360,7 +356,7 @@
                                         <div class="position-relative">
                                         <input type="text" class="form-control rounded-0 py-3"
                                             name="pickupLocation" id="carPickupLocation"
-                                            placeholder="Enter Pickup Location" required>
+                                            placeholder="Pickup " required>
                                         <input type="hidden" name="pickupLocationCode" id="carPickupLocationCode">
                                         <div id="carPickupLocationList" class="card" style="position: absolute; width: 100%; max-height: 150px; overflow-y: scroll; z-index: 1000;"></div>
                                     </div>
@@ -370,7 +366,7 @@
                                         <div class="position-relative">
                                         <input type="text" class="form-control rounded-0 py-3"
                                             name="dropoffLocation" id="carDropoffLocation"
-                                            placeholder="Enter Drop-off Location" required>
+                                            placeholder=" Drop-off " required>
                                         <input type="hidden" name="dropoffLocationCode" id="carDropoffLocationCode">
                                         <div id="carDropoffLocationList" class="card" style="position: absolute; width: 100%; max-height: 150px; overflow-y: scroll; z-index: 1000;"></div>
                                     </div>
@@ -779,7 +775,35 @@
   </script>
    -->
    <script>
-    
+    // Add this JavaScript to your existing scripts
+function adjustPlaceholders() {
+  // Check if we're in tablet view
+  const isTablet = window.innerWidth <= 991 && window.innerWidth >= 576;
+  
+  // Set placeholders based on screen size
+  document.getElementById('hotelSearchCity').placeholder = isTablet ? 'City' : 'Enter City';
+  document.getElementById('checkinDatepicker').placeholder = isTablet ? 'Check-in' : 'Select Check-in Date';
+  document.getElementById('numberOfNights').placeholder = isTablet ? 'Nights' : 'No. of Nights';
+}
+
+// Run on page load and window resize
+window.addEventListener('load', adjustPlaceholders);
+window.addEventListener('resize', adjustPlaceholders);
+
+    $(document).ready(function() {
+    // Configure toastr global settings
+    toastr.options = {
+        closeButton: true,
+        progressBar: true,
+        positionClass: "toast-top-right",
+        timeOut: 5000,
+        extendedTimeOut: 2000,
+        showEasing: "swing",
+        hideEasing: "linear",
+        showMethod: "fadeIn",
+        hideMethod: "fadeOut"
+    };
+});
     // Add this JavaScript after your HTML
 document.addEventListener('DOMContentLoaded', function() {
     const passengerDropdown = document.getElementById('passengerDropdown');
@@ -805,6 +829,7 @@ document.addEventListener('DOMContentLoaded', function() {
     adultCount.addEventListener('change', updatePassengerDisplay);
     childCount.addEventListener('change', updatePassengerDisplay);
     infantCount.addEventListener('change', updatePassengerDisplay);
+     updatePassengerDisplay();
 });
 // Modified loading spinner functions
 function showLoadingSpinner() {
@@ -814,11 +839,11 @@ function showLoadingSpinner() {
     }
 }
 function hideLoadingSpinner() {
-    if (hotelDetailsLoaded && roomDetailsLoaded) {
+    
         const spinner = document.getElementById('loadingSpinner');
         if (spinner) {
             spinner.style.display = 'none';
-        }
+      
     }
 }
 
@@ -1369,13 +1394,13 @@ console.log('Cookies:', document.cookie);
     } 
     else {
         console.error('API Error:', data.message);
-        alert(data.message || 'No results found. Please try different search criteria.');
+        toastr.warning(data.message || 'No results found. Please try different search criteria.', 'No Results');
     }
 })
 .catch(error => {
   hideLoadingSpinner();
     console.error('Error:', error);
-    alert('An error occurred while searching. Please try again later.');
+    toastr.error('An error occurred while searching. Please try again later.', 'Search Error');
 });
         });
     }
@@ -1445,7 +1470,7 @@ console.log('Cookies:', document.cookie);
                 const tripType = document.getElementById('carTripType').value;
 
                 if (!pickupLocation || !dropoffLocation || !pickupDate || !tripType) {
-                    alert('Please fill all required fields before searching.');
+                    toastr.warning('Please fill all required fields before searching.', 'Missing Information');
                     return;
                 }
 
@@ -1503,7 +1528,7 @@ console.log('Cookies:', document.cookie);
 
                 } catch (error) {
                     console.error('Error:', error);
-                    alert('An error occurred while searching for cars. Please try again.');
+                    toastr.error('An error occurred while searching for cars. Please try again.', 'Search Error');
                 } finally {
                     searchButton.disabled = false;
                     searchButton.innerHTML = 'Search ';
@@ -1512,12 +1537,9 @@ console.log('Cookies:', document.cookie);
         }
     });
 
-
-
   //  ****************************************************
   //                    FLIGHT SEARCH
   //  ****************************************************
-
 
 $(document).ready(function () {
     // Initialize datepicker with the correct format
@@ -1526,8 +1548,6 @@ $(document).ready(function () {
         autoclose: true,
         startDate: new Date()
     });
-
-    
 
     function initializeAirportSearch() {
     const searchConfig = [
@@ -1827,12 +1847,13 @@ console.log('journeytypt is this ',journeyType )
             // Redirect to results page
            window.location.href =  `/flight?${searchParams.toString()}`;
         } else {
-            alert(response.message || 'No flights found.');
-        }
+            toastr.info(response.message || 'No flights found.', 'Search Results');
+    }
+
     },
     error: function (xhr) {
         console.error('Error:', xhr.responseJSON);
-        alert(xhr.responseJSON?.message || 'An error occurred.');
+        toastr.error(xhr.responseJSON?.message || 'An error occurred.', 'Search Error');
     }
 });
     });

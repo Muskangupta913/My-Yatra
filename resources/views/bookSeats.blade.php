@@ -1,9 +1,6 @@
 @extends('frontend.layouts.master')
 @section('title', 'Booking Confirmation')
 @section('content')
-
-
-
 <!DOCTYPE html>
 <html lang="en">
 <head>

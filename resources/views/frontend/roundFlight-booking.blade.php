@@ -1005,7 +1005,7 @@ function fetchSSRData(type, passengerType, resultIndex, srdvIndex, direction, pa
                 },
                 body: JSON.stringify({
                     EndUserIp: '1.1.1.1',
-                    ClientId: '180189',
+                    ClientId: '180133',
                     UserName: 'MakeMy91',
                     Password: 'MakeMy@910',
                     SrdvType: "MixAPI",
@@ -1530,7 +1530,7 @@ function fetchSeatMap(type, resultIndex, srdvIndex, direction, passengerType, pa
         },
         body: JSON.stringify({
             EndUserIp: '1.1.1.1',
-            ClientId: '180189',
+            ClientId: '180133',
             UserName: 'MakeMy91',
             Password: 'MakeMy@910',
             SrdvType: "MixAPI",
@@ -2024,7 +2024,7 @@ function checkFlightBalance() {
             },
             body: JSON.stringify({
                 EndUserIp: '1.1.1.1',
-                ClientId: '180189',
+                ClientId: '180133',
                 UserName: 'MakeMy91',
                 Password: 'MakeMy@910'
             })

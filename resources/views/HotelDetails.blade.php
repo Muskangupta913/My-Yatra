@@ -8,7 +8,7 @@
     left: 0; 
     width: 100%; 
     height: 100%; 
-    background-color: rgba(255, 255, 255, 0.8); 
+    background-color: rgba(255, 255, 255, 0.8);
     z-index: 9999; 
     display: flex; 
     align-items: center; 
@@ -201,25 +201,6 @@ body {
     </div>
     <template id="hotel-template">
     <div class="space-y-6">
-        <!-- Hotel Header -->
-        <div class="bg-white rounded-lg shadow p-6">
-            <h1 class="text-3xl font-bold hotel-name"></h1>
-            <div class="flex flex-wrap gap-4 text-sm text-gray-600 mt-2">
-                <div class="flex items-center gap-1">
-                    <i class="fas fa-map-marker-alt"></i>
-                    <span class="hotel-address"></span>
-                </div>
-                <div class="flex items-center gap-1">
-                    <i class="fas fa-star text-yellow-400"></i>
-                    <span class="hotel-rating"></span>
-                </div>
-                <div class="flex items-center gap-1">
-                    <i class="fas fa-phone"></i>
-                    <span class="hotel-contact"></span>
-                </div>
-            </div>
-        </div>
-
         <!-- Main Content Area -->
         <div class="flex flex-col md:flex-row gap-6">
             <!-- Left Side - Image Gallery -->
@@ -238,67 +219,6 @@ body {
                         <!-- Thumbnails will be populated here -->
                     </div>
                 </div>
-
-                <!-- Hotel Description Below Gallery -->
-                <div class="mt-6 bg-white rounded-lg shadow p-6">
-                    <h2 class="text-xl font-semibold mb-4">About the Hotel</h2>
-                    <div class="space-y-4 hotel-description">
-                        <!-- Description will be populated here -->
-                    </div>
-                </div>
-            </div>
-
-            <!-- Right Side - Hotel Details Sidebar -->
-            <div class="md:w-1/3">
-                <div class="bg-white rounded-lg shadow p-6 space-y-6 sticky top-4">
-                    <h2 class="text-xl font-semibold border-b pb-2">Hotel Information</h2>
-                    
-                    <!-- Location Details -->
-                    <div class="space-y-4">
-                        <div class="flex items-start gap-3">
-                            <i class="fas fa-map-marked-alt text-blue-500 mt-1"></i>
-                            <div>
-                                <h3 class="font-semibold text-gray-700">Address</h3>
-                                <p class="text-gray-600 hotel-full-address"></p>
-                            </div>
-                        </div>
-
-                        <div class="flex items-start gap-3">
-                            <i class="fas fa-globe-asia text-blue-500 mt-1"></i>
-                            <div>
-                                <h3 class="font-semibold text-gray-700">Location</h3>
-                                <p class="text-gray-600">
-                                    <span class="hotel-city"></span>,
-                                    <span class="hotel-state"></span>
-                                </p>
-                                <p class="text-gray-600">
-                                    <span class="hotel-country"></span>
-                                    <span class="hotel-pincode"></span>
-                                </p>
-                            </div>
-                        </div>
-
-                        <div class="flex items-start gap-3">
-                            <i class="fas fa-location-crosshairs text-blue-500 mt-1"></i>
-                            <div>
-                                <h3 class="font-semibold text-gray-700">Coordinates</h3>
-                                <p class="text-gray-600">
-                                    <span class="hotel-latitude"></span>, 
-                                    <span class="hotel-longitude"></span>
-                                </p>
-                            </div>
-                        </div>
-
-                        <div class="flex items-start gap-3">
-                            <i class="fas fa-phone-alt text-blue-500 mt-1"></i>
-                            <div>
-                                <h3 class="font-semibold text-gray-700">Contact</h3>
-                                <p class="text-gray-600 hotel-phone"></p>
-                                <p class="text-gray-600 hotel-email"></p>
-                            </div>
-                        </div>
-                    </div>
-
                     <!-- Facilities Section -->
                     <div class="border-t pt-4">
                         <h3 class="font-semibold text-gray-700 mb-3">Hotel Facilities</h3>
@@ -313,7 +233,7 @@ body {
 </template>
 
     <div class="room-info-container">
-        <div id="room-details" class="loading-state">Kindly Refresh the page to the availabe rooms</div>
+        <div id="room-details" class="loading-state">Kindly Refresh the page to the available rooms</div>
     </div>
     <!-- Include Toastr JS -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/js/toastr.min.js"></script>
@@ -358,7 +278,7 @@ function hideLoadingSpinner() {
             const hotelCode = urlParams.get('hotelCode');
 
             if (!resultIndex || !traceId || !hotelCode) {
-                document.getElementById('hotel-details').innerHTML = 
+                document.getElementById('hotel-details').innerHTML =
                     '<div class="error-state">No hotel information available</div>';
                     hotelDetailsLoaded = true;
                     hideLoadingSpinner();
@@ -402,7 +322,8 @@ function hideLoadingSpinner() {
         hotelDetailsLoaded = true;
         hideLoadingSpinner();
     });
-}function renderHotelDetails(hotel) {
+}
+function renderHotelDetails(hotel) {
     const template = document.getElementById('hotel-template');
     const content = template.content.cloneNode(true);
     const container = document.getElementById('hotel-details');
