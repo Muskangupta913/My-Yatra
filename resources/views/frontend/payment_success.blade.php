@@ -253,7 +253,7 @@ fetch(`/balance-log?TraceId=${traceId}&amount=${amount}`, {
     } 
     else {
         // Redirect to failed page with error message
-        window.location.href = `/payments/failed?message=${encodeURIComponent(bookingResult.message || "Booking failed")}`;
+        // window.location.href = `/payments/failed?message=${encodeURIComponent(bookingResult.message || "Booking failed")}`;
     }
 })
 .catch(error => {

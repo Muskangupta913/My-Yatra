@@ -809,7 +809,7 @@ public function paymentCallback(Request $request)
         ]);
 
         // Initialize Razorpay API with env variables
-        $api = new Api('rzp_test_cvVugPSRGGLWtS',' xHoRXawt9gYD7vitghKq1l5c');
+        $api = new Api('rzp_test_cvVugPSRGGLWtS','xHoRXawt9gYD7vitghKq1l5c');
         
         // Verify payment signature
         $attributes = [
@@ -849,8 +849,8 @@ $generatedSignature = hash_hmac(
             \Log::error('Payment record not found', [
                 'order_id' => $validatedData['razorpay_order_id']
             ]);
-            return redirect()->route('payments.failed')
-                ->with('error', 'Payment record could not be located');
+            // return redirect()->route('payments.failed')
+            //     ->with('error', 'Payment record could not be located');
         }
 
         // Update payment record with comprehensive details
@@ -888,8 +888,8 @@ $generatedSignature = hash_hmac(
             'trace' => $e->getTraceAsString()
         ]);
 
-        return redirect()->route('payments.failed')
-            ->with('error', 'Payment verification failed: '. $e->getMessage());
+        // return redirect()->route('payments.failed')
+        //     ->with('error', 'Payment verification failed: '. $e->getMessage());
     }
 }
 

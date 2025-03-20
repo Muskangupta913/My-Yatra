@@ -394,10 +394,12 @@
     const price = JSON.parse(decodeURIComponent(urlParams.get('Price')));
     const traceId = urlParams.get('TraceId');
     const resultIndex = urlParams.get('ResultIndex');
+    console.log('price details', price);
     let invoiceAmount= 0;
              let encodedpassengers = '';
              invoiceAmount = passengers[0].SeatDetails.Price;
             encodedpassengers=encodeURIComponent(passengers);
+            console.log('invoice amount', invoiceAmount);
     // Format date and time
     function formatDateTime(dateTimeStr) {
         const dt = new Date(dateTimeStr);
@@ -675,7 +677,7 @@ document.getElementById('payNowButton').addEventListener('click', function(e) {
                             razorpay_signature: response.razorpay_signature,
                             
                             trace_id: traceId,
-                            amount: totalAmount,
+                            amount: invoiceAmount,
                             passenger_data: passengers,
                             result_index: resultIndex,
                             boarding_point_name: encodeURIComponent(JSON.stringify(boardingPoint)),
