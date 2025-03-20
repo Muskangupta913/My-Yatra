@@ -595,7 +595,7 @@ document.getElementById('payNowButton').addEventListener('click', function(e) {
 
         const payload = {
             TraceId: traceId,
-            Amount: invoiceAmount,
+            Amount: totalAmount,
             PassengerData: passengers,
             BoardingPointName: boardingPoint.Name,
             DroppingPointName: droppingPoint.Name,
@@ -675,7 +675,7 @@ document.getElementById('payNowButton').addEventListener('click', function(e) {
                             razorpay_signature: response.razorpay_signature,
                             
                             trace_id: traceId,
-                            amount: invoiceAmount,
+                            amount: totalAmount,
                             passenger_data: passengers,
                             result_index: resultIndex,
                             boarding_point_name: encodeURIComponent(JSON.stringify(boardingPoint)),

@@ -740,7 +740,7 @@ public function initializePayment(Request $request)
     
     try {
         // Initialize Razorpay API with env variables
-        $api = new Api(env('RAZORPAY_KEY_ID'), env('RAZORPAY_KEY_SECRET'));
+        $api = new Api('rzp_test_cvVugPSRGGLWtS', 'xHoRXawt9gYD7vitghKq1l5c');
         
         // Convert amount to paise (Razorpay uses paise)
         $amountInPaise = $validatedData['Amount'] * 100;
@@ -771,7 +771,7 @@ public function initializePayment(Request $request)
         return response()->json([
             'success' => true,
             'navigateToPayment' => true,
-            'key_id' => env('RAZORPAY_KEY_ID'),
+           'key_id' => 'rzp_test_cvVugPSRGGLWtS',
             'order_id' => $order->id,
             'amount' => $validatedData['Amount'], // Send original amount, not in paise
             'amount_in_paise' => $amountInPaise, // Also send amount in paise for reference
@@ -809,7 +809,7 @@ public function paymentCallback(Request $request)
         ]);
 
         // Initialize Razorpay API with env variables
-        $api = new Api(env('RAZORPAY_KEY_ID'), env('RAZORPAY_KEY_SECRET'));
+        $api = new Api('rzp_test_cvVugPSRGGLWtS',' xHoRXawt9gYD7vitghKq1l5c');
         
         // Verify payment signature
         $attributes = [
@@ -827,10 +827,13 @@ public function paymentCallback(Request $request)
             ]);
             
             // Alternative manual verification as fallback
-            $generatedSignature = hash_hmac('sha256', 
-                $validatedData['razorpay_order_id'] . '|' . $validatedData['razorpay_payment_id'], 
-                env('RAZORPAY_KEY_SECRET')
-            );
+            // Alternative manual verification as fallback
+$generatedSignature = hash_hmac(
+    'sha256',
+    $validatedData['razorpay_order_id'] . '|' . $validatedData['razorpay_payment_id'],
+    'xHoRXawt9gYD7vitghKq1l5c'
+);
+
             
             if ($generatedSignature !== $validatedData['razorpay_signature']) {
                 throw new \Exception('Payment signature verification failed');
@@ -875,7 +878,7 @@ public function paymentCallback(Request $request)
         \Log::info('Payment Successfully Processed', $successParams);
 
         // Redirect to success page with all necessary parameters
-        return redirect()->route('payments.success', $successParams)
+        return redirect()->route('payments.bus', $successParams)
             ->with('success', 'Payment processed successfully');
 
     } catch (\Exception $e) {

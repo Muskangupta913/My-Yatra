@@ -803,7 +803,7 @@ public function createPayment(Request $request)
         ]);
 
         // Initialize Razorpay API
-        $api = new Api(env('RAZORPAY_KEY_ID'), env('RAZORPAY_KEY_SECRET'));
+        $api = new Api('rzp_test_cvVugPSRGGLWtS', 'xHoRXawt9gYD7vitghKq1l5c');
 
         
         // Create order
@@ -845,7 +845,7 @@ public function createPayment(Request $request)
             'order_id' => $razorpayOrder->id,
             'amount' => $request->amount,
             'currency' => $request->currency ?? 'INR',
-            'key_id' => env('rzp_test_cvVugPSRGGLWtS')
+           'key_id' => 'rzp_test_cvVugPSRGGLWtS'
         ]);
         
     } catch (Exception $e) {
@@ -874,7 +874,7 @@ public function verifyPayment(Request $request)
         ]);
 
         // Initialize Razorpay API
-        $api = new Api(env('RAZORPAY_KEY_ID'), env('RAZORPAY_KEY_SECRET'));
+        $api = new Api('rzp_test_cvVugPSRGGLWtS', 'xHoRXawt9gYD7vitghKq1l5c');
         // Get payment data from request
         $razorpay_payment_id = $request->razorpay_payment_id;
         $razorpay_order_id = $request->razorpay_order_id;
@@ -1041,7 +1041,7 @@ public function verifyPayment(Request $request)
         if ($request->has('razorpay_payment_id') && $request->has('razorpay_order_id')) {
             // Try to verify payment status directly with Razorpay
             try {
-                $api = new Api(env('RAZORPAY_KEY_ID'), env('RAZORPAY_KEY_SECRET'));
+                $api = new Api('rzp_test_cvVugPSRGGLWtS', 'xHoRXawt9gYD7vitghKq1l5c');
                 $paymentInfo = $api->payment->fetch($request->razorpay_payment_id);
                 
                 // If payment is authorized or captured, consider it successful
