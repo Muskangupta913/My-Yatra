@@ -392,10 +392,7 @@ function renderHotelDetails(hotel) {
                 </div>
 
                 <!-- Hotel Description Below Gallery -->
-                <div style="margin-top: 2rem; background: white; border-radius: 1rem; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); border: 1px solid #e2e8f0; padding: 1.5rem;">
-                    <h2 style="font-size: 1.5rem; font-weight: 600; color: #1e40af; margin-bottom: 1rem; border-bottom: 2px solid #93c5fd; padding-bottom: 0.5rem;">About the Hotel</h2>
-                    <div class="hotel-description" style="color: #475569;"></div>
-                </div>
+               
             </div>
 
             <!-- Right Side - Hotel Details Sidebar -->
@@ -437,10 +434,7 @@ function renderHotelDetails(hotel) {
                     </div>
 
                     <!-- Facilities Section -->
-                    <div style="border-top: 1px solid #e2e8f0; margin-top: 1.5rem; padding-top: 1.5rem;">
-                        <h3 style="font-weight: 600; color: #1e40af; margin-bottom: 1rem;">Hotel Facilities</h3>
-                        <div class="facilities-list" style="display: grid; gap: 0.5rem;"></div>
-                    </div>
+                    
                 </div>
             </div>
         </div>
@@ -489,39 +483,12 @@ function renderHotelDetails(hotel) {
             });
         }
     }
-
-    // Render facilities
-    const facilitiesList = container.querySelector('.facilities-list');
-    if (hotel.HotelFacilities) {
-        hotel.HotelFacilities.forEach(facility => {
-            const facilityDiv = document.createElement('div');
-            facilityDiv.style = 'display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem; background: #f8fafc; border-radius: 0.5rem; border: 1px solid #e2e8f0; transition: all 0.3s ease;';
-            facilityDiv.innerHTML = `
-                <i class="fas ${facility.FontAwesome}" style="color: #2563eb;"></i>
-                <span style="color: #475569;">${facility.Name}</span>
-            `;
-            facilitiesList.appendChild(facilityDiv);
-        });
-    }
-
-    // Render hotel description
-    const descriptionContainer = container.querySelector('.hotel-description');
-    if (hotel.Description) {
-        hotel.Description.forEach(section => {
-            const sectionDiv = document.createElement('div');
-            sectionDiv.style = 'margin-bottom: 1.5rem;';
-            sectionDiv.innerHTML = `
-                <h3 style="font-weight: 600; color: #1e40af; margin-bottom: 0.75rem;">${section.Name}</h3>
-                <ul style="list-style-type: disc; padding-left: 1.5rem; color: #475569;">
-                    ${section.Detail.map(detail => `
-                        <li style="margin-bottom: 0.5rem;">${detail}</li>
-                    `).join('')}
-                </ul>
-            `;
-            descriptionContainer.appendChild(sectionDiv);
-        });
-    }
+    // STORING HOTEL INFORMATION IN GLOBAL VARIABLES TO ACCESS AFTER ROOM RENDERING
+    window.hotelDescription = hotel.Description;
+    window.hotelFacilities = hotel.HotelFacilities;
 }
+
+
 
 // Initialize the page
 // document.addEventListener('DOMContentLoaded', fetchHotelInfo);
@@ -644,7 +611,7 @@ function fetchRoomDetails() {
                                     ` : ''}
                                     <!-- Description and Bed Type -->
                                     <div style="color: #475569; margin-bottom: 1rem;">
-                                        ${room.Description}
+                                        <!--${room.Description}-->
                                         <div style="display: flex; align-items: center; gap: 0.5rem; margin-top: 0.5rem;">
                                             <i class="fas fa-bed"></i>
                                             ${room.BedTypes || 'N/A'}
@@ -707,6 +674,7 @@ function fetchRoomDetails() {
             });
             
             document.getElementById('room-details').innerHTML = roomDetailsHtml;
+            appendHotelDetailsFooter();
         } else {
     Swal.fire({
         icon: "error",
@@ -728,6 +696,93 @@ function fetchRoomDetails() {
         roomDetailsLoaded = true;
         hideLoadingSpinner();
     });
+}
+
+// HIGHLIGHT START: New function to append hotel details as footer
+function appendHotelDetailsFooter() {
+    // Only proceed if we have the global variables set
+    if (!window.hotelDescription && !window.hotelFacilities) {
+        return;
+    }
+    
+    // Create footer container
+    const footerContainer = document.createElement('div');
+    footerContainer.className = 'hotel-footer-details';
+    footerContainer.style = 'margin-top: 3rem; padding-top: 2rem; border-top: 2px solid #e2e8f0;';
+    
+    // Add the title
+    const footerTitle = document.createElement('h2');
+    footerTitle.style = 'font-size: 1.75rem; font-weight: 700; color: #1e40af; margin-bottom: 2rem; text-align: center;';
+    footerTitle.textContent = 'More About This Hotel';
+    footerContainer.appendChild(footerTitle);
+    
+    // Create a flex container for the two sections
+    const flexContainer = document.createElement('div');
+    flexContainer.style = 'display: flex; flex-wrap: wrap; gap: 2rem;';
+    footerContainer.appendChild(flexContainer);
+    
+    // About the Hotel Section
+    if (window.hotelDescription) {
+        const descriptionSection = document.createElement('div');
+        descriptionSection.style = 'flex: 1; min-width: 300px; background: white; border-radius: 1rem; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); border: 1px solid #e2e8f0; padding: 1.5rem;';
+        
+        const descriptionTitle = document.createElement('h3');
+        descriptionTitle.style = 'font-size: 1.5rem; font-weight: 600; color: #1e40af; margin-bottom: 1rem; border-bottom: 2px solid #93c5fd; padding-bottom: 0.5rem;';
+        descriptionTitle.textContent = 'About the Hotel';
+        descriptionSection.appendChild(descriptionTitle);
+        
+        const descriptionContent = document.createElement('div');
+        descriptionContent.className = 'hotel-description';
+        descriptionContent.style = 'color: #475569;';
+        
+        window.hotelDescription.forEach(section => {
+            const sectionDiv = document.createElement('div');
+            sectionDiv.style = 'margin-bottom: 1.5rem;';
+            sectionDiv.innerHTML = `
+                <h4 style="font-weight: 600; color: #1e40af; margin-bottom: 0.75rem;">${section.Name}</h4>
+                <ul style="list-style-type: disc; padding-left: 1.5rem; color: #475569;">
+                    ${section.Detail.map(detail => `
+                        <li style="margin-bottom: 0.5rem;">${detail}</li>
+                    `).join('')}
+                </ul>
+            `;
+            descriptionContent.appendChild(sectionDiv);
+        });
+        
+        descriptionSection.appendChild(descriptionContent);
+        flexContainer.appendChild(descriptionSection);
+    }
+    
+    // Facilities Section
+    if (window.hotelFacilities) {
+        const facilitiesSection = document.createElement('div');
+        facilitiesSection.style = 'flex: 1; min-width: 300px; background: white; border-radius: 1rem; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); border: 1px solid #e2e8f0; padding: 1.5rem;';
+        
+        const facilitiesTitle = document.createElement('h3');
+        facilitiesTitle.style = 'font-size: 1.5rem; font-weight: 600; color: #1e40af; margin-bottom: 1rem; border-bottom: 2px solid #93c5fd; padding-bottom: 0.5rem;';
+        facilitiesTitle.textContent = 'Hotel Facilities';
+        facilitiesSection.appendChild(facilitiesTitle);
+        
+        const facilitiesList = document.createElement('div');
+        facilitiesList.className = 'facilities-list';
+        facilitiesList.style = 'display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 1rem;';
+        
+        window.hotelFacilities.forEach(facility => {
+            const facilityDiv = document.createElement('div');
+            facilityDiv.style = 'display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem; background: #f8fafc; border-radius: 0.5rem; border: 1px solid #e2e8f0; transition: all 0.3s ease;';
+            facilityDiv.innerHTML = `
+                <i class="fas ${facility.FontAwesome}" style="color: #2563eb;"></i>
+                <span style="color: #475569;">${facility.Name}</span>
+            `;
+            facilitiesList.appendChild(facilityDiv);
+        });
+        
+        facilitiesSection.appendChild(facilitiesList);
+        flexContainer.appendChild(facilitiesSection);
+    }
+    
+    // Append the footer to the room details container
+    document.getElementById('room-details').appendChild(footerContainer);
 }
 // Initialize everything when the page loads
 document.addEventListener('DOMContentLoaded', () => {

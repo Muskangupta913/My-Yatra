@@ -7,32 +7,86 @@
     <title>Payment Successful</title>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+      /* Processing overlay styles */
+      .processing-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.7); /* Darker background for better hiding */
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 9999; /* High z-index to ensure it's on top */
+        backdrop-filter: blur(3px); /* Adding blur effect for better hiding */
+    }
+    
+    .processing-content {
+        background-color: white;
+        padding: 30px;
+        border-radius: 10px;
+        text-align: center;
+        max-width: 500px;
+        width: 90%;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    }
+    
+    .spinner {
+        margin: 20px auto;
+        width: 50px;
+        height: 50px;
+        border: 5px solid #f3f3f3;
+        border-top: 5px solid #3498db;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+    }
+    
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+    </style>
 </head>
 <body>
+<!-- ADDED: Processing overlay -->
+<div id="processingOverlay" class="processing-overlay">
+    <div class="processing-content">
+        <h3>Please wait...</h3>
+        <div class="spinner"></div>
+        <p id="processingMessage">Please wait while we process your booking...
 
+Don't close this window</p>
+        <p id="processingStatus">Processing...</p>
+    </div>
+</div>
 <div class="container">
     <div class="row justify-content-center">
         <div class="col-md-8">
             <div class="card mt-5">
-                <div class="card-header bg-success text-white">Payment Successful</div>
+                <div class="card-header bg-success text-white">Booking Successful</div>
 
                 <div class="card-body text-center">
                     <i class="fa fa-check-circle fa-5x text-success mb-3"></i>
                     <h2>Thank You!</h2>
-                    <p class="lead">Your payment has been processed successfully.</p>
+                    <p class="lead">Your booking has been confirmed.</p>
                     
                     <div class="mt-4">
-                        <a href="index.html" class="btn btn-primary">Back to Home</a>
+                        <a href="{{ route('home') }}" class="btn btn-primary">Back to Home</a>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
-
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
 <script>
+    
+     function hideProcessingOverlay() {
+    document.getElementById('processingOverlay').style.display = 'none';
+}
   document.addEventListener('DOMContentLoaded', () => {
     
     determineFlightTypes();
@@ -277,12 +331,14 @@ function fetchBalanceLogAndBookLCC() {
             // Proceed with booking only if balance deduction was successful
             bookLCC(bookingDetails);
         } else {
-            showError(data.errorMessage || 'Failed to process balance log');
+            window.location.href = '/payments/failed?';
+            // showError(data.errorMessage || 'Failed to process balance log');
         }
     })
     .catch(error => {
+        window.location.href = '/payments/failed?';
         console.error('Balance log error:', error);
-        showError('Failed to process balance check. Please try again.');
+        // showError('Failed to process balance check. Please try again.');
     });
 }
 
@@ -371,16 +427,19 @@ function bookLCC(bookingDetails) {
     .then(response => response.json())
     .then(data => {
         if (data.status === 'success') {
-            alert('✅ Booking successful!');
+            hideProcessingOverlay();
+            // alert('✅ Booking successful!');
             console.log("✅ Booking successful!");
         } else {
-            alert('❌ Booking failed: ' + (data.message || 'Unknown error'));
+            // alert('❌ Booking failed: ' + (data.message || 'Unknown error'));
             console.error("❌ Booking Failure:", data);
+            window.location.href = '/payments/failed?';
         }
     })
     .catch(error => {
+        window.location.href = '/payments/failed?';
         console.error('❌ Error:', error);
-        alert('An error occurred during booking');
+        // alert('An error occurred during booking');
     });
 }
 
@@ -457,12 +516,14 @@ function fetchBalanceLogAndBookGDS() {
             // Proceed with booking only if balance deduction was successful
             processGdsTicket(gdsTicketDetails);
         } else {
-            showError(data.errorMessage || 'Failed to process balance log');
+            window.location.href = '/payments/failed?';
+            // showError(data.errorMessage || 'Failed to process balance log');
         }
     })
     .catch(error => {
+        window.location.href = '/payments/failed?';
         console.error('Balance log error:', error);
-        showError('Failed to process balance check. Please try again.');
+        // showError('Failed to process balance check. Please try again.');
     });
 }
 
@@ -493,6 +554,7 @@ function processGdsTicket(gdsTicketDetails) {
     .then(data => {
         console.log("API Response:", data);
         if (data.status === "success") {
+            hideProcessingOverlay();
             console.log("Booking successful:", {
                 bookingId: data.data.bookingId,
                 pnr: data.data.pnr,
@@ -501,10 +563,12 @@ function processGdsTicket(gdsTicketDetails) {
             });
         } else {
             console.error("Booking failed:", data.message);
+            window.location.href = '/payments/failed?';
         }
     })
     .catch(error => {
         console.error("API Error:", error);
+        window.location.href = '/payments/failed?';
     });
 }
 }
@@ -866,7 +930,8 @@ async function bookLCC() {
                 });
                 const data = await response.json();
                 if (data.status !== 'success') {
-                    throw new Error(`Outbound booking failed: ${data.message}`);
+                    window.location.href = '/payments/failed?';
+                    // throw new Error(`Outbound booking failed: ${data.message}`);
                 }
                 return true;
             })();
@@ -894,7 +959,8 @@ async function bookLCC() {
                 });
                 const data = await response.json();
                 if (data.status !== 'success') {
-                    throw new Error(`Return booking failed: ${data.message}`);
+                    window.location.href = '/payments/failed?';
+                    // throw new Error(`Return booking failed: ${data.message}`);
                 }
                 return true;
             })();
@@ -906,8 +972,9 @@ async function bookLCC() {
         return results.every(result => result === true);
 
     } catch (error) {
+        window.location.href = '/payments/failed?';
         console.error("❌ Error in LCC booking:", error);
-        throw error;
+        // throw error;
     }
 }
 
