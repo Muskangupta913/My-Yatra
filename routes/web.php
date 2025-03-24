@@ -445,18 +445,6 @@ Route::get('/api/payment/{paymentId}', [HotelController::class, 'getPaymentDetai
 Route::get('/api/payment-history', [HotelController::class, 'getPaymentHistory']);
 
 
-
-
-
-
-
-
-
-
-
-
-
-
 Route::get('/fetch-all-cities', [CityController::class, 'fetchAllCities'])->name('fetch.all.cities');
 Route::get('/search-cities', [CityController::class, 'searchCities'])->name('search.cities');
 
@@ -474,7 +462,7 @@ Route::get('/fetch-all-states', [HomeController::class, 'fetchAllStates'])->name
 // Route::get('/search/cities', [HomeController::class, 'searchCities'])->name('search.cities');
 
 // Searching Packages
-Route::get('/search-packages', [HomeController::class, 'searchPackages'])->name('searchPackages');
+
 Route::get('/kashmir', function () {
   return view('kashmir'); // Replace 'kashmir' with the actual Blade file name without the .blade.php extension.
 })->name('kashmir');
@@ -491,8 +479,6 @@ Route::get('/fetch-all-states', [HomeController::class, 'fetchAllStates'])->name
 
 // Route::get('/search/cities', [HomeController::class, 'searchCities'])->name('search.cities');
 
-// Searching Packages
-Route::get('/search-packages', [HomeController::class, 'searchPackages'])->name('searchPackages');
 
 // car Route
 Route::post('/fetch-cities', [CarController::class, 'fetchCities'])->name('fetchCities');
@@ -536,7 +522,7 @@ Route::post('/create-payment', [PaymentController::class, 'createPayment'])->nam
 Route::post('/verify-payment', [PaymentController::class, 'verifyPayment'])->name('payment.verify');
 Route::get('/payment/success', [PaymentController::class, 'handlePaymentSuccess'])->name('payment.success');
 Route::post('/process-booking', [PaymentController::class, 'processBookingApis']);
-
+Route::post('/process-booking-apis', [PaymentController::class, 'processBookingApis'])->name('process.booking.apis');
 
 
 
@@ -600,3 +586,9 @@ Route::get('/tour-image/{filename}', function($filename) {
   
   return response()->file($path);
 });
+
+Route::get('/fetch-cities', [CityController::class, 'fetchCitiesByState']);
+Route::get('/fetch-all-cities', [CityController::class, 'fetchAllCities'])->name('fetch.all.cities');
+Route::get('/packages/city/{cityCode}', [HomeController::class, 'getPackagesByCityCode'])->name('packages.byCityCode');
+Route::get('/package-list', [HomeController::class, 'packageList'])->name('package.list');
+Route::get('/search-packages', [HomeController::class, 'searchPackages'])->name('searchPackages');

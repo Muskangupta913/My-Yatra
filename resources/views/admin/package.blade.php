@@ -24,6 +24,7 @@
                                                             <th>Photo</th>
                                                             <th>Package Name</th>
                                                             <th style="width:10%;">Destination Name</th>
+                                                            <th>City</th>
                                                             {{-- <th style="width:10%;">Duration</th> --}}
                                                             <th>Photo & Video</th>
                                                             <th>Action</th>
@@ -40,7 +41,8 @@
                                                             <td>{{$i++}}</td>
                                                             <td><img src="{{ asset('uploads/packages/'.$data->photo )}}" width="120" alt=""></td>
                                                             <td>{{$data->package_name}}</td>
-                                                            <td>{{ $data->destination->destination_name}}</td>
+                                                            <td>{{ $data->destination ? $data->destination->destination_name : 'N/A' }}</td>
+                                                            <td>{{ $data->city ? $data->city->name : 'N/A' }}</td>
                                                             {{-- <td>{{$data->duration}}</td> --}}
                                                           
                                                             <td><a href="{{ route('package.photo', $data->id)}}" class="btn d-block mb-3 btn-success btn-sm">Manage Photos</a>

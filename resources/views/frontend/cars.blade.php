@@ -2,383 +2,384 @@
 
 @section('styles')
     <style>
-/* Base responsive adjustments for all screens */
-.container {
-    width: 100%;
-    padding-right: 1rem;
-    padding-left: 1rem;
-}
+        /* Base responsive adjustments for all screens */
+        .container {
+            width: 100%;
+            padding-right: 1rem;
+            padding-left: 1rem;
+        }
 
-/* Enhanced search summary box */
-.search-summary {
-    background: #ffffff;
-    border-radius: 10px;
-    padding: 15px 20px;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-    transition: all 0.3s ease-in-out;
-    max-width: 600px;
-    margin: 20px auto;
-}
+        /* Enhanced search summary box */
+        .search-summary {
+            background: #ffffff;
+            border-radius: 10px;
+            padding: 15px 20px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease-in-out;
+            max-width: 600px;
+            margin: 20px auto;
+        }
 
-.search-summary:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.15);
-}
+        .search-summary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.15);
+        }
 
-.search-summary p {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    align-items: center;
-    gap: 10px;
-    margin: 0;
-    text-align: center;
-}
+        .search-summary p {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            margin: 0;
+            text-align: center;
+        }
 
-.search-summary strong {
-    color: #007bff;
-}
+        .search-summary strong {
+            color: #007bff;
+        }
 
-/* Mobile search summary adjustments */
-@media (max-width: 768px) {
-    .search-summary {
-        max-width: 100%;
-        padding: 10px;
-    }
+        /* Mobile search summary adjustments */
+        @media (max-width: 768px) {
+            .search-summary {
+                max-width: 100%;
+                padding: 10px;
+            }
 
-    .search-summary p {
-        font-size: 14px;
-        flex-direction: column;
-        gap: 5px;
-    }
-}
+            .search-summary p {
+                font-size: 14px;
+                flex-direction: column;
+                gap: 5px;
+            }
+        }
 
-/* Car results section - this fixes the layout for larger screens */
-#carResults {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: space-between;
-    gap: 20px;
-}
+        /* Car results section - this fixes the layout for larger screens */
+        #carResults {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            gap: 20px;
+        }
 
-/* Core card layout */
-.car-card {
-    background: white;
-    border-radius: 12px;
-    box-shadow: 0 4px 6px rgba(129, 87, 228, 0.69);
-    transition: transform 0.3s ease;
-    position: relative;
-    overflow: hidden;
-    width: 100%;
-    margin-bottom: 20px;
-}
+        /* Core card layout */
+        .car-card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(129, 87, 228, 0.69);
+            transition: transform 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            width: 100%;
+            margin-bottom: 20px;
+        }
 
-/* Card grid system for larger screens */
-@media (min-width: 768px) {
-    .car-card {
-        width: calc(50% - 10px);
-        margin-bottom: 20px;
-    }
-}
+        /* Card grid system for larger screens */
+        @media (min-width: 768px) {
+            .car-card {
+                width: calc(50% - 10px);
+                margin-bottom: 20px;
+            }
+        }
 
-@media (min-width: 1024px) {
-    .container {
-        padding-right: 2rem;
-        padding-left: 2rem;
-    }
-    
-    .car-card {
-        width: calc(50% - 10px);
-    }
-}
+        @media (min-width: 1024px) {
+            .container {
+                padding-right: 2rem;
+                padding-left: 2rem;
+            }
 
-/* Card appearance and animations */
-.car-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 12px 20px rgba(0, 0, 0, 0.15);
-}
+            .car-card {
+                width: calc(50% - 10px);
+            }
+        }
 
-/* Fix for car image wrapper */
-.car-image-wrapper {
-    position: relative;
-    border-radius: 8px;
-    overflow: hidden;
-    display: block;
-    width: 100%;
-}
+        /* Card appearance and animations */
+        .car-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 20px rgba(0, 0, 0, 0.15);
+        }
 
-/* Car image styling */
-.car-image {
-    width: 100%;
-    height: 150px;
-    object-fit: cover;
-    transition: transform 0.5s ease;
-    border-radius: 8px 8px 0 0;
-}
+        /* Fix for car image wrapper */
+        .car-image-wrapper {
+            position: relative;
+            border-radius: 8px;
+            overflow: hidden;
+            display: block;
+            width: 100%;
+        }
 
-.car-card:hover .car-image {
-    transform: scale(1.05);
-}
+        /* Car image styling */
+        .car-image {
+            width: 100%;
+            height: 150px;
+            object-fit: cover;
+            transition: transform 0.5s ease;
+            border-radius: 8px 8px 0 0;
+        }
 
-/* Car title positioning */
-.car-title {
-    font-size: 1.25rem;
-    font-weight: 600;
-    margin-bottom: 1rem;
-    color: #333;
-    display: block;
-    width: 100%;
-    /* Critical fix for text positioning */
-    position: relative;
-    z-index: 2;
-}
+        .car-card:hover .car-image {
+            transform: scale(1.05);
+        }
 
-/* Updated price tag design */
-.price-tag {
-    position: absolute;
-    top: 1rem;
-    right: 0;
-    background: #1d4ed8;
-    color: white;
-    padding: 0rem 1rem;
-    font-weight: bold;
-    clip-path: polygon(0 0, 100% 0, 95% 100%, 0% 100%);
-    z-index: 4;
-}
+        /* Car title positioning */
+        .car-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: #333;
+            display: block;
+            width: 100%;
+            /* Critical fix for text positioning */
+            position: relative;
+            z-index: 2;
+        }
 
-/* Book Now button styling */
-.book-now-btn {
-    width: 100%;
-    background-color: #1d4ed8;
-    color: white !important;
-    font-weight: 600;
-    padding: 0.75rem 1rem;
-    border-radius: 8px;
-    border: none;
-    transition: all 0.3s ease;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.5rem;
-    cursor: pointer;
-    margin-top: 1rem;
-    text-align: center;
-    position: relative;
-    z-index: 2;
-}
+        /* Updated price tag design */
+        .price-tag {
+            position: absolute;
+            top: 1rem;
+            right: 0;
+            background: #1d4ed8;
+            color: white;
+            padding: 0rem 1rem;
+            font-weight: bold;
+            clip-path: polygon(0 0, 100% 0, 95% 100%, 0% 100%);
+            z-index: 4;
+        }
 
-.book-now-btn:hover {
-    background-color: #1e40af;
-    transform: translateY(-2px);
-}
+        /* Book Now button styling */
+        .book-now-btn {
+            width: 100%;
+            background-color: #1d4ed8;
+            color: white !important;
+            font-weight: 600;
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            border: none;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            cursor: pointer;
+            margin-top: 1rem;
+            text-align: center;
+            position: relative;
+            z-index: 2;
+        }
 
-/* Badge styling */
-.badge {
-    display: inline-block;
-    padding: 0.25rem 0.75rem;
-    border-radius: 9999px;
-    font-size: 0.75rem;
-    font-weight: 500;
-    margin-right: 0.5rem;
-    margin-bottom: 0.5rem;
-}
+        .book-now-btn:hover {
+            background-color: #1e40af;
+            transform: translateY(-2px);
+        }
 
-.badge-ac {
-    background-color: #e0f2fe;
-    color: #0369a1;
-}
+        /* Badge styling */
+        .badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            margin-right: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
 
-.badge-refundable {
-    background-color: #dcfce7;
-    color: #15803d;
-}
+        .badge-ac {
+            background-color: #e0f2fe;
+            color: #0369a1;
+        }
 
-.badge-non-refundable {
-    background-color: #fee2e2;
-    color: #b91c1c;
-}
+        .badge-refundable {
+            background-color: #dcfce7;
+            color: #15803d;
+        }
 
-/* Responsive grid layout for car details */
-.grid-cols-2 {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 0.5rem;
-    margin-top: 0.5rem;
-}
+        .badge-non-refundable {
+            background-color: #fee2e2;
+            color: #b91c1c;
+        }
 
-/* ==================== */
-/* CRITICAL FIX FOR TEXT POSITIONING ON LARGER SCREENS */
-/* ==================== */
-.car-image-wrapper .flex-col {
-    position: relative !important;
-    top: auto !important;
-    left: auto !important;
-    margin-top: 0.5rem !important;
-    padding: 0 0.5rem !important;
-    width: 100% !important;
-}
+        /* Responsive grid layout for car details */
+        .grid-cols-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+        }
 
-.car-details.space-y-3 {
-    position: relative !important;
-    width: 100% !important;
-    margin-bottom: 1rem !important;
-}
+        /* ==================== */
+        /* CRITICAL FIX FOR TEXT POSITIONING ON LARGER SCREENS */
+        /* ==================== */
+        .car-image-wrapper .flex-col {
+            position: relative !important;
+            top: auto !important;
+            left: auto !important;
+            margin-top: 0.5rem !important;
+            padding: 0 0.5rem !important;
+            width: 100% !important;
+        }
 
-.car-details-container {
-    position: static !important;
-    width: 100% !important;
-}
+        .car-details.space-y-3 {
+            position: relative !important;
+            width: 100% !important;
+            margin-bottom: 1rem !important;
+        }
 
-/* End of critical fix */
-/* ==================== */
+        .car-details-container {
+            position: static !important;
+            width: 100% !important;
+        }
 
-/* Screen-specific adjustments */
-/* Mobile layout fixes */
-@media (max-width: 767px) {
-    .car-card {
-        width: 100%;
-        margin-bottom: 15px;
-    }
-    
-    .car-image {
-        height: 150px;
-    }
-    
-    /* Fix badge display on mobile */
-    .badge {
-        font-size: 0.7rem;
-        padding: 0.2rem 0.5rem;
-        margin-bottom: 0.35rem;
-    }
-    
-    /* Fix car title display */
-    .car-title {
-        font-size: 1rem;
-        margin-top: 0;
-    }
-    
-    /* Fix grid layout on mobile */
-    .grid-cols-2 {
-        grid-template-columns: 1fr 1fr;
-        gap: 0.25rem;
-        text-align: left;
-        font-size: 0.85rem;
-    }
-    
-    /* Fix price tag positioning */
-    .price-tag {
-        top: 0.5rem;
-        padding: 0.25rem 0.75rem;
-        font-size: 0.875rem;
-    }
-    
-    /* Fix book now button */
-    .book-now-btn {
-        padding: 0.5rem;
-        font-size: 0.875rem;
-        margin-top: 0.5rem;
-    }
-    
-    /* Fix filter sidebar on mobile */
-    aside.md\:col-span-1 {
-        padding: 1rem;
-        margin-bottom: 1rem;
-    }
-}
+        /* End of critical fix */
+        /* ==================== */
 
-/* Extra small device optimizations */
-@media (max-width: 375px) {
-    .container {
-        padding-right: 0.5rem;
-        padding-left: 0.5rem;
-    }
-    
-    .search-summary {
-        padding: 10px;
-    }
-    
-    .search-summary p {
-        font-size: 12px;
-    }
-    
-    .car-image {
-        height: 120px !important;
-    }
-    
-    .car-title {
-        font-size: 0.9rem;
-        margin-bottom: 0.25rem;
-    }
-    
-    .badge {
-        font-size: 0.65rem;
-        padding: 0.15rem 0.4rem;
-        margin-right: 0.25rem;
-        margin-bottom: 0.25rem;
-    }
-    
-    .grid-cols-2 {
-        gap: 0.2rem;
-    }
-    
-    .grid-cols-2 > div {
-        font-size: 0.75rem;
-    }
-    
-    .book-now-btn {
-        font-size: 0.8rem;
-        padding: 0.4rem;
-    }
-}
+        /* Screen-specific adjustments */
+        /* Mobile layout fixes */
+        @media (max-width: 767px) {
+            .car-card {
+                width: 100%;
+                margin-bottom: 15px;
+            }
 
-/* Fix for section layout on mobile */
-@media (max-width: 767px) {
-    .md\:col-span-3 {
-        width: 100%;
-    }
-    
-    .md\:col-span-1 {
-        width: 100%;
-    }
-    
-    .grid.md\:grid-cols-4 {
-        display: block;
-    }
-}
+            .car-image {
+                height: 150px;
+            }
 
-/* Animation for cards */
-.animate-fade-in {
-    animation: fadeIn 0.5s ease-in-out forwards;
-}
+            /* Fix badge display on mobile */
+            .badge {
+                font-size: 0.7rem;
+                padding: 0.2rem 0.5rem;
+                margin-bottom: 0.35rem;
+            }
 
-@keyframes fadeIn {
-    from {
-        opacity: 0;
-        transform: translateY(10px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
+            /* Fix car title display */
+            .car-title {
+                font-size: 1rem;
+                margin-top: 0;
+            }
 
-/* Loading state */
-.shimmer {
-    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
-    background-size: 200% 100%;
-    animation: shimmer 1.5s infinite;
-}
+            /* Fix grid layout on mobile */
+            .grid-cols-2 {
+                grid-template-columns: 1fr 1fr;
+                gap: 0.25rem;
+                text-align: left;
+                font-size: 0.85rem;
+            }
 
-@keyframes shimmer {
-    0% {
-        background-position: 200% 0;
-    }
-    100% {
-        background-position: -200% 0;
-    }
-}
+            /* Fix price tag positioning */
+            .price-tag {
+                top: 0.5rem;
+                padding: 0.25rem 0.75rem;
+                font-size: 0.875rem;
+            }
 
-</style>
+            /* Fix book now button */
+            .book-now-btn {
+                padding: 0.5rem;
+                font-size: 0.875rem;
+                margin-top: 0.5rem;
+            }
+
+            /* Fix filter sidebar on mobile */
+            aside.md\:col-span-1 {
+                padding: 1rem;
+                margin-bottom: 1rem;
+            }
+        }
+
+        /* Extra small device optimizations */
+        @media (max-width: 375px) {
+            .container {
+                padding-right: 0.5rem;
+                padding-left: 0.5rem;
+            }
+
+            .search-summary {
+                padding: 10px;
+            }
+
+            .search-summary p {
+                font-size: 12px;
+            }
+
+            .car-image {
+                height: 120px !important;
+            }
+
+            .car-title {
+                font-size: 0.9rem;
+                margin-bottom: 0.25rem;
+            }
+
+            .badge {
+                font-size: 0.65rem;
+                padding: 0.15rem 0.4rem;
+                margin-right: 0.25rem;
+                margin-bottom: 0.25rem;
+            }
+
+            .grid-cols-2 {
+                gap: 0.2rem;
+            }
+
+            .grid-cols-2>div {
+                font-size: 0.75rem;
+            }
+
+            .book-now-btn {
+                font-size: 0.8rem;
+                padding: 0.4rem;
+            }
+        }
+
+        /* Fix for section layout on mobile */
+        @media (max-width: 767px) {
+            .md\:col-span-3 {
+                width: 100%;
+            }
+
+            .md\:col-span-1 {
+                width: 100%;
+            }
+
+            .grid.md\:grid-cols-4 {
+                display: block;
+            }
+        }
+
+        /* Animation for cards */
+        .animate-fade-in {
+            animation: fadeIn 0.5s ease-in-out forwards;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Loading state */
+        .shimmer {
+            background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.5s infinite;
+        }
+
+        @keyframes shimmer {
+            0% {
+                background-position: 200% 0;
+            }
+
+            100% {
+                background-position: -200% 0;
+            }
+        }
+    </style>
 @endsection
 
 @section('content')
@@ -480,7 +481,7 @@
                                                 <i class="fas fa-car-side mr-2"></i>
                                                 {{ $car['availability'] ?? 0 }} Available
                                             </div>
-                                            <div class="car-info-item">
+                                            {{-- <div class="car-info-item">
                                                 <i class="fas fa-fingerprint"></i>
                                                 <span>TraceID: <strong>{{ session('carSearchResults.TraceID') ?? 'N/A' }}</strong></span>
                                             </div>
@@ -488,31 +489,37 @@
                                                 <i class="fas fa-barcode"></i>
                                                 <span>SrdvIndex: <strong>{{ $car['id'] ?? 'N/A' }}</strong></span>
                                             </div>
+                                            <div>
+                                                <i class="fas fa-money-bill-wave mr-2"></i>
+                                                Base Fare: ₹{{ number_format($car['baseFare'], 2) }}
+                                            </div> --}}
                                         </div>
                                     </div>
-                                   
+
                                 </div>
                                 <div class="price-tag absolute top-4 right-0 py-2 px-4 text-sm font-bold">
-                                        <b>₹{{ number_format($car['totalAmount'], 2) }}</b>
-                                    </div>
-                                    <button
-                class="book-now-btn w-full mt-4 bg-blue-600 text-black py-3 px-4 rounded-lg hover:bg-blue-700 
+                                    <b>₹{{ number_format($car['totalAmount'], 2) }}</b>
+                                </div>
+                                <button
+                                    class="book-now-btn w-full mt-4 bg-blue-600 text-black py-3 px-4 rounded-lg hover:bg-blue-700 
                 transform transition-all duration-300 hover:scale-[1.02] focus:outline-none focus:ring-2 
                 focus:ring-blue-500 focus:ring-opacity-50 flex items-center justify-center space-x-2"
-                data-car="{{ json_encode([
-                    'id' => $car['id'] ?? uniqid(), // Ensure there's always an ID
-                    'category' => $car['category'] ?? 'Unknown',
-                    'seatingCapacity' => $car['seatingCapacity'] ?? '4',
-                    'luggageCapacity' => $car['luggageCapacity'] ?? 'Not Specified',
-                    'totalAmount' => $car['totalAmount'] ?? 0,
-                    'hasAC' => $car['hasAC'] ?? false,
-                    'carType' => $car['carType'] ?? 'Standard',
-                    'availability' => $car['availability'] ?? 0,
-                    'isRefundable' => $car['isRefundable'] ?? false
-                ]) }}">
-                <span><b>Book Now</b></span>
-                <i class="fas fa-arrow-right transition-transform duration-300 group-hover:translate-x-1"></i>
-            </button>
+                                    data-car="{{ json_encode([
+                                        'id' => $car['id'] ?? uniqid(),
+                                        'category' => $car['category'] ?? 'Unknown',
+                                        'seatingCapacity' => $car['seatingCapacity'] ?? '4',
+                                        'luggageCapacity' => $car['luggageCapacity'] ?? 'Not Specified',
+                                        'totalAmount' => $car['totalAmount'] ?? 0,
+                                        'baseFare' => $car['baseFare'] ?? 0, // Ensure Base Fare is included
+                                        'hasAC' => $car['hasAC'] ?? false,
+                                        'carType' => $car['carType'] ?? 'Standard',
+                                        'availability' => $car['availability'] ?? 0,
+                                        'isRefundable' => $car['isRefundable'] ?? false,
+                                    ]) }}">
+                                    <span><b>Book Now</b></span>
+                                    <i
+                                        class="fas fa-arrow-right transition-transform duration-300 group-hover:translate-x-1"></i>
+                                </button>
                             </div>
                         </div>
                     @empty
@@ -530,49 +537,51 @@
 
 @section('scripts')
     <script>
-// car details 
-document.querySelectorAll(".book-now-btn").forEach(button => {
-    button.addEventListener("click", function() {
-        const carData = JSON.parse(this.dataset.car);
-        // Also store search parameters
-        const searchParams = {
-            pickupLocation: "{{ $searchParams['pickupLocation'] ?? 'N/A' }}",
-            dropoffLocation: "{{ $searchParams['dropoffLocation'] ?? 'N/A' }}",
-            pickupDate: "{{ $searchParams['pickupDate'] ?? 'N/A' }}",
-            tripType: "{{ ['One Way', 'Return', 'Local'][$searchParams['tripType'] ?? 0] }}"
-        };
-        localStorage.setItem("selectedCar", JSON.stringify(carData));
-        localStorage.setItem("searchParams", JSON.stringify(searchParams));
-        window.location.href = "{{ route('car.booking.form') }}";
-    });
-});
-// car details close
+        // car details 
+        document.querySelectorAll(".book-now-btn").forEach(button => {
+            button.addEventListener("click", function() {
+                const carData = JSON.parse(this.dataset.car);
+                // Also store search parameters
+                const searchParams = {
+                    pickupLocation: "{{ $searchParams['pickupLocation'] ?? 'N/A' }}",
+                    dropoffLocation: "{{ $searchParams['dropoffLocation'] ?? 'N/A' }}",
+                    pickupDate: "{{ $searchParams['pickupDate'] ?? 'N/A' }}",
+                    tripType: "{{ ['One Way', 'Return', 'Local'][$searchParams['tripType'] ?? 0] }}"
+                };
+                localStorage.setItem("selectedCar", JSON.stringify(carData));
+                localStorage.setItem("searchParams", JSON.stringify(searchParams));
+                window.location.href = "{{ route('car.booking.form') }}";
+            });
+        });
+        // car details close
 
         // car select 
         document.addEventListener("DOMContentLoaded", function() {
             document.querySelectorAll(".book-now-btn").forEach(button => {
                 try {
-                // Parse the car data from the button's data attribute
-                const carData = JSON.parse(this.dataset.car);
-                
-                // Validate required fields
-                const requiredFields = ['id', 'category', 'seatingCapacity', 'luggageCapacity', 'totalAmount'];
-                const missingFields = requiredFields.filter(field => !carData[field]);
-                
-                if (missingFields.length > 0) {
-                    console.error('Missing required fields:', missingFields);
-                    alert('Unable to proceed with booking. Please try again.');
-                    return;
-                }
+                    // Parse the car data from the button's data attribute
+                    const carData = JSON.parse(this.dataset.car);
 
-                // Store car data and redirect
-                localStorage.setItem("selectedCar", JSON.stringify(carData));
-                window.location.href = "{{ route('car.booking.form') }}";
-            } catch (error) {
-                console.error('Error processing car data:', error);
-            }
+                    // Validate required fields
+                    const requiredFields = ['id', 'category', 'seatingCapacity', 'luggageCapacity',
+                        'totalAmount'
+                    ];
+                    const missingFields = requiredFields.filter(field => !carData[field]);
+
+                    if (missingFields.length > 0) {
+                        console.error('Missing required fields:', missingFields);
+                        alert('Unable to proceed with booking. Please try again.');
+                        return;
+                    }
+
+                    // Store car data and redirect
+                    localStorage.setItem("selectedCar", JSON.stringify(carData));
+                    window.location.href = "{{ route('car.booking.form') }}";
+                } catch (error) {
+                    console.error('Error processing car data:', error);
+                }
+            });
         });
-    });
 
         // car select close
         // animation
@@ -656,19 +665,19 @@ document.querySelectorAll(".book-now-btn").forEach(button => {
                                 </div>
                                 
                                 ${car.isRefundable !== undefined ? `
-                                            <div class="mt-3">
-                                                <p class="text-sm ${car.isRefundable ? 'text-green-600' : 'text-red-600'}">
-                                                    ${car.isRefundable ? 'Refundable' : 'Non-Refundable'}
-                                                </p>
-                                            </div>
-                                        ` : ''}
+                                                    <div class="mt-3">
+                                                        <p class="text-sm ${car.isRefundable ? 'text-green-600' : 'text-red-600'}">
+                                                            ${car.isRefundable ? 'Refundable' : 'Non-Refundable'}
+                                                        </p>
+                                                    </div>
+                                                ` : ''}
                                 
                                 ${car.cancellationPolicy ? `
-                                            <div class="mt-3">
-                                                <p class="text-sm font-medium">Cancellation Policy:</p>
-                                                <p class="text-sm text-gray-600">${car.cancellationPolicy}</p>
-                                            </div>
-                                        ` : ''}
+                                                    <div class="mt-3">
+                                                        <p class="text-sm font-medium">Cancellation Policy:</p>
+                                                        <p class="text-sm text-gray-600">${car.cancellationPolicy}</p>
+                                                    </div>
+                                                ` : ''}
                                 
                                 <button onclick="window.location.href='/booking/create/${car.id}'"
                                         class="mt-4 w-full bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700">
@@ -710,7 +719,7 @@ document.querySelectorAll(".book-now-btn").forEach(button => {
                 });
 
             // Fetch car details (all cars or specific car)
-            fetch('/get-car-details') 
+            fetch('/get-car-details')
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
@@ -731,15 +740,15 @@ document.querySelectorAll(".book-now-btn").forEach(button => {
             });
         });
 
-document.querySelectorAll(".book-now-btn").forEach(button => {
-    button.addEventListener("click", function() {
-        const carData = JSON.parse(this.dataset.car);
-        const traceId = "{{ session('carSearchResults.TraceID') }}";
-        carData.traceId = traceId;
-        carData.srdvIndex = carData.id; // Ensure SrdvIndex is set correctly
-        localStorage.setItem("selectedCar", JSON.stringify(carData));
-        window.location.href = "{{ route('car.booking.form') }}";
-    });
-});
+        document.querySelectorAll(".book-now-btn").forEach(button => {
+            button.addEventListener("click", function() {
+                const carData = JSON.parse(this.dataset.car);
+                const traceId = "{{ session('carSearchResults.TraceID') }}";
+                carData.traceId = traceId;
+                carData.srdvIndex = carData.id; // Ensure SrdvIndex is set correctly
+                localStorage.setItem("selectedCar", JSON.stringify(carData));
+                window.location.href = "{{ route('car.booking.form') }}";
+            });
+        });
     </script>
 @endsection

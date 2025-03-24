@@ -159,20 +159,7 @@
                         <p >The bustling Mall Road is the heart of Mussoorie’s social scene.  cafes, shops, and restaurants, it’s perfect for shopping, dining, and leisurely strolls. You’ll find local handicrafts, woolens, and souvenirs here.</p>
                     </div>
                 </div>
-
-
-
-                <div class="col-md-3 mb-3 mt-3">
-                    <img src='{{ asset("assets/images/mussoorie-attraction1-img.jpg") }}' data-aos="fade-up" width="100%" height="250px" alt="">
-                        <div class="mussoorie-content border">
-                            <h3>Lal Tibba</h3>
-                            <p>Lal Tibba is the highest point in Mussoorie and  the surrounding mountains, including the Badrinath and Kedarnath peaks on a clear day. It's a peaceful place for nature lovers and photographers.</p>
-                        </div>
-                    </div>
-            
-
-
-                    
+    
                 <div class="col-md-3 mb-3 mt-3">
                     <img src='{{ asset("assets/images/mussoorie-attraction1-img.jpg") }}' data-aos="fade-up" width="100%" height="250px" alt="">
                         <div class="mussoorie-content border">

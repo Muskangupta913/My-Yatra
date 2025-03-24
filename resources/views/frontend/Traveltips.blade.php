@@ -1,106 +1,260 @@
 @extends('frontend.layouts.master')
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
-    @section('content')
-<body class="bg-gray-50 text-gray-800">
-    <div class="container mx-auto px-4 py-8">
-        <header class="text-center mb-12">
-            <h1 class="text-4xl font-bold text-blue-600 mb-4">Essential Travel Tips for India</h1>
-            <p class="text-xl text-gray-600 max-w-2xl mx-auto">
-                Navigate the vibrant and diverse landscape of India with confidence using these crucial travel insights.
-            </p>
-        </header>
 
-        <div class="grid md:grid-cols-2 gap-8">
-            <div class="bg-white shadow-lg rounded-lg p-6">
-                <h2 class="text-2xl font-semibold text-blue-500 mb-4">
-                    <i class="fas fa-passport mr-3"></i>Visa and Documentation
-                </h2>
-                <ul class="space-y-3">
-                    <li class="flex items-start">
-                        <i class="fas fa-check-circle text-green-500 mr-3 mt-1"></i>
-                        <span>Obtain an e-Visa or appropriate tourist visa before arrival</span>
-                    </li>
-                    <li class="flex items-start">
-                        <i class="fas fa-check-circle text-green-500 mr-3 mt-1"></i>
-                        <span>Carry multiple copies of passport, visa, and important documents</span>
-                    </li>
-                    <li class="flex items-start">
-                        <i class="fas fa-check-circle text-green-500 mr-3 mt-1"></i>
-                        <span>Register with your country's embassy for emergency support</span>
-                    </li>
-                </ul>
-            </div>
+@section('content')
+<!-- External Resources -->
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 
-            <div class="bg-white shadow-lg rounded-lg p-6">
-                <h2 class="text-2xl font-semibold text-blue-500 mb-4">
-                    <i class="fas fa-first-aid mr-3"></i>Health Precautions
-                </h2>
-                <ul class="space-y-3">
-                    <li class="flex items-start">
-                        <i class="fas fa-check-circle text-green-500 mr-3 mt-1"></i>
-                        <span>Get recommended vaccinations (Hepatitis A, Typhoid, etc.)</span>
-                    </li>
-                    <li class="flex items-start">
-                        <i class="fas fa-check-circle text-green-500 mr-3 mt-1"></i>
-                        <span>Carry a basic medical kit and any personal medications</span>
-                    </li>
-                    <li class="flex items-start">
-                        <i class="fas fa-check-circle text-green-500 mr-3 mt-1"></i>
-                        <span>Drink bottled water and avoid street food initially</span>
-                    </li>
-                </ul>
-            </div>
+<style>
+    /* Custom Professional Styling */
+    body {
+        background-color: #f8f9fa;
+        color: #343a40;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    
+    .travel-tips-header {
+        text-align: center;
+        margin-bottom: 60px;
+        padding-top: 40px;
+    }
+    
+    .travel-tips-title {
+        color: #0056b3;
+        font-weight: 700;
+        margin-bottom: 20px;
+    }
+    
+    .travel-tips-subtitle {
+        color: #6c757d;
+        max-width: 700px;
+        margin: 0 auto;
+        line-height: 1.6;
+    }
+    
+    .tips-card {
+        background-color: #ffffff;
+        border-radius: 8px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+        padding: 25px;
+        height: 100%;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    
+    .tips-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+    }
+    
+    .tips-card-title {
+        color: #0056b3;
+        font-weight: 600;
+        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+        font-size: 22px;
+    }
+    
+    .tips-card-title i {
+        color: #0056b3;
+        margin-right: 15px;
+        font-size: 24px;
+        width: 30px;
+        text-align: center;
+    }
+    
+    .tips-list {
+        list-style-type: none;
+        padding-left: 0;
+        margin-bottom: 0;
+    }
+    
+    .tips-list li {
+        display: flex;
+        align-items: flex-start;
+        margin-bottom: 15px;
+    }
+    
+    .tips-list li:last-child {
+        margin-bottom: 0;
+    }
+    
+    .tips-list-icon {
+        color: #28a745;
+        margin-right: 15px;
+        margin-top: 4px;
+        flex-shrink: 0;
+    }
+    
+    .tips-list-text {
+        flex-grow: 1;
+        line-height: 1.5;
+    }
+    
+    .cultural-sensitivity-section {
+        background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+        border-radius: 8px;
+        padding: 35px;
+        margin-top: 60px;
+        text-align: center;
+    }
+    
+    .cultural-sensitivity-title {
+        color: #0056b3;
+        font-weight: 700;
+        margin-bottom: 20px;
+    }
+    
+    .cultural-sensitivity-text {
+        color: #37474f;
+        max-width: 800px;
+        margin: 0 auto;
+        line-height: 1.7;
+        font-size: 18px;
+    }
+    
+    @media (max-width: 767px) {
+        .travel-tips-title {
+            font-size: 28px;
+        }
+        
+        .tips-card {
+            margin-bottom: 20px;
+        }
+        
+        .cultural-sensitivity-section {
+            padding: 25px;
+        }
+        
+        .cultural-sensitivity-title {
+            font-size: 24px;
+        }
+        
+        .cultural-sensitivity-text {
+            font-size: 16px;
+        }
+    }
+</style>
 
-            <div class="bg-white shadow-lg rounded-lg p-6">
-                <h2 class="text-2xl font-semibold text-blue-500 mb-4">
-                    <i class="fas fa-rupee-sign mr-3"></i>Money and Expenses
+<div class="container">
+    <!-- Header Section -->
+    <div class="travel-tips-header">
+        <h1 class="travel-tips-title display-4">Essential Travel Tips for India</h1>
+        <p class="travel-tips-subtitle lead">
+            Navigate the vibrant and diverse landscape of India with confidence using these crucial travel insights.
+        </p>
+    </div>
+    
+    <!-- Travel Tips Cards -->
+    <div class="row g-4">
+        <!-- Visa and Documentation -->
+        <div class="col-md-6">
+            <div class="tips-card">
+                <h2 class="tips-card-title">
+                    <i class="fas fa-passport"></i>
+                    Visa and Documentation
                 </h2>
-                <ul class="space-y-3">
-                    <li class="flex items-start">
-                        <i class="fas fa-check-circle text-green-500 mr-3 mt-1"></i>
-                        <span>Inform your bank about travel to prevent card blockages</span>
+                <ul class="tips-list">
+                    <li>
+                        <i class="fas fa-check-circle tips-list-icon"></i>
+                        <span class="tips-list-text">Obtain an e-Visa or appropriate tourist visa before arrival</span>
                     </li>
-                    <li class="flex items-start">
-                        <i class="fas fa-check-circle text-green-500 mr-3 mt-1"></i>
-                        <span>Carry some cash and use multiple payment methods</span>
+                    <li>
+                        <i class="fas fa-check-circle tips-list-icon"></i>
+                        <span class="tips-list-text">Carry multiple copies of passport, visa, and important documents</span>
                     </li>
-                    <li class="flex items-start">
-                        <i class="fas fa-check-circle text-green-500 mr-3 mt-1"></i>
-                        <span>Be prepared to negotiate prices in local markets</span>
-                    </li>
-                </ul>
-            </div>
-
-            <div class="bg-white shadow-lg rounded-lg p-6">
-                <h2 class="text-2xl font-semibold text-blue-500 mb-4">
-                    <i class="fas fa-mobile-alt mr-3"></i>Communication Tips
-                </h2>
-                <ul class="space-y-3">
-                    <li class="flex items-start">
-                        <i class="fas fa-check-circle text-green-500 mr-3 mt-1"></i>
-                        <span>Purchase a local SIM card for affordable data and calls</span>
-                    </li>
-                    <li class="flex items-start">
-                        <i class="fas fa-check-circle text-green-500 mr-3 mt-1"></i>
-                        <span>Download offline translation and navigation apps</span>
-                    </li>
-                    <li class="flex items-start">
-                        <i class="fas fa-check-circle text-green-500 mr-3 mt-1"></i>
-                        <span>Learn a few basic Hindi or local language phrases</span>
+                    <li>
+                        <i class="fas fa-check-circle tips-list-icon"></i>
+                        <span class="tips-list-text">Register with your country's embassy for emergency support</span>
                     </li>
                 </ul>
             </div>
         </div>
-
-        <section class="mt-12 bg-blue-50 rounded-lg p-8 text-center">
-            <h2 class="text-3xl font-bold text-blue-700 mb-4">Cultural Sensitivity</h2>
-            <p class="text-lg text-gray-700 max-w-3xl mx-auto">
-                Respect local customs by dressing modestly, asking permission before photographing people, 
-                and being mindful of religious and cultural practices. India is diverse, so attitudes can 
-                vary significantly between regions.
-            </p>
-        </section>
+        
+        <!-- Health Precautions -->
+        <div class="col-md-6">
+            <div class="tips-card">
+                <h2 class="tips-card-title">
+                    <i class="fas fa-first-aid"></i>
+                    Health Precautions
+                </h2>
+                <ul class="tips-list">
+                    <li>
+                        <i class="fas fa-check-circle tips-list-icon"></i>
+                        <span class="tips-list-text">Get recommended vaccinations (Hepatitis A, Typhoid, etc.)</span>
+                    </li>
+                    <li>
+                        <i class="fas fa-check-circle tips-list-icon"></i>
+                        <span class="tips-list-text">Carry a basic medical kit and any personal medications</span>
+                    </li>
+                    <li>
+                        <i class="fas fa-check-circle tips-list-icon"></i>
+                        <span class="tips-list-text">Drink bottled water and avoid street food initially</span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        
+        <!-- Money and Expenses -->
+        <div class="col-md-6">
+            <div class="tips-card">
+                <h2 class="tips-card-title">
+                    <i class="fas fa-rupee-sign"></i>
+                    Money and Expenses
+                </h2>
+                <ul class="tips-list">
+                    <li>
+                        <i class="fas fa-check-circle tips-list-icon"></i>
+                        <span class="tips-list-text">Inform your bank about travel to prevent card blockages</span>
+                    </li>
+                    <li>
+                        <i class="fas fa-check-circle tips-list-icon"></i>
+                        <span class="tips-list-text">Carry some cash and use multiple payment methods</span>
+                    </li>
+                    <li>
+                        <i class="fas fa-check-circle tips-list-icon"></i>
+                        <span class="tips-list-text">Be prepared to negotiate prices in local markets</span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        
+        <!-- Communication Tips -->
+        <div class="col-md-6">
+            <div class="tips-card">
+                <h2 class="tips-card-title">
+                    <i class="fas fa-mobile-alt"></i>
+                    Communication Tips
+                </h2>
+                <ul class="tips-list">
+                    <li>
+                        <i class="fas fa-check-circle tips-list-icon"></i>
+                        <span class="tips-list-text">Purchase a local SIM card for affordable data and calls</span>
+                    </li>
+                    <li>
+                        <i class="fas fa-check-circle tips-list-icon"></i>
+                        <span class="tips-list-text">Download offline translation and navigation apps</span>
+                    </li>
+                    <li>
+                        <i class="fas fa-check-circle tips-list-icon"></i>
+                        <span class="tips-list-text">Learn a few basic Hindi or local language phrases</span>
+                    </li>
+                </ul>
+            </div>
+        </div>
     </div>
-</body>
+    
+    <!-- Cultural Sensitivity Section -->
+    <div class="cultural-sensitivity-section">
+        <h2 class="cultural-sensitivity-title">Cultural Sensitivity</h2>
+        <p class="cultural-sensitivity-text">
+            Respect local customs by dressing modestly, asking permission before photographing people, 
+            and being mindful of religious and cultural practices. India is diverse, so attitudes can 
+            vary significantly between regions.
+        </p>
+    </div>
+</div>
+
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 @endsection

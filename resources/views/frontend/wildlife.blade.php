@@ -13,6 +13,7 @@
     justify-content: center;
     color: #fff;
     text-align: center;
+    
   }
   
   .wildlife-hero h1 {
@@ -58,7 +59,11 @@
     transition: all 0.3s ease;
     margin-bottom: 30px;
     background: #fff;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
   }
+
   
   .safari-card:hover {
     transform: translateY(-10px);
@@ -95,8 +100,46 @@
   .safari-card .card-text {
     color: #666;
     margin-bottom: 1rem;
+  flex-grow: 1;
   }
-  
+  .info-card {
+  height: 100%;
+  border-radius: 10px;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+  transition: all 0.3s ease;
+  border: none;
+}
+.info-card:hover {
+  box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+  transform: translateY(-5px);
+}
+
+.info-card .card-body {
+  padding: 1.75rem;
+}
+
+.info-card h3 {
+  color: #2e7d32;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.info-card h3 i {
+  margin-right: 10px;
+  color: #2e7d32;
+}
+
+.info-card ul {
+  padding-left: 1.2rem;
+}
+
+.info-card li {
+  margin-bottom: 0.75rem;
+  line-height: 1.6;
+}
+
   .safari-badge {
     display: inline-block;
     padding: 0.4rem 0.8rem;
@@ -297,6 +340,54 @@
     color: #fff;
     transform: rotateY(180deg);
   }
+
+  /* Responsive fixes */
+@media (max-width: 991px) {
+  .wildlife-hero h1 {
+    font-size: 3rem;
+  }
+  
+  .wildlife-hero p {
+    font-size: 1.2rem;
+  }
+}
+
+@media (max-width: 767px) {
+  .safari-card .card-img {
+    height: 200px;
+  }
+  
+  .wildlife-hero h1 {
+    font-size: 2.5rem;
+  }
+  
+  .wildlife-hero {
+    height: 60vh;
+  }
+  
+  .info-card {
+    margin-bottom: 1.5rem;
+  }
+  
+  .section-heading {
+    font-size: 1.8rem;
+    margin-bottom: 2rem;
+  }
+}
+
+@media (max-width: 575px) {
+  .wildlife-hero h1 {
+    font-size: 2rem;
+  }
+  
+  .stat-number {
+    font-size: 2.5rem;
+  }
+  
+  .stat-text {
+    font-size: 1rem;
+  }
+}
 </style>
 @endsection
 

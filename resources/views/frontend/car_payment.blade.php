@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -59,15 +60,24 @@
             align-items: center;
         }
 
-        .left-section { animation-delay: 0.2s; }
-        .center-section { animation-delay: 0.4s; }
-        .right-section { animation-delay: 0.6s; }
+        .left-section {
+            animation-delay: 0.2s;
+        }
+
+        .center-section {
+            animation-delay: 0.4s;
+        }
+
+        .right-section {
+            animation-delay: 0.6s;
+        }
 
         @keyframes slideIn {
             from {
                 transform: translateY(20px);
                 opacity: 0;
             }
+
             to {
                 transform: translateY(0);
                 opacity: 1;
@@ -131,8 +141,13 @@
         }
 
         @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
         }
 
         .alert {
@@ -154,7 +169,7 @@
             box-shadow: 0 2px 4px rgb(0 0 0 / 0.1);
         }
 
-        
+
         .contact-info {
             text-align: center;
             margin-top: 2rem;
@@ -200,6 +215,7 @@
                 opacity: 0;
                 transform: scale(0.95);
             }
+
             to {
                 opacity: 1;
                 transform: scale(1);
@@ -225,12 +241,13 @@
             border-radius: 0.5rem;
             transition: border-color 0.2s;
         }
+
         .modal-content input:focus {
             outline: none;
             border-color: var(--primary-color);
         }
 
-       
+
 
         .close {
             position: absolute;
@@ -245,16 +262,24 @@
         @media (max-width: 1024px) {
             .container {
                 grid-template-columns: 1fr;
-                grid-template-areas: 
+                grid-template-areas:
                     "center"
                     "left"
                     "right";
                 max-width: 800px;
             }
 
-            .left-section { grid-area: left; }
-            .center-section { grid-area: center; }
-            .right-section { grid-area: right; }
+            .left-section {
+                grid-area: left;
+            }
+
+            .center-section {
+                grid-area: center;
+            }
+
+            .right-section {
+                grid-area: right;
+            }
         }
 
         @media (max-width: 640px) {
@@ -271,120 +296,125 @@
                 grid-template-columns: 1fr;
             }
         }
-    .submit-btn {
-    background: linear-gradient(135deg, #007BFF, #0056b3);
-    color: white;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    font-size: 16px;
-    font-weight: bold;
-    padding: 12px 24px;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
-    text-transform: uppercase;
-    letter-spacing: 1px;
-}
 
-.submit-btn:hover {
-    background: linear-gradient(135deg, #0056b3, #003d80);
-    box-shadow: 0px 6px 12px rgba(0, 0, 0, 0.2);
-    transform: translateY(-2px);
-}
+        .submit-btn {
+            background: linear-gradient(135deg, #007BFF, #0056b3);
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 16px;
+            font-weight: bold;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
 
-.submit-btn:active {
-    transform: translateY(1px);
-    box-shadow: 0px 3px 6px rgba(0, 0, 0, 0.15);
-}
+        .submit-btn:hover {
+            background: linear-gradient(135deg, #0056b3, #003d80);
+            box-shadow: 0px 6px 12px rgba(0, 0, 0, 0.2);
+            transform: translateY(-2px);
+        }
 
-.button-container {
-    display: flex;
-    justify-content: center;
-    margin-top: 2rem;
-}
+        .submit-btn:active {
+            transform: translateY(1px);
+            box-shadow: 0px 3px 6px rgba(0, 0, 0, 0.15);
+        }
 
-</style>
+        .button-container {
+            display: flex;
+            justify-content: center;
+            margin-top: 2rem;
+        }
+    </style>
 </head>
+
 <body>
     <div class="container">
         <!-- Left Section: Trip & Vehicle Details -->
         <div class="booking-section left-section">
             <h2 class="section-title">Trip Details</h2>
-            @if(isset($bookingDetails['trip_info']))
-            <div class="info-grid">
-                <div class="info-item">
-                    <span class="label">Pickup Address:</span>
-                    <span class="value">{{ $bookingDetails['trip_info']['pickup_address'] ?? 'N/A' }}</span>
+            @if (isset($bookingDetails['trip_info']))
+                <div class="info-grid">
+                    <div class="info-item">
+                        <span class="label">Pickup Address:</span>
+                        <span class="value">{{ $bookingDetails['trip_info']['pickup_address'] ?? 'N/A' }}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="label">Drop Address:</span>
+                        <span class="value">{{ $bookingDetails['trip_info']['drop_address'] ?? 'N/A' }}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="label">Date:</span>
+                        <span class="value">{{ $bookingDetails['trip_info']['booking_date'] ?? 'N/A' }}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="label">Trip Type:</span>
+                        <span class="value">{{ $bookingDetails['trip_info']['trip_type'] ?? 'N/A' }}</span>
+                    </div>
                 </div>
-                <div class="info-item">
-                    <span class="label">Drop Address:</span>
-                    <span class="value">{{ $bookingDetails['trip_info']['drop_address'] ?? 'N/A' }}</span>
-                </div>
-                <div class="info-item">
-                    <span class="label">Date:</span>
-                    <span class="value">{{ $bookingDetails['trip_info']['booking_date'] ?? 'N/A' }}</span>
-                </div>
-                <div class="info-item">
-                    <span class="label">Trip Type:</span>
-                    <span class="value">{{ $bookingDetails['trip_info']['trip_type'] ?? 'N/A' }}</span>
-                </div>
-            </div>
             @endif
         </div>
 
         <div class="booking-section center-section">
             <h2 class="section-title">Vehicle Details</h2>
-            @if(isset($bookingDetails['car_info']))
-            <div class="info-grid">
-                <div class="info-item">
-                    <span class="label">Category:</span>
-                    <span class="value">{{ $bookingDetails['car_info']['category'] ?? 'N/A' }}</span>
+            @if (isset($bookingDetails['car_info']))
+                <div class="info-grid">
+                    <div class="info-item">
+                        <span class="label">Category:</span>
+                        <span class="value">{{ $bookingDetails['car_info']['category'] ?? 'N/A' }}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="label">Seating Capacity:</span>
+                        <span class="value">{{ $bookingDetails['car_info']['seating'] ?? 'N/A' }}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="label">Luggage Capacity:</span>
+                        <span class="value">{{ $bookingDetails['car_info']['luggage'] ?? 'N/A' }}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="label">Total Price:</span>
+                        <span class="value">₹{{ $bookingDetails['car_info']['price'] ?? 'N/A' }}</span>
+                    </div>
+                    <div class="info-item" style="display: none;">
+                        <span class="label">Base Fare:</span>
+                        <span class="value">₹{{ $bookingDetails['car_info']['base_fare'] ?? '0.00' }}</span>
+                    </div>
+                    <div class="info-item" style="display: none;">
+                        <span class="label">TraceID:</span>
+                        <span class="value">{{ $bookingDetails['trace_id'] ?? 'N/A' }}</span>
+                    </div>
+                    <div class="info-item" style="display: none;">
+                        <span class="label">SrdvIndex:</span>
+                        <span class="value">{{ $bookingDetails['srdv_index'] ?? 'N/A' }}</span>
+                    </div>
                 </div>
-                <div class="info-item">
-                    <span class="label">Seating Capacity:</span>
-                    <span class="value">{{ $bookingDetails['car_info']['seating'] ?? 'N/A' }}</span>
-                </div>
-                <div class="info-item">
-                    <span class="label">Luggage Capacity:</span>
-                    <span class="value">{{ $bookingDetails['car_info']['luggage'] ?? 'N/A' }}</span>
-                </div>
-                <div class="info-item">
-                    <span class="label">Total Price:</span>
-                    <span class="value">₹{{ $bookingDetails['car_info']['price'] ?? 'N/A' }}</span>
-                </div>
-                <div class="info-item">
-                    <span class="label">TraceID:</span>
-                    <span class="value">{{ $bookingDetails['trace_id'] ?? 'N/A' }}</span>
-                </div>
-                <div class="info-item">
-                    <span class="label">SrdvIndex:</span>
-                    <span class="value">{{ $bookingDetails['srdv_index'] ?? 'N/A' }}</span>
-                </div>
-            </div>
             @endif
         </div>
 
         <!-- Right Section: Personal Information -->
         <div class="booking-section right-section">
             <h2 class="section-title">Personal Information</h2>
-            @if(isset($bookingDetails['personal_info']))
-            <div class="info-grid">
-                <div class="info-item">
-                    <span class="label">Name:</span>
-                    <span class="value">{{ $bookingDetails['personal_info']['name'] ?? 'N/A' }}</span>
+            @if (isset($bookingDetails['personal_info']))
+                <div class="info-grid">
+                    <div class="info-item">
+                        <span class="label">Name:</span>
+                        <span class="value">{{ $bookingDetails['personal_info']['name'] ?? 'N/A' }}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="label">Email:</span>
+                        <span class="value">{{ $bookingDetails['personal_info']['email'] ?? 'N/A' }}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="label">Phone:</span>
+                        <span class="value">{{ $bookingDetails['personal_info']['phone'] ?? 'N/A' }}</span>
+                    </div>
                 </div>
-                <div class="info-item">
-                    <span class="label">Email:</span>
-                    <span class="value">{{ $bookingDetails['personal_info']['email'] ?? 'N/A' }}</span>
-                </div>
-                <div class="info-item">
-                    <span class="label">Phone:</span>
-                    <span class="value">{{ $bookingDetails['personal_info']['phone'] ?? 'N/A' }}</span>
-                </div>
-            </div>
             @endif
         </div>
     </div>
@@ -393,7 +423,7 @@
         <button id="processToPay" class="submit-btn">Process To Pay</button>
     </div>
 
-    
+
     <div class="contact-info">
         <a href="mailto:info@makemybharatyatra.com">
             <i class="fas fa-envelope"></i> info@makemybharatyatra.com
@@ -402,81 +432,86 @@
             <i class="fas fa-phone-alt"></i> +91 1204223100
         </a>
     </div>
-   <!-- Loading Overlay -->
-   <div id="loadingOverlay" class="loading-overlay">
-        <div class="spinner"></div>
-        <div>Processing payment...</div>
-    </div>
+
+
+
     <script>
-    document.getElementById("processToPay").addEventListener("click", function(e) {
-        e.preventDefault();
-        
-        // Get amount from booking details
-        const amount = {{ $bookingDetails['car_info']['price'] ?? 0 }};
-        
-        // Step 1: Create an order via API
-        fetch('/create-payment', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-            },
-            body: JSON.stringify({ amount: amount })
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.error) {
-                alert('Error: ' + data.error);
-                return;
-            }
-            
-            // Step 2: Initialize Razorpay Payment UI
-            var options = {
-                "key": "{{ env('RAZORPAY_KEY') }}",
-                "amount": data.amount * 100, // Convert to paise
-                "currency": data.currency,
-                "name": "Make My Bharat Yatra",
-                "description": "Car Final Payment",
-                "image": "/assets/images/MMBY_logo.jpg",
-                "order_id": data.order_id,
-                "handler": function (response) {
-                    // Step 3: Send Payment Data to Server
-                    var form = document.createElement('form');
-                    form.method = 'POST';
-                    form.action = '/verify-payment';
-                    
-                    // Add CSRF token properly
-                    var csrfTokenElement = document.querySelector('meta[name="csrf-token"]');
-                    var csrfToken = csrfTokenElement ? csrfTokenElement.getAttribute('content') : '';
-                    form.innerHTML = `
+        document.getElementById("processToPay").addEventListener("click", function(e) {
+            e.preventDefault();
+
+            // Get amount from booking details
+            const amount = {{ $bookingDetails['car_info']['price'] ?? 0 }};
+
+            // Step 1: Create an order via API
+            fetch('/create-payment', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute(
+                            'content')
+                    },
+                    body: JSON.stringify({
+                        amount: amount
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.error) {
+                        alert('Error: ' + data.error);
+                        return;
+                    }
+
+                    // Step 2: Initialize Razorpay Payment UI
+                    var options = {
+                        "key": "{{ env('RAZORPAY_KEY') }}",
+                        "amount": data.amount * 100, // Convert to paise
+                        "currency": data.currency,
+                        "name": "Make My Bharat Yatra",
+                        "description": "Car Final Payment",
+                        "image": "/assets/images/MMBY_logo.jpg",
+                        "order_id": data.order_id,
+                        "handler": function(response) {
+                            // Step 3: Send Payment Data to Server
+                            var form = document.createElement('form');
+                            form.method = 'POST';
+                            form.action = '/verify-payment';
+
+                            // Add CSRF token properly
+                            var csrfTokenElement = document.querySelector('meta[name="csrf-token"]');
+                            var csrfToken = csrfTokenElement ? csrfTokenElement.getAttribute(
+                                'content') : '';
+                            form.innerHTML = `
                         <input type="hidden" name="_token" value="${csrfToken}">
                         <input type="hidden" name="razorpay_order_id" value="${response.razorpay_order_id}">
                         <input type="hidden" name="razorpay_payment_id" value="${response.razorpay_payment_id}">
                         <input type="hidden" name="razorpay_signature" value="${response.razorpay_signature}">
-                        <input type="hidden" name="trace_id" value="{{ $bookingDetails['trace_id'] ?? '' }}"> <!-- Add trace_id -->
-                        <input type="hidden" name="srdv_index" value="{{ $bookingDetails['srdv_index'] ?? '' }}"> <!-- Add srdv_index -->
+                        <input type="hidden" name="trace_id" value="{{ $bookingDetails['trace_id'] ?? '' }}"> 
+                        <input type="hidden" name="srdv_index" value="{{ $bookingDetails['srdv_index'] ?? '' }}"> 
+                        <input type="hidden" name="base_fare" value="{{ $bookingDetails['car_info']['base_fare'] ?? '0.00' }}">
+                        <input type="hidden" name="bookingDetails" value='${JSON.stringify(@json($bookingDetails))}'>
                     `;
-                    document.body.appendChild(form);
-                    form.submit();
-                },
-                "prefill": {
-                    "name": "{{ $bookingDetails['personal_info']['name'] ?? '' }}",
-                    "email": "{{ $bookingDetails['personal_info']['email'] ?? '' }}",
-                    "contact": "{{ $bookingDetails['personal_info']['phone'] ?? '' }}"
-                },
-                "theme": {
-                    "color": "#2563eb"
-                }
-            };
-            var rzp1 = new Razorpay(options);
-            rzp1.open();
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            alert('Failed to create payment order. Please try again.');
+                            document.body.appendChild(form);
+                            form.submit();
+                        },
+                        "prefill": {
+                            "name": "{{ $bookingDetails['personal_info']['name'] ?? '' }}",
+                            "email": "{{ $bookingDetails['personal_info']['email'] ?? '' }}",
+                            "contact": "{{ $bookingDetails['personal_info']['phone'] ?? '' }}"
+                        },
+                        "theme": {
+                            "color": "#2563eb"
+                        }
+                    };
+                    var rzp1 = new Razorpay(options);
+                    rzp1.open();
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Failed to create payment order. Please try again.');
+                });
         });
-    });
-</script>
+    </script>
 
 </body>
+
 </html>

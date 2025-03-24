@@ -67,133 +67,159 @@
         }
 
         .btn-custom {
-    background-color: rgba(18, 171, 177, 0.94);
-    color: #000103;
-    font-weight: 500;
-    border: none;
-    padding: 10px 20px;
-    font-size: 16px;
-    border-radius: 5px;
-    cursor: pointer;
-    transition: background-color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
-    position: relative;
-    overflow: hidden;
-}
+            background-color: rgba(244, 243, 240, 0.94);
+            color: #000103;
+            font-weight: 500;
+            border: none;
+            padding: 10px 20px;
+            font-size: 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
 
-.btn-custom:hover, .btn-custom:focus, .btn-custom.active {
-    background-color: rgb(207, 42, 236);
-    color: #000103;
-    transform: translateY(-3px);
-    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
-}
+        .btn-custom:hover,
+        .btn-custom:focus,
+        .btn-custom.active {
+            background-color: #ffa500;
+            color: rgb(247, 248, 249);
+            transform: translateY(-3px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+        }
 
-/* Adding a subtle pulse effect */
-@keyframes pulse {
-    0% { transform: scale(1); }
-    50% { transform: scale(1.05); }
-    100% { transform: scale(1); }
-}
+        /* Adding a subtle pulse effect */
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+            }
 
-.btn-custom:hover {
-    animation: pulse 0.6s ease-in-out;
-}
+            50% {
+                transform: scale(1.05);
+            }
 
-/* Adding a ripple effect */
-.btn-custom::after {
-    content: "";
-    position: absolute;
-    width: 100px;
-    height: 100px;
-    background: rgba(255, 255, 255, 0.4);
-    display: block;
-    border-radius: 50%;
-    transform: scale(0);
-    opacity: 0;
-    transition: transform 0.5s ease, opacity 0.5s ease;
-}
+            100% {
+                transform: scale(1);
+            }
+        }
 
-.btn-custom:active::after {
-    transform: scale(4);
-    opacity: 1;
-    transition: transform 0.3s ease, opacity 0.3s ease;
-}
+        .btn-custom:hover {
+            animation: pulse 0.6s ease-in-out;
+        }
 
+        /* Adding a ripple effect */
+        .btn-custom::after {
+            content: "";
+            position: absolute;
+            width: 100px;
+            height: 100px;
+            background: rgba(255, 255, 255, 0.4);
+            display: block;
+            border-radius: 50%;
+            transform: scale(0);
+            opacity: 0;
+            transition: transform 0.5s ease, opacity 0.5s ease;
+        }
 
+        .btn-custom:active::after {
+            transform: scale(4);
+            opacity: 1;
+            transition: transform 0.3s ease, opacity 0.3s ease;
+        }
     </style>
 @endsection
 
 <section class="hero">
-  <div class="container">
-    <div class="row">
-      <div class="card search-engine-card py-5 px-4" style="position: relative">
-      <ul class="nav nav-tabs border-0 flex-wrap" 
-            style="position: absolute; top:0; left:1%; transform:translateY(-50%); width: 95%;"
-            id="myTab" role="tablist">
-          <!-- Modified: Reduced margin to just enough space between wrapped items -->
-          <li class="nav-item mb-1 me-1" role="presentation">
-            <button class="nav-link px-3 px-md-4 shadow border-0" id="flight-tab" data-bs-toggle="tab" data-bs-target="#flight"
-              type="button" role="tab" aria-controls="flight" aria-selected="false">
-              <i class="fa-solid fa-plane-departure d-block"></i>
-              <small class="d-none d-md-block">Flight</small>
-            </button>
-          </li>
-          <li class="nav-item mb-1 me-1" role="presentation">
-            <button class="nav-link px-3 px-md-4 shadow border-0" id="profile-tab" data-bs-toggle="tab"
-              data-bs-target="#profile" type="button" role="tab" aria-controls="profile" aria-selected="false">
-              <i class="fa-solid fa-building d-block"></i>
-              <small class="d-none d-md-block">Hotel</small>
-            </button>
-          </li>
-          <li class="nav-item mb-1 me-1" role="presentation">
-            <button class="nav-link active px-3 px-md-4 border-0 shadow" id="contact-tab" data-bs-toggle="tab"
-              data-bs-target="#contact" type="button" role="tab" aria-controls="contact" aria-selected="false">
-              <i class="fa-solid fa-umbrella-beach d-block"></i>
-              <small class="d-none d-md-block">Holidays</small>
-            </button>
-          </li>
-          <li class="nav-item mb-1 me-1" role="presentation">
-            <button class="nav-link px-3 px-md-4 shadow border-0" id="bus-tab" data-bs-toggle="tab" data-bs-target="#bus"
-              type="button" role="tab" aria-controls="bus" aria-selected="false">
-              <i class="fa-solid fa-bus d-block"></i>
-              <small class="d-none d-md-block">Bus</small>
-            </button>
-          </li>
-          <li class="nav-item mb-1" role="presentation">
-            <button class="nav-link px-3 px-md-4 shadow border-0" id="car-tab" data-bs-toggle="tab" data-bs-target="#car"
-              type="button" role="tab" aria-controls="car" aria-selected="false">
-              <i class="fa-solid fa-car d-block"></i>
-              <small class="d-none d-md-block">Car</small>
-            </button>
-          </li>
-        </ul>
-        
-        <div class="tab-content" id="myTabContent">
-          <!-- <div class="tab-pane fade" id="home" role="tabpanel" aria-labelledby="home-tab">
+    <div class="container">
+        <div class="row">
+            <div class="card search-engine-card py-5 px-4" style="position: relative">
+                <ul class="nav nav-tabs border-0 flex-wrap"
+                    style="position: absolute; top:0; left:1%; transform:translateY(-50%); width: 95%;" id="myTab"
+                    role="tablist">
+                    <!-- Modified: Reduced margin to just enough space between wrapped items -->
+                    <li class="nav-item mb-1 me-1" role="presentation">
+                        <button class="nav-link px-3 px-md-4 shadow border-0" id="flight-tab" data-bs-toggle="tab"
+                            data-bs-target="#flight" type="button" role="tab" aria-controls="flight"
+                            aria-selected="false">
+                            <i class="fa-solid fa-plane-departure d-block"></i>
+                            <small class="d-none d-md-block">Flight</small>
+                        </button>
+                    </li>
+                    <li class="nav-item mb-1 me-1" role="presentation">
+                        <button class="nav-link px-3 px-md-4 shadow border-0" id="profile-tab" data-bs-toggle="tab"
+                            data-bs-target="#profile" type="button" role="tab" aria-controls="profile"
+                            aria-selected="false">
+                            <i class="fa-solid fa-building d-block"></i>
+                            <small class="d-none d-md-block">Hotel</small>
+                        </button>
+                    </li>
+                    <li class="nav-item mb-1 me-1" role="presentation">
+                        <button class="nav-link active px-3 px-md-4 border-0 shadow" id="contact-tab"
+                            data-bs-toggle="tab" data-bs-target="#contact" type="button" role="tab"
+                            aria-controls="contact" aria-selected="false">
+                            <i class="fa-solid fa-umbrella-beach d-block"></i>
+                            <small class="d-none d-md-block">Holidays</small>
+                        </button>
+                    </li>
+                    <li class="nav-item mb-1 me-1" role="presentation">
+                        <button class="nav-link px-3 px-md-4 shadow border-0" id="bus-tab" data-bs-toggle="tab"
+                            data-bs-target="#bus" type="button" role="tab" aria-controls="bus"
+                            aria-selected="false">
+                            <i class="fa-solid fa-bus d-block"></i>
+                            <small class="d-none d-md-block">Bus</small>
+                        </button>
+                    </li>
+                    <li class="nav-item mb-1" role="presentation">
+                        <button class="nav-link px-3 px-md-4 shadow border-0" id="car-tab" data-bs-toggle="tab"
+                            data-bs-target="#car" type="button" role="tab" aria-controls="car"
+                            aria-selected="false">
+                            <i class="fa-solid fa-car d-block"></i>
+                            <small class="d-none d-md-block">Car</small>
+                        </button>
+                    </li>
+                    <li class="nav-item mb-1 me-1" role="presentation">
+                        <button class="nav-link px-3 px-md-4 shadow border-0 fw-bold text-primary" id="build-tab"
+                            data-bs-toggle="tab" data-bs-target="#build" type="button" role="tab"
+                            aria-controls="build" aria-selected="false">
+                            <i class="fa-solid fa-pen-to-square"></i>
+                            <small class="d-none d-md-block">Build</small>
+                        </button>
+                    </li>
+                </ul>
+
+                <div class="tab-content" id="myTabContent">
+                    <!-- <div class="tab-pane fade" id="home" role="tabpanel" aria-labelledby="home-tab">
             <p>Comming Soon!</p>
           </div> -->
                     <!-- // hotel booking -->
 
-          <div class="tab-content" id="myTabContent">
-
-  <!-- Hotel Booking -->
-  <div class="tab-pane fade mt-5" id="profile" role="tabpanel" aria-labelledby="profile-tab">
-    <h4 class="mb-5" id="hotel-title">Book Hotels in India</h4>
-    <hr class="searchline">
-    <form id="hotelSearchForm">
-        <div class="row">
-            <div class="mb-3 col-md-3">
-                <div class="date-caption">Enter City</div>
-                <div class="position-relative">
-                <input type="text" class="form-control rounded-0 py-3" name="CityName" id="hotelSearchCity" placeholder="Enter City Name" required style="text-align: center;" >
-                <input type="hidden" name="CityId" id="cityIdInput" value="" >
-                <div id="hotelSearchCityList" class="card" style="position: absolute; width: 100%; max-height: 150px; overflow-y: scroll; z-index: 1000;"></div>
-           </div>
-            </div>
-            <!-- Check-in Date -->
-            <div class="mb-3 col-md-2">
-                 <div class="date-caption">Check-in </div>
-                 <input type="text" id="checkinDatepicker" name="CheckInDate" class="form-control rounded-0 py-3 datepicker" placeholder="Select Check-in Date" required style="text-align: center;">
-            </div>
+                    <div class="tab-content" id="myTabContent">
+                        <!-- Hotel Booking -->
+                        <div class="tab-pane fade mt-5" id="profile" role="tabpanel" aria-labelledby="profile-tab">
+                            <h4 class="mb-5" id="hotel-title">Book Hotels in India</h4>
+                            <hr class="searchline">
+                            <form id="hotelSearchForm">
+                                <div class="row">
+                                    <div class="mb-3 col-md-3">
+                                        <div class="date-caption">Enter City</div>
+                                        <div class="position-relative">
+                                            <input type="text" class="form-control rounded-0 py-3" name="CityName"
+                                                id="hotelSearchCity" placeholder="Enter City Name" required
+                                                style="text-align: center;">
+                                            <input type="hidden" name="CityId" id="cityIdInput" value="">
+                                            <div id="hotelSearchCityList" class="card"
+                                                style="position: absolute; width: 100%; max-height: 150px; overflow-y: scroll; z-index: 1000;">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <!-- Check-in Date -->
+                                    <div class="mb-3 col-md-2">
+                                        <div class="date-caption">Check-in </div>
+                                        <input type="text" id="checkinDatepicker" name="CheckInDate"
+                                            class="form-control rounded-0 py-3 datepicker"
+                                            placeholder="Select Check-in Date" required style="text-align: center;">
+                                    </div>
 
                                     <!-- Number of Nights -->
                                     <div class="mb-3 col-md-2">
@@ -297,13 +323,11 @@
                             </form>
                         </div>
 
-                        
-                        <!-- Flight Booking -->
 
+                        <!-- Flight Booking -->
                         <div class="tab-pane fade mt-4" id="flight" role="tabpanel" aria-labelledby="home-tab">
                             <h4 class="mb-5" id="flight-title">Book Flights</h4>
                             <hr class="searchline">
-
                             <form id="flightSearchForm" action="{{ route('flight.search') }}" method="POST">
                                 @csrf
                                 <div class="row mb-3">
@@ -321,106 +345,108 @@
                                     </div>
                                 </div>
 
-        <div class="row">
-        <div class="mb-2 col-md-2 position-relative">
-    <div class="date-caption">From</div>
-    <div class="position-relative">
-    <input type="text" class="form-control rounded-0 py-3" id="flightFromCity" placeholder="Enter Departure City" required>
-    <!-- Note: removed 'name' attribute from display input and added it to hidden input -->
-    <input type="hidden" id="flightFromCityCode" name="origin" required>
-    <div id="flightFromCityList" class="card" style="position: absolute; width: 100%; max-height: 150px; overflow-y: scroll; z-index: 1000;"></div>
-</div>
-</div>          
-<div class="mb-2 col-md-2 position-relative">
-    <div class="date-caption">To</div>
-    <div class="position-relative">
-    <input type="text" class="form-control rounded-0 py-3" id="flightToCity" placeholder="Enter Destination City" required>
-    <!-- Note: removed 'name' attribute from display input and added it to hidden input -->
-    <input type="hidden" id="flightToCityCode" name="destination" required>
-    <div id="flightToCityList" class="card" style="position: absolute; width: 100%; max-height: 150px; overflow-y: scroll; z-index: 1000;"></div>
-</div>
-</div>
-            <div class="mb-2 col-md-2">
-                <div class="date-caption">Departure </div>
-                <input type="text" id="flightDepartureDate" name="departureDate"
-                    class="form-control rounded-0 py-3 datepicker"
-                    placeholder="Select Departure Date" required>
-            </div>
-            <div class="mb-2 col-md-2">
-                <div class="date-caption">Return </div>
-                <input type="text" id="flightReturnDate" name="returnDate"
-                    class="form-control rounded-0 py-3 datepicker"
-                    placeholder="Select Return Date">
-            </div>
-            <div class="mb-2 col-md-2">
-    <div class="date-caption">Passengers</div>
-    <div class="dropdown">
-        <button class="form-control rounded-0 py-3 text-start" type="button" id="passengerDropdown" data-bs-toggle="dropdown">
-            Select
-        </button>
-        <div class="dropdown-menu p-3" style="width: 250px;">
-            <div class="mb-2">
-                <label for="adultCount">Adults</label>
-                <input type="number" 
-                       id="adultCount"
-                       name="adultCount" 
-                       class="form-control" 
-                       value="1" 
-                       min="1" 
-                       max="9">
-            </div>
-            <div class="mb-2">
-                <label for="childCount">Child</label>
-                <input type="number" 
-                       id="childCount"
-                       name="childCount" 
-                       class="form-control" 
-                       value="0" 
-                       min="0" 
-                       max="9">
-            </div>
-            <div class="mb-2">
-                <label for="infantCount">Infants</label>
-                <input type="number" 
-                       id="infantCount"
-                       name="infantCount" 
-                       class="form-control" 
-                       value="0" 
-                       min="0" 
-                       max="9">
-            </div>
-        </div>
-    </div>
-</div>
-            <div class="mb-2 col-md-2">
-                <div class="date-caption" style="visibility: hidden">Search</div>
-                <button type="submit" id="flightSearch" class="btn btn-warning w-100 rounded-0 py-3 fw-bold">Search</button>
-            </div>
-        </div>
-                  <!-- Fare Type Selection -->
-                  <div class="row mt-3">
-    <div class="col-md-12">
-        <label class="fw-bold">Fare Type:</label>
-        <div class="form-check form-check-inline">
-            <input class="form-check-input" type="radio" name="fareType" id="normalFare" value="1" checked>
-            <label class="form-check-label" for="normalFare">Normal Fare</label>
-        </div>
-        <div class="form-check form-check-inline">
-            <input class="form-check-input" type="radio" name="fareType" id="studentFare" value="2">
-            <label class="form-check-label" for="studentFare">Student Fare</label>
-        </div>
-        <div class="form-check form-check-inline">
-            <input class="form-check-input" type="radio" name="fareType" id="seniorCitizenFare" value="3">
-            <label class="form-check-label" for="seniorCitizenFare">Senior Citizen Fare</label>
-        </div>
-        <div class="form-check form-check-inline">
-            <input class="form-check-input" type="radio" name="fareType" id="armedForceFare" value="4">
-            <label class="form-check-label" for="armedForceFare">Armed Force Fare</label>
-        </div>
-    </div>
-</div> 
-</form>
-</div>
+                                <div class="row">
+                                    <div class="mb-2 col-md-2 position-relative">
+                                        <div class="date-caption">From</div>
+                                        <div class="position-relative">
+                                            <input type="text" class="form-control rounded-0 py-3"
+                                                id="flightFromCity" placeholder="Enter Departure City" required>
+                                            <!-- Note: removed 'name' attribute from display input and added it to hidden input -->
+                                            <input type="hidden" id="flightFromCityCode" name="origin" required>
+                                            <div id="flightFromCityList" class="card"
+                                                style="position: absolute; width: 100%; max-height: 150px; overflow-y: scroll; z-index: 1000;">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="mb-2 col-md-2 position-relative">
+                                        <div class="date-caption">To</div>
+                                        <div class="position-relative">
+                                            <input type="text" class="form-control rounded-0 py-3"
+                                                id="flightToCity" placeholder="Enter Destination City" required>
+                                            <!-- Note: removed 'name' attribute from display input and added it to hidden input -->
+                                            <input type="hidden" id="flightToCityCode" name="destination" required>
+                                            <div id="flightToCityList" class="card"
+                                                style="position: absolute; width: 100%; max-height: 150px; overflow-y: scroll; z-index: 1000;">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="mb-2 col-md-2">
+                                        <div class="date-caption">Departure </div>
+                                        <input type="text" id="flightDepartureDate" name="departureDate"
+                                            class="form-control rounded-0 py-3 datepicker"
+                                            placeholder="Select Departure Date" required>
+                                    </div>
+                                    <div class="mb-2 col-md-2" id="returnDateContainer">
+                                        <div class="date-caption">Return </div>
+                                        <input type="text" id="flightReturnDate" name="returnDate"
+                                            class="form-control rounded-0 py-3 datepicker"
+                                            placeholder="Select Return Date">
+                                    </div>
+                                    <div class="mb-2 col-md-2">
+                                        <div class="date-caption">Passengers</div>
+                                        <div class="dropdown">
+                                            <button class="form-control rounded-0 py-3 text-start" type="button"
+                                                id="passengerDropdown" data-bs-toggle="dropdown">
+                                                Select
+                                            </button>
+                                            <div class="dropdown-menu p-3" style="width: 250px;">
+                                                <div class="mb-2">
+                                                    <label for="adultCount">Adults</label>
+                                                    <input type="number" id="adultCount" name="adultCount"
+                                                        class="form-control" value="1" min="1"
+                                                        max="9">
+                                                </div>
+                                                <div class="mb-2">
+                                                    <label for="childCount">Child</label>
+                                                    <input type="number" id="childCount" name="childCount"
+                                                        class="form-control" value="0" min="0"
+                                                        max="9">
+                                                </div>
+                                                <div class="mb-2">
+                                                    <label for="infantCount">Infants</label>
+                                                    <input type="number" id="infantCount" name="infantCount"
+                                                        class="form-control" value="0" min="0"
+                                                        max="9">
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="mb-2 col-md-2">
+                                        <div class="date-caption" style="visibility: hidden">Search</div>
+                                        <button type="submit" id="flightSearch"
+                                            class="btn btn-warning w-100 rounded-0 py-3 fw-bold">Search</button>
+                                    </div>
+                                </div>
+                                <!-- Fare Type Selection -->
+                                <div class="row mt-3">
+                                    <div class="col-md-12">
+                                        <label class="fw-bold">Fare Type:</label>
+                                        <div class="form-check form-check-inline">
+                                            <input class="form-check-input" type="radio" name="fareType"
+                                                id="normalFare" value="1" checked>
+                                            <label class="form-check-label" for="normalFare">Normal Fare</label>
+                                        </div>
+                                        <div class="form-check form-check-inline">
+                                            <input class="form-check-input" type="radio" name="fareType"
+                                                id="studentFare" value="2">
+                                            <label class="form-check-label" for="studentFare">Student Fare</label>
+                                        </div>
+                                        <div class="form-check form-check-inline">
+                                            <input class="form-check-input" type="radio" name="fareType"
+                                                id="seniorCitizenFare" value="3">
+                                            <label class="form-check-label" for="seniorCitizenFare">Senior Citizen
+                                                Fare</label>
+                                        </div>
+                                        <div class="form-check form-check-inline">
+                                            <input class="form-check-input" type="radio" name="fareType"
+                                                id="armedForceFare" value="4">
+                                            <label class="form-check-label" for="armedForceFare">Armed Force
+                                                Fare</label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
 
                         <!-- Car Booking -->
                         <div class="tab-pane fade mt-5" id="car" role="tabpanel" aria-labelledby="car-tab">
@@ -431,25 +457,40 @@
                                 <input type="hidden" name="trace_id" id="trace_id">
                                 <input type="hidden" name="srdv_index" id="srdv_index">
                                 <div class="row">
-                                    <div class="mb-3 col-md-3">
-                                        <div class="date-caption">Pickup Location</div>
+                                    <div class="mb-3 col-md-2">
+                                        <div class="date-caption">From</div>
                                         <div class="position-relative">
-                                        <input type="text" class="form-control rounded-0 py-3"
-                                            name="pickupLocation" id="carPickupLocation"
-                                            placeholder="Enter Pickup Location" required>
-                                        <input type="hidden" name="pickupLocationCode" id="carPickupLocationCode">
-                                        <div id="carPickupLocationList" class="card" style="position: absolute; width: 100%; max-height: 150px; overflow-y: scroll; z-index: 1000;"></div>
+                                            <input type="text" class="form-control rounded-0 py-3"
+                                                name="pickupLocation" id="carPickupLocation" placeholder="From"
+                                                required>
+                                            <input type="hidden" name="pickupLocationCode"
+                                                id="carPickupLocationCode">
+                                            <div id="carPickupLocationList" class="card"
+                                                style="position: absolute; width: 100%; max-height: 150px; overflow-y: scroll; z-index: 1000;">
+                                            </div>
+                                        </div>
                                     </div>
-                                     </div>
-                                    <div class="mb-3 col-md-3">
-                                        <div class="date-caption">Drop-off Location</div>
+                                    <div class="mb-3 col-md-2">
+                                        <div class="date-caption">To</div>
                                         <div class="position-relative">
-                                        <input type="text" class="form-control rounded-0 py-3"
-                                            name="dropoffLocation" id="carDropoffLocation"
-                                            placeholder="Enter Drop-off Location" required>
-                                        <input type="hidden" name="dropoffLocationCode" id="carDropoffLocationCode">
-                                        <div id="carDropoffLocationList" class="card" style="position: absolute; width: 100%; max-height: 150px; overflow-y: scroll; z-index: 1000;"></div>
+                                            <input type="text" class="form-control rounded-0 py-3"
+                                                name="dropoffLocation" id="carDropoffLocation" placeholder="To"
+                                                required>
+                                            <input type="hidden" name="dropoffLocationCode"
+                                                id="carDropoffLocationCode">
+                                            <div id="carDropoffLocationList" class="card"
+                                                style="position: absolute; width: 100%; max-height: 150px; overflow-y: scroll; z-index: 1000;">
+                                            </div>
+                                        </div>
                                     </div>
+                                    <div class="mb-3 col-md-2">
+                                        <div class="date-caption">Trip Type</div>
+                                        <select name="trip_type" id="carTripType"
+                                            class="form-control rounded-0 py-3">
+                                            <option value="0">One Way</option>
+                                            <option value="1">Return</option>
+                                            <!-- <option value="2">Local</option> -->
+                                        </select>
                                     </div>
                                     <div class="mb-3 col-md-2">
                                         <div class="date-caption">Pickup Date</div>
@@ -457,14 +498,11 @@
                                             class="form-control rounded-0 py-3 datepicker"
                                             placeholder="Select Pickup Date" required>
                                     </div>
-                                    <div class="mb-3 col-md-2">
-                                    <div class="date-caption">Trip Type</div>
-                                        <select name="trip_type" id="carTripType"
-                                            class="form-control rounded-0 py-3">
-                                            <option value="0">One Way</option>
-                                            <option value="1">Return</option>
-                                            <option value="2">Local</option>
-                                        </select>
+                                    <div class="mb-3 col-md-2 return-date-container" style="display: none;">
+                                        <div class="date-caption">Return Date</div>
+                                        <input type="text" id="carReturnDate" name="return_date"
+                                            class="form-control rounded-0 py-3 datepicker"
+                                            placeholder="Select Return Date">
                                     </div>
                                     <div class="mb-3 col-md-2">
                                         <div class="date-caption" style="visibility: hidden">Search</div>
@@ -476,32 +514,42 @@
                         </div>
 
                         <!-- Bus Booking -->
- <div class="tab-pane fade mt-5" id="bus" role="tabpanel" aria-labelledby="bus-tab">
-  <h4 class="mb-5" id="bus-title">Book Bus Tickets</h4>
-  <hr class="searchline">
-  <!-- Bus Search Form -->
-  <form action="{{ route('buses.search') }}" method="POST" id="busSearchForm">
-    @csrf
-    <div class="row">
-        <!-- Source City -->
-        <div class="mb-3 col-md-3">
-            <div class="date-caption">From</div>
-            <div class="position-relative">
-            <input type="text" class="form-control rounded-0 py-3" name="source_city" id="busFromCity" placeholder="Enter Departure City" required>
-            <input type="hidden" name="source_code" id="busFromCode"> <!-- Hidden field to store source city code -->
-            <div id="busFromCityList" class="card" style="position: absolute; width: 100%; max-height: 150px; overflow-y: scroll; z-index: 1000;"></div>
-        </div>
-</div>
+                        <div class="tab-pane fade mt-5" id="bus" role="tabpanel" aria-labelledby="bus-tab">
+                            <h4 class="mb-5" id="bus-title">Book Bus Tickets</h4>
+                            <hr class="searchline">
+                            <!-- Bus Search Form -->
+                            <form action="{{ route('buses.search') }}" method="POST" id="busSearchForm">
+                                @csrf
+                                <div class="row">
+                                    <!-- Source City -->
+                                    <div class="mb-3 col-md-3">
+                                        <div class="date-caption">From</div>
+                                        <div class="position-relative">
+                                            <input type="text" class="form-control rounded-0 py-3"
+                                                name="source_city" id="busFromCity"
+                                                placeholder="Enter Departure City" required>
+                                            <input type="hidden" name="source_code" id="busFromCode">
+                                            <!-- Hidden field to store source city code -->
+                                            <div id="busFromCityList" class="card"
+                                                style="position: absolute; width: 100%; max-height: 150px; overflow-y: scroll; z-index: 1000;">
+                                            </div>
+                                        </div>
+                                    </div>
 
-        <!-- Destination City -->
-        <div class="mb-3 col-md-3">
-            <div class="date-caption">To</div>
-            <div class="position-relative">
-            <input type="text" class="form-control rounded-0 py-3" name="destination_city" id="busToCity" placeholder="Enter Destination City" required>
-            <input type="hidden" name="destination_code" id="busToCode"> <!-- Hidden field to store destination city code -->
-            <div id="busToCityList" class="card" style="position: absolute; width: 100%; max-height: 150px; overflow-y: scroll; z-index: 1000;"></div>
-        </div>
-</div>
+                                    <!-- Destination City -->
+                                    <div class="mb-3 col-md-3">
+                                        <div class="date-caption">To</div>
+                                        <div class="position-relative">
+                                            <input type="text" class="form-control rounded-0 py-3"
+                                                name="destination_city" id="busToCity"
+                                                placeholder="Enter Destination City" required>
+                                            <input type="hidden" name="destination_code" id="busToCode">
+                                            <!-- Hidden field to store destination city code -->
+                                            <div id="busToCityList" class="card"
+                                                style="position: absolute; width: 100%; max-height: 150px; overflow-y: scroll; z-index: 1000;">
+                                            </div>
+                                        </div>
+                                    </div>
 
                                     <!-- Journey Date -->
                                     <div class="mb-3 col-md-3">
@@ -511,90 +559,109 @@
                                             placeholder="Select Journey Date" required>
                                     </div>
 
-        <!-- Submit Button -->
-        <div class="mb-3 col-md-3">
-            <div class="date-caption" style="visibility: hidden">Search</div>
-            <button type="submit" class="btn btn-warning w-100 rounded-0 py-3 fw-bold">Search Buses</button>
-        </div>
-    </div>
-  </form>
-</div>
-<!-- holiday booking  -->
-          <div class="tab-pane fade mt-5 show active" id="contact" role="tabpanel" aria-labelledby="contact-tab">
-            {{-- holiday packages searches --}}
-            <h4 class="mb-5" id="tour-title">Book Holiday Packages</h4>
-            <hr class="searchline">
-            <form action="{{ route('searchPackages') }}" method="GET">
-              <div class="row">
-                <div class="mb-3 col-md-4 holiday-search">
-                  <div class="date-caption">Search Destination</div>
-                  <input type="text" class="form-control rounded-0 py-3" name="searchDestination" id="searchDestination"
-                    placeholder="Search Destination" required>
-                  <div class="search-icon">
-                    <i class="fa-solid fa-magnifying-glass"></i>
-                  </div>
-                  <div id="destinationList" class="card" style=" position: absolute;
-                      width: 95%; max-height: 150px; overflow-y: scroll; display: none;">
-                                        </div>
-                                    </div>
+                                    <!-- Submit Button -->
                                     <div class="mb-3 col-md-3">
-                                        <div class="date-caption">Select City</div>
-                                        <input type="text" class="form-control rounded-0 py-3" name="searchCity"
-                                            id="searchCity" placeholder="Select City">
-                                        <div id="cityList" class="list-group mt-2"
-                                            style="position: absolute;
-                                width: 23%; max-height: 150px; overflow-y: scroll;">
-                                        </div>
+                                        <div class="date-caption" style="visibility: hidden">Search</div>
+                                        <button type="submit"
+                                            class="btn btn-warning w-100 rounded-0 py-3 fw-bold">Search Buses</button>
                                     </div>
-                                    <div class="mb-3 col-md-3">
-                                        <div class="date-caption">Travel Date</div>
-                                        <input type="text" id="datepicker" name="travel_date"
-                                            class="form-control rounded-0 py-3">
+                                </div>
+                            </form>
+                        </div>
+
+
+                        <!-- holiday booking  -->
+                        <div class="tab-pane fade mt-5 show active" id="contact" role="tabpanel"
+                            aria-labelledby="contact-tab">
+                            {{-- holiday packages searches --}}
+                            <h4 class="mb-5" id="tour-title">Book Holiday Packages</h4>
+                            <hr class="searchline">
+                            <form action="{{ route('searchPackages') }}" method="GET">
+                                <div class="row align-items-end">
+                                    <div class="mb-3 col-md-2">
+                                        <div class="date-caption">From</div>
+                                        <div class="position-relative">
+                                            <input type="text" class="form-control rounded-0 py-3"
+                                                name="from_city_name" id="fromCity" placeholder="From"
+                                                autocomplete="off" required>
+                                            <input type="hidden" name="from_city_id" id="fromCityId">
+                                            <div id="fromCityList" class="card"
+                                                style="position: absolute; width: 100%; max-height: 150px; overflow-y: scroll; z-index: 1000; display: none;">
+                                            </div>
+                                        </div>
                                     </div>
                                     <div class="mb-3 col-md-2">
-                                        <div class="date-caption" style="visibility: hidden">Search</div>
+                                        <div class="date-caption">To</div>
+                                        <div class="position-relative">
+                                            <input type="text" class="form-control rounded-0 py-3"
+                                                name="to_city_name" id="toCity" placeholder="To"
+                                                autocomplete="off" required>
+                                            <input type="hidden" name="to_city_id" id="toCityId">
+                                            <div id="toCityList" class="card"
+                                                style="position: absolute; width: 100%; max-height: 150px; overflow-y: scroll; z-index: 1000; display: none;">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="mb-3 col-md-2">
+                                        <div class="date-caption">Date</div>
+                                        <input type="text" id="travelDate" name="travel_date"
+                                            class="form-control rounded-0 py-3 datepicker" placeholder="Select Date"
+                                            required>
+                                    </div>
+                                    <div class="mb-3 col-md-2">
+                                        <div class="date-caption">Days</div>
+                                        <select class="form-control rounded-0 py-3" name="no_of_days" id="noOfDays"
+                                            required>
+                                            <option value="" disabled selected>Select Days</option>
+                                            <option value="2">1 Night 2 Days</option>
+                                            <option value="3">2 Night 3 Days</option>
+                                            <option value="5">4 Night 5 Days</option>
+                                            <option value="7">6 Night 7 Days</option>
+                                        </select>
+                                    </div>
+                                    <div class="mb-3 col-md-2">
                                         <button type="submit"
                                             class="btn btn-warning w-100 rounded-0 py-3 fw-bold tourbuttonsearch">Search</button>
                                     </div>
                                 </div>
                             </form>
                         </div>
-                        
-                       <!-- Build Your Package -->
-                             <div class="tab-pane fade mt-1" id="build" role="tabpanel" aria-labelledby="build-tab">
-                                 <hr class="searchline">
-                                 <div class="state-selection mt-1">
-                                     <div class="btn-group mt-1 d-flex flex-wrap" role="group" aria-label="State selection">
-                                         <?php
-                                  // Database connection
-                                         $conn = new mysqli("localhost", "root", "", "makemybharatyatra");
-            
-                                         // Check connection
-                                         if ($conn->connect_error) {
-                                             die("Connection failed: " . $conn->connect_error);
-                                         }
-            
-                                         // Fetch states from database
-                                         $sql = "SELECT id, destination_name, state_slug FROM states ORDER BY destination_name";
-                                         $result = $conn->query($sql);
-            
-                                         if ($result->num_rows > 0) {
-                                             // Output data of each row
-                                             while($row = $result->fetch_assoc()) {
-                                                 echo '<a href="' . route('build.cities', ['state_slug' => $row["state_slug"]]) . '" class="btn btn-custom m-2 px-4 py-2 rounded-pill shadow-sm">' . $row["destination_name"] . '</a>';
-                                             }
-                                         } else {
-                                         echo "No states found";
-                                         }
-            
-                                         $conn->close();
-                                         ?>
-                                     </div>
-                                 </div>
-                             </div>
 
 
 
+                        <!-- Build Your Package -->
+                        <div class="tab-pane fade mt-1" id="build" role="tabpanel" aria-labelledby="build-tab">
+                            <hr class="searchline">
+                            <div class="state-selection mt-1">
+                                <div class="btn-group mt-1 d-flex flex-wrap" role="group"
+                                    aria-label="State selection">
+                                    <?php
+                                    // Database connection
+                                    $conn = new mysqli('localhost', 'root', '', 'makemybharatyatra');
+                                    
+                                    // Check connection
+                                    if ($conn->connect_error) {
+                                        die('Connection failed: ' . $conn->connect_error);
+                                    }
+                                    
+                                    // Fetch states from database
+                                    $sql = 'SELECT id, destination_name, state_slug FROM states ORDER BY destination_name';
+                                    $result = $conn->query($sql);
+                                    
+                                    if ($result->num_rows > 0) {
+                                        // Output data of each row
+                                        while ($row = $result->fetch_assoc()) {
+                                            echo '<a href="' . route('build.cities', ['state_slug' => $row['state_slug']]) . '" class="btn btn-custom m-2 px-4 py-2 rounded-pill shadow-sm">' . $row['destination_name'] . '</a>';
+                                        }
+                                    } else {
+                                        echo 'No states found';
+                                    }
+                                    
+                                    $conn->close();
+                                    ?>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -653,17 +720,18 @@
 {{-- Tour places --}}
 <section class="tour-places mt-5 mb-5">
     <div class="container">
-        <h2 class="border-start border-4 mb-5 border-warning px-2" style="font-weight: 400;">Best <span
-                style="font-size: 30px; font-weight:bold;">Tourist Places</span> to Visit in the <span
-                style="font-size: 30px; font-weight:bold;">India</span></h2>
-        <div class="row">
+        <h1 class="border-start border-4 mb-5 border-warning px-2" style="font-weight: 400;">
+            Best <span style="font-size: 30px; font-weight:bold;" id="sectionTitle">Tourist Places</span> to Visit in
+            <span style="font-size: 30px; font-weight:bold;" id="sectionSubtitle">India</span>
+        </h1>
+        <div class="row" id="dynamicContent">
+            <!-- Default content for Holidays -->
             <div class="swiper mySwiper best-places px-2">
                 <div class="swiper-wrapper">
                     @foreach ($destinations as $item)
                         @if ($item->status == 1)
                             <div class="swiper-slide item">
                                 <a href="{{ url('holidays/' . $item->slug) }}">
-
                                     <img src="{{ asset('uploads/destination/' . $item->photo) }}" class="w-100"
                                         alt="">
                                     <div class="strip">
@@ -681,34 +749,36 @@
 
 <section id="tour-places" class="tour-places tour-category mt-5 mb-5">
     <div class="container">
-        <h2 class="border-start border-4 mb-5 border-warning px-2" style="font-weight: 400;">Wonderful Place For You<span style="font-size: 30px; font-weight:bold;"> Tour Categories</span> </h2>
+        <h2 class="border-start border-4 mb-5 border-warning px-2" style="font-weight: 400;">Wornderful Place For You
+            Tour <span style="font-size: 30px; font-weight:bold;" id="sectionSubtitle">Tour Categories</span></h2>
 
         <div class="row">
+            <div class="row">
 
-            <div class="swiper mySwipercategory best-places px-2">
-                <div class="swiper-wrapper">
-                    @foreach ($tourTypes as $tourType)
-                        <div class="swiper-slide item">
-                            @php
-                                $slug = Illuminate\Support\Str::slug($tourType->name);
-                            @endphp
+                <div class="swiper mySwipercategory best-places px-2">
+                    <div class="swiper-wrapper">
+                        @foreach ($tourTypes as $tourType)
+                            <div class="swiper-slide item">
+                                @php
+                                    $slug = Illuminate\Support\Str::slug($tourType->name);
+                                @endphp
 
-                            <a href="{{ url('tour-category', $slug) }}" class="text-decoration-none text-dark">
+                                <a href="{{ url('tour-category', $slug) }}" class="text-decoration-none text-dark">
 
-                                @if ($tourType->packages->isNotEmpty())
-                                    <img src="{{ asset('uploads/packages/' . $tourType->packages->first()->photo) }}"
-                                        alt="{{ $tourType->name }}">
-                                @endif
-                                <div class="strip">
-                                    <h5>{{ $tourType->name }}</h5>
-                            </a>
-                        </div>
+                                    @if ($tourType->packages->isNotEmpty())
+                                        <img src="{{ asset('uploads/packages/' . $tourType->packages->first()->photo) }}"
+                                            alt="{{ $tourType->name }}">
+                                    @endif
+                                    <div class="strip">
+                                        <h5>{{ $tourType->name }}</h5>
+                                </a>
+                            </div>
+                    </div>
+                    @endforeach
+
                 </div>
-                @endforeach
-
             </div>
         </div>
-    </div>
     </div>
 </section>
 
@@ -781,82 +851,37 @@
 <section class="holiday-packages">
     <div class="container">
         <h3 class="border-start border-4 border-warning px-3 mb-4">Best Selling India Holiday Packages</h3>
-        <div class="swiper mySwiperHoliday best-places"style="height: auto !important;">
-            <div class="swiper-wrapper "style="height: auto !important;">
+        <div class="swiper mySwiperHoliday best-places" style="height: auto !important;">
+            <div class="swiper-wrapper" style="height: auto !important;">
                 @if ($tourpackages->count() > 0)
                     @foreach ($tourpackages as $item)
-                        <div class="swiper-slide holiday-packages-swiper mt-3"style="height: auto !important;'">
-                            <div class="card">
-                                <div class="card-body items p-0">
+                        <div class="swiper-slide holiday-packages-swiper mt-3" style="height: auto !important;">
+                            <div class="card shadow-sm">
+                                <a href="{{ url('holiday-packages', $item->slug) }}" class="text-decoration-none">
+                                    <img src="{{ asset('uploads/packages/' . $item->photo) }}" class="card-img-top"
+                                        alt="{{ $item->package_name }}">
+                                </a>
+                                <div class="card-body">
+                                    <h5 class="card-title">{{ $item->package_name }}</h5>
+                                    <p class="card-text">
+                                        <strong>Duration:</strong> {{ $item->duration }}<br>
+                                        <strong>Price:</strong> ₹{{ number_format($item->offer_price, 2) }}
+                                    </p>
                                     @php
-                                        $discount = (($item->ragular_price - $item->offer_price) / $item->ragular_price) * 100;
+                                        $discount =
+                                            (($item->ragular_price - $item->offer_price) / $item->ragular_price) * 100;
                                     @endphp
-                                    <a href="{{ url('holiday-packages', $item->slug) }}">
-                                        <img src="{{ asset('uploads/packages/' . $item->photo) }}" class="w-100"
-                                            alt="{{ $item->package_name }}">
-                                        <div class="recommended under-checkbox">{{ round($discount, 2) }}%
-                                            OFF<span></span></div>
-                                        <div class="duration">
-                                            <div class="duration-days">
-                                                <small style="font-size: 14px; font-weight: 700;">
-                                                    <i class="fa-solid fa-calendar-days"></i> {{ $item->duration }}
-                                                </small>
-                                            </div>
-                                            <div class="features">
-                                                <i class="fa-solid fa-hotel"></i>
-                                                <i class="fa-solid fa-car"></i>
-                                                <i class="fa-solid fa-utensils"></i>
-                                            </div>
-                                        </div>
-                                    </a>
+                                    <div class="badge bg-success">{{ round($discount, 2) }}% OFF</div>
                                 </div>
-                                <div class="card-footer py-3 bg-white">
-                                    <div class="desc">
-                                        <h5 class="title">
-                                            <a href="{{ url('holiday-packages', $item->slug) }}"
-                                                class="title text-decoration-none">
-                                                {{ \Illuminate\Support\Str::limit($item->package_name, 32, '...') }}
-                                            </a>
-                                        </h5>
-                                        <p class="sub-title fs-5 text-secondary">
-                                            @if($item->destination)
-                                                {{ $item->destination->destination_name }}
-                                            @else
-                                                Destination not available
-                                            @endif
-                                        </p>
-                                        <p class="sub-titles">Starting From</p>
-                                        <div
-                                            style="display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 10px;">
-                                            <div>
-                                                <span
-                                                    style="font-size: 1.25rem; font-weight: 600; color: #ff9800;">₹{{ number_format($item->offer_price) }}</span>
-                                                <div>
-                                                    <del>{{ number_format($item->ragular_price) }} /-</del>
-                                                    <span style="font-size: 0.9rem; color: #666;"> per person</span>
-                                                </div>
-                                            </div>
-                                            <a href="{{ url('holiday-packages', $item->slug) }}"
-                                                style="display: inline-block; 
-                           background-color: #ff9800; 
-                           color: white; 
-                           text-decoration: none; 
-                           padding: 8px 16px; 
-                           font-size: 16px; 
-                           font-weight: 600; 
-                           border-radius: 5px; 
-                           box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
-                           transition: background-color 0.3s ease;
-                           min-width: 100px;
-                           text-align: center;">
-                                                Details
-                                            </a>
-                                        </div>
-                                    </div>
+                                <div class="card-footer text-center">
+                                    <a href="{{ url('holiday-packages', $item->slug) }}"
+                                        class="btn btn-warning btn-sm">View Details</a>
                                 </div>
                             </div>
                         </div>
                     @endforeach
+                @else
+                    <p class="text-center">No holiday packages available at the moment.</p>
                 @endif
             </div>
         </div>
@@ -865,13 +890,9 @@
 
 {{-- <section class="best-destination mt-5">
   <div class="container">
-
-   
     <div class="row">
-
     </div>
   </div>
-
 </section> --}}
 
 <section class="bd-offer-area py-5 section-space-bottom">
@@ -899,6 +920,7 @@
         </div>
     </div>
 </section>
+
 @endsection
 @section('scripts')
 <!-- Include Toastr JS -->
@@ -913,7 +935,7 @@
     }).datepicker('setDate', new Date()); // Automatically set today's date
 </script>
    -->
-   <script>
+<script>
     // Add this JavaScript after your HTML
     document.addEventListener('DOMContentLoaded', function() {
         const passengerDropdown = document.getElementById('passengerDropdown');
@@ -1046,21 +1068,21 @@
                         // Event handler for city selection
                         citiesList.find('.list-group-item').on('click', function() {
                             const selectedId = $(this).data(
-                            'id'); // Get CityId from data-id attribute
+                                'id'); // Get CityId from data-id attribute
                             const selectedValue = $(this).text().trim(); // Get City Name
 
                             // Update the input field with the selected city name
                             $(inputField).val(selectedValue).data('city-id', selectedId);
                             $('#cityIdInput').val(
-                            selectedId); // Store the CityId in the hidden input field
+                                selectedId); // Store the CityId in the hidden input field
 
                             // Set the source_code or destination_code hidden field for bus
                             if (inputField === '#busFromCity') {
                                 $('#busFromCode').val(
-                                selectedId); // Store CityId as source_code
+                                    selectedId); // Store CityId as source_code
                             } else if (inputField === '#busToCity') {
                                 $('#busToCode').val(
-                                selectedId); // Store CityId as destination_code
+                                    selectedId); // Store CityId as destination_code
                             }
 
                             citiesList.hide(); // Hide the dropdown list
@@ -1196,20 +1218,21 @@
         $('#busSearchForm').on('submit', function(event) {
             event.preventDefault(); // Prevents default form submission
 
-        // Ensure the date is in 'yyyy-mm-dd' format
-        let formattedDate = $('#busJourneyDate').val();
-    const dateParts = formattedDate.split('/'); // Handles MM/DD/YYYY if that's returned
-    if (dateParts.length === 3) {
-        formattedDate = `${dateParts[2]}-${dateParts[0].padStart(2, '0')}-${dateParts[1].padStart(2, '0')}`;
-    }
-        // Collect form data
-        const data = {
-            source_city: $('#busFromCity').val(),
-            source_code: $('#busFromCode').val(),
-            destination_city: $('#busToCity').val(),
-            destination_code: $('#busToCode').val(),
-            depart_date: formattedDate // Use the formatted date
-        };
+            // Ensure the date is in 'yyyy-mm-dd' format
+            let formattedDate = $('#busJourneyDate').val();
+            const dateParts = formattedDate.split('/'); // Handles MM/DD/YYYY if that's returned
+            if (dateParts.length === 3) {
+                formattedDate =
+                    `${dateParts[2]}-${dateParts[0].padStart(2, '0')}-${dateParts[1].padStart(2, '0')}`;
+            }
+            // Collect form data
+            const data = {
+                source_city: $('#busFromCity').val(),
+                source_code: $('#busFromCode').val(),
+                destination_city: $('#busToCity').val(),
+                destination_code: $('#busToCode').val(),
+                depart_date: formattedDate // Use the formatted date
+            };
 
             console.log('Search Buses Request Data:', data);
 
@@ -1250,9 +1273,6 @@
     //                    HOTEL SEARCH
     //  ****************************************************
 
-
-
-
     $.ajaxSetup({
         headers: {
             'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content'),
@@ -1288,7 +1308,7 @@
             error: function() {
                 console.error("Error fetching hotel cities");
                 $(listId).html('<div class="list-group-item text-danger">Failed to load cities</div>')
-                .show();
+                    .show();
             }
         });
     }
@@ -1405,126 +1425,128 @@
                 const formattedCheckInDate = `${year}-${paddedMonth}-${paddedDay}`;
 
 
-            // Get all child ages
-        const childCount = parseInt(data["RoomGuests[0][NoOfChild]"]);
-        const childAges = [];
-        
-        // Only collect ages if there are children
-        if (childCount > 0) {
-            for (let i = 0; i < childCount; i++) {
-                const ageSelect = document.querySelector(`select[name="RoomGuests[0][ChildAges][${i}]"]`);
-                if (ageSelect) {
-                    childAges.push(parseInt(ageSelect.value));
+                // Get all child ages
+                const childCount = parseInt(data["RoomGuests[0][NoOfChild]"]);
+                const childAges = [];
+
+                // Only collect ages if there are children
+                if (childCount > 0) {
+                    for (let i = 0; i < childCount; i++) {
+                        const ageSelect = document.querySelector(
+                            `select[name="RoomGuests[0][ChildAges][${i}]"]`);
+                        if (ageSelect) {
+                            childAges.push(parseInt(ageSelect.value));
+                        }
+                    }
                 }
-            }
-        }
 
 
-        function getCookie(name) {
-    const value = `; ${document.cookie}`;
-    const parts = value.split(`; ${name}=`);
-    if (parts.length === 2) return parts.pop().split(';').shift();
-    return null;
-}
+                function getCookie(name) {
+                    const value = `; ${document.cookie}`;
+                    const parts = value.split(`; ${name}=`);
+                    if (parts.length === 2) return parts.pop().split(';').shift();
+                    return null;
+                }
 
-// Example usage - Get cookie values
-console.log('NoOfChildren:', getCookie('noOfChildren'));
-console.log('ChildAges:', getCookie('childAges'));
-console.log('NoOfAdults:', getCookie('noOfAdults'));
+                // Example usage - Get cookie values
+                console.log('NoOfChildren:', getCookie('noOfChildren'));
+                console.log('ChildAges:', getCookie('childAges'));
+                console.log('NoOfAdults:', getCookie('noOfAdults'));
 
-       
-        // Get the selected number of children
-const noOfChildrenSelect = document.querySelector('select[name="RoomGuests[0][NoOfChild]"]');
-const selectedChildCount = noOfChildrenSelect ? noOfChildrenSelect.value : '0';
 
-// Set cookies with expiry time (e.g., 7 days)
-document.cookie = `noOfChildren=${selectedChildCount}; path=/; max-age=604800`;
-document.cookie = `childAges=${childAges}; path=/; max-age=604800`;
-document.cookie = `noOfAdults=${String(data["RoomGuests[0][NoOfAdults]"])}; path=/; max-age=604800`;
+                // Get the selected number of children
+                const noOfChildrenSelect = document.querySelector(
+                    'select[name="RoomGuests[0][NoOfChild]"]');
+                const selectedChildCount = noOfChildrenSelect ? noOfChildrenSelect.value : '0';
+
+                // Set cookies with expiry time (e.g., 7 days)
+                document.cookie = `noOfChildren=${selectedChildCount}; path=/; max-age=604800`;
+                document.cookie = `childAges=${childAges}; path=/; max-age=604800`;
+                document.cookie =
+                    `noOfAdults=${String(data["RoomGuests[0][NoOfAdults]"])}; path=/; max-age=604800`;
 
 
 
                 // Check specific cookies
                 console.log('Cookies:', document.cookie);
 
-            const payload = {
-                ClientId: "180189",
-                UserName: "MakeMy91",
-                Password: "MakeMy@910",
-                EndUserIp: "1.1.1.1",
-                BookingMode: "5",
-                CheckInDate: formattedCheckInDate,
-                NoOfNights: String(data.NoOfNights),
-                CityId: data.CityId,
-                CountryCode: data.CountryCode || '',
-                GuestNationality: document.getElementById("nationalitySelect").value,
-                PreferredCurrency: "INR",
-                NoOfRooms: String(data.NoOfRooms),
-                RoomGuests: [
-                    {
+                const payload = {
+                    ClientId: "180189",
+                    UserName: "MakeMy91",
+                    Password: "MakeMy@910",
+                    EndUserIp: "1.1.1.1",
+                    BookingMode: "5",
+                    CheckInDate: formattedCheckInDate,
+                    NoOfNights: String(data.NoOfNights),
+                    CityId: data.CityId,
+                    CountryCode: data.CountryCode || '',
+                    GuestNationality: document.getElementById("nationalitySelect").value,
+                    PreferredCurrency: "INR",
+                    NoOfRooms: String(data.NoOfRooms),
+                    RoomGuests: [{
                         NoOfAdults: String(data["RoomGuests[0][NoOfAdults]"]),
                         NoOfChild: String(data["RoomGuests[0][NoOfChild]"]),
-                        ChildAge:  childAges,
-                    },
-                ],
-            };
-            showLoadingSpinner();
-            fetch('/search-hotel', {
-    method: 'POST',
-    headers: {
-        'Content-Type': 'application/json',
-        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-    },
-    body: JSON.stringify(payload),
-})
-.then(response => {
-    if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-    }
-    return response.json();
-})
-.then(data => {
-    if (data.status === 'success') {
-      const searchParams = new URLSearchParams({
-                        city: document.getElementById('hotelSearchCity').value,
-                        cityId: payload.CityId,
-                        checkIn: payload.CheckInDate,
-                        nights: payload.NoOfNights,
-                        rooms: payload.NoOfRooms,
-                        adults: payload.RoomGuests[0].NoOfAdults,
-                        children: payload.RoomGuests[0].NoOfChild,
-                        nationality: payload.GuestNationality
+                        ChildAge: childAges,
+                    }, ],
+                };
+                showLoadingSpinner();
+                fetch('/search-hotel', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')
+                                .getAttribute('content'),
+                        },
+                        body: JSON.stringify(payload),
+                    })
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error(`HTTP error! status: ${response.status}`);
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        if (data.status === 'success') {
+                            const searchParams = new URLSearchParams({
+                                city: document.getElementById('hotelSearchCity').value,
+                                cityId: payload.CityId,
+                                checkIn: payload.CheckInDate,
+                                nights: payload.NoOfNights,
+                                rooms: payload.NoOfRooms,
+                                adults: payload.RoomGuests[0].NoOfAdults,
+                                children: payload.RoomGuests[0].NoOfChild,
+                                nationality: payload.GuestNationality
+                            });
+                            console.log('Search results:', data.results);
+                            console.log('TraceId:', data.traceId); // Debug log
+                            sessionStorage.setItem('searchResults', JSON.stringify(data.results));
+                            sessionStorage.setItem('traceId', data.traceId);
+                            sessionStorage.setItem('searchParams', JSON.stringify(payload));
+                            const hotelCodes = data.results.map(result => result.HotelCode);
+                            console.log('Hotel Codes:', hotelCodes);
+
+                            // Optional: Store HotelCodes as a separate sessionStorage item
+                            sessionStorage.setItem('hotelCodes', JSON.stringify(hotelCodes));
+                            window.location.href = `/search-result?${searchParams.toString()}`;
+                        } else {
+                            console.error('API Error:', data.message);
+                            alert(data.message ||
+                                'No results found. Please try different search criteria.');
+                        }
+                    })
+                    .catch(error => {
+                        hideLoadingSpinner();
+                        console.error('Error:', error);
+                        alert('An error occurred while searching. Please try again later.');
                     });
-      console.log('Search results:', data.results);
-      console.log('TraceId:', data.traceId); // Debug log
-        sessionStorage.setItem('searchResults', JSON.stringify(data.results));
-        sessionStorage.setItem('traceId', data.traceId);
-        sessionStorage.setItem('searchParams', JSON.stringify(payload));
-        const hotelCodes = data.results.map(result => result.HotelCode);
-            console.log('Hotel Codes:', hotelCodes);
+            });
+        }
+    });
 
-            // Optional: Store HotelCodes as a separate sessionStorage item
-            sessionStorage.setItem('hotelCodes', JSON.stringify(hotelCodes));
-        window.location.href = `/search-result?${searchParams.toString()}`;
-    } 
-    else {
-        console.error('API Error:', data.message);
-        alert(data.message || 'No results found. Please try different search criteria.');
-    }
-})
-.catch(error => {
-  hideLoadingSpinner();
-    console.error('Error:', error);
-    alert('An error occurred while searching. Please try again later.');
-});
-        });
-    }
-});
-
-        // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-        // +                  Car Script                                   +
-        // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-        document.addEventListener('DOMContentLoaded', function() {
+    // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    // +                  Car Script                                   +
+    // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    document.addEventListener('DOMContentLoaded', function() {
         function fetchCities(inputId, suggestionId) {
             const query = document.getElementById(inputId).value;
             if (query.length < 2) {
@@ -1569,6 +1591,18 @@ document.cookie = `noOfAdults=${String(data["RoomGuests[0][NoOfAdults]"])}; path
             fetchCities('carDropoffLocation', 'carDropoffLocationList');
         });
 
+        // Toggle return date field based on trip type
+        document.getElementById('carTripType').addEventListener('change', function() {
+            const returnDateContainer = document.querySelector('.return-date-container');
+            if (this.value === '1') { // Return trip
+                returnDateContainer.style.display = 'block';
+                document.getElementById('carReturnDate').setAttribute('required', 'required');
+            } else {
+                returnDateContainer.style.display = 'none';
+                document.getElementById('carReturnDate').removeAttribute('required');
+            }
+        });
+
         const form = document.getElementById('carSearchForm');
         const searchButton = document.getElementById('searchButton');
 
@@ -1582,11 +1616,19 @@ document.cookie = `noOfAdults=${String(data["RoomGuests[0][NoOfAdults]"])}; path
                 const pickupDate = document.getElementById('carPickupDate').value;
                 const tripType = document.getElementById('carTripType').value;
 
-                if (!pickupLocation || !dropoffLocation || !pickupDate || !tripType) {
+                // Get return date if applicable
+                const returnDate = tripType === '1' ? document.getElementById('carReturnDate')
+                    .value : "";
+
+                if (!pickupLocation || !dropoffLocation || !pickupDate) {
                     alert('Please fill all required fields before searching.');
                     return;
                 }
-
+                // Validate return date for return trips
+                if (tripType === '1' && !returnDate) {
+                    alert('Please select a return date for round trip bookings.');
+                    return;
+                }
                 // Show loading state
                 searchButton.disabled = true;
                 searchButton.innerHTML =
@@ -1600,6 +1642,7 @@ document.cookie = `noOfAdults=${String(data["RoomGuests[0][NoOfAdults]"])}; path
                         pickupLocationCode: pickupLocation,
                         dropoffLocationCode: dropoffLocation,
                         pickupDate: pickupDate,
+                        returnDate: returnDate,
                         tripType: tripType
                     };
                     const apiRequestBody = {
@@ -1610,7 +1653,7 @@ document.cookie = `noOfAdults=${String(data["RoomGuests[0][NoOfAdults]"])}; path
                         FormCity: pickupLocation,
                         ToCity: dropoffLocation,
                         PickUpDate: pickupDate,
-                        DropDate: "",
+                        DropDate: returnDate,
                         Hours: "8",
                         TripType: tripType,
                         searchParams: searchParams
@@ -1881,7 +1924,7 @@ document.cookie = `noOfAdults=${String(data["RoomGuests[0][NoOfAdults]"])}; path
             console.log('Origin:', getCookie('origin'));
             console.log('Destination:', getCookie('destination'));
             const fareType = $('input[name="fareType"]:checked').val() ||
-            "1"; // Default to Normal Fare (1)
+                "1"; // Default to Normal Fare (1)
             const journeyType = $('input[name="journeyType"]:checked').val();
             sessionStorage.setItem('journeyType', journeyType);
 
@@ -1914,7 +1957,7 @@ document.cookie = `noOfAdults=${String(data["RoomGuests[0][NoOfAdults]"])}; path
 
             if ($('input[name="journeyType"]:checked').val() === '2') {
                 const returnDate = convertToISODate($('#flightReturnDate')
-            .val()); // Convert return date format
+                    .val()); // Convert return date format
                 segments.push({
                     Origin: $('#flightToCityCode').val().toUpperCase(),
                     Destination: $('#flightFromCityCode').val().toUpperCase(),
@@ -1976,27 +2019,209 @@ document.cookie = `noOfAdults=${String(data["RoomGuests[0][NoOfAdults]"])}; path
                                 'flightSearchResults')
                         });
 
-            // Redirect to results page
-           window.location.href =  `/flight?${searchParams.toString()}`;
-        } else {
-            alert(response.message || 'No flights found.');
-        }
-    },
-    error: function (xhr) {
-        console.error('Error:', xhr.responseJSON);
-        alert(xhr.responseJSON?.message || 'An error occurred.');
-    }
-});
+                        // Redirect to results page
+                        window.location.href = `/flight?${searchParams.toString()}`;
+                    } else {
+                        alert(response.message || 'No flights found.');
+                    }
+                },
+                error: function(xhr) {
+                    console.error('Error:', xhr.responseJSON);
+                    alert(xhr.responseJSON?.message || 'An error occurred.');
+                }
+            });
+        });
+
+
+        // Initialize components
+        initializeAirportSearch();
+        $('input[name="journeyType"]').on('change', handleTripTypeChange);
+        handleTripTypeChange();
     });
 
 
-    // Initialize components
-    initializeAirportSearch();
-    $('input[name="journeyType"]').on('change', handleTripTypeChange);
-    handleTripTypeChange();
-});
+    //  ****************************************************
+    //  *             Building a Package                   *
+    //  ****************************************************
 
+    document.addEventListener('DOMContentLoaded', function() {
+        const stateButtons = document.querySelectorAll('.btn-custom');
+        stateButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                // Remove active class from all buttons
+                stateButtons.forEach(btn => btn.classList.remove('active'));
+
+                // Add active class to clicked button
+                this.classList.add('active');
+
+                // Get state ID and slug
+                const stateId = this.getAttribute('data-state-id');
+                const stateSlug = this.getAttribute('data-state-slug');
+
+                // You can use stateId and stateSlug to fetch related data
+                console.log('Selected state:', this.textContent);
+                console.log('State ID:', stateId);
+                console.log('State slug:', stateSlug);
+
+                // Add your code to update the UI based on selected state
+            });
+        });
+    });
 </script>
 
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const tabButtons = document.querySelectorAll('#myTab button');
+        const dynamicContent = document.getElementById('dynamicContent');
+        const sectionTitle = document.getElementById('sectionTitle');
+        const sectionSubtitle = document.getElementById('sectionSubtitle');
+        const mainContent = `
+        <div class="swiper mySwiper best-places px-2">
+            <div class="swiper-wrapper">
+                @foreach ($destinations as $item)
+                    @if ($item->status == 1)
+                        <div class="swiper-slide item">
+                            <a href="{{ url('holidays/' . $item->slug) }}">
+                                <img src="{{ asset('uploads/destination/' . $item->photo) }}" class="w-100" alt="">
+                                <div class="strip">
+                                    <h5>{{ $item->state_name }}</h5>
+                                </div>
+                            </a>
+                        </div>
+                    @endif
+                @endforeach
+            </div>
+        </div>
+    `;
 
-@endsection 
+        tabButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                const selectedTab = this.getAttribute('id');
+
+                if (selectedTab === 'flight-tab') {
+                    // Update section title and subtitle
+                    sectionTitle.textContent = 'Flights';
+                    sectionSubtitle.textContent = 'World wide';
+
+                    // Update content for Flights
+                    dynamicContent.innerHTML = `
+                   <div class="row align-items-stretch">
+    <div class="col-md-6 col-sm-12 mb-4">
+        <div class="card shadow-sm d-flex flex-column">
+            <img src="assets/images/international-flight.jpg" class="card-img-top" alt="International Flights" style="height: 200px; object-fit: contain;">
+            <div class="card-body d-flex flex-column flex-grow-1">
+                <h5 class="card-title">International Flights</h5>
+                <p class="card-text mb-2">Explore the world with our exclusive international flight deals.</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 col-sm-12 mb-4">
+        <div class="card shadow-sm d-flex flex-column">
+            <img src="assets/images/domestic-flight.png" class="card-img-top" alt="Domestic Flights" style="height: 200px; object-fit: contain;">
+            <div class="card-body d-flex flex-column flex-grow-1">
+                <h5 class="card-title">Domestic Flights</h5>
+                <p class="card-text mb-2">Discover amazing destinations within the country at affordable prices.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+                `;
+                } else if (selectedTab === 'profile-tab') {
+                    // Update section title and subtitle
+                    sectionTitle.textContent = 'Hotels';
+                    sectionSubtitle.textContent = 'World wide';
+
+                    // Update content for Hotels
+                    dynamicContent.innerHTML = `
+                   <div class="row align-items-stretch">
+    <div class="col-md-6 col-sm-12 mb-4">
+        <div class="card shadow-lg border-0 d-flex flex-column">
+            <img src="assets/images/world-map.png" class="card-img-top" alt="International Hotels" style="height: 300px; object-fit: cover;">
+            <div class="card-body d-flex flex-column flex-grow-1">
+                <h5 class="card-title text-primary">International Hotels</h5>
+                <p class="card-text">Stay at luxurious hotels around the globe with our exclusive deals.</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 col-sm-12 mb-4">
+        <div class="card shadow-lg border-0 d-flex flex-column">
+            <img src="assets/images/india-map.png" class="card-img-top" alt="Domestic Hotels" style="height: 300px; object-fit: cover;">
+            <div class="card-body d-flex flex-column flex-grow-1">
+                <h5 class="card-title text-success">Domestic Hotels</h5>
+                <p class="card-text">Discover comfortable and affordable stays across the country.</p>
+                
+            </div>
+        </div>
+    </div>
+</div>
+
+                `;
+                } else {
+                    // Restore main content for other tabs
+                    sectionTitle.textContent = 'Tourist Places';
+                    sectionSubtitle.textContent = 'India';
+                    dynamicContent.innerHTML = mainContent;
+                }
+            });
+        });
+    });
+</script>
+
+//Holidays Page
+<script>
+    $(document).ready(function() {
+        // Fetch cities for autocomplete
+        function fetchCities(query, listId, inputId, hiddenId) {
+            if (query.length > 0) {
+                $.ajax({
+                    url: "{{ route('fetch.all.cities') }}",
+                    method: "GET",
+                    data: {
+                        query: query
+                    },
+                    success: function(response) {
+                        const list = $(listId);
+                        list.empty().show();
+                        if (response.status === 'success' && response.data.length > 0) {
+                            response.data.forEach(city => {
+                                list.append(
+                                    `<div class="list-group-item" data-id="${city.id}" style="cursor: pointer;">${city.city_name}</div>`
+                                );
+                            });
+                            list.find('.list-group-item').on('click', function() {
+                                const cityId = $(this).data('id');
+                                const cityName = $(this).text();
+                                $(inputId).val(cityName);
+                                $(hiddenId).val(cityId);
+                                list.hide();
+                            });
+                        } else {
+                            list.html('<div class="list-group-item">No cities found</div>');
+                        }
+                    },
+                    error: function() {
+                        $(listId).html(
+                            '<div class="list-group-item text-danger">Error fetching cities</div>'
+                            );
+                    }
+                });
+            } else {
+                $(listId).hide();
+            }
+        }
+
+        // Event listener for "To" field
+        $('#toCity').on('input', function() {
+            fetchCities($(this).val(), '#toCityList', '#toCity', '#toCityId');
+        });
+
+        // Hide dropdown when clicking outside
+        $(document).on('click', function(e) {
+            if (!$(e.target).closest('#toCity, #toCityList').length) {
+                $('#toCityList').hide();
+            }
+        });
+    });
+</script>
+@endsection

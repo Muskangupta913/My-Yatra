@@ -40,7 +40,10 @@ class CarController extends Controller
 
             // Format the pickup date properly
             $pickupDate = date('d/m/Y', strtotime($request->input('searchParams.pickupDate')));
-
+            // Format the return date if it exists
+            $returnDate = $request->input('searchParams.returnDate') 
+            ? date('d/m/Y', strtotime($request->input('searchParams.returnDate'))) 
+            : "";
             $requestBody = [
                 "EndUserIp" => "1.1.1.1",
                 "ClientId" => $this->apiConfig['client_id'],
@@ -49,7 +52,7 @@ class CarController extends Controller
                 "FormCity" => $request->input('searchParams.pickupLocationCode'),
                 "ToCity" => $request->input('searchParams.dropoffLocationCode'),
                 "PickUpDate" => $pickupDate,
-                "DropDate" => "",
+               "DropDate" => $returnDate,
                 "Hours" => "8",
                 "TripType" => $request->input('searchParams.tripType', "0")
             ];
@@ -326,6 +329,7 @@ public function processPayment(Request $request)
               'car_seating' => 'required',
               'car_luggage' => 'required',
               'car_price' => 'required',
+              'car_base_fare' => 'required', 
               // Add validation for trip details
               'pickup_location' => 'required',
               'dropoff_location' => 'required',
@@ -354,7 +358,8 @@ public function processPayment(Request $request)
                 'category' => $validated['car_category'],
                 'seating' => $validated['car_seating'],
                 'luggage' => $validated['car_luggage'],
-                'price' => $validated['car_price']
+                'price' => $validated['car_price'],
+                'base_fare' => $validated['car_base_fare'] // Add base_fare here
             ],
             'trace_id' => $validated['trace_id'],
             'srdv_index' => $validated['srdv_index']

@@ -216,52 +216,21 @@ public function fetchAllStates()
 
 public function searchPackages(Request $request)
 {
+    // Validate the input
+    $request->validate([
+        'to_city_id' => 'required|integer',
+    ]);
 
-    $destination = $request->input('searchDestination');
-    $city = $request->input('searchCity');
-    $travelDate = $request->input('travel_date');
+    // Fetch packages based on the "To City ID"
+    $toCityId = $request->input('to_city_id');
+    $packages = Package::where('city_id', $toCityId)
+        ->where('status', 1) // Only fetch active packages
+        ->get();
 
-
-    // Convert travelDate to the correct format if needed
-    if (!empty($travelDate)) {
-        $travelDate = date('Y-m-d', strtotime($travelDate));  // Ensures the date is in 'YYYY-MM-DD' format
-    }
-
-    // Fetch the destination by name
-    $state = State::where('destination_name', 'like', '%' . $destination . '%')->first();
-
-    // dd($state->state_slug);
-   
-
-    // Initialize an empty package query
-    $packages = Package::query();
-
-    // Filter by destination if found
-    if ($state) {
-        $packages->where('destination_id', $state->id);
-    }
-
-    // Only filter by city if a city was provided
-    if (!empty($city)) {
-        $city = City::where('city_name', 'like', '%' . $city . '%')->first();
-        if ($city) {
-            $packages->where('city_id', $city->id);
-        }
-    }
-
-    // Filter by travel date if provided
-    if (!empty($travelDate)) {
-        $packages->where('start_date', '<=', $travelDate)
-                 ->where('end_date', '>=', $travelDate);
-    }
-
-    // Get the final package results
-    $packages = $packages->get();
-
-  //  dd($packages);
-
-    return view('frontend.package_list', compact('packages', 'state'));
+    // Pass the packages to the view
+    return view('frontend.package_list', compact('packages'));
 }
+
 
 // addon static pages section
 
@@ -814,9 +783,7 @@ public function showCitiesByState($state_slug)
     return view('frontend.build', compact('state', 'cities'));
 }
 
-public function Wildlife()
-{
-    return view('frontend.Wildlife');
+
 public function destination()
 {
     return view('frontend.destination');
@@ -830,4 +797,24 @@ public function Wildlife()
     return view('frontend.wildlife');
 
 }
+
+public function getPackagesByCityCode(Request $request, $cityCode)
+{
+    $packages = Package::where('city_id', $cityCode)->get();
+
+    return view('frontend.package_list', compact('packages'));
+}
+
+public function packageList(Request $request)
+{
+    $cityId = $request->query('city_id'); // Get the "To City Code" from the query parameter
+
+    // Fetch packages based on the "To City Code"
+    $packages = Package::where('city_id', $cityId)
+        ->where('status', 1) // Only fetch active packages
+        ->get();
+
+    return view('frontend.package_list', compact('packages'));
+}
+
 }

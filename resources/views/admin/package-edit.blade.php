@@ -215,7 +215,7 @@
                   $('#city').empty().append('<option value="">Select City</option>');
                   $('#city').append(
                       data.map(function(city) {
-                          return `<option value="${city.id}">${city.name}</option>`;
+                          return `<option value="${city.id}">${city.city_name}</option>`;
                       })
                   );
               });

@@ -136,8 +136,8 @@
       <a id="honeymoon" href="{{ url('tour-category/honeymoon') }}">Honeymoon</a>
         <a id="adventure" href="{{ url('tour-category/adventure') }}">Adventure</a>
         <a id="religious-places" href="{{ url('tour-category/religious-places') }}">Religious Places</a>
-        <a id="beach1" href="{{ url('tour-category/adventure') }}">Beaches</a>
-        <a id="trekking1" href="{{ url('tour-category/adventure') }}">Trekking</a>
+        <!-- <a id="beach1" href="{{ url('tour-category/adventure') }}">Beaches</a>
+        <a id="trekking1" href="{{ url('tour-category/adventure') }}">Trekking</a> -->
         <!-- <a id="trekking2" href="http://127.0.0.1:8000/tour-category/trekking">Historical</a>
         <a id="beach2" href="http://127.0.0.1:8000/tour-category/beach">Beaches</a> -->
       </b>

@@ -2,11 +2,12 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Newcity;  // Updated to use Newcity model
+use App\Models\Newcity;  
 use App\Models\HotelCity;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
 
 class CityController extends Controller
 {
@@ -19,46 +20,18 @@ class CityController extends Controller
     /**
      * Fetch all cities with caching implementation
      */
-    public function fetchAllCities()
+    public function fetchAllCities(Request $request)
     {
-        try {
-            // Try to get cities from cache first
-            $cities = Cache::remember('bus_cities', 3600, function () {
-                return Newcity::all();  // Using Newcity model to fetch cities
-            });
-
-            // Check if cities data is empty
-            if ($cities->isEmpty()) {
-                return response()->json([
-                    'status' => 'error',
-                    'message' => 'No cities found',
-                    'data' => [],
-                    'total_cities' => 0
-                ], 404);
-            }
-
-            // Return cities data with additional metadata
-            return response()->json([
-                'status' => 'success',
-                'message' => 'Cities fetched successfully',
-                'data' => $cities,
-                'total_cities' => $cities->count()
-            ], 200);
-
-        } catch (\Exception $e) {
-            // Log the error
-            Log::error('City Fetch Error', [
-                'message' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
-            ]);
-
-            // Return error response
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Failed to fetch cities',
-                'error' => $e->getMessage()
-            ], 500);
-        }
+        $query = $request->input('query');
+        $cities = DB::table('cities')  // Using the cities table
+            ->where('city_name', 'LIKE', "%{$query}%")
+            ->select('id', 'city_name')
+            ->get();
+    
+        return response()->json([
+            'status' => 'success',
+            'data' => $cities
+        ]);
     }
 
 
@@ -94,6 +67,16 @@ class CityController extends Controller
         ], 200);
     }
 
+    public function fetchCitiesByState(Request $request)
+    {
+        $state = $request->query('state');
+        $stateRecord = DB::table('states')->where('destination_name', $state)->first();
+        if ($stateRecord) {
+            $cities = DB::table('cities')->where('state_id', $stateRecord->id)->get();
+            return response()->json($cities);
+        }
+        return response()->json([]);
+    }
 
    //HOTEL RELATED CONTROLLER 
 

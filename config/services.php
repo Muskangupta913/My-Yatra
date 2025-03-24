@@ -30,24 +30,4 @@ return [
         'secret' => env('AWS_SECRET_ACCESS_KEY'),
         'region' => env('AWS_DEFAULT_REGION', 'us-east-1'),
     ],
-
-
-
-
-'bus_api' => [
-    'url' => env('BUS_API_URL', 'https://bus.srdvtest.com/v5/rest/'),
-    'client_id' => env('BUS_API_CLIENT_ID'),
-    'username' => env('BUS_API_USERNAME'),
-    'password' => env('BUS_API_PASSWORD'),
-    'api_token' => env('BUS_API_TOKEN'),
-    
-   
-
-],
-'razorpay' => [
-    'key_id' => env('RAZORPAY_KEY_ID', 'rzp_test_cvVugPSRGGLWtS'),
-    'key_secret' => env('RAZORPAY_KEY_SECRET', 'xHoRXawt9gYD7vitghKq1l5c'),
-],
-
-
 ];
