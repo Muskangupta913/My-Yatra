@@ -1,9 +1,6 @@
 @extends('frontend.layouts.master')
 @section('title', 'Booking Confirmation')
 @section('content')
-
-
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -397,10 +394,12 @@
     const price = JSON.parse(decodeURIComponent(urlParams.get('Price')));
     const traceId = urlParams.get('TraceId');
     const resultIndex = urlParams.get('ResultIndex');
+    console.log('price details', price);
     let invoiceAmount= 0;
              let encodedpassengers = '';
              invoiceAmount = passengers[0].SeatDetails.Price;
             encodedpassengers=encodeURIComponent(passengers);
+            console.log('invoice amount', invoiceAmount);
     // Format date and time
     function formatDateTime(dateTimeStr) {
         const dt = new Date(dateTimeStr);
@@ -598,7 +597,7 @@ document.getElementById('payNowButton').addEventListener('click', function(e) {
 
         const payload = {
             TraceId: traceId,
-            Amount: invoiceAmount,
+            Amount: totalAmount,
             PassengerData: passengers,
             BoardingPointName: boardingPoint.Name,
             DroppingPointName: droppingPoint.Name,
@@ -655,7 +654,7 @@ document.getElementById('payNowButton').addEventListener('click', function(e) {
                     currency: data.currency,
                     name: "MAKE MY BHARAT YATRA",
                     description: "Payment for bus tickets",
-                    image: "https://your-logo-url.com/logo.png",
+                    image:"/assets/images/mmby_logo.jpeg",
                     order_id: data.order_id,
                     
                     handler: function(response) {

@@ -46,7 +46,7 @@
             <div class="support-info alert alert-info mt-4">
                 <h5><i class="fas fa-headset mr-2"></i>Need assistance?</h5>
                 <p>Please contact our support team for help with your booking:</p>
-                <p class="font-weight-bold">Call: <a href="tel:+911234567890">+91 1204223100</a></p>
+                <p class="font-weight-bold">Call: <a href="tel:+911234567890">+91 1204223100 </a></p>
                 <p>Email: <a href="mailto:support@example.com">support@makemybharatyatra.com</a></p>
                 <p class="small">Available Monday to Saturday, 9:00 AM to 6:00 PM</p>
             </div>

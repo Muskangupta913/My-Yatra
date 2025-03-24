@@ -533,24 +533,23 @@ document.addEventListener('DOMContentLoaded', function () {
     </div>
 </div>
 
-<div id="pickupDropDropdown-${bus.ResultIndex}" class="pickup-drop-details"  
-    style="display: none; padding: 10px; background-color: #f8f9fa; border-radius: 5px; margin-top: 10px; border: 1px solid #ddd; overflow-x: auto; max-width: 100%;">
-    <div class="row">
-        <!-- Boarding Points on the left -->
-        <div class="col-12 col-md-6 mb-3 mb-md-0">
-            <div><strong>Boarding Points:</strong></div>
-            ${bus.BoardingPoints.map(point => `
-                <p class="text-break">${point.CityPointName} - ${new Date(point.CityPointTime).toLocaleString()}</p>
-            `).join('')}
-        </div>
-        <!-- Dropping Points on the right -->
-        <div class="col-12 col-md-6">
-            <div><strong>Dropping Points:</strong></div>
-            ${bus.DroppingPoints.map(point => `
-                <p class="text-break">${point.CityPointName} - ${new Date(point.CityPointTime).toLocaleString()}</p>
-            `).join('')}
-        </div>
+<div id="pickupDropDropdown-${bus.ResultIndex}" class="pickup-drop-details" style="display: none; padding: 10px; background-color: #f8f9fa; border-radius: 5px; margin-top: 10px; border: 1px solid #ddd; overflow-x: auto; max-width: 100%;">
+  <div class="row">
+    <!-- Boarding Points on the left -->
+    <div class="col-12 col-md-6 mb-3 mb-md-0">
+      <div><strong>Boarding Points:</strong></div>
+      ${bus.BoardingPoints && bus.BoardingPoints.map(point => 
+        point ? `<p class="text-break">${point.CityPointName || 'Unknown'} - ${new Date(point.CityPointTime).toLocaleString()}</p>` : ''
+      ).join('')}
     </div>
+    <!-- Dropping Points on the right -->
+    <div class="col-12 col-md-6">
+      <div><strong>Dropping Points:</strong></div>
+      ${bus.DroppingPoints && bus.DroppingPoints.map(point => 
+        point ? `<p class="text-break">${point.CityPointName || 'Unknown'} - ${new Date(point.CityPointTime).toLocaleString()}</p>` : ''
+      ).join('')}
+    </div>
+  </div>
 </div>
 
 <!-- Select Seat Button in Bottom Right Corner (Fixed) -->

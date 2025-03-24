@@ -194,134 +194,116 @@
           </div> -->
                     <!-- // hotel booking -->
 
-                    <div class="tab-content" id="myTabContent">
-                        <!-- Hotel Booking -->
-                        <div class="tab-pane fade mt-5" id="profile" role="tabpanel" aria-labelledby="profile-tab">
-                            <h4 class="mb-5" id="hotel-title">Book Hotels in India</h4>
-                            <hr class="searchline">
-                            <form id="hotelSearchForm">
-                                <div class="row">
-                                    <div class="mb-3 col-md-3">
-                                        <div class="date-caption">Enter City</div>
-                                        <div class="position-relative">
-                                            <input type="text" class="form-control rounded-0 py-3" name="CityName"
-                                                id="hotelSearchCity" placeholder="Enter City Name" required
-                                                style="text-align: center;">
-                                            <input type="hidden" name="CityId" id="cityIdInput" value="">
-                                            <div id="hotelSearchCityList" class="card"
-                                                style="position: absolute; width: 100%; max-height: 150px; overflow-y: scroll; z-index: 1000;">
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <!-- Check-in Date -->
-                                    <div class="mb-3 col-md-2">
-                                        <div class="date-caption">Check-in </div>
-                                        <input type="text" id="checkinDatepicker" name="CheckInDate"
-                                            class="form-control rounded-0 py-3 datepicker"
-                                            placeholder="Select Check-in Date" required style="text-align: center;">
-                                    </div>
+          <div class="tab-content" id="myTabContent">
 
-                                    <!-- Number of Nights -->
-                                    <div class="mb-3 col-md-2">
-                                        <div class="date-caption">No. of Nights</div>
-                                        <input type="number" name="NoOfNights" class="form-control rounded-0 py-3"
-                                            placeholder="No. of Nights" required style="text-align: center;">
-                                    </div>
+  <!-- Hotel Booking -->
+  <div class="tab-pane fade mt-5" id="profile" role="tabpanel" aria-labelledby="profile-tab">
+    <h4 class="mb-5" id="hotel-title">Book Hotels in India</h4>
+    <hr class="searchline">
+    <form id="hotelSearchForm">
+        <div class="row">
+            <div class="mb-3 col-md-3">
+                <div class="date-caption">Enter City</div>
+                <div class="position-relative">
+                <input type="text" class="form-control rounded-0 py-3" name="CityName" id="hotelSearchCity" placeholder="Enter City " required style="text-align: center;" >
+                <input type="hidden" name="CityId" id="cityIdInput" value="" >
+                <div id="hotelSearchCityList" class="card" style="position: absolute; width: 100%; max-height: 150px; overflow-y: scroll; z-index: 1000;"></div>
+           </div>
+            </div>
+            <!-- Check-in Date -->
+            <div class="mb-3 col-md-2">
+                 <div class="date-caption">Check-in </div>
+                 <input type="text" id="checkinDatepicker" name="CheckInDate" class="form-control rounded-0 py-3 datepicker" placeholder="Select Check-in Date" required style="text-align: center;">
+            </div>
 
-                                    <div class="mb-3 col-md-2">
-                                        <div class="date-caption">Room & Guests</div>
-                                        <div class="dropdown">
-                                            <button
-                                                class="btn btn-outline-secondary dropdown-toggle w-100 rounded-0 py-3"
-                                                type="button" id="roomGuestsDropdown" data-bs-toggle="dropdown"
-                                                aria-expanded="false"
-                                                style="background-color: white; color: #6c757d; border-color: #ced4da;">
-                                                1 Room, 2 Adults, 0 Children
-                                            </button>
-                                            <ul class="dropdown-menu p-3" aria-labelledby="roomGuestsDropdown"
-                                                style="width: 100%; max-width: 300px;">
-                                                <li class="mb-3">
-                                                    <div class="d-flex justify-content-between align-items-center">
-                                                        <label for="noOfRooms" class="form-label mb-0">Rooms</label>
-                                                        <select id="noOfRooms" name="NoOfRooms"
-                                                            class="form-select w-auto"
-                                                            onchange="updateRoomGuestsTitle()">
-                                                            <option value="1" selected>1</option>
-                                                            <option value="2">2</option>
-                                                            <option value="3">3</option>
-                                                            <option value="4">4</option>
-                                                        </select>
-                                                    </div>
-                                                </li>
-                                                <li class="mb-3">
-                                                    <div class="d-flex justify-content-between align-items-center">
-                                                        <label for="noOfAdults" class="form-label mb-0">Adults</label>
-                                                        <select id="noOfAdults" name="RoomGuests[0][NoOfAdults]"
-                                                            class="form-select w-auto"
-                                                            onchange="updateRoomGuestsTitle()">
-                                                            <option value="1">1</option>
-                                                            <option value="2" selected>2</option>
-                                                            <option value="3">3</option>
-                                                            <option value="4">4</option>
-                                                        </select>
-                                                    </div>
-                                                </li>
-                                                <li class="mb-3">
-                                                    <div class="d-flex justify-content-between align-items-center">
-                                                        <label for="noOfChildren"
-                                                            class="form-label mb-0">Children</label>
-                                                        <select id="noOfChildren" name="RoomGuests[0][NoOfChild]"
-                                                            class="form-select w-auto"
-                                                            onchange="handleChildrenChange()">
-                                                            <option value="0" selected>0</option>
-                                                            <option value="1">1</option>
-                                                            <option value="2">2</option>
-                                                            <option value="3">3</option>
-                                                        </select>
-                                                    </div>
-                                                </li>
-                                                <li>
-                                                    <div id="childAgesContainer" class="mt-3"
-                                                        style="display: none;">
-                                                        <label class="form-label"
-                                                            style="font-size: 16px; font-weight: bold; color: #333;">Child
-                                                            Ages</label>
-                                                        <div id="childAgesInputs" class="d-flex flex-column gap-2">
-                                                            <!-- Child age inputs will be dynamically added here -->
-                                                        </div>
-                                                    </div>
+            <!-- Number of Nights -->
+            <div class="mb-3 col-md-2">
+                <div class="date-caption">No. of Nights</div>
+                <input type="number" name="NoOfNights" class="form-control rounded-0 py-3" placeholder="No. of Nights" required style="text-align: center;">
+            </div>
 
-                                                </li>
-                                            </ul>
-                                        </div>
-                                    </div>
-                                    <!-- Guest Nationality -->
-                                    <div class="mb-3 col-md-2">
-                                        <div class="date-caption"style="text-align: center;">Nationality</div>
-                                        <select id="nationalitySelect"
-                                            class="form-control rounded-0 py-3 text-center">
-                                            <option value="" selected>Select</option>
-                                            <option value="IN" data-nationality="Indian">INDIA</option>
-                                            <option value="US" data-nationality="American">American</option>
-                                            <option value="GB" data-nationality="British">British</option>
-                                            <option value="CA" data-nationality="Canadian">Canadian</option>
-                                        </select>
-                                    </div>
+            <div class="mb-3 col-md-3">
+            <div class="date-caption">Room & Guests</div>
+            <div class="dropdown">
+        <button
+            class="btn btn-outline-secondary dropdown-toggle w-100 rounded-0 py-3"
+            type="button"
+            id="roomGuestsDropdown"
+            data-bs-toggle="dropdown"
+            aria-expanded="false"
+            style="background-color: white; color: #6c757d; border-color: #ced4da;">
+            1 Room, 2 Adults, 0 Children
+        </button>
+        <ul class="dropdown-menu p-3" aria-labelledby="roomGuestsDropdown" style="width: 100%; max-width: 300px;">
+            <li class="mb-3">
+                <div class="d-flex justify-content-between align-items-center">
+                    <label for="noOfRooms" class="form-label mb-0">Rooms</label>
+                    <select id="noOfRooms" name="NoOfRooms" class="form-select w-auto" onchange="updateRoomGuestsTitle()">
+                        <option value="1" selected>1</option>
+                        <option value="2">2</option>
+                        <option value="3">3</option>
+                        <option value="4">4</option>
+                    </select>
+                </div>
+            </li>
+            <li class="mb-3">
+                <div class="d-flex justify-content-between align-items-center">
+                    <label for="noOfAdults" class="form-label mb-0">Adults</label>
+                    <select id="noOfAdults" name="RoomGuests[0][NoOfAdults]" class="form-select w-auto" onchange="updateRoomGuestsTitle()">
+                        <option value="1">1</option>
+                        <option value="2" selected>2</option>
+                        <option value="3">3</option>
+                        <option value="4">4</option>
+                    </select>
+                </div>
+            </li>
+            <li class="mb-3">
+                <div class="d-flex justify-content-between align-items-center">
+                    <label for="noOfChildren" class="form-label mb-0">Children</label>
+                    <select id="noOfChildren" name="RoomGuests[0][NoOfChild]" class="form-select w-auto" onchange="handleChildrenChange()">
+                        <option value="0" selected>0</option>
+                        <option value="1">1</option>
+                        <option value="2">2</option>
+                        <option value="3">3</option>
+                    </select>
+                </div>
+            </li>
+            <li>
+            <div id="childAgesContainer" class="mt-3" style="display: none;">
+    <label class="form-label" style="font-size: 16px; font-weight: bold; color: #333;">Child Ages</label>
+    <div id="childAgesInputs" class="d-flex flex-column gap-2">
+        <!-- Child age inputs will be dynamically added here -->
+    </div>
+</div>
 
-                                    <input type="hidden" name="CountryCode" id="countryCodeInput" value="">
-                                    <input type="hidden" name="SelectedNationality" id="hiddenNationality"
-                                        value="">
+            </li>
+        </ul>
+    </div>
+</div>
+            <!-- Guest Nationality -->
+            <div class="mb-3 col-md-2">
+                <div class="date-caption"style="text-align: center;">Nationality</div>
+                <select id="nationalitySelect" class="form-control rounded-0 py-3 text-center">
+                    <option value="" selected>Select</option>
+                    <option value="IN" data-nationality="Indian">INDIA</option>
+                    <option value="US" data-nationality="American">American</option>
+                    <option value="GB" data-nationality="British">British</option>
+                    <option value="CA" data-nationality="Canadian">Canadian</option>
+                </select>
+            </div>
 
-                                    <!-- Search Button -->
-                                    <div class="mb-3 col-md-2">
-                                        <div class="date-caption" style="visibility: hidden">Search</div>
-                                        <button type="button"
-                                            class="btn item-center btn-warning w-100 rounded-0 py-3 fw-bold hotelbuttonsearch"
-                                            id="searchButton">Search</button>
-                                    </div>
-                                </div>
-                            </form>
-                        </div>
+            <input type="hidden" name="CountryCode" id="countryCodeInput" value="">
+            <input type="hidden" name="SelectedNationality" id="hiddenNationality" value="">
+
+            <!-- Search Button -->
+            <div class="mb-3 col-md-2">
+                <div class="date-caption" style="visibility: hidden">Search</div>
+                <button type="button" class="btn item-center btn-warning w-100 rounded-0 py-3 fw-bold hotelbuttonsearch" id="searchButton">Search</button>
+            </div>
+        </div>
+    </form>
+</div>
+  <!-- Flight Booking -->
 
 
                         <!-- Flight Booking -->
@@ -345,108 +327,106 @@
                                     </div>
                                 </div>
 
-                                <div class="row">
-                                    <div class="mb-2 col-md-2 position-relative">
-                                        <div class="date-caption">From</div>
-                                        <div class="position-relative">
-                                            <input type="text" class="form-control rounded-0 py-3"
-                                                id="flightFromCity" placeholder="Enter Departure City" required>
-                                            <!-- Note: removed 'name' attribute from display input and added it to hidden input -->
-                                            <input type="hidden" id="flightFromCityCode" name="origin" required>
-                                            <div id="flightFromCityList" class="card"
-                                                style="position: absolute; width: 100%; max-height: 150px; overflow-y: scroll; z-index: 1000;">
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="mb-2 col-md-2 position-relative">
-                                        <div class="date-caption">To</div>
-                                        <div class="position-relative">
-                                            <input type="text" class="form-control rounded-0 py-3"
-                                                id="flightToCity" placeholder="Enter Destination City" required>
-                                            <!-- Note: removed 'name' attribute from display input and added it to hidden input -->
-                                            <input type="hidden" id="flightToCityCode" name="destination" required>
-                                            <div id="flightToCityList" class="card"
-                                                style="position: absolute; width: 100%; max-height: 150px; overflow-y: scroll; z-index: 1000;">
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="mb-2 col-md-2">
-                                        <div class="date-caption">Departure </div>
-                                        <input type="text" id="flightDepartureDate" name="departureDate"
-                                            class="form-control rounded-0 py-3 datepicker"
-                                            placeholder="Select Departure Date" required>
-                                    </div>
-                                    <div class="mb-2 col-md-2" id="returnDateContainer">
-                                        <div class="date-caption">Return </div>
-                                        <input type="text" id="flightReturnDate" name="returnDate"
-                                            class="form-control rounded-0 py-3 datepicker"
-                                            placeholder="Select Return Date">
-                                    </div>
-                                    <div class="mb-2 col-md-2">
-                                        <div class="date-caption">Passengers</div>
-                                        <div class="dropdown">
-                                            <button class="form-control rounded-0 py-3 text-start" type="button"
-                                                id="passengerDropdown" data-bs-toggle="dropdown">
-                                                Select
-                                            </button>
-                                            <div class="dropdown-menu p-3" style="width: 250px;">
-                                                <div class="mb-2">
-                                                    <label for="adultCount">Adults</label>
-                                                    <input type="number" id="adultCount" name="adultCount"
-                                                        class="form-control" value="1" min="1"
-                                                        max="9">
-                                                </div>
-                                                <div class="mb-2">
-                                                    <label for="childCount">Child</label>
-                                                    <input type="number" id="childCount" name="childCount"
-                                                        class="form-control" value="0" min="0"
-                                                        max="9">
-                                                </div>
-                                                <div class="mb-2">
-                                                    <label for="infantCount">Infants</label>
-                                                    <input type="number" id="infantCount" name="infantCount"
-                                                        class="form-control" value="0" min="0"
-                                                        max="9">
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="mb-2 col-md-2">
-                                        <div class="date-caption" style="visibility: hidden">Search</div>
-                                        <button type="submit" id="flightSearch"
-                                            class="btn btn-warning w-100 rounded-0 py-3 fw-bold">Search</button>
-                                    </div>
-                                </div>
-                                <!-- Fare Type Selection -->
-                                <div class="row mt-3">
-                                    <div class="col-md-12">
-                                        <label class="fw-bold">Fare Type:</label>
-                                        <div class="form-check form-check-inline">
-                                            <input class="form-check-input" type="radio" name="fareType"
-                                                id="normalFare" value="1" checked>
-                                            <label class="form-check-label" for="normalFare">Normal Fare</label>
-                                        </div>
-                                        <div class="form-check form-check-inline">
-                                            <input class="form-check-input" type="radio" name="fareType"
-                                                id="studentFare" value="2">
-                                            <label class="form-check-label" for="studentFare">Student Fare</label>
-                                        </div>
-                                        <div class="form-check form-check-inline">
-                                            <input class="form-check-input" type="radio" name="fareType"
-                                                id="seniorCitizenFare" value="3">
-                                            <label class="form-check-label" for="seniorCitizenFare">Senior Citizen
-                                                Fare</label>
-                                        </div>
-                                        <div class="form-check form-check-inline">
-                                            <input class="form-check-input" type="radio" name="fareType"
-                                                id="armedForceFare" value="4">
-                                            <label class="form-check-label" for="armedForceFare">Armed Force
-                                                Fare</label>
-                                        </div>
-                                    </div>
-                                </div>
-                            </form>
-                        </div>
+        <div class="row">
+        <div class="mb-2 col-md-2 position-relative">
+    <div class="date-caption">From</div>
+    <div class="position-relative">
+    <input type="text" class="form-control rounded-0 py-3" id="flightFromCity" placeholder="Origin" required>
+    <!-- Note: removed 'name' attribute from display input and added it to hidden input -->
+    <input type="hidden" id="flightFromCityCode" name="origin" required>
+    <div id="flightFromCityList" class="card" style="position: absolute; width: 100%; max-height: 150px; overflow-y: scroll; z-index: 1000;"></div>
+</div>
+</div>          
+<div class="mb-2 col-md-2 position-relative">
+    <div class="date-caption">To</div>
+    <div class="position-relative">
+    <input type="text" class="form-control rounded-0 py-3" id="flightToCity" placeholder="Arriving" required>
+    <!-- Note: removed 'name' attribute from display input and added it to hidden input -->
+    <input type="hidden" id="flightToCityCode" name="destination" required>
+    <div id="flightToCityList" class="card" style="position: absolute; width: 100%; max-height: 150px; overflow-y: scroll; z-index: 1000;"></div>
+</div>
+</div>
+            <div class="mb-2 col-md-2">
+                <div class="date-caption">Departure </div>
+                <input type="text" id="flightDepartureDate" name="departureDate"
+                    class="form-control rounded-0 py-3 datepicker"
+                    placeholder="Departure" required>
+            </div>
+            <div class="mb-2 col-md-2">
+                <div class="date-caption">Return </div>
+                <input type="text" id="flightReturnDate" name="returnDate"
+                    class="form-control rounded-0 py-3 datepicker"
+                    placeholder="Return On">
+            </div>
+            <div class="mb-2 col-md-2">
+    <div class="date-caption">Passengers</div>
+    <div class="dropdown">
+        <button class="form-control rounded-0 py-3 text-start" type="button" id="passengerDropdown" data-bs-toggle="dropdown">
+            Passengers
+        </button>
+        <div class="dropdown-menu p-3" style="position: absolute; width: 100%; max-height: 150px; overflow-y: scroll; z-index: 1000;">
+            <div class="mb-2">
+                <label for="adultCount">Adults</label>
+                <input type="number" 
+                       id="adultCount"
+                       name="adultCount" 
+                       class="form-control" 
+                       value="1" 
+                       min="1" 
+                       max="9">
+            </div>
+            <div class="mb-2">
+                <label for="childCount">Child</label>
+                <input type="number" 
+                       id="childCount"
+                       name="childCount" 
+                       class="form-control" 
+                       value="0" 
+                       min="0" 
+                       max="9">
+            </div>
+            <div class="mb-2">
+                <label for="infantCount">Infants</label>
+                <input type="number" 
+                       id="infantCount"
+                       name="infantCount" 
+                       class="form-control" 
+                       value="0" 
+                       min="0" 
+                       max="9">
+            </div>
+        </div>
+    </div>
+</div>
+            <div class="mb-2 col-md-2">
+                <div class="date-caption" style="visibility: hidden">Search</div>
+                <button type="submit" id="flightSearch" class="btn btn-warning w-100 rounded-0 py-3 fw-bold">Search</button>
+            </div>
+        </div>
+                  <!-- Fare Type Selection -->
+                  <div class="row mt-3">
+    <div class="col-md-12">
+        <label class="fw-bold">Fare Type:</label>
+        <div class="form-check form-check-inline">
+            <input class="form-check-input" type="radio" name="fareType" id="normalFare" value="1" checked>
+            <label class="form-check-label" for="normalFare">Normal Fare</label>
+        </div>
+        <div class="form-check form-check-inline">
+            <input class="form-check-input" type="radio" name="fareType" id="studentFare" value="2">
+            <label class="form-check-label" for="studentFare">Student Fare</label>
+        </div>
+        <div class="form-check form-check-inline">
+            <input class="form-check-input" type="radio" name="fareType" id="seniorCitizenFare" value="3">
+            <label class="form-check-label" for="seniorCitizenFare">Senior Citizen Fare</label>
+        </div>
+        <div class="form-check form-check-inline">
+            <input class="form-check-input" type="radio" name="fareType" id="armedForceFare" value="4">
+            <label class="form-check-label" for="armedForceFare">Armed Force Fare</label>
+        </div>
+    </div>
+</div> 
+</form>
+</div>
 
                         <!-- Car Booking -->
                         <div class="tab-pane fade mt-5" id="car" role="tabpanel" aria-labelledby="car-tab">
@@ -460,28 +440,28 @@
                                     <div class="mb-3 col-md-2">
                                         <div class="date-caption">From</div>
                                         <div class="position-relative">
-                                            <input type="text" class="form-control rounded-0 py-3"
-                                                name="pickupLocation" id="carPickupLocation" placeholder="From"
-                                                required>
-                                            <input type="hidden" name="pickupLocationCode"
-                                                id="carPickupLocationCode">
-                                            <div id="carPickupLocationList" class="card"
-                                                style="position: absolute; width: 100%; max-height: 150px; overflow-y: scroll; z-index: 1000;">
-                                            </div>
-                                        </div>
+                                        <input type="text" class="form-control rounded-0 py-3"
+                                            name="pickupLocation" id="carPickupLocation"
+                                            placeholder="Enter Pickup Location" required>
+                                        <input type="hidden" name="pickupLocationCode" id="carPickupLocationCode">
+                                        <div id="carPickupLocationList" class="card" style="position: absolute; width: 100%; max-height: 150px; overflow-y: scroll; z-index: 1000;"></div>
+                                    </div>
+                                     </div>
+                                    <div class="mb-3 col-md-3">
+                                        <div class="date-caption">Drop-off Location</div>
+                                        <div class="position-relative">
+                                        <input type="text" class="form-control rounded-0 py-3"
+                                            name="dropoffLocation" id="carDropoffLocation"
+                                            placeholder="Enter Drop-off Location" required>
+                                        <input type="hidden" name="dropoffLocationCode" id="carDropoffLocationCode">
+                                        <div id="carDropoffLocationList" class="card" style="position: absolute; width: 100%; max-height: 150px; overflow-y: scroll; z-index: 1000;"></div>
+                                    </div>
                                     </div>
                                     <div class="mb-3 col-md-2">
-                                        <div class="date-caption">To</div>
-                                        <div class="position-relative">
-                                            <input type="text" class="form-control rounded-0 py-3"
-                                                name="dropoffLocation" id="carDropoffLocation" placeholder="To"
-                                                required>
-                                            <input type="hidden" name="dropoffLocationCode"
-                                                id="carDropoffLocationCode">
-                                            <div id="carDropoffLocationList" class="card"
-                                                style="position: absolute; width: 100%; max-height: 150px; overflow-y: scroll; z-index: 1000;">
-                                            </div>
-                                        </div>
+                                        <div class="date-caption">Pickup Date</div>
+                                        <input type="text" id="carPickupDate" name="pickup_date"
+                                            class="form-control rounded-0 py-3 datepicker"
+                                            placeholder="Select Pickup Date" required>
                                     </div>
                                     <div class="mb-3 col-md-2">
                                         <div class="date-caption">Trip Type</div>
@@ -935,7 +915,8 @@
     }).datepicker('setDate', new Date()); // Automatically set today's date
 </script>
    -->
-<script>
+   <script>
+    
     // Add this JavaScript after your HTML
     document.addEventListener('DOMContentLoaded', function() {
         const passengerDropdown = document.getElementById('passengerDropdown');
@@ -957,27 +938,26 @@
             passengerDropdown.textContent = displayText.trim() || 'Select';
         }
 
-        // Add event listeners to all inputs
-        adultCount.addEventListener('change', updatePassengerDisplay);
-        childCount.addEventListener('change', updatePassengerDisplay);
-        infantCount.addEventListener('change', updatePassengerDisplay);
-    });
-    // Modified loading spinner functions
-    function showLoadingSpinner() {
+    // Add event listeners to all inputs
+    adultCount.addEventListener('change', updatePassengerDisplay);
+    childCount.addEventListener('change', updatePassengerDisplay);
+    infantCount.addEventListener('change', updatePassengerDisplay);
+});
+// Modified loading spinner functions
+function showLoadingSpinner() {
+    const spinner = document.getElementById('loadingSpinner');
+    if (spinner) {
+        spinner.style.display = 'flex';
+    }
+}
+function hideLoadingSpinner() {
+    if (hotelDetailsLoaded && roomDetailsLoaded) {
         const spinner = document.getElementById('loadingSpinner');
         if (spinner) {
-            spinner.style.display = 'flex';
+            spinner.style.display = 'none';
         }
     }
-
-    function hideLoadingSpinner() {
-        if (hotelDetailsLoaded && roomDetailsLoaded) {
-            const spinner = document.getElementById('loadingSpinner');
-            if (spinner) {
-                spinner.style.display = 'none';
-            }
-        }
-    }
+}
 
 
     document.addEventListener('DOMContentLoaded', function() {
@@ -1525,23 +1505,24 @@
                             const hotelCodes = data.results.map(result => result.HotelCode);
                             console.log('Hotel Codes:', hotelCodes);
 
-                            // Optional: Store HotelCodes as a separate sessionStorage item
-                            sessionStorage.setItem('hotelCodes', JSON.stringify(hotelCodes));
-                            window.location.href = `/search-result?${searchParams.toString()}`;
-                        } else {
-                            console.error('API Error:', data.message);
-                            alert(data.message ||
-                                'No results found. Please try different search criteria.');
-                        }
-                    })
-                    .catch(error => {
-                        hideLoadingSpinner();
-                        console.error('Error:', error);
-                        alert('An error occurred while searching. Please try again later.');
-                    });
-            });
-        }
-    });
+            // Optional: Store HotelCodes as a separate sessionStorage item
+            sessionStorage.setItem('hotelCodes', JSON.stringify(hotelCodes));
+        window.location.href = `/search-result?${searchParams.toString()}`;
+    } 
+    else {
+        console.error('API Error:', data.message);
+        alert(data.message || 'No results found. Please try different search criteria.');
+    }
+})
+.catch(error => {
+  hideLoadingSpinner();
+    console.error('Error:', error);
+    alert('An error occurred while searching. Please try again later.');
+});
+        });
+    }
+});
+
 
     // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     // +                  Car Script                                   +
@@ -1616,11 +1597,7 @@
                 const pickupDate = document.getElementById('carPickupDate').value;
                 const tripType = document.getElementById('carTripType').value;
 
-                // Get return date if applicable
-                const returnDate = tripType === '1' ? document.getElementById('carReturnDate')
-                    .value : "";
-
-                if (!pickupLocation || !dropoffLocation || !pickupDate) {
+                if (!pickupLocation || !dropoffLocation || !pickupDate || !tripType) {
                     alert('Please fill all required fields before searching.');
                     return;
                 }
@@ -1686,7 +1663,7 @@
 
                 } catch (error) {
                     console.error('Error:', error);
-                    alert('An error occurred while searching for cars. Please try again.');
+                    toastr.error('An error occurred while searching for cars. Please try again.', 'Search Error');
                 } finally {
                     searchButton.disabled = false;
                     searchButton.innerHTML = 'Search ';
@@ -1697,20 +1674,20 @@
 
 
 
-    //  ****************************************************
-    //                    FLIGHT SEARCH
-    //  ****************************************************
+  //  ****************************************************
+  //                    FLIGHT SEARCH
+  //  ****************************************************
 
 
-    $(document).ready(function() {
-        // Initialize datepicker with the correct format
-        $('.datepicker').datepicker({
-            format: 'yyyy-mm-dd',
-            autoclose: true,
-            startDate: new Date()
-        });
+$(document).ready(function () {
+    // Initialize datepicker with the correct format
+    $('.datepicker').datepicker({
+        format: 'yyyy-mm-dd',
+        autoclose: true,
+        startDate: new Date()
+    });
 
-
+    
 
         function initializeAirportSearch() {
             const searchConfig = [{
@@ -2019,25 +1996,23 @@
                                 'flightSearchResults')
                         });
 
-                        // Redirect to results page
-                        window.location.href = `/flight?${searchParams.toString()}`;
-                    } else {
-                        alert(response.message || 'No flights found.');
-                    }
-                },
-                error: function(xhr) {
-                    console.error('Error:', xhr.responseJSON);
-                    alert(xhr.responseJSON?.message || 'An error occurred.');
-                }
-            });
-        });
-
-
-        // Initialize components
-        initializeAirportSearch();
-        $('input[name="journeyType"]').on('change', handleTripTypeChange);
-        handleTripTypeChange();
+            // Redirect to results page
+           window.location.href =  `/flight?${searchParams.toString()}`;
+        } else {
+            alert(response.message || 'No flights found.');
+        }
+    },
+    error: function (xhr) {
+        console.error('Error:', xhr.responseJSON);
+        alert(xhr.responseJSON?.message || 'An error occurred.');
+    }
+});
     });
+    // Initialize components
+    initializeAirportSearch();
+    $('input[name="journeyType"]').on('change', handleTripTypeChange);
+    handleTripTypeChange();
+});
 
 
     //  ****************************************************

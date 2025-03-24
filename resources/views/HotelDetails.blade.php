@@ -8,7 +8,7 @@
     left: 0; 
     width: 100%; 
     height: 100%; 
-    background-color: rgba(255, 255, 255, 0.8); 
+    background-color: rgba(255, 255, 255, 0.8);
     z-index: 9999; 
     display: flex; 
     align-items: center; 
@@ -201,25 +201,6 @@ body {
     </div>
     <template id="hotel-template">
     <div class="space-y-6">
-        <!-- Hotel Header -->
-        <div class="bg-white rounded-lg shadow p-6">
-            <h1 class="text-3xl font-bold hotel-name"></h1>
-            <div class="flex flex-wrap gap-4 text-sm text-gray-600 mt-2">
-                <div class="flex items-center gap-1">
-                    <i class="fas fa-map-marker-alt"></i>
-                    <span class="hotel-address"></span>
-                </div>
-                <div class="flex items-center gap-1">
-                    <i class="fas fa-star text-yellow-400"></i>
-                    <span class="hotel-rating"></span>
-                </div>
-                <div class="flex items-center gap-1">
-                    <i class="fas fa-phone"></i>
-                    <span class="hotel-contact"></span>
-                </div>
-            </div>
-        </div>
-
         <!-- Main Content Area -->
         <div class="flex flex-col md:flex-row gap-6">
             <!-- Left Side - Image Gallery -->
@@ -238,67 +219,6 @@ body {
                         <!-- Thumbnails will be populated here -->
                     </div>
                 </div>
-
-                <!-- Hotel Description Below Gallery -->
-                <div class="mt-6 bg-white rounded-lg shadow p-6">
-                    <h2 class="text-xl font-semibold mb-4">About the Hotel</h2>
-                    <div class="space-y-4 hotel-description">
-                        <!-- Description will be populated here -->
-                    </div>
-                </div>
-            </div>
-
-            <!-- Right Side - Hotel Details Sidebar -->
-            <div class="md:w-1/3">
-                <div class="bg-white rounded-lg shadow p-6 space-y-6 sticky top-4">
-                    <h2 class="text-xl font-semibold border-b pb-2">Hotel Information</h2>
-                    
-                    <!-- Location Details -->
-                    <div class="space-y-4">
-                        <div class="flex items-start gap-3">
-                            <i class="fas fa-map-marked-alt text-blue-500 mt-1"></i>
-                            <div>
-                                <h3 class="font-semibold text-gray-700">Address</h3>
-                                <p class="text-gray-600 hotel-full-address"></p>
-                            </div>
-                        </div>
-
-                        <div class="flex items-start gap-3">
-                            <i class="fas fa-globe-asia text-blue-500 mt-1"></i>
-                            <div>
-                                <h3 class="font-semibold text-gray-700">Location</h3>
-                                <p class="text-gray-600">
-                                    <span class="hotel-city"></span>,
-                                    <span class="hotel-state"></span>
-                                </p>
-                                <p class="text-gray-600">
-                                    <span class="hotel-country"></span>
-                                    <span class="hotel-pincode"></span>
-                                </p>
-                            </div>
-                        </div>
-
-                        <div class="flex items-start gap-3">
-                            <i class="fas fa-location-crosshairs text-blue-500 mt-1"></i>
-                            <div>
-                                <h3 class="font-semibold text-gray-700">Coordinates</h3>
-                                <p class="text-gray-600">
-                                    <span class="hotel-latitude"></span>, 
-                                    <span class="hotel-longitude"></span>
-                                </p>
-                            </div>
-                        </div>
-
-                        <div class="flex items-start gap-3">
-                            <i class="fas fa-phone-alt text-blue-500 mt-1"></i>
-                            <div>
-                                <h3 class="font-semibold text-gray-700">Contact</h3>
-                                <p class="text-gray-600 hotel-phone"></p>
-                                <p class="text-gray-600 hotel-email"></p>
-                            </div>
-                        </div>
-                    </div>
-
                     <!-- Facilities Section -->
                     <div class="border-t pt-4">
                         <h3 class="font-semibold text-gray-700 mb-3">Hotel Facilities</h3>
@@ -313,7 +233,7 @@ body {
 </template>
 
     <div class="room-info-container">
-        <div id="room-details" class="loading-state">Loading room details...</div>
+        <div id="room-details" class="loading-state">Kindly Refresh the page to the available rooms</div>
     </div>
     <!-- Include Toastr JS -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/js/toastr.min.js"></script>
@@ -358,7 +278,7 @@ function hideLoadingSpinner() {
             const hotelCode = urlParams.get('hotelCode');
 
             if (!resultIndex || !traceId || !hotelCode) {
-                document.getElementById('hotel-details').innerHTML = 
+                document.getElementById('hotel-details').innerHTML =
                     '<div class="error-state">No hotel information available</div>';
                     hotelDetailsLoaded = true;
                     hideLoadingSpinner();
@@ -402,7 +322,8 @@ function hideLoadingSpinner() {
         hotelDetailsLoaded = true;
         hideLoadingSpinner();
     });
-}function renderHotelDetails(hotel) {
+}
+function renderHotelDetails(hotel) {
     const template = document.getElementById('hotel-template');
     const content = template.content.cloneNode(true);
     const container = document.getElementById('hotel-details');
@@ -471,10 +392,7 @@ function hideLoadingSpinner() {
                 </div>
 
                 <!-- Hotel Description Below Gallery -->
-                <div style="margin-top: 2rem; background: white; border-radius: 1rem; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); border: 1px solid #e2e8f0; padding: 1.5rem;">
-                    <h2 style="font-size: 1.5rem; font-weight: 600; color: #1e40af; margin-bottom: 1rem; border-bottom: 2px solid #93c5fd; padding-bottom: 0.5rem;">About the Hotel</h2>
-                    <div class="hotel-description" style="color: #475569;"></div>
-                </div>
+               
             </div>
 
             <!-- Right Side - Hotel Details Sidebar -->
@@ -516,10 +434,7 @@ function hideLoadingSpinner() {
                     </div>
 
                     <!-- Facilities Section -->
-                    <div style="border-top: 1px solid #e2e8f0; margin-top: 1.5rem; padding-top: 1.5rem;">
-                        <h3 style="font-weight: 600; color: #1e40af; margin-bottom: 1rem;">Hotel Facilities</h3>
-                        <div class="facilities-list" style="display: grid; gap: 0.5rem;"></div>
-                    </div>
+                    
                 </div>
             </div>
         </div>
@@ -568,39 +483,12 @@ function hideLoadingSpinner() {
             });
         }
     }
-
-    // Render facilities
-    const facilitiesList = container.querySelector('.facilities-list');
-    if (hotel.HotelFacilities) {
-        hotel.HotelFacilities.forEach(facility => {
-            const facilityDiv = document.createElement('div');
-            facilityDiv.style = 'display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem; background: #f8fafc; border-radius: 0.5rem; border: 1px solid #e2e8f0; transition: all 0.3s ease;';
-            facilityDiv.innerHTML = `
-                <i class="fas ${facility.FontAwesome}" style="color: #2563eb;"></i>
-                <span style="color: #475569;">${facility.Name}</span>
-            `;
-            facilitiesList.appendChild(facilityDiv);
-        });
-    }
-
-    // Render hotel description
-    const descriptionContainer = container.querySelector('.hotel-description');
-    if (hotel.Description) {
-        hotel.Description.forEach(section => {
-            const sectionDiv = document.createElement('div');
-            sectionDiv.style = 'margin-bottom: 1.5rem;';
-            sectionDiv.innerHTML = `
-                <h3 style="font-weight: 600; color: #1e40af; margin-bottom: 0.75rem;">${section.Name}</h3>
-                <ul style="list-style-type: disc; padding-left: 1.5rem; color: #475569;">
-                    ${section.Detail.map(detail => `
-                        <li style="margin-bottom: 0.5rem;">${detail}</li>
-                    `).join('')}
-                </ul>
-            `;
-            descriptionContainer.appendChild(sectionDiv);
-        });
-    }
+    // STORING HOTEL INFORMATION IN GLOBAL VARIABLES TO ACCESS AFTER ROOM RENDERING
+    window.hotelDescription = hotel.Description;
+    window.hotelFacilities = hotel.HotelFacilities;
 }
+
+
 
 // Initialize the page
 // document.addEventListener('DOMContentLoaded', fetchHotelInfo);
@@ -723,7 +611,7 @@ function fetchRoomDetails() {
                                     ` : ''}
                                     <!-- Description and Bed Type -->
                                     <div style="color: #475569; margin-bottom: 1rem;">
-                                        ${room.Description}
+                                        <!--${room.Description}-->
                                         <div style="display: flex; align-items: center; gap: 0.5rem; margin-top: 0.5rem;">
                                             <i class="fas fa-bed"></i>
                                             ${room.BedTypes || 'N/A'}
@@ -786,20 +674,115 @@ function fetchRoomDetails() {
             });
             
             document.getElementById('room-details').innerHTML = roomDetailsHtml;
+            appendHotelDetailsFooter();
         } else {
-            document.getElementById('room-details').innerHTML = 
-                '<div style="text-align: center; padding: 2rem; color: #ef4444;">Failed to load room details</div>';
-        }
+    Swal.fire({
+        icon: "error",
+        title: "Oops...",
+        text: "An error occured.Kindly Refresh the page!"
+    });
+}
     })
     .catch(error => {
         console.error('Error:', error);
         document.getElementById('room-details').innerHTML = 
-            '<div style="text-align: center; padding: 2rem; color: #ef4444;">An error occurred while loading room details</div>';
+        Swal.fire({
+        icon: "error",
+        title: "Oops...",
+        text: "An error occured.Kindly Refresh the page!"
+    });
     })
     .finally(() => {
         roomDetailsLoaded = true;
         hideLoadingSpinner();
     });
+}
+
+// HIGHLIGHT START: New function to append hotel details as footer
+function appendHotelDetailsFooter() {
+    // Only proceed if we have the global variables set
+    if (!window.hotelDescription && !window.hotelFacilities) {
+        return;
+    }
+    
+    // Create footer container
+    const footerContainer = document.createElement('div');
+    footerContainer.className = 'hotel-footer-details';
+    footerContainer.style = 'margin-top: 3rem; padding-top: 2rem; border-top: 2px solid #e2e8f0;';
+    
+    // Add the title
+    const footerTitle = document.createElement('h2');
+    footerTitle.style = 'font-size: 1.75rem; font-weight: 700; color: #1e40af; margin-bottom: 2rem; text-align: center;';
+    footerTitle.textContent = 'More About This Hotel';
+    footerContainer.appendChild(footerTitle);
+    
+    // Create a flex container for the two sections
+    const flexContainer = document.createElement('div');
+    flexContainer.style = 'display: flex; flex-wrap: wrap; gap: 2rem;';
+    footerContainer.appendChild(flexContainer);
+    
+    // About the Hotel Section
+    if (window.hotelDescription) {
+        const descriptionSection = document.createElement('div');
+        descriptionSection.style = 'flex: 1; min-width: 300px; background: white; border-radius: 1rem; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); border: 1px solid #e2e8f0; padding: 1.5rem;';
+        
+        const descriptionTitle = document.createElement('h3');
+        descriptionTitle.style = 'font-size: 1.5rem; font-weight: 600; color: #1e40af; margin-bottom: 1rem; border-bottom: 2px solid #93c5fd; padding-bottom: 0.5rem;';
+        descriptionTitle.textContent = 'About the Hotel';
+        descriptionSection.appendChild(descriptionTitle);
+        
+        const descriptionContent = document.createElement('div');
+        descriptionContent.className = 'hotel-description';
+        descriptionContent.style = 'color: #475569;';
+        
+        window.hotelDescription.forEach(section => {
+            const sectionDiv = document.createElement('div');
+            sectionDiv.style = 'margin-bottom: 1.5rem;';
+            sectionDiv.innerHTML = `
+                <h4 style="font-weight: 600; color: #1e40af; margin-bottom: 0.75rem;">${section.Name}</h4>
+                <ul style="list-style-type: disc; padding-left: 1.5rem; color: #475569;">
+                    ${section.Detail.map(detail => `
+                        <li style="margin-bottom: 0.5rem;">${detail}</li>
+                    `).join('')}
+                </ul>
+            `;
+            descriptionContent.appendChild(sectionDiv);
+        });
+        
+        descriptionSection.appendChild(descriptionContent);
+        flexContainer.appendChild(descriptionSection);
+    }
+    
+    // Facilities Section
+    if (window.hotelFacilities) {
+        const facilitiesSection = document.createElement('div');
+        facilitiesSection.style = 'flex: 1; min-width: 300px; background: white; border-radius: 1rem; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); border: 1px solid #e2e8f0; padding: 1.5rem;';
+        
+        const facilitiesTitle = document.createElement('h3');
+        facilitiesTitle.style = 'font-size: 1.5rem; font-weight: 600; color: #1e40af; margin-bottom: 1rem; border-bottom: 2px solid #93c5fd; padding-bottom: 0.5rem;';
+        facilitiesTitle.textContent = 'Hotel Facilities';
+        facilitiesSection.appendChild(facilitiesTitle);
+        
+        const facilitiesList = document.createElement('div');
+        facilitiesList.className = 'facilities-list';
+        facilitiesList.style = 'display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 1rem;';
+        
+        window.hotelFacilities.forEach(facility => {
+            const facilityDiv = document.createElement('div');
+            facilityDiv.style = 'display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem; background: #f8fafc; border-radius: 0.5rem; border: 1px solid #e2e8f0; transition: all 0.3s ease;';
+            facilityDiv.innerHTML = `
+                <i class="fas ${facility.FontAwesome}" style="color: #2563eb;"></i>
+                <span style="color: #475569;">${facility.Name}</span>
+            `;
+            facilitiesList.appendChild(facilityDiv);
+        });
+        
+        facilitiesSection.appendChild(facilitiesList);
+        flexContainer.appendChild(facilitiesSection);
+    }
+    
+    // Append the footer to the room details container
+    document.getElementById('room-details').appendChild(footerContainer);
 }
 // Initialize everything when the page loads
 document.addEventListener('DOMContentLoaded', () => {

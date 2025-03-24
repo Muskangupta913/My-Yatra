@@ -785,8 +785,8 @@ public function cancelRoom(Request $request)
 
 
 
-//ORDER BASED API CALLS
-public function createOrder(Request $request)
+//Hotel BASED API CALLS
+public function createPayment(Request $request)
 {
     try {
         // Validate the request
@@ -845,7 +845,7 @@ public function createOrder(Request $request)
             'order_id' => $razorpayOrder->id,
             'amount' => $request->amount,
             'currency' => $request->currency ?? 'INR',
-            'key_id' => env('rzp_test_cvVugPSRGGLWtS')
+           'key_id' => 'rzp_test_cvVugPSRGGLWtS'
         ]);
         
     } catch (Exception $e) {
@@ -875,7 +875,6 @@ public function verifyPayment(Request $request)
 
         // Initialize Razorpay API
         $api = new Api('rzp_test_cvVugPSRGGLWtS', 'xHoRXawt9gYD7vitghKq1l5c');
-
         // Get payment data from request
         $razorpay_payment_id = $request->razorpay_payment_id;
         $razorpay_order_id = $request->razorpay_order_id;
@@ -1003,7 +1002,7 @@ public function verifyPayment(Request $request)
             }
             
             // For web requests, redirect to success page with all parameters
-            return redirect()->route('payment.success', $successParams)
+            return redirect()->route('payments.success', $successParams)
                 ->with('success', 'Payment processed successfully');
             
         } catch (Exception $verificationError) {
@@ -1027,7 +1026,7 @@ public function verifyPayment(Request $request)
             }
             
             // For web requests, redirect to failure page
-            return redirect()->route('payment.failed')
+            return redirect()->route('payments.failed')
                 ->with('error', 'Payment verification failed: ' . $verificationError->getMessage());
         }
         
@@ -1086,7 +1085,7 @@ public function verifyPayment(Request $request)
                     }
                     
                     // Redirect to success page with all parameters
-                    return redirect()->route('payment.success', $successParams)
+                    return redirect()->route('payments.success', $successParams)
                         ->with('success', 'Payment processed successfully');
                 }
             } catch (Exception $razorpayError) {
@@ -1105,7 +1104,7 @@ public function verifyPayment(Request $request)
         }
         
         // For web requests, redirect to failure page
-        return redirect()->route('payment.failed')
+        return redirect()->route('payments.failed')
             ->with('error', 'Payment processing error: ' . $e->getMessage());
     }
 }

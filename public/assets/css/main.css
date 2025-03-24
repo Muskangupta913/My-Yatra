@@ -77,7 +77,7 @@ color: white;
     color: #b8b7b7;
 }
 
-#searchDestination{
+#searchDestination,#carPickupLocation,#carDropoffLocation,#carPickupDate,#carTripType ,#flightFromCity,#flightToCity,#flightDepartureDate,#flightReturnDate,#passengerDropdown,#hotelSearchCity,#numberOfNights, #checkinDatepicker,#roomGuestsDropdown,#nationalitySelect,#searchCity, #busFromCity, #busToCity, #busJourneyDate{
     font-size: 18px;
     font-weight: bold;
 
@@ -93,7 +93,7 @@ color: white;
 }
 
 @media(max-width:768px){
-    #searchDestination{
+    #searchDestination,#searchButton,#flightSearch,#searchCity, #datepicker, #busFromCity, #busToCity, #busJourneyDate {
     font-size: 17px;
     font-weight: 600;
     padding: 14px !important;
@@ -155,7 +155,6 @@ color: white;
     padding-left: 30px;
    
 } */
-
 #destinationList {
     max-height: 150px;   /* Adjust this value as needed */
     overflow-y: auto;    /* Enable vertical scrollbar if content exceeds 5 items */

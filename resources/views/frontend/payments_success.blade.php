@@ -73,7 +73,7 @@ Don't close this window</p>
                     <p class="lead">Your booking has been confirmed.</p>
                     
                     <div class="mt-4">
-                        <a href="index.html" class="btn btn-primary">Back to Home</a>
+                    <a href="{{ route('home') }}" class="btn btn-primary">Back to Home</a>
                     </div>
                 </div>
             </div>
@@ -288,10 +288,9 @@ Don't close this window</p>
             hideProcessingOverlay();
         } catch (error) {
             console.error('Error during hotel booking:', error);
-            window.location.href = `/payments/failed?message=${encodeURIComponent(error.message || "An unexpected error occurred")}`;
         }
     }
-   
+
 </script>
 </body>
 </html>

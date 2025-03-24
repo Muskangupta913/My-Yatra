@@ -317,10 +317,20 @@ body {
     .search-header {
         flex-direction: column;
         align-items: flex-start;
+        padding: 10px;
+        gap: 15px;
     }
 
     #mobileFilterBtn {
         display: block;
+    }
+    
+    .hotel-info-container {
+        padding: 15px;
+    }
+    
+    .hotel-info-container h3 {
+        font-size: 1.2rem;
     }
 }
 
@@ -387,135 +397,112 @@ body {
 }
 </style>
  @endsection
-    <div style="
-    position: sticky; 
-    top: 0; 
-    z-index: 100; 
-    background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%); 
-    color: white; 
-    padding: 15px 20px; 
-    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    justify-content: space-between;
-    gap: 10px;
-">
-   <div style="display: flex; align-items: center; gap: 15px;">
-        <i class="fas fa-map-marker-alt" style="font-size: 24px; color: #ecf0f1;"></i>
-        <div>
-            <span style="display: block;font-size: 12px;color: #bdc3c7;margin-bottom: 3px;">Destination</span>
-            <span style="font-size: 16px;font-weight: 600;">{{ request()->input('city') }}</span>
+    <div class="search-header">
+        <div class="search-info-item">
+            <i class="fas fa-map-marker-alt search-info-icon"></i>
+            <div class="search-info-text">
+                <span class="search-info-label">Destination</span>
+                <span class="search-info-value">{{ request()->input('city') }}</span>
+            </div>
+        </div>
+
+        <div class="search-info-item">
+            <i class="fas fa-calendar-alt search-info-icon"></i>
+            <div class="search-info-text">
+                <span class="search-info-label">Check-in-Date</span>
+                <span class="search-info-value">{{ request()->input('checkIn') }}</span>
+            </div>
+        </div>
+
+        <div class="search-info-item">
+            <i class="fas fa-users search-info-icon"></i>
+            <div class="search-info-text">
+                <span class="search-info-label">Guests</span>
+                <span class="search-info-value">{{ request()->input('adults') }} Adults, {{ request()->input('children') }} Children</span>
+            </div>
+        </div>
+        
+        <div class="search-info-item">
+            <i class="fas fa-bed search-info-icon"></i>
+            <div class="search-info-text">
+                <span class="search-info-label">Rooms</span>
+                <span class="search-info-value">{{ request()->input('rooms') }}</span>
+            </div>
         </div>
     </div>
 
-    <div style="display: flex; align-items: center; gap: 15px;">
-        <i class="fas fa-calendar-alt" style="font-size: 24px; color: #ecf0f1;"></i>
-        <div>
-            <span style="display: block; font-size: 12px;color: #bdc3c7; margin-bottom: 3px;">Check-in-Date</span>
-            <span style="font-size: 16px; font-weight: 600;">{{ request()->input('checkIn') }}</span>
-        </div>
-    </div>
-
-    <div style="display: flex; align-items: center; gap: 15px;">
-        <i class="fas fa-users" style="font-size: 24px; color: #ecf0f1;"></i>
-        <div>
-            <span style="display: block;font-size: 12px;color: #bdc3c7;margin-bottom: 3px;">Guests</span>
-            <span style="font-size: 16px;font-weight: 600; ">{{ request()->input('adults') }} Adults, {{ request()->input('children') }} Children</span>
-        </div>
-    </div>
-    <div style="display: flex; align-items: center; gap: 15px;">
-        <i class="fas fa-bed" style="font-size: 24px; color: #ecf0f1;"></i>
-        <div>
-            <span style="display: block;font-size: 12px;color: #bdc3c7;margin-bottom: 3px;">Rooms</span>
-            <span style="font-size: 16px;font-weight: 600;">{{ request()->input('rooms') }}</span>
-        </div>
-    </div>
-        <style>
-        @media (max-width: 768px) {
-            & {
-                flex-direction: column;
-                align-items: flex-start;
-                padding: 10px;
-                gap: 15px;
-            }
-        }
-        </style>
-</div>
-
-    <div style=" margin: 80px 20px auto; padding: 0 20px; display: flex; gap: 20px; position: relative;">
+    <div class="main-container">
         <!-- Enhanced Filters Sidebar -->
-<aside id="filterSidebar" style="width: 320px; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); position: sticky; top: 20px; height: calc(100vh - 40px); overflow-y: auto;">
-<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-            <h3 style="font-size: 18px; color: #333;">Filters</h3>
-            <button onclick="clearAllFilters()" style="color: #1a73e8; border: none; background: none; cursor: pointer; font-size: 14px;">
-                Clear All
-            </button>
-        </div>
+        <aside id="filterSidebar">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h3 style="font-size: 18px; color: #333;">Filters</h3>
+                <button onclick="clearAllFilters()" style="color: #1a73e8; border: none; background: none; cursor: pointer; font-size: 14px;">
+                    Clear All
+                </button>
+            </div>
 
-    <!-- Active Filters -->
-    <div id="activeFilters" class="active-filters"></div>
+            <!-- Active Filters -->
+            <div id="activeFilters" class="active-filters"></div>
 
-    <!-- Price Range Filter -->
-    <div class="filter-section">
-        <h4>Price Range</h4>
-        <input type="range" id="priceRange" class="price-slider" min="0" max="50000" step="100">
-        <div style="display: flex; justify-content: space-between; margin-top: 8px; font-size: 14px; color: #666;">
-            <span id="minPrice">₹0</span>
-            <span id="maxPrice">₹50,000</span>
-        </div>
-    </div>
+            <!-- Price Range Filter -->
+            <div class="filter-section">
+                <h4>Price Range</h4>
+                <input type="range" id="priceRange" class="price-slider" min="0" max="50000" step="100">
+                <div style="display: flex; justify-content: space-between; margin-top: 8px; font-size: 14px; color: #666;">
+                    <span id="minPrice">₹0</span>
+                    <span id="maxPrice">₹50,000</span>
+                </div>
+            </div>
 
-    <!-- Star Rating Filter -->
-    <div class="filter-section">
-        <h4>Star Rating</h4>
-        <div id="starRatingFilters" class="filter-group"></div>
-    </div>
+            <!-- Star Rating Filter -->
+            <div class="filter-section">
+                <h4>Star Rating</h4>
+                <div id="starRatingFilters" class="filter-group"></div>
+            </div>
 
-    <!-- Hotel Type Filter -->
-    <div class="filter-section">
-        <h4>Property Type</h4>
-        <div id="propertyTypeFilters" class="filter-group"></div>
-    </div>
+            <!-- Hotel Type Filter -->
+            <div class="filter-section">
+                <h4>Property Type</h4>
+                <div id="propertyTypeFilters" class="filter-group"></div>
+            </div>
 
-    <!-- Amenities Filter -->
-    <div class="filter-section">
-        <h4>Amenities</h4>
-        <div id="amenitiesFilters" class="filter-group"></div>
-    </div>
+            <!-- Amenities Filter -->
+            <div class="filter-section">
+                <h4>Amenities</h4>
+                <div id="amenitiesFilters" class="filter-group"></div>
+            </div>
 
-    <!-- Sort Options -->
-    <div class="filter-section">
-        <h4>Sort By</h4>
-        <select id="sortSelect" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px; color: #333;">
-            <option value="price-low">Price: Low to High</option>
-            <option value="price-high">Price: High to Low</option>
-            <option value="rating-high">Rating: High to Low</option>
-            <option value="name-asc">Hotel Name: A to Z</option>
-        </select>
-    </div>
-</aside>
+            <!-- Sort Options -->
+            <div class="filter-section">
+                <h4>Sort By</h4>
+                <select id="sortSelect">
+                    <option value="price-low">Price: Low to High</option>
+                    <option value="price-high">Price: High to Low</option>
+                    <option value="rating-high">Rating: High to Low</option>
+                    <option value="name-asc">Hotel Name: A to Z</option>
+                </select>
+            </div>
+        </aside>
 
         <!-- Results Section -->
         <main style="flex-grow: 1;">
-            <div id="resultsCount" style="background: white; padding: 15px; border-radius: 8px; margin-bottom: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+            <div id="resultsCount">
                 Loading results...
             </div>
             
-            <div id="hotelGrid" style="display: grid; gap: 20px;">
+            <div id="hotelGrid">
                 <!-- Hotels will be inserted here -->
             </div>
         </main>
     </div>
 
     <!-- Mobile Filter Button -->
-    <button id="mobileFilterBtn" style="display: none; position: fixed; bottom: 20px; right: 20px; padding: 12px 24px; background: #1a73e8; color: white; border: none; border-radius: 25px; box-shadow: 0 2px 8px rgba(0,0,0,0.2); z-index: 1000;">
+    <button id="mobileFilterBtn">
         <i class="fas fa-filter"></i> Filters
     </button>
     @endsection
     @section('scripts')
     <script>
-
             let allHotels = [];
             let filteredHotels = [];
         let activeFilters = {
@@ -549,12 +536,12 @@ body {
             document.getElementById('maxPrice').textContent = `₹${maxPrice.toLocaleString()}`;
 
             // Add event listener for price range
-    priceRange.addEventListener('input', function() {
-        const value = parseInt(this.value);
-        document.getElementById('maxPrice').textContent = `₹${value.toLocaleString()}`;
-        activeFilters.priceRange = value;
-        applyFilters();
-    });
+            priceRange.addEventListener('input', function() {
+                const value = parseInt(this.value);
+                document.getElementById('maxPrice').textContent = `₹${value.toLocaleString()}`;
+                activeFilters.priceRange = value;
+                applyFilters();
+            });
 
             // Initialize star ratings
             const starRatings = [...new Set(allHotels.map(hotel => Math.floor(parseFloat(hotel.StarRating) || 0)))].sort((a, b) => b - a);
@@ -567,13 +554,13 @@ body {
                 </label>
             `).join('');
             
-    // Add event listeners to star rating checkboxes
-    document.querySelectorAll('.star-filter').forEach(checkbox => {
-        checkbox.addEventListener('change', () => {
-            activeFilters.starRating = Array.from(document.querySelectorAll('.star-filter:checked')).map(cb => parseInt(cb.value));
-            applyFilters();
-        });
-    });
+            // Add event listeners to star rating checkboxes
+            document.querySelectorAll('.star-filter').forEach(checkbox => {
+                checkbox.addEventListener('change', () => {
+                    activeFilters.starRating = Array.from(document.querySelectorAll('.star-filter:checked')).map(cb => parseInt(cb.value));
+                    applyFilters();
+                });
+            });
 
             // Initialize property types
             const propertyTypes = [...new Set(allHotels.map(hotel => hotel.HotelCategory))];
@@ -585,13 +572,12 @@ body {
                 </label>
             `).join('');
              // Add event listeners to property type checkboxes
-    document.querySelectorAll('.property-type-filter').forEach(checkbox => {
-        checkbox.addEventListener('change', () => {
-            activeFilters.propertyType = Array.from(document.querySelectorAll('.property-type-filter:checked')).map(cb => cb.value);
-            applyFilters();
-        });
-    });
-
+            document.querySelectorAll('.property-type-filter').forEach(checkbox => {
+                checkbox.addEventListener('change', () => {
+                    activeFilters.propertyType = Array.from(document.querySelectorAll('.property-type-filter:checked')).map(cb => cb.value);
+                    applyFilters();
+                });
+            });
 
             // Initialize amenities
             const amenities = [...new Set(allHotels.flatMap(hotel => 
@@ -605,17 +591,17 @@ body {
                 </label>
             `).join('');
              // Add event listeners to amenity checkboxes
-    document.querySelectorAll('.amenity-filter').forEach(checkbox => {
-        checkbox.addEventListener('change', () => {
-            activeFilters.amenities = Array.from(document.querySelectorAll('.amenity-filter:checked')).map(cb => cb.value);
-            applyFilters();
-        });
-    });
-      // Add event listener for sort select
-      document.getElementById('sortSelect').addEventListener('change', function() {
-        activeFilters.sortBy = this.value;
-        applyFilters();
-    });
+            document.querySelectorAll('.amenity-filter').forEach(checkbox => {
+                checkbox.addEventListener('change', () => {
+                    activeFilters.amenities = Array.from(document.querySelectorAll('.amenity-filter:checked')).map(cb => cb.value);
+                    applyFilters();
+                });
+            });
+            // Add event listener for sort select
+            document.getElementById('sortSelect').addEventListener('change', function() {
+                activeFilters.sortBy = this.value;
+                applyFilters();
+            });
         }
 
         function updateActiveFilters() {
@@ -664,10 +650,10 @@ body {
         function clearFilter(filterType, value) {
             if (filterType === 'priceRange') {
                 const priceRange = document.getElementById('priceRange');
-        const maxPrice = parseInt(priceRange.max);
-        activeFilters.priceRange = maxPrice;
-        priceRange.value = maxPrice;
-        document.getElementById('maxPrice').textContent = `₹${maxPrice.toLocaleString()}`;
+                const maxPrice = parseInt(priceRange.max);
+                activeFilters.priceRange = maxPrice;
+                priceRange.value = maxPrice;
+                document.getElementById('maxPrice').textContent = `₹${maxPrice.toLocaleString()}`;
             } else if (value) {
                 activeFilters[filterType] = activeFilters[filterType].filter(v => v !== value);
                 document.querySelector(`input[value="${value}"]`).checked = false;
@@ -702,18 +688,18 @@ body {
                 const type = hotel.HotelCategory;
                 const hotelAmenities = hotel.Facilities.flatMap(f => f.FacilitiesNames);
 
-                 // Price filter condition
-        const priceInRange = activeFilters.priceRange === null || price <= activeFilters.priceRange;
-        
-        // Other filter conditions
-        const starMatch = activeFilters.starRating.length === 0 || activeFilters.starRating.includes(stars);
-        const typeMatch = activeFilters.propertyType.length === 0 || activeFilters.propertyType.includes(type);
-        const amenitiesMatch = activeFilters.amenities.length === 0 || 
-                             activeFilters.amenities.every(a => hotelAmenities.includes(a));
+                // Price filter condition
+                const priceInRange = activeFilters.priceRange === null || price <= activeFilters.priceRange;
+                
+                // Other filter conditions
+                const starMatch = activeFilters.starRating.length === 0 || activeFilters.starRating.includes(stars);
+                const typeMatch = activeFilters.propertyType.length === 0 || activeFilters.propertyType.includes(type);
+                const amenitiesMatch = activeFilters.amenities.length === 0 || 
+                                    activeFilters.amenities.every(a => hotelAmenities.includes(a));
 
-        // Return true only if all conditions are met
-        return priceInRange && starMatch && typeMatch && amenitiesMatch;
-    });
+                // Return true only if all conditions are met
+                return priceInRange && starMatch && typeMatch && amenitiesMatch;
+            });
 
             // Apply sorting
             switch(activeFilters.sortBy) {
@@ -736,73 +722,93 @@ body {
             renderHotels(filteredHotels);
         }
         
-function setupMobileResponsiveness() {
-    const sidebar = document.getElementById('filterSidebar');
-    const mobileBtn = document.getElementById('mobileFilterBtn');
-    const mainContent = document.querySelector('main');
-    const mediaQuery = window.matchMedia('(max-width: 768px)');
+        function setupMobileResponsiveness() {
+            const sidebar = document.getElementById('filterSidebar');
+            const mobileBtn = document.getElementById('mobileFilterBtn');
+            const mainContent = document.querySelector('main');
+            const mediaQuery = window.matchMedia('(max-width: 768px)');
 
-    function handleScreenChange(e) {
-        if (e.matches) { // Mobile view
-            sidebar.style.position = 'fixed';
-            sidebar.style.left = '-100%';
-            sidebar.style.top = '0';
-            sidebar.style.height = '100vh';
-            sidebar.style.zIndex = '1000';
-            sidebar.style.transition = '0.3s';
-            sidebar.style.transform = 'translateX(-100%)';
-            mobileBtn.style.display = 'block';
-        } else { // Desktop view
-            // Reset all mobile-specific styles
-            sidebar.style.position = 'sticky';
-            sidebar.style.left = '';
-            sidebar.style.transform = '';
-            sidebar.style.height = 'calc(100vh - 40px)';
-            sidebar.style.zIndex = '';
-            mobileBtn.style.display = 'none';
-        }
-    }
+            function handleScreenChange(e) {
+                if (e.matches) { // Mobile view
+                    sidebar.style.position = 'fixed';
+                    sidebar.style.left = '-100%';
+                    sidebar.style.top = '0';
+                    sidebar.style.height = '100vh';
+                    sidebar.style.zIndex = '1000';
+                    sidebar.style.transition = '0.3s';
+                    sidebar.style.transform = 'translateX(-100%)';
+                    mobileBtn.style.display = 'block';
+                } else { // Desktop view
+                    // Reset all mobile-specific styles
+                    sidebar.style.position = 'sticky';
+                    sidebar.style.left = '';
+                    sidebar.style.transform = '';
+                    sidebar.style.height = 'calc(100vh - 40px)';
+                    sidebar.style.zIndex = '';
+                    mobileBtn.style.display = 'none';
+                }
+                
+                // Update grid layout based on screen size
+                const grid = document.getElementById('hotelGrid');
+                grid.style.display = 'flex';
+                grid.style.flexDirection = 'column';
+            }
 
-    // Initial setup
-    handleScreenChange(mediaQuery);
+            // Initial setup
+            handleScreenChange(mediaQuery);
 
-    // Add listener for screen size changes
-    mediaQuery.addListener(handleScreenChange);
+            // Add listener for screen size changes
+            mediaQuery.addEventListener('change', handleScreenChange);
 
-    // Toggle sidebar for mobile
-    let isOpen = false;
-    mobileBtn.addEventListener('click', () => {
-        isOpen = !isOpen;
-        if (isOpen) {
-            sidebar.style.transform = 'translateX(0)';
-            sidebar.style.left = '0';
-            // Add overlay
-            const overlay = document.createElement('div');
-            overlay.id = 'sidebarOverlay';
-            overlay.style.position = 'fixed';
-            overlay.style.top = '0';
-            overlay.style.left = '0';
-            overlay.style.right = '0';
-            overlay.style.bottom = '0';
-            overlay.style.backgroundColor = 'rgba(0,0,0,0.5)';
-            overlay.style.zIndex = '999';
-            document.body.appendChild(overlay);
-            
-            // Close sidebar when clicking overlay
-            overlay.addEventListener('click', () => {
-                isOpen = false;
-                sidebar.style.transform = 'translateX(-100%)';
-                sidebar.style.left = '-100%';
-                overlay.remove();
+            // Toggle sidebar for mobile
+            let isOpen = false;
+            mobileBtn.addEventListener('click', () => {
+                isOpen = !isOpen;
+                if (isOpen) {
+                    sidebar.style.transform = 'translateX(0)';
+                    sidebar.style.left = '0';
+                    // Add overlay
+                    const overlay = document.createElement('div');
+                    overlay.id = 'sidebarOverlay';
+                    overlay.style.position = 'fixed';
+                    overlay.style.top = '0';
+                    overlay.style.left = '0';
+                    overlay.style.right = '0';
+                    overlay.style.bottom = '0';
+                    overlay.style.backgroundColor = 'rgba(0,0,0,0.5)';
+                    overlay.style.zIndex = '999';
+                    document.body.appendChild(overlay);
+                    
+                    // Close sidebar when clicking overlay
+                    overlay.addEventListener('click', () => {
+                        isOpen = false;
+                        sidebar.style.transform = 'translateX(-100%)';
+                        sidebar.style.left = '-100%';
+                        overlay.remove();
+                    });
+                } else {
+                    sidebar.style.transform = 'translateX(-100%)';
+                    sidebar.style.left = '-100%';
+                    const overlay = document.getElementById('sidebarOverlay');
+                    if (overlay) overlay.remove();
+                }
             });
-        } else {
-            sidebar.style.transform = 'translateX(-100%)';
-            sidebar.style.left = '-100%';
-            const overlay = document.getElementById('sidebarOverlay');
-            if (overlay) overlay.remove();
         }
-    });
-}
+
+        function setupEventListeners() {
+            // Set initial grid layout
+            const grid = document.getElementById('hotelGrid');
+            grid.style.display = 'flex';
+            grid.style.flexDirection = 'column';
+            
+            // Other event listeners can be added here
+            window.addEventListener('resize', () => {
+                const grid = document.getElementById('hotelGrid');
+                grid.style.display = 'flex';
+                grid.style.flexDirection = 'column';
+            });
+        }
+
         function updateResultsCount() {
             const count = filteredHotels.length;
             document.getElementById('resultsCount').innerHTML = `
@@ -814,18 +820,17 @@ function setupMobileResponsiveness() {
         }
 
         function renderHotels(hotels) {
-    const grid = document.getElementById('hotelGrid');
-    
-    if (hotels.length === 0) {
-        grid.innerHTML = `
-            <div style="text-align: center; padding: 40px; background: white; border-radius: 8px;">
-                <i class="fas fa-search" style="font-size: 48px; color: #ccc; margin-bottom: 20px;"></i>
-                <p>No hotels found matching your criteria</p>
-            </div>
-        `;
-        return;
-    }
-
+            const grid = document.getElementById('hotelGrid');
+            
+            if (hotels.length === 0) {
+                grid.innerHTML = `
+                    <div style="text-align: center; padding: 40px; background: white; border-radius: 8px;">
+                        <i class="fas fa-search" style="font-size: 48px; color: #ccc; margin-bottom: 20px;"></i>
+                        <p>No hotels found matching your criteria</p>
+                    </div>
+                `;
+                return;
+            }
     // Store scroll position
     const scrollPosition = window.pageYOffset;
 
